@@ -25,7 +25,7 @@ function __init__()
 end
 function init_path(path)
     PATH[:gamedata] = path
-    PATH[:cache] = normpath(joinpath(@__DIR__, "../../.cache"))
+    PATH[:cache] = normpath(joinpath(@__DIR__, "../.cache"))
     PATH[:history] = joinpath(PATH[:cache], "history.json")
     PATH[:eachfile] = Dict{String, String}()
     for (root, dirs, files) in walkdir(joinpath(PATH[:gamedata], ".XLSX"))

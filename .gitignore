@@ -1,0 +1,5 @@
+# Excel temporary
+~$*.xlsx*
+
+# 로컬 폴더
+.cache/*
