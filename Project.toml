@@ -1,0 +1,14 @@
+name = "GameDataManager"
+uuid = "88844230-ccf1-11e8-233b-3f48c6dac397"
+authors = ["김용희 <yongheekim@devsisters.com>"]
+version = "0.1.7"
+
+[deps]
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
+XLSX = "fdbf4ff8-1666-58a4-91e7-1b58723a45e0"
+XLSXasJSON = "8c9e00cc-ccf1-11e8-3de6-5b028f480d9e"
