@@ -1,4 +1,4 @@
-const PATH = Dict{Symbol, Any}()
+const GAMEPATH = Dict{Symbol, Any}()
 const GAMEDATA = Dict{Symbol, Any}(
     :xlsx    => Dict{Symbol, Any}(),
     :json    => Dict{Symbol, Any}(),
@@ -7,8 +7,8 @@ const GAMEDATA = Dict{Symbol, Any}(
 function __init__()
     if isdefined(Main, :PATH_MARS_PROTOTYPE)
         init_path(joinpath(Main.PATH_MARS_PROTOTYPE, "unity/Assets/5_GameData"))
-        init_meta(PATH[:gamedata])
-        init_history(PATH[:history])
+        init_meta(GAMEPATH[:data])
+        init_history(GAMEPATH[:history])
         @info """사용법
             xl("Player"): Player.xlsx 파일만 json으로 추출합니다
             xl()        : 수정된 엑셀파일만 검색하여 json으로 추출합니다
@@ -24,18 +24,18 @@ function __init__()
     end
 end
 function init_path(path)
-    PATH[:gamedata] = path
-    PATH[:cache] = normpath(joinpath(@__DIR__, "../.cache"))
-    PATH[:history] = joinpath(PATH[:cache], "history.json")
-    PATH[:eachfile] = Dict{String, String}()
-    for (root, dirs, files) in walkdir(joinpath(PATH[:gamedata], ".XLSX"))
+    GAMEPATH[:data] = path
+    GAMEPATH[:cache] = normpath(joinpath(@__DIR__, "../.cache"))
+    GAMEPATH[:history] = joinpath(GAMEPATH[:cache], "history.json")
+    GAMEPATH[:eachfile] = Dict{String, String}()
+    for (root, dirs, files) in walkdir(joinpath(GAMEPATH[:data], ".XLSX"))
         for f in filter(x -> (is_xlsxfile(x) && !startswith(x, "~\$")), files)
-            PATH[:eachfile][f] = replace(root, PATH[:gamedata]*"/" => "")
+            GAMEPATH[:eachfile][f] = replace(root, GAMEPATH[:data]*"/" => "")
         end
     end
     # JSON은 현재 eachfile에 담을필요 없음
-    # for (root, dirs, files) in walkdir(joinpath(PATH[:gamedata], "JSON"))
-    #     PATH[:eachfile][f] = replace(root, PATH[:gamedata]*"/" => "")
+    # for (root, dirs, files) in walkdir(joinpath(PATH[:data], "JSON"))
+    #     PATH[:eachfile][f] = replace(root, PATH[:data]*"/" => "")
     # end
 end
 

@@ -70,7 +70,7 @@ function validate_perfile(jwb::JSONWorkbook)
     validate_ShopBuilding(jws) = validate_ResidenceBuilding(jws)
     function validate_Block(jwb::JSONWorkbook)
         b = begin
-                f = joinpath(PATH[:gamedata], "ScriptableObjects/BlockTemplateBalanceTable.asset")
+                f = joinpath(GAMEPATH[:data], "ScriptableObjects/BlockTemplateBalanceTable.asset")
                 x = filter(x -> startswith(x, "  - Key:"), readlines(f))
                 unique(broadcast(x -> split(x, "Key: ")[2], x))
         end

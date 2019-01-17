@@ -10,7 +10,7 @@ function get_vertexcount(x)
         a = match(r"(\d+)", x)
         parse(Int, a.captures[1])
     end
-    root = joinpath(PATH[:gamedata], "../4_ArtAssets/Works/Blocks")
+    root = joinpath(GAMEPATH[:data], "../4_ArtAssets/Works/Blocks")
 
     k = 0
     for dir in ["Shop", "Common", "House"]

@@ -15,7 +15,7 @@ include("history.jl")
 include("unity_datahandler.jl")
 include("xlsxwriter.jl")
 
-export PATH, GAMEDATA,
+export GAMEPATH, GAMEDATA,
        #
        read_gamedata, load_gamedata!,
        #

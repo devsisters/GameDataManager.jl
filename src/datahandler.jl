@@ -75,7 +75,7 @@ function read_gamedata(f::AbstractString; validate = true)
 end
 
 function joinpath_gamedata(file)
-    joinpath(PATH[:gamedata], PATH[:eachfile][file], file)
+    joinpath(GAMEPATH[:data], GAMEPATH[:eachfile][file], file)
 end
 is_xlsxfile(f) = (endswith(f, ".xlsx") || endswith(f, ".xlsm"))
 function getpath_gamedata(file)
@@ -102,7 +102,7 @@ end
 메타 정보를 참조하여 시트마다 다른 이름으로 저장한다
 """
 function write_json(jwb::JSONWorkbook; kwargs...)
-    dir = joinpath(PATH[:gamedata], "JSON/")
+    dir = joinpath(GAMEPATH[:data], "JSON/")
     meta = GAMEDATA[:meta][:files][basename(xlsxpath(jwb))]
 
     for s in sheetnames(jwb)

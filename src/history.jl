@@ -29,7 +29,7 @@ function write_history(files::Vector)
         GAMEDATA[:history][f] = mtime(joinpath_gamedata(f))
     end
 
-    open(PATH[:history], "w") do io
+    open(GAMEPATH[:history], "w") do io
         write(io, JSON.json(GAMEDATA[:history]))
     end
 end
