@@ -14,11 +14,13 @@ function dirtyhandle_rewardtable!(jwb::JSONWorkbook)
                 RewardKey   = df[1, :RewardKey],
                 RewardScript= OrderedDict(
                     :TraceTag=> df[1, :TraceTag],
-                    :Rewards=> [broadcast(row -> row[1], df[:Rewards])] ))
+                    :Rewards=> Any[broadcast(row -> row[1], df[:Rewards])] ))
             # 다중 보상 처리
             for row in df[:Rewards]
                 if length(row) > 1
-                    push!(x[1, :RewardScript][:Rewards], row[2:end])
+                    for i in 2:length(row)
+                        push!(x[1, :RewardScript][:Rewards], [row[i]])
+                    end
                 end
             end
             push!(v, x)
