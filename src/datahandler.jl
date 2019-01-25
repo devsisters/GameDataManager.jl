@@ -67,7 +67,7 @@ function read_gamedata(f::AbstractString; validate = true)
         jwb = JSONWorkbook(path, keys(sheets); kwargs...)
         impose_sort!(jwb)
         if basename(xlsxpath(jwb)) == "RewardTable.xlsx"
-            jwb = dirtyhandle_rewardtable!(jwb)
+            dirtyhandle_rewardtable!(jwb)
         end
         return validate ? validation(jwb) : jwb
     else

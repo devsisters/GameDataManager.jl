@@ -1,4 +1,3 @@
-# TODO: 범용으로 사용할 수 있도록 XLSXasJSON 기능으로 추가??
 """
     dirtyhandle_rewardtable!
 
