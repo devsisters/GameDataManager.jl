@@ -63,14 +63,15 @@ function read_gamedata(f::AbstractString; validate = true)
     kwargs = GAMEDATA[:meta][:kwargs][f]
     if is_xlsxfile(f)
         sheets = GAMEDATA[:meta][:files][f]
+        
         jwb = JSONWorkbook(path, keys(sheets); kwargs...)
         impose_sort!(jwb)
-
+        if basename(xlsxpath(jwb)) == "RewardTable.xlsx"
+            jwb = dirtyhandle_rewardtable!(jwb)
+        end
         return validate ? validation(jwb) : jwb
-
-    #TODO json 읽기 기능
-    elseif endswith(f, ".json")
-        # return JSON.parsefile(path, dicttype=OrderedDict)
+    else
+        throw(ArgumentError("$(f)는 읽을 수 없습니다"))
     end
 end
 
@@ -80,7 +81,7 @@ end
 is_xlsxfile(f) = (endswith(f, ".xlsx") || endswith(f, ".xlsm"))
 function getpath_gamedata(file)
     x = collect(filter(x -> startswith(x, "$file.xls"), keys(GAMEDATA[:meta][:files])))
-    isempty(x) && throw(ArgumentError("$file. 파일은 _Meta.json에 존재하지 않습니다. 파일명을 확인해 주세요"))
+    isempty(x) && throw(ArgumentError("$file 파일은 _Meta.json에 존재하지 않습니다. 파일명을 확인해 주세요"))
     return x[1]
 end
 
@@ -88,9 +89,9 @@ end
     load_gamedata!(f; gamedata = GAMEDATA)
 gamedata[:xlsx]로 데이터를 불러온다.
 """
-function load_gamedata!(f; gamedata::Dict = GAMEDATA)
+function load_gamedata!(f, gamedata = GAMEDATA; kwargs...)
     filename = is_xlsxfile(f) ? f : getpath_gamedata(f)
-    jwb = read_gamedata(filename)
+    jwb = read_gamedata(filename; kwargs...)
 
     gamedata[:xlsx][Symbol(f)] = jwb
     println("---- $(f) 가 GAMEDATA에 추가되었습니다 ----")
@@ -111,31 +112,4 @@ function write_json(jwb::JSONWorkbook; kwargs...)
 
         @printf("   saved => \"%s\" \n", file)
     end
-end
-
-"""
-    rowindex_cash(df::DataFrame, key_cols)
-지정된 컬럼 data로 row를 cash로 생성
-String 데이터면 Symbol로 전환한다 이거 뭔가 이상???
-수정 필요
-"""
-function rowindex_cash(ref::AbstractArray)
-    ref = map(x -> isa(x, AbstractString) ? Symbol(x) : x, ref)
-    Dict(zip(ref, collect(eachindex(ref))))
-end
-function rowindex_cash(df::DataFrame, col::Symbol)
-    rowindex_cash(df[col])
-end
-
-function rowindex_cash(jwb::JSONWorkbook, col::Symbol)
-    d = Dict{Symbol, Dict}()
-    for x in sheetnames(jwb)
-        d[x] = rowindex_cash(jwb[x], col)
-    end
-    return d
-end
-function rowindex_cash(jws::JSONWorksheet, col::Symbol)
-    df = jws[:]
-    # 해당 column이 없으면 빈 Dict를 반환
-    haskey(df, col) ? rowindex_cash(df, col) : Dict()
 end

@@ -98,6 +98,13 @@ function validate_perfile(jwb::JSONWorkbook)
     function validate_PipoFashion(jwb::JSONWorkbook)
         # :Hair, :Face, :Dress Key를 유니크하게 해야할지? 확인 필요
     end
+    function validate_rewardtable(jwb::JSONWorkbook)
+        combined_key = [jwb[:Solo][:RewardKey]; jwb[:Box][:RewardKey]]
+        if !allunique(combined_key)
+            duplicate = filter(el -> el[2] > 1, countmap(combined_key))
+            throw(AssertionError("다음의 Key가 중복되었습니다 \n $(keys(duplicate))"))
+        end
+    end
     filename = basename(xlsxpath(jwb))
     if filename == "Ability.xlsx"
         validate_AbilityLevel(jwb[:Level])
@@ -109,6 +116,8 @@ function validate_perfile(jwb::JSONWorkbook)
         validate_Block(jwb)
     elseif filename == "PipoFashion.xlsx"
         # validate_PipoFashion(jwb)
+    elseif filename == "RewardTable.xlsx"
+        validate_rewardtable(jwb)
     end
 
     nothing

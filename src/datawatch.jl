@@ -32,5 +32,5 @@ end
 """
 function collect_xlsx_for_autoxl()
     setdiff(collect_allxlsx(),
-    ["Climate.xlsx", "ContinentGenerator.xlsx", "PipoColorTable.xlsm", "PipoName.xlsx"])
+    ["PipoColorTable.xlsm", "PipoName.xlsx"])
 end
