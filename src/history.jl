@@ -18,6 +18,9 @@ end
 function collect_allxlsx()
     filter(x -> is_xlsxfile(x), keys(GAMEDATA[:meta][:files])) |> collect
 end
+function collect_alljson()
+    filter(x -> endswith(x, ".json"), keys(GAMEDATA[:meta][:files])) |> collect
+end
 
 function ismodified(fname)::Bool
     file = joinpath_gamedata(fname)

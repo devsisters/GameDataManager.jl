@@ -26,16 +26,18 @@ function init_path(path)
     GAMEPATH[:data] = path
     GAMEPATH[:cache] = normpath(joinpath(@__DIR__, "../.cache"))
     GAMEPATH[:history] = joinpath(GAMEPATH[:cache], "history.json")
-    GAMEPATH[:eachfile] = Dict{String, String}()
+    GAMEPATH[:xlsx] = Dict{String, String}()
     for (root, dirs, files) in walkdir(joinpath(GAMEPATH[:data], ".XLSX"))
         for f in filter(x -> (is_xlsxfile(x) && !startswith(x, "~\$")), files)
-            GAMEPATH[:eachfile][f] = replace(root, GAMEPATH[:data]*"/" => "")
+            GAMEPATH[:xlsx][f] = replace(root, GAMEPATH[:data]*"/" => "")
         end
     end
-    # JSON은 현재 eachfile에 담을필요 없음
-    # for (root, dirs, files) in walkdir(joinpath(PATH[:data], "JSON"))
-    #     PATH[:eachfile][f] = replace(root, PATH[:data]*"/" => "")
-    # end
+    GAMEPATH[:json] = Dict{String, String}()
+    for (root, dirs, files) in walkdir(joinpath(GAMEPATH[:data], "JSON"))
+        for f in filter(x -> endswith(x, ".json"), files)
+            GAMEPATH[:json][f] = replace(root, GAMEPATH[:data]*"/" => "")
+        end
+    end
 end
 
 

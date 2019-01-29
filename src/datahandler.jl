@@ -77,7 +77,8 @@ function read_gamedata(f::AbstractString; validate = true)
 end
 
 function joinpath_gamedata(file)
-    joinpath(GAMEPATH[:data], GAMEPATH[:eachfile][file], file)
+    mid_folder = is_xlsxfile(file) ? GAMEPATH[:xlsx][file] : GAMEPATH[:json][file]
+    joinpath(GAMEPATH[:data], mid_folder, file)
 end
 is_xlsxfile(f) = (endswith(f, ".xlsx") || endswith(f, ".xlsm"))
 function getpath_gamedata(file)
