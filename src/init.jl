@@ -14,7 +14,6 @@ function __init__()
             xl()        : 수정된 엑셀파일만 검색하여 json으로 추출합니다
             xl(true)    : '_Meta.json'에서 관리하는 모든 파일을 json으로 추출합니다
             autoxl()    : '.Xlsx/' 폴더를 감시하면서 변경된 파일을 자동으로 json 추출합니다.
-                         ※ Julia를 강제종료할 때까지 멈추지 않습니다.
         """
     else
         @warn """

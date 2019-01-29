@@ -3,7 +3,7 @@ autoxl(interval = 3, timeout = 10000) = autoxl(collect_xlsx_for_autoxl(), interv
 
     @info """$(candidate)
     .xlsx 파일 감시를 시작합니다...
-        감시 종료를 원할경우 Ctrl + j + k 단축키로 julia를 강제 종료해주세요
+        감시 종료를 원할경우 'Ctrl + c'를 누르면 감시를 멈출 수 있습니다
     """
     # @async로 task로 생성할 수도 있지만... history 파일을 동시 편집할 위험이 있기 때문에 @async는 사용하지 않는다
     IO = stderr
