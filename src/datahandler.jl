@@ -105,7 +105,7 @@ end
 메타 정보를 참조하여 시트마다 다른 이름으로 저장한다
 """
 function write_json(jwb::JSONWorkbook; kwargs...)
-    dir = joinpath(GAMEPATH[:data], "JSON/")
+    dir = GAMEPATH[:json]["root"]
     meta = GAMEDATA[:meta][:files][basename(xlsxpath(jwb))]
 
     for s in sheetnames(jwb)

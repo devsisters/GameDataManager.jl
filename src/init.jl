@@ -6,14 +6,14 @@ const GAMEDATA = Dict{Symbol, Any}(
 
 function __init__()
     if isdefined(Main, :PATH_MARS_PROTOTYPE)
-        init_path(joinpath(Main.PATH_MARS_PROTOTYPE, "unity/Assets/5_GameData"))
-        init_meta(GAMEPATH[:data])
+        init_path(joinpath(Main.PATH_MARS_PROTOTYPE, "patch-resources"))
+        init_meta(joinpath(GAMEPATH[:json]["root"]))
         init_history(GAMEPATH[:history])
         @info """사용법
             xl("Player"): Player.xlsx 파일만 json으로 추출합니다
             xl()        : 수정된 엑셀파일만 검색하여 json으로 추출합니다
             xl(true)    : '_Meta.json'에서 관리하는 모든 파일을 json으로 추출합니다
-            autoxl()    : '.Xlsx/' 폴더를 감시하면서 변경된 파일을 자동으로 json 추출합니다.
+            autoxl()    : '01_XLSX/' 폴더를 감시하면서 변경된 파일을 자동으로 json 추출합니다.
         """
     else
         @warn """
@@ -26,14 +26,14 @@ function init_path(path)
     GAMEPATH[:data] = path
     GAMEPATH[:cache] = normpath(joinpath(@__DIR__, "../.cache"))
     GAMEPATH[:history] = joinpath(GAMEPATH[:cache], "history.json")
-    GAMEPATH[:xlsx] = Dict{String, String}()
-    for (root, dirs, files) in walkdir(joinpath(GAMEPATH[:data], ".XLSX"))
+    GAMEPATH[:xlsx] = Dict("root" => joinpath(GAMEPATH[:data], "01_XLSX"))
+    for (root, dirs, files) in walkdir(GAMEPATH[:xlsx]["root"])
         for f in filter(x -> (is_xlsxfile(x) && !startswith(x, "~\$")), files)
             GAMEPATH[:xlsx][f] = replace(root, GAMEPATH[:data]*"/" => "")
         end
     end
-    GAMEPATH[:json] = Dict{String, String}()
-    for (root, dirs, files) in walkdir(joinpath(GAMEPATH[:data], "JSON"))
+    GAMEPATH[:json] = Dict("root" => joinpath(GAMEPATH[:data], "00_Files/BalanceTables"))
+    for (root, dirs, files) in walkdir(GAMEPATH[:json]["root"])
         for f in filter(x -> endswith(x, ".json"), files)
             GAMEPATH[:json][f] = replace(root, GAMEPATH[:data]*"/" => "")
         end
@@ -51,7 +51,7 @@ function init_meta(path)
     println("-"^7, "_Meta.json 로딩이 완료되었습니다","-"^7)
 end
 function read_meta(path)
-    meta = JSON.parsefile("$path/JSON/_Meta.json"; dicttype=OrderedDict{Symbol, Any})
+    meta = JSON.parsefile("$path/_Meta.json"; dicttype=OrderedDict{Symbol, Any})
 
     d = OrderedDict{String, Any}()
     d2 = Dict()
