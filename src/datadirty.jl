@@ -3,29 +3,40 @@
 
 RewardTable.xlsx 전용으로 사용 됨
 
-TODO: 나도 언젠간 깨끗해져서 XLSXasJSON으로 들어가고 싶어요~
+TODO: 개편필요...
 """
 function dirtyhandle_rewardtable!(jwb::JSONWorkbook)
+    function get_reward(rewards)
+        rewards = filter(el -> !ismissing(el[:Kind]), rewards)
+        v = []
+        for el in rewards
+            weight = string(get(el, :Weight, 1))
+            if ismissing(el[:ItemKey]) 
+                push!(v, [weight, el[:Kind], string(el[:Amount])])
+            else
+                push!(v, [weight, el[:Kind], string(el[:ItemKey]), string(el[:Amount])])
+            end
+        end
+        return v
+    end
+
     function foo(jws)
         v = DataFrame[]
         for df in groupby(jws[:], :RewardKey)
-            x = DataFrame(
-                RewardKey   = df[1, :RewardKey],
-                RewardScript= OrderedDict(
-                    :TraceTag=> df[1, :TraceTag],
-                    :Rewards=> Any[broadcast(row -> row[1], df[:Rewards])] ))
-            # 다중 보상 처리
-            for row in df[:Rewards]
-                if length(row) > 1
-                    for i in 2:length(row)
-                        push!(x[1, :RewardScript][:Rewards], [row[i]])
+            d = OrderedDict(:TraceTag => df[1, :TraceTag], :Rewards => [])
+            for col in [:r1, :r2, :r3, :r4, :r5]
+                if haskey(df, col)
+                    re = get_reward(df[col])
+                    if !isempty(re)
+                        push!(d[:Rewards], re)
                     end
                 end
             end
-            push!(v, x)
+            push!(v, DataFrame(RewardKey = df[1, :RewardKey], RewardScript = d))
         end
         vcat(v...)
     end
+
     sheets = foo.(jwb)
     for i in 1:length(jwb)
         jws_replace = JSONWorksheet(vcat(sheets...), xlsxpath(jwb), sheetnames(jwb)[i])
@@ -34,5 +45,3 @@ function dirtyhandle_rewardtable!(jwb::JSONWorkbook)
 
     return jwb
 end
-
-
