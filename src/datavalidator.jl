@@ -27,7 +27,7 @@ function validate_general(jwb::JSONWorkbook)
         check = broadcast(x -> isa(x, String) ? occursin(r"(\s)|(\t)|(\n)", x) : false, jws[:Key])
         @assert !any(check) "Key에는 공백, 줄바꿈, 탭이 들어갈 수 없습니다 \n $(jws[:Key][check])"
     end
-    #################3
+    #################
     for ws in jwb
         haskey(ws, :Key) && validate_Key(ws)
     end
@@ -48,13 +48,13 @@ end
 function validate_perfile(jwb::JSONWorkbook)
     function validate_AbilityLevel(jws)
         # https://github.com/devsisters/mars-prototype/blob/develop/unity/Assets/6_UIAssets/TempShared/Base/AbilityKeyType.cs 의 리스트와 일치해야 한다
-        if !issubset(unique(jws[:GroupKey]),
-                ["CoinStorageCap","PipoInterviewQueue","PipoInterviewInterval",
-                "PipoEmployeeCap",
-                "ProfitCoin_1", "ProfitCoin_2", "ProfitCoin_3", "ProfitCoin_4", "ProfitCoin_5", "ProfitCoin_6", "ProfitCoin_7", "ProfitCoin_8", "ProfitCoin_9",
-                "CoinCounterCap_1", "CoinCounterCap_2", "CoinCounterCap_3", "CoinCounterCap_4", "CoinCounterCap_5", "CoinCounterCap_6", "CoinCounterCap_7", "CoinCounterCap_8", "CoinCounterCap_9", 
-                "RentCoin","RenterCap","RenterTalentBonus"])
-            @warn "Ability_Level.json의 GroupKey가 클라이언트 enum과 일치하지 않습니다. @전정은님께 문의 바랍니다"
+        for k in unique(jws[:GroupKey])
+            check = broadcast(x -> startswith(k, x), 
+                ["CoinStorageCap", "PipoInterviewQueue", "PipoInterviewInterval",
+                "PipoEmployeeCap", "ProfitCoin", "CoinCounterCap", "RentCoin","RenterCap","RenterTalentBonus"])
+            if !any(check)
+                @warn "Ability_Level.json의 '$(k)'가 클라이언트 prefix 규칙과 일치하지 않습니다. @전정은님께 문의 바랍니다"
+            end
         end
     end
     function validate_ResidenceBuilding(jws)
@@ -99,7 +99,8 @@ function validate_perfile(jwb::JSONWorkbook)
         # :Hair, :Face, :Dress Key를 유니크하게 해야할지? 확인 필요
     end
     function validate_rewardtable(jwb::JSONWorkbook)
-        combined_key = [jwb[:Solo][:RewardKey]; jwb[:Box][:RewardKey]]
+        # 시트를 합쳐두었다.
+        combined_key = jwb[:Solo][:RewardKey]
         if !allunique(combined_key)
             duplicate = filter(el -> el[2] > 1, countmap(combined_key))
             throw(AssertionError("다음의 Key가 중복되었습니다 \n $(keys(duplicate))"))

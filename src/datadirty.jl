@@ -26,10 +26,12 @@ function dirtyhandle_rewardtable!(jwb::JSONWorkbook)
         end
         vcat(v...)
     end
+    sheets = foo.(jwb)
     for i in 1:length(jwb)
-        jws_replace = JSONWorksheet(foo(jwb[i]), xlsxpath(jwb), sheetnames(jwb)[i])
+        jws_replace = JSONWorksheet(vcat(sheets...), xlsxpath(jwb), sheetnames(jwb)[i])
         getfield(jwb, :sheets)[i] = jws_replace
     end
+
     return jwb
 end
 
