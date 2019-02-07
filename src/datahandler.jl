@@ -69,8 +69,15 @@ function read_gamedata(f::AbstractString; validate = true)
         impose_sort!(jwb)
         if basename(xlsxpath(jwb)) == "RewardTable.xlsx"
             dirtyhandle_rewardtable!(jwb)
+        elseif basename(xlsxpath(jwb)) == "Quest.xlsx"
+            dirtyhandle_quest!(jwb)
         end
-        return validate ? validation(jwb) : jwb
+        if validate 
+            validation(jwb)
+        end
+
+        dummy_localizer!(jwb)
+        return jwb
     else
         throw(ArgumentError("$(f)는 읽을 수 없습니다"))
     end

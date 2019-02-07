@@ -9,6 +9,7 @@ function __init__()
         init_path(joinpath(Main.PATH_MARS_PROTOTYPE, "patch-resources"))
         init_meta(joinpath(GAMEPATH[:json]["root"]))
         init_history(GAMEPATH[:history])
+        init_xlsxasjson()
         @info """사용법
             xl("Player"): Player.xlsx 파일만 json으로 추출합니다
             xl()        : 수정된 엑셀파일만 검색하여 json으로 추출합니다
@@ -79,4 +80,8 @@ function init_history(file)
         isfile(file) ? JSON.parsefile(file; dicttype=Dict{String, Float64}) :
                        Dict{String, Float64}()
     end
+end
+
+function init_xlsxasjson()
+    push!(XLSXasJSON.DELIM, ",")
 end
