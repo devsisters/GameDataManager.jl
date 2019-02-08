@@ -14,6 +14,7 @@ include("datasorter.jl")
 
 include("history.jl")
 include("unity_datahandler.jl")
+include("jsonloader.jl")
 include("xlsxwriter.jl")
 
 export GAMEPATH, GAMEDATA,
@@ -22,6 +23,5 @@ export GAMEPATH, GAMEDATA,
        #
        xlsx_to_json!, xl, autoxl,
 
-       addinfo!
-
+       update_xlsx_reference!
 end
