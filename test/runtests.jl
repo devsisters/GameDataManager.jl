@@ -8,6 +8,9 @@ GDM = GameDataManager
     jwb = read_gamedata("Player.xlsx")
     @test sheetnames(jwb) == [:AccountLevel, :HomeLevel, :ChunkPrice]
 
+end
+
+@testset "datavalidate.jl" begin
     jwb = read_gamedata("Shop.xlsx"; validate = false)
     jwb[1][:][1, :Key] = jwb[1][:][2, :Key] # 키 중복
     @test_throws AssertionError GDM.validation(jwb)
@@ -18,7 +21,13 @@ GDM = GameDataManager
     @test_throws AssertionError GDM.validation(jwb)
     jwb[1][:][1, :Key] = "Key\tKey"# 키에 탭
     @test_throws AssertionError GDM.validation(jwb)
+
+    jwb = read_gamedata("Quest.xlsx"; validate = false)
+    jwb[:Main][:][1, :QuestKey] = 1024
+    @test_throws AssertionError GDM.validation(jwb)
 end
+
+
 
 @testset "History" begin
     xl()

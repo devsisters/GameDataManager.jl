@@ -46,10 +46,11 @@ end
                  'Building'시트의 TemplateKey가 'Template' 시트의 Key에 있어야 한다
 """
 function validate_perfile(jwb::JSONWorkbook)
-    function validate_AbilityLevel(jws)
+    function _Ability(jwb)
+        jws = jwb[:Level]
         # https://github.com/devsisters/mars-prototype/blob/develop/unity/Assets/6_UIAssets/TempShared/Base/AbilityKeyType.cs 의 리스트와 일치해야 한다
         for k in unique(jws[:GroupKey])
-            check = broadcast(x -> startswith(k, x), 
+            check = broadcast(x -> startswith(k, x),
                 ["CoinStorageCap", "PipoInterviewQueue", "PipoInterviewInterval",
                 "PipoEmployeeCap", "ProfitCoin", "CoinCounterCap", "RentCoin","RenterCap","RenterTalentBonus"])
             if !any(check)
@@ -57,7 +58,8 @@ function validate_perfile(jwb::JSONWorkbook)
             end
         end
     end
-    function validate_ResidenceBuilding(jws)
+    function _Residence(jwb)
+        jws = jwb[:Building]
         #Ability가 있어야 검사 가능
         !haskey(GAMEDATA[:xlsx], :Ability) && load_gamedata!("Ability")
         b = GAMEDATA[:xlsx][:Ability][:Level][:GroupKey]
@@ -67,8 +69,8 @@ function validate_perfile(jwb::JSONWorkbook)
             @assert check "AbilityKey가 Ability_Level에 없습니다\n $(setdiff(row, unique(b)))"
         end
     end
-    validate_ShopBuilding(jws) = validate_ResidenceBuilding(jws)
-    function validate_Block(jwb::JSONWorkbook)
+    _Shop(jwb) = _Residence(jwb)
+    function _Block(jwb::JSONWorkbook)
         b = begin
                 f = joinpath(GAMEPATH[:data], "ScriptableObjects/BlockTemplateBalanceTable.asset")
                 x = filter(x -> startswith(x, "  - Key:"), readlines(f))
@@ -91,14 +93,14 @@ function validate_perfile(jwb::JSONWorkbook)
         end
 
         # 임시로 ArtAsset이 중복되면 안됨. 추후 삭제
-        validate_duplicate(jwb[:Building], :ArtAsset; assert = false)
-        validate_duplicate(jwb[:Deco], :ArtAsset; assert = false)
+        _duplicate(jwb[:Building], :ArtAsset; assert = false)
+        _duplicate(jwb[:Deco], :ArtAsset; assert = false)
 
     end
-    function validate_PipoFashion(jwb::JSONWorkbook)
+    function _PipoFashion(jwb::JSONWorkbook)
         # :Hair, :Face, :Dress Key를 유니크하게 해야할지? 확인 필요
     end
-    function validate_rewardtable(jwb::JSONWorkbook)
+    function _RewardTable(jwb::JSONWorkbook)
         # 시트를 합쳐두었다.
         combined_key = jwb[:Solo][:RewardKey]
         if !allunique(combined_key)
@@ -106,20 +108,21 @@ function validate_perfile(jwb::JSONWorkbook)
             throw(AssertionError("다음의 Key가 중복되었습니다 \n $(keys(duplicate))"))
         end
     end
-    filename = basename(xlsxpath(jwb))
-    if filename == "Ability.xlsx"
-        validate_AbilityLevel(jwb[:Level])
-    elseif filename == "Residence.xlsx"
-        validate_ResidenceBuilding(jwb[:Building])
-    elseif filename == "Shop.xlsx"
-        validate_ShopBuilding(jwb[:Building])
-    elseif filename == "Block.xlsx"
-        validate_Block(jwb)
-    elseif filename == "PipoFashion.xlsx"
-        # validate_PipoFashion(jwb)
-    elseif filename == "RewardTable.xlsx"
-        validate_rewardtable(jwb)
+    function _Quest(jwb::JSONWorkbook)
+        if maximum(jwb[:Main][:QuestKey]) > 1023 || minimum(jwb[:Main][:QuestKey]) < 0
+            throw(AssertionError("Quest_Main.json의 QuestKey는 0~1023만 사용 가능합니다."))
+        end
     end
+
+    fname = basename(xlsxpath(jwb))
+
+    fname == "Ability.xlsx"     ? _Ability(jwb) :
+    fname == "Residence.xlsx"   ? _Residence(jwb) :
+    fname == "Shop.xlsx"        ? _Shop(jwb) :
+    fname == "Block.xlsx"       ? _Block(jwb) :
+    # fname == "PipoFashion.xlsx" ? _PipoFashion(jwb) :
+    fname == "RewardTable.xlsx" ? _RewardTable(jwb) :
+    fname == "Quest.xlsx"       ? _Quest(jwb) : nothing
 
     nothing
 end
