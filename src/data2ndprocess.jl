@@ -11,7 +11,7 @@ function dirtyhandle_rewardtable!(jwb::JSONWorkbook)
         v = []
         for el in rewards
             weight = string(get(el, "Weight", 1))
-            if ismissing(el["ItemKey"]) 
+            if ismissing(el["ItemKey"])
                 push!(v, [weight, el["Kind"], string(el["Amount"])])
             else
                 push!(v, [weight, el["Kind"], string(el["ItemKey"]), string(el["Amount"])])
@@ -37,11 +37,10 @@ function dirtyhandle_rewardtable!(jwb::JSONWorkbook)
         vcat(v...)
     end
 
+    # 합치고 둘 중 한개 삭제
     sheets = concatenate_rewards.(jwb)
-    for i in 1:length(jwb)
-        jws_replace = JSONWorksheet(vcat(sheets...), xlsxpath(jwb), sheetnames(jwb)[i])
-        jwb[i] = jws_replace
-    end
+    jwb[1] = JSONWorksheet(vcat(sheets...), xlsxpath(jwb), sheetnames(jwb)[1])
+    deleteat!(jwb, 2)
 
     return jwb
 end
@@ -73,6 +72,27 @@ function dirtyhandle_quest!(jwb::JSONWorkbook)
     end
     return jwb
 end
+
+"""
+    dropnull_namegenerator!
+
+Namegenerator.xlsx 전용으로 사용 됨
+"""
+function dropnull_namegenerator!(jwb)
+    function foo(jws)
+        df = DataFrame()
+        for col in names(jws)
+            df[col] = [filter(!ismissing, jws[col][1])]
+        end
+        df
+    end
+    for i in 1:length(jwb)
+        jws_replace = JSONWorksheet(foo(jwb[i]), xlsxpath(jwb), sheetnames(jwb)[i])
+        jwb[i] = jws_replace
+    end
+    jwb
+end
+
 
 """
     dummy_localizer!

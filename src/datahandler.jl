@@ -64,15 +64,17 @@ function read_gamedata(f::AbstractString; validate = true)
     kwargs = GAMEDATA[:meta][:kwargs][f]
     if is_xlsxfile(f)
         sheets = GAMEDATA[:meta][:files][f]
-        
+
         jwb = JSONWorkbook(path, keys(sheets); kwargs...)
         impose_sort!(jwb)
         if basename(xlsxpath(jwb)) == "RewardTable.xlsx"
             dirtyhandle_rewardtable!(jwb)
         elseif basename(xlsxpath(jwb)) == "Quest.xlsx"
             dirtyhandle_quest!(jwb)
+        elseif basename(xlsxpath(jwb)) == "NameGenerator.xlsx"
+            dropnull_namegenerator!(jwb)
         end
-        if validate 
+        if validate
             validation(jwb)
         end
 
