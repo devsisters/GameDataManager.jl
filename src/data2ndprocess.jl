@@ -20,7 +20,37 @@ function impose_2ndprocess!(jwb::JSONWorkbook)
         dirtyhandle_quest!(jwb)
     elseif occursin(r"(NameGenerator\.xls)", filename)
         dropnull_namegenerator!(jwb)
+    elseif occursin(r"(CashStore\.xls)", filename)
+        combine_args_sheet(jwb, :Data, :args; key = :ProductKey)
     end
+    jwb
+end
+
+
+"""
+    combine_args_sheet(jwb::JSONWorkbook, mother_sheet, arg_sheet; key::Symbol)
+
+주어진 jwb의 mother_sheet에 arg_sheet의 key가 일치하는 row를 합쳐준다.
+arg_sheet에 있는 모든 key는 mother_sheet에 있어야 한다
+
+"""
+function combine_args_sheet(jwb::JSONWorkbook, mother_sheet, arg_sheet; key = :Key)
+    jws = jwb[mother_sheet]
+    args = jwb[arg_sheet]
+
+    argnames = setdiff(names(args), names(jws))
+    for (i, row) in enumerate(eachrow(args[:]))
+        jws_row = findfirst(x -> x == row[key], jws[key])
+        isa(jws_row, Nothing) && throw(KeyError("$(key): $(row[key])"))
+
+        for col in argnames
+            if i == 1
+                jws[col] = Vector{Any}(missing, size(jws, 1))
+            end
+            jws[:][jws_row, col] = row[col]
+        end
+    end
+    deleteat!(jwb, arg_sheet)
     jwb
 end
 
@@ -72,7 +102,7 @@ function dirtyhandle_rewardtable!(jwb::JSONWorkbook)
     return jwb
 end
 """
-    dirtyhandle_rewardtable!
+    dirtyhandle_quest!
 
 Quest.xlsx 전용으로 사용 됨
 """
