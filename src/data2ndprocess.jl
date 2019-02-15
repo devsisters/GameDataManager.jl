@@ -1,4 +1,31 @@
 """
+    impose_2ndprocess!(jwb::JSONWorkbook)
+
+하드코딩된 기준으로 데이터를 2차가공한다
+* Block : Key로 오름차순 정렬
+* RewardTable : 시트를 합치고 여러가지 복잡한 가공
+* Quest : 여러 복잡한 가공
+* NameGenerator : null 제거
+"""
+function impose_2ndprocess!(jwb::JSONWorkbook)
+    filename = basename(xlsxpath(jwb))
+
+    if occursin(r"(Block\.xls)", filename)
+        sort!(jwb[:Deco], :Key)
+        sort!(jwb[:Building], :Key)
+    elseif occursin(r"(RewardTable\.xls)", filename)
+        dirtyhandle_rewardtable!(jwb)
+        sort!(jwb[1], :RewardKey)
+    elseif occursin(r"(Quest\.xls)", filename)
+        dirtyhandle_quest!(jwb)
+    elseif occursin(r"(NameGenerator\.xls)", filename)
+        dropnull_namegenerator!(jwb)
+    end
+    jwb
+end
+
+
+"""
     dirtyhandle_rewardtable!
 
 RewardTable.xlsx 전용으로 사용 됨

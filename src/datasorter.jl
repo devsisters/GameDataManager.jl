@@ -10,5 +10,5 @@ function impose_sort!(jwb::JSONWorkbook)
         sort!(jwb[:Deco], :Key)
         sort!(jwb[:Building], :Key)
     end
-    nothing
+    jwb
 end
