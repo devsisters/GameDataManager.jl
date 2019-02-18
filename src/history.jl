@@ -36,4 +36,19 @@ function write_history(files::Vector)
         write(io, JSON.json(GAMEDATA[:history]))
     end
 end
-# TODO: cleanup_history 필요 - 엑셀 파일명이 바뀌었을 때 쓰레기값이 계속 남아있음...
+
+# _Meta.json에 없는 파일 제거함
+function cleanup_history!()
+    a = keys(GAMEDATA[:meta][:files])
+    deleted_file = setdiff(keys(GAMEDATA[:history]), a)
+    if length(deleted_file) > 0
+        for x in deleted_file
+            pop!(GAMEDATA[:history], x)
+        end
+
+        open(GAMEPATH[:history], "w") do io
+            write(io, JSON.json(GAMEDATA[:history]))
+        end
+    end
+    nothing
+end

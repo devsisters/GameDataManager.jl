@@ -59,7 +59,6 @@ function read_meta(path)
     for f in meta[:files]
         xlsx = string(f[:xlsx])
         d[xlsx] = f[:sheets]
-        d[string(split(xlsx, ".")[1])] = d[xlsx]
         for (k, v) in f[:sheets]
             d[v] = (xlsx, k)
         end
@@ -83,8 +82,12 @@ function init_history(file)
         isfile(file) ? JSON.parsefile(file; dicttype=Dict{String, Float64}) :
                        Dict{String, Float64}()
     end
+    # 좀 이상하긴 한데... 가끔식 히스토리 청소해 줌
+    rand() < 0.02 && cleanup_history!()
+    nothing
 end
 
 function init_xlsxasjson()
+    # Vector[] 컬럼 데이터 구분자 추가 [";", ","]
     push!(XLSXasJSON.DELIM, ",")
 end
