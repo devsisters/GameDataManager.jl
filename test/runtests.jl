@@ -4,11 +4,16 @@ using XLSXasJSON
 
 GDM = GameDataManager
 
-@testset "Basic" begin
-    jwb = read_gamedata("Player.xlsx")
-    @test sheetnames(jwb) == [:AccountLevel, :HomeLevel, :ChunkPrice]
+@testset "GameData loader" begin
+    for k in keys(GAMEDATA[:meta][:xlsxfile_shortcut])
+        getgamedata(k)
+        @test haskey(GAMEDATA[:xlsx], Symbol(k)) == true
+    end
 
+    jwb = GAMEDATA[:xlsx][:Player]
+    @test sheetnames(jwb) == [:AccountLevel, :HomeLevel]
 end
+
 
 @testset "datavalidate.jl" begin
     jwb = read_gamedata("Shop.xlsx"; validate = false)
@@ -34,9 +39,7 @@ end
     @test isempty(GDM.collect_modified_xlsx())
 end
 
-@testset "Load gamedata" begin
-    load_gamedata!("Player")
-end
+
 
 @testset "XLSX to JSON" begin
     xl("Player.xlsx")

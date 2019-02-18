@@ -1,6 +1,8 @@
 # 단축키
 xl() = xlsx_to_json!()
 xl(x) = xlsx_to_json!(x)
+
+is_xlsxfile(f) = (endswith(f, ".xlsx") || endswith(f, ".xlsm"))
 """
     xlsx_to_json!(file::AbstractString)
     xlsx_to_json!(exportall::Bool = false)
@@ -26,7 +28,7 @@ function xlsx_to_json!(exportall::Bool = false)
     end
 end
 function xlsx_to_json!(file::AbstractString)
-    file = is_xlsxfile(file) ? file : getpath_gamedata(file)
+    file = is_xlsxfile(file) ? file : GAMEDATA[:meta][:xlsxfile_shortcut][file]
     xlsx_to_json!([file])
 end
 function xlsx_to_json!(files::Vector)
@@ -83,19 +85,13 @@ function joinpath_gamedata(file)
     mid_folder = is_xlsxfile(file) ? GAMEPATH[:xlsx][file] : GAMEPATH[:json][file]
     joinpath(GAMEPATH[:data], mid_folder, file)
 end
-is_xlsxfile(f) = (endswith(f, ".xlsx") || endswith(f, ".xlsm"))
-function getpath_gamedata(file)
-    x = collect(filter(x -> startswith(x, "$file.xls"), keys(GAMEDATA[:meta][:files])))
-    isempty(x) && throw(ArgumentError("$file 파일은 _Meta.json에 존재하지 않습니다. 파일명을 확인해 주세요"))
-    return x[1]
-end
 
 """
     load_gamedata!(f; gamedata = GAMEDATA)
 gamedata[:xlsx]로 데이터를 불러온다.
 """
 function load_gamedata!(f, gamedata = GAMEDATA; kwargs...)
-    filename = is_xlsxfile(f) ? f : getpath_gamedata(f)
+    filename = is_xlsxfile(f) ? f : GAMEDATA[:meta][:xlsxfile_shortcut][f]
     jwb = read_gamedata(filename; kwargs...)
 
     gamedata[:xlsx][Symbol(f)] = jwb
@@ -116,5 +112,29 @@ function write_json(jwb::JSONWorkbook; kwargs...)
         XLSXasJSON.write(file, jwb[s]; kwargs...)
 
         @printf("   saved => \"%s\" \n", file)
+    end
+end
+
+
+"""
+    getgamedata(fname, sheetname, colname)
+해당하는 Excel 파일의 시트의 컬럼을 가져온다.
+load_gamedata!가 안되어있을 경우 해당 파일을 load한다
+
+매번 key 검사하느라 느릴테니 테스트 스크립트용으로 사용하고, MarsSimulator에서는 직접 access 하도록 작업할 것
+"""
+function getgamedata(file::AbstractString, sheetname::Symbol, colname::Symbol)
+    jws = getgamedata(file, sheetname)
+    return jws[colname]
+end
+function getgamedata(file::AbstractString, sheetname::Symbol)
+    jwb = getgamedata(file)
+    return jwb[sheetname]
+end
+function getgamedata(file::AbstractString)
+    if haskey(GAMEDATA[:xlsx], Symbol(file))
+        GAMEDATA[:xlsx][Symbol(file)]
+    else
+        load_gamedata!(file)
     end
 end

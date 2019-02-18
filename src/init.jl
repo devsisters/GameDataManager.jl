@@ -47,7 +47,7 @@ end
 'path'의 하위에 있는 5_GameData 폴더내의 파일정보를 불러온다.
 경로가 틀리면 GameDataManager 사용 불가
 """
-function init_meta(path)
+function init_meta(path = GAMEPATH[:json]["root"])
     GAMEDATA[:meta] = read_meta(path)
     println("-"^7, "_Meta.json 로딩이 완료되었습니다","-"^7)
 end
@@ -59,6 +59,7 @@ function read_meta(path)
     for f in meta[:files]
         xlsx = string(f[:xlsx])
         d[xlsx] = f[:sheets]
+        d[string(split(xlsx, ".")[1])] = d[xlsx]
         for (k, v) in f[:sheets]
             d[v] = (xlsx, k)
         end
@@ -70,6 +71,8 @@ function read_meta(path)
                     ))
     end
     meta[:files] = d
+    meta[:xlsxfile_shortcut] =  broadcast(x -> (split(x, ".")[1], x),
+                                                filter(k -> (endswith(k, ".xlsx") || endswith(k, ".xlsm")), keys(d))) |> Dict
     meta[:kwargs] = d2
 
     return meta
