@@ -27,14 +27,16 @@ function ismodified(fname)::Bool
     mtime(file) > get(GAMEDATA[:history], fname ,0.)
 end
 
+function write_history()
+    open(GAMEPATH[:history], "w") do io
+        write(io, JSON.json(GAMEDATA[:history]))
+    end
+end
 function write_history(files::Vector)
     for f in files
         GAMEDATA[:history][f] = mtime(joinpath_gamedata(f))
     end
-
-    open(GAMEPATH[:history], "w") do io
-        write(io, JSON.json(GAMEDATA[:history]))
-    end
+    write_history()
 end
 
 # _Meta.json에 없는 파일 제거함
@@ -45,10 +47,7 @@ function cleanup_history!()
         for x in deleted_file
             pop!(GAMEDATA[:history], x)
         end
-
-        open(GAMEPATH[:history], "w") do io
-            write(io, JSON.json(GAMEDATA[:history]))
-        end
+        write_history()
     end
     nothing
 end
