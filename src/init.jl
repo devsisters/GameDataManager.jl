@@ -11,6 +11,7 @@ function __init__()
         init_history(GAMEPATH[:history])
         init_xlsxasjson()
         @info """사용법
+            init_meta() : '_Meta.json'을 다시 읽습니다.
             xl("Player"): Player.xlsx 파일만 json으로 추출합니다
             xl()        : 수정된 엑셀파일만 검색하여 json으로 추출합니다
             xl(true)    : '_Meta.json'에서 관리하는 모든 파일을 json으로 추출합니다
@@ -18,7 +19,7 @@ function __init__()
         """
     else
         @warn """
-            https://github.com/devsisters/mars-prototype 의 로컬 경로를 지정한 후 다시 시도해주세요
+            https://github.com/devsisters/mars-prototype 저장소의 로컬 경로를 지정한 후 다시 시도해주세요
             PATH_MARS_PROTOTYPE = "?/?"
         """
     end
