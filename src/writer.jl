@@ -37,12 +37,8 @@ function xlsx_to_json!(files::Vector)
         println("-"^75)
         for f in files
             println("『", f, "』")
-            if isfile(joinpath_gamedata(f))
-                data = read_gamedata(f)
-                write_json(data)
-            else
-                @warn "$(f)가 존재하지 않습니다. SourceTree를 확인해주세요"
-            end
+            gd = GameData(f)
+            write_json(gd.data)
         end
         @info "json 추출이 완료되었습니다 ☺"
         write_history(files)

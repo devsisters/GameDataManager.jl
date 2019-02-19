@@ -6,7 +6,7 @@ using XLSX, JSON, XLSXasJSON
 using StatsBase
 using DataFrames, DataStructures
 
-include("structs.jl")
+include("gamedata.jl")
 
 include("init.jl")
 include("loader.jl")
@@ -22,7 +22,8 @@ include("_wip.jl")
 
 export GAMEPATH, GAMEDATA,
        #
-       read_gamedata, load_gamedata!, getgamedata,
+       GameData,
+         load_gamedata!, getgamedata,
        #
        xlsx_to_json!, xl, autoxl, init_meta,
 

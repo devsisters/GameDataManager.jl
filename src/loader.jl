@@ -9,46 +9,13 @@ end
 
 
 """
-    read_gamedata(f::AbstractString)
-mars 메인 저장소의 `.../_META.json`에 명시된 파일을 읽습니다
-
-** Arguements **
-* validate = true : false로 하면 validation을 하지 않습니다
-"""
-function read_gamedata(f::AbstractString; validate = true)
-    if !haskey(GAMEDATA[:meta][:files], f)
-        throw(ArgumentError("$(f)가 '_Meta.json'에 존재하지 않습니다"))
-    end
-
-    path = joinpath_gamedata(f)
-    kwargs = GAMEDATA[:meta][:kwargs][f]
-    if is_xlsxfile(f)
-        sheets = GAMEDATA[:meta][:files][f]
-
-        jwb = JSONWorkbook(path, keys(sheets); kwargs...)
-        impose_2ndprocess!(jwb) #data2ndprocess.jl
-
-        if validate
-            validation(jwb)
-        end
-
-        dummy_localizer!(jwb)
-        return jwb
-    else
-        throw(ArgumentError("$(f)는 읽을 수 없습니다"))
-    end
-end
-
-
-"""
     load_gamedata!(f; gamedata = GAMEDATA)
 gamedata[:xlsx]로 데이터를 불러온다.
 """
 function load_gamedata!(f, gamedata = GAMEDATA; kwargs...)
-    filename = is_xlsxfile(f) ? f : GAMEDATA[:meta][:xlsxfile_shortcut][f]
-    jwb = read_gamedata(filename; kwargs...)
+    gd = GameData(f; kwargs...)
 
-    gamedata[:xlsx][Symbol(f)] = jwb
+    gamedata[:xlsx][Symbol(f)] = gd.data
     println("---- $(f) 가 GAMEDATA에 추가되었습니다 ----")
     return gamedata[:xlsx][Symbol(f)]
 end
