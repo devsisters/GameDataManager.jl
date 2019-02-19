@@ -1,0 +1,146 @@
+# 단축키
+xl() = xlsx_to_json!()
+xl(x) = xlsx_to_json!(x)
+
+is_xlsxfile(f) = (endswith(f, ".xlsx") || endswith(f, ".xlsm"))
+"""
+    xlsx_to_json!(file::AbstractString)
+    xlsx_to_json!(exportall::Bool = false)
+
+* file="filename.xlsx": 지정된 파일만 json으로 추출합니다
+* exportall = true    : 모든 파일을 json으로 추출합니다
+* exportall = false   : 변경된 .xlsx파일만 json으로 추출합니다
+
+mars 메인 저장소의 '.../_META.json'에 명시된 파일만 추출가능합니다
+"""
+function xlsx_to_json!(exportall::Bool = false)
+    files = exportall ? collect_allxlsx() : collect_modified_xlsx()
+    if isempty(files)
+        @info """추출할 .xlsx 파일이 없습니다 ♫
+        ---------------------------------------------------------------------------
+            xl("Player"): Player.xlsx 파일만 json으로 추출합니다
+            xl()        : 수정된 엑셀파일만 검색하여 json으로 추출합니다
+            xl(true)    : '_Meta.json'에서 관리하는 모든 파일을 json으로 추출합니다
+            autoxl()    : '01_XLSX/' 폴더를 감시하면서 변경된 파일을 자동으로 json 추출합니다.
+        """
+    else
+        xlsx_to_json!(files)
+    end
+end
+function xlsx_to_json!(file::AbstractString)
+    file = is_xlsxfile(file) ? file : GAMEDATA[:meta][:xlsxfile_shortcut][file]
+    xlsx_to_json!([file])
+end
+function xlsx_to_json!(files::Vector)
+    if !isempty(files)
+        @info "xlsx -> json 추출을 시작합니다 ⚒"
+        println("-"^75)
+        for f in files
+            println("『", f, "』")
+            if isfile(joinpath_gamedata(f))
+                data = read_gamedata(f)
+                write_json(data)
+            else
+                @warn "$(f)가 존재하지 않습니다. SourceTree를 확인해주세요"
+            end
+        end
+        @info "json 추출이 완료되었습니다 ☺"
+        write_history(files)
+    end
+    nothing
+end
+
+"""
+    write_json
+메타 정보를 참조하여 시트마다 다른 이름으로 저장한다
+"""
+function write_json(jwb::JSONWorkbook; kwargs...)
+    dir = GAMEPATH[:json]["root"]
+    meta = GAMEDATA[:meta][:files][basename(xlsxpath(jwb))]
+
+    for s in sheetnames(jwb)
+        file = joinpath(dir, meta[s])
+        XLSXasJSON.write(file, jwb[s]; kwargs...)
+
+        @printf("   saved => \"%s\" \n", file)
+    end
+end
+
+##############################################################################
+##
+## 자동 감시 기능 autoxl()
+##
+##############################################################################
+
+autoxl(interval = 3, timeout = 10000) = autoxl(collect_xlsx_for_autoxl(), interval, timeout)
+@inline function autoxl(candidate, interval::Integer, timeout::Integer)
+    @info """$(candidate)
+    .xlsx 파일 감시를 시작합니다...
+        감시 종료를 원할경우 'Ctrl + c'를 누르면 감시를 멈출 수 있습니다
+    """
+    # @async로 task로 생성할 수도 있지만... history 파일을 동시 편집할 위험이 있기 때문에 @async는 사용하지 않는다
+    IO = stderr
+    @inbounds for i in 1:timeout
+        bar = isodd(i) ? repeat("↗↘", 23) : repeat("←↑", 23)
+        print(IO, "\r")
+        printstyled(IO, ".Xlsx/ 폴더를 감시 중 입니다 \\ $bar \\"; color=:green)
+
+        target = ismodified.(candidate)
+        if any(target)
+            print(IO, "\n")
+            xlsx_to_json!(candidate[target])
+        else
+            sleep(interval)
+        end
+        bar = isodd(i) ? repeat("↗↘", 23) : repeat("←↑", 23)
+        print(IO, "\r")
+        printstyled(IO, ".Xlsx/ 폴더를 감시 중 입니다 \\ $bar \\"; color=:green)
+    end
+    println(IO, "\n timeout이 끝나 감시를 종료합니다. 이용해주셔서 감사합니다.")
+end
+
+"""
+    collect_xlsx_for_autoxl()
+감시할 필요 없는파일 하드코딩으로 제외
+"""
+function collect_xlsx_for_autoxl()
+    setdiff(collect_allxlsx(),
+    ["PipoColorTable.xlsm", "NameGenerator.xlsx"])
+end
+
+
+##############################################################################
+##
+## 엑셀 작업용 참조 테이블 업데이트
+##
+##############################################################################
+
+# 함수명 적절하게 변경?? f를 참조하는 파일들을 업데이트하는건데...
+function update_xlsx_reference!(f)
+    if f == "ItemTable"
+        data = parse_itemtable()
+        write_on_xlsx!("RewardTable.xlsx", "_ItemTable", data)
+        write_on_xlsx!("Quest.xlsx", "_ItemTable", data)
+
+    elseif f == "RewardTable"
+        data = parse_rewardtable()
+        write_on_xlsx!("Quest.xlsx", "_RewardTable", data)
+
+    else
+        throw(ArgumentError("$f 에 대해서는 update_xlsx_reference! 가 정의되지 않았습니다"))
+    end
+    nothing
+end
+
+function write_on_xlsx!(f, sheetname, data)
+    XLSX.openxlsx(joinpath_gamedata(f), mode="rw") do xf
+        s = xf[sheetname]
+        for row in 1:size(data, 1), col in 1:size(data, 2)
+            x = data[row, col]
+            if !ismissing(x) && !isa(x, Nothing)
+                s[XLSX.CellRef(row, col)] = x
+            end
+        end
+    end
+    @info "참조 테이블 $sheetname 을 $f 에 업데이트하였습니다"
+end

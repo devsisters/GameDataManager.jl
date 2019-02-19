@@ -1,20 +1,24 @@
 module GameDataManager
 
+# using GameDataLocalizer TODO
 using Printf, Dates
 using XLSX, JSON, XLSXasJSON
 using StatsBase
 using DataFrames, DataStructures
 
-include("init.jl")
-include("data/handler.jl")
-include("data/2ndprocess.jl")
-include("data/watch.jl")
-include("data/validator.jl")
+include("structs.jl")
 
+include("init.jl")
+include("loader.jl")
+include("parser.jl")
+include("validator.jl")
+include("editor.jl")
+include("writer.jl")
 include("history.jl")
-include("unity_datahandler.jl")
-include("jsonloader.jl")
-include("xlsxwriter.jl")
+
+include("_wip.jl")
+
+
 
 export GAMEPATH, GAMEDATA,
        #
