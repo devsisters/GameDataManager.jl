@@ -13,24 +13,17 @@ struct GameData
     localizer::Union{Missing, Function}
     editor::Union{Missing, Function}
     parser::Union{Missing, Function}
-    output
+    cache::Array{Any, 1} # 중간 연산물 cache에 차곡차곡 쌓는다. Dict로 할까?
+
     function GameData(jwb::JSONWorkbook, kwargs, validator, localizer, editor, parser)
         if !ismissing(validator)
             validate_general(jwb)
             validator(jwb)
         end
-        if !ismissing(localizer)
-            localizer(jwb)
-        end
-        if !ismissing(editor)
-            editor(jwb)
-        end
-        if !ismissing(parser)
-            parser(jwb)
-        end
-        output = missing # json을 미리 만둘어둘까?
+        !ismissing(editor)    && editor(jwb)
+        !ismissing(localizer) && localizer(jwb)
 
-        new(jwb, kwargs, validator, localizer, editor, parser)
+        new(jwb, kwargs, validator, localizer, editor, parser, Any[])
     end
 end
 function GameData(file; validate = true)
@@ -84,6 +77,7 @@ end
 * RewardTable : 시트를 합치고 여러가지 복잡한 가공
 * Quest : 여러 복잡한 가공
 * NameGenerator : null 제거
+* CashStore : key 컬럼을 기준으로 'Data'시트에 'args'시트를 합친다
 """
 function select_editor(f)
     f == "Block.xlsm"         ? editor_Block! :
@@ -95,5 +89,7 @@ function select_editor(f)
 end
 
 function select_parser(f)
+    f == "ItemTable.xlsx" ? parser_ItemTable :
+    f == "RewardTable.xlsm" ? parser_RewardTable :
     missing
 end

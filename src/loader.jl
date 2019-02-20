@@ -10,14 +10,14 @@ end
 
 """
     load_gamedata!(f; gamedata = GAMEDATA)
-gamedata[:xlsx]로 데이터를 불러온다.
+gamedata[:data]로 데이터를 불러온다.
 """
 function load_gamedata!(f, gamedata = GAMEDATA; kwargs...)
     gd = GameData(f; kwargs...)
 
-    gamedata[:xlsx][Symbol(f)] = gd.data
+    gamedata[:data][Symbol(f)] = gd
     println("---- $(f) 가 GAMEDATA에 추가되었습니다 ----")
-    return gamedata[:xlsx][Symbol(f)]
+    return gamedata[:data][Symbol(f)]
 end
 
 
@@ -28,17 +28,21 @@ load_gamedata!가 안되어있을 경우 해당 파일을 load한다
 
 매번 key 검사하느라 느릴테니 테스트 스크립트용으로 사용하고, MarsSimulator에서는 직접 access 하도록 작업할 것
 """
-function getgamedata(file::AbstractString, sheetname::Symbol, colname::Symbol)
-    jws = getgamedata(file, sheetname)
+function getgamedata(file::AbstractString, sheet, colname)
+    jws = getgamedata(file, sheet)
     return jws[colname]
 end
 function getgamedata(file::AbstractString, sheetname::Symbol)
-    jwb = getgamedata(file)
+    jwb = getgamedata(file).data
     return jwb[sheetname]
 end
+function getgamedata(file::AbstractString, sheet_index::Integer)
+    jwb = getgamedata(file).data
+    return jwb[sheet_index]
+end
 function getgamedata(file::AbstractString)
-    if haskey(GAMEDATA[:xlsx], Symbol(file))
-        GAMEDATA[:xlsx][Symbol(file)]
+    if haskey(GAMEDATA[:data], Symbol(file))
+        GAMEDATA[:data][Symbol(file)]
     else
         load_gamedata!(file)
     end

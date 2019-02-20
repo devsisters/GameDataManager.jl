@@ -1,7 +1,6 @@
 const GAMEPATH = Dict{Symbol, Any}()
 const GAMEDATA = Dict{Symbol, Any}(
-    :xlsx    => Dict{Symbol, Any}(),
-    :json    => Dict{Symbol, Any}(),
+    :data    => Dict{Symbol, GameData}(),
     :julia   => Dict{Symbol, Any}())
 
 function __init__()

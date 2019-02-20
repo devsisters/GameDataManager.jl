@@ -34,13 +34,12 @@ function validator_Ability(jwb)
 end
 function validator_Residence(jwb)
     jws = jwb[:Building]
-    #Ability가 있어야 검사 가능
-    !haskey(GAMEDATA[:xlsx], :Ability) && load_gamedata!("Ability")
-    b = GAMEDATA[:xlsx][:Ability][:Level][:GroupKey]
 
+    ability_groupkey = getgamedata("Ability", :Level, :GroupKey)
     for row in jws[:AbilityKey]
-        check = issubset(row, unique(b))
-        @assert check "AbilityKey가 Ability_Level에 없습니다\n $(setdiff(row, unique(b)))"
+        check = issubset(row, unique(ability_groupkey))
+        @assert check "AbilityKey가 Ability_Level에 없습니다\n
+                            $(setdiff(row, unique(ability_groupkey)))"
     end
     nothing
 end

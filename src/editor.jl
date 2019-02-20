@@ -6,13 +6,13 @@ end
 function editor_RewardTable!(jwb)
     function get_reward(rewards)
         rewards = filter(el -> !ismissing(el["Kind"]), rewards)
-        v = []
-        for el in rewards
+        v = Vector{Vector{String}}(undef, length(rewards))
+        for (i, el) in enumerate(rewards)
             weight = string(get(el, "Weight", 1))
-            if ismissing(el["ItemKey"])
-                push!(v, [weight, el["Kind"], string(el["Amount"])])
+            v[i] = if ismissing(el["ItemKey"])
+                String[weight, el["Kind"], string(el["Amount"])]
             else
-                push!(v, [weight, el["Kind"], string(el["ItemKey"]), string(el["Amount"])])
+                String[weight, el["Kind"], string(el["ItemKey"]), string(el["Amount"])]
             end
         end
         return v
@@ -20,7 +20,9 @@ function editor_RewardTable!(jwb)
     function concatenate_rewards(jws)
         v = DataFrame[]
         for df in groupby(jws[:], :RewardKey)
-            d = OrderedDict(:TraceTag => df[1, :TraceTag], :Rewards => [])
+            d = OrderedDict(:TraceTag => df[1, :TraceTag],
+                            :Rewards => Vector{Vector{String}}[])
+                            
             for col in [:r1, :r2, :r3, :r4, :r5]
                 if haskey(df, col)
                     re = get_reward(df[col])
@@ -58,7 +60,6 @@ function editor_Quest!(jwb)
 
         df
     end
-
     sheets = concatenate_columns.(jwb)
     for i in 1:length(jwb)
         jws_replace = JSONWorksheet(vcat(sheets...), xlsxpath(jwb), sheetnames(jwb)[i])

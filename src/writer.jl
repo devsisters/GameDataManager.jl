@@ -114,13 +114,14 @@ end
 # 함수명 적절하게 변경?? f를 참조하는 파일들을 업데이트하는건데...
 function update_xlsx_reference!(f)
     if f == "ItemTable"
-        data = parse_itemtable()
+        data = parse(getgamedata(f))
         write_on_xlsx!("RewardTable.xlsx", "_ItemTable", data)
         write_on_xlsx!("Quest.xlsx", "_ItemTable", data)
 
     elseif f == "RewardTable"
-        data = parse_rewardtable()
+        data = parse(getgamedata(f))
         write_on_xlsx!("Quest.xlsx", "_RewardTable", data)
+        write_on_xlsx!("RewardTable.xlsm", "_RewardTable", data)
 
     else
         throw(ArgumentError("$f 에 대해서는 update_xlsx_reference! 가 정의되지 않았습니다"))
@@ -128,7 +129,11 @@ function update_xlsx_reference!(f)
     nothing
 end
 
-function write_on_xlsx!(f, sheetname, data)
+function write_on_xlsx!(f, sheetname, data::DataFrame)
+    write_on_xlsx!(f, sheetname,
+                    [hcat(string.(names(data))...); convert(Matrix, data)])
+end
+function write_on_xlsx!(f, sheetname, data::Array)
     XLSX.openxlsx(joinpath_gamedata(f), mode="rw") do xf
         s = xf[sheetname]
         for row in 1:size(data, 1), col in 1:size(data, 2)
