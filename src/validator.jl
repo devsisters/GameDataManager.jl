@@ -70,9 +70,10 @@ validator_Shop(jwb) = validator_Residence(jwb)
 
 function validator_Block(jwb::JSONWorkbook)
     b = begin
-            f = joinpath(GAMEPATH[:data], "ScriptableObjects/BlockTemplateBalanceTable.asset")
-            x = filter(x -> startswith(x, "  - Key:"), readlines(f))
-            unique(broadcast(x -> split(x, "Key: ")[2], x))
+        f = joinpath(GAMEPATH[:data], "../unity/Assets/5_GameData/ScriptableObjects",
+                                      "BlockTemplateBalanceTable.asset")
+        x = filter(x -> startswith(x, "  - Key:"), readlines(f))
+        unique(broadcast(x -> split(x, "Key: ")[2], x))
     end
     missing_key = setdiff(unique(jwb[:Building][:TemplateKey]), b)
     if !isempty(missing_key)
