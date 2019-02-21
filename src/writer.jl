@@ -1,6 +1,6 @@
 # 단축키
-xl() = xlsx_to_json!()
-xl(x) = xlsx_to_json!(x)
+xl(; kwargs...) = xlsx_to_json!(; kwargs...)
+xl(x; kwargs...) = xlsx_to_json!(x; kwargs...)
 
 is_xlsxfile(f) = (endswith(f, ".xlsx") || endswith(f, ".xlsm"))
 """
@@ -13,7 +13,7 @@ is_xlsxfile(f) = (endswith(f, ".xlsx") || endswith(f, ".xlsm"))
 
 mars 메인 저장소의 '.../_META.json'에 명시된 파일만 추출가능합니다
 """
-function xlsx_to_json!(exportall::Bool = false)
+function xlsx_to_json!(exportall::Bool = false; kwargs...)
     files = exportall ? collect_allxlsx() : collect_modified_xlsx()
     if isempty(files)
         @info """추출할 .xlsx 파일이 없습니다 ♫
@@ -24,20 +24,21 @@ function xlsx_to_json!(exportall::Bool = false)
             autoxl()    : '01_XLSX/' 폴더를 감시하면서 변경된 파일을 자동으로 json 추출합니다.
         """
     else
-        xlsx_to_json!(files)
+        xlsx_to_json!(files; kwargs...)
     end
 end
-function xlsx_to_json!(file::AbstractString)
+function xlsx_to_json!(file::AbstractString; kwargs...)
     file = is_xlsxfile(file) ? file : GAMEDATA[:meta][:xlsxfile_shortcut][file]
-    xlsx_to_json!([file])
+    xlsx_to_json!([file]; kwargs...)
 end
-function xlsx_to_json!(files::Vector)
+function xlsx_to_json!(files::Vector; loadgamedata = false)
     if !isempty(files)
         @info "xlsx -> json 추출을 시작합니다 ⚒"
         println("-"^75)
         for f in files
+            gd = loadgamedata ? loadgamedata!(f) : GameData(f)
+
             println("『", f, "』")
-            gd = GameData(f)
             write_json(gd.data)
         end
         @info "json 추출이 완료되었습니다 ☺"
@@ -114,12 +115,12 @@ end
 # 함수명 적절하게 변경?? f를 참조하는 파일들을 업데이트하는건데...
 function update_xlsx_reference!(f)
     if f == "ItemTable"
-        data = parse(getgamedata(f))
+        data = parse(loadgamedata!(f))
         write_on_xlsx!("RewardTable.xlsx", "_ItemTable", data)
         write_on_xlsx!("Quest.xlsx", "_ItemTable", data)
 
     elseif f == "RewardTable"
-        data = parse(getgamedata(f))
+        data = parse(loadgamedata!(f))
         write_on_xlsx!("Quest.xlsx", "_RewardTable", data)
         write_on_xlsx!("RewardTable.xlsm", "_RewardTable", data)
 

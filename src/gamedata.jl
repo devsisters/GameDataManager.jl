@@ -57,12 +57,12 @@ end
                  'Building'시트의 TemplateKey가 'Template' 시트의 Key에 있어야 한다
 """
 function select_validator(f)
-    f == "Ability.xlsx"     ? validator_Ability :
-    f == "Residence.xlsx"   ? validator_Residence :
-    f == "Shop.xlsx"        ? validator_Shop :
-    f == "Block.xlsx"       ? validator_Block :
-    f == "RewardTable.xlsx" ? validator_RewardTable :
-    f == "Quest.xlsx"       ? validator_Quest :
+    startswith(f,"Ability.") ? validator_Ability :
+    startswith(f,"Residence.")   ? validator_Residence :
+    startswith(f,"Shop.")        ? validator_Shop :
+    startswith(f,"Block.")       ? validator_Block :
+    startswith(f,"RewardTable.") ? validator_RewardTable :
+    startswith(f,"Quest.")       ? validator_Quest :
     missing
 end
 function select_localizer(f)
@@ -80,16 +80,16 @@ end
 * CashStore : key 컬럼을 기준으로 'Data'시트에 'args'시트를 합친다
 """
 function select_editor(f)
-    f == "Block.xlsm"         ? editor_Block! :
-    f == "RewardTable.xlsm"   ? editor_RewardTable! :
-    f == "Quest.xlsx"         ? editor_Quest! :
-    f == "NameGenerator.xlsx" ? editor_NameGenerator! :
-    f == "CashStore.xlsm"     ? editor_CashStore! :
+    startswith(f,"Block.")         ? editor_Block! :
+    startswith(f,"RewardTable.")   ? editor_RewardTable! :
+    startswith(f,"Quest.")         ? editor_Quest! :
+    startswith(f,"NameGenerator.") ? editor_NameGenerator! :
+    startswith(f,"CashStore.")     ? editor_CashStore! :
     missing
 end
 
 function select_parser(f)
-    f == "ItemTable.xlsx" ? parser_ItemTable :
-    f == "RewardTable.xlsm" ? parser_RewardTable :
+    startswith(f,"ItemTable.")   ? parser_ItemTable :
+    startswith(f,"RewardTable.") ? parser_RewardTable :
     missing
 end

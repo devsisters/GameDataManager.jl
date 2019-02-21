@@ -22,9 +22,10 @@ function collect_alljson()
     filter(x -> endswith(x, ".json"), keys(GAMEDATA[:meta][:files])) |> collect
 end
 
-function ismodified(fname)::Bool
-    file = joinpath_gamedata(fname)
-    mtime(file) > get(GAMEDATA[:history], fname ,0.)
+function ismodified(f)::Bool
+    file = is_xlsxfile(f) ? f : GAMEDATA[:meta][:xlsxfile_shortcut][f]
+    
+    mtime(joinpath_gamedata(file)) > get(GAMEDATA[:history], file ,0.)
 end
 
 function write_history()

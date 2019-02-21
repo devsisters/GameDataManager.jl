@@ -52,5 +52,5 @@ end
 @testset "RewardTable 특별 처리" begin
     # 음... 어떻게 테스트하지???
     jwb = JSONWorkbook(GDM.joinpath_gamedata("RewardTable.xlsx"), 2; start_line = 2)
-    jwb = load_gamedata!("RewardTable")
+    jwb = loadgamedata!("RewardTable")
 end
