@@ -7,7 +7,6 @@ mars 메인 저장소의 `.../_META.json`에 명시된 파일을 읽습니다
 """
 struct GameData
     data::JSONWorkbook
-    kwargs
     # 사용할 함수들
     validator::Union{Missing, Function}
     localizer::Union{Missing, Function}
@@ -15,25 +14,24 @@ struct GameData
     parser::Union{Missing, Function}
     cache::Array{Any, 1} # 중간 연산물 cache에 차곡차곡 쌓는다. Dict로 할까?
 
-    function GameData(jwb::JSONWorkbook, kwargs, validator, localizer, editor, parser)
-        if !ismissing(validator)
-            validate_general(jwb)
-            validator(jwb)
-        end
+    function GameData(jwb::JSONWorkbook, validator, localizer, editor, parser)
+        validate_general(jwb)
+
+        !ismissing(validator) && validator(jwb)
         !ismissing(editor)    && editor(jwb)
         !ismissing(localizer) && localizer(jwb)
 
-        new(jwb, kwargs, validator, localizer, editor, parser, Any[])
+        new(jwb, validator, localizer, editor, parser, Any[])
     end
 end
 function GameData(file; validate = true)
     # TODO: JSON일 경우 처리?
     f = is_xlsxfile(file) ? file : GAMEDATA[:meta][:xlsxfile_shortcut][file]
 
-    kwargs = GAMEDATA[:meta][:kwargs][f]
+    kwargs_per_sheet = GAMEDATA[:meta][:kwargs][f]
     sheets = GAMEDATA[:meta][:files][f]
 
-    jwb = JSONWorkbook(joinpath_gamedata(f), keys(sheets); kwargs...)
+    jwb = JSONWorkbook(joinpath_gamedata(f), keys(sheets), kwargs_per_sheet)
 
     if validate
         validator = select_validator(f)
@@ -41,7 +39,7 @@ function GameData(file; validate = true)
         validator = missing
     end
 
-    GameData(jwb, kwargs, validator, select_localizer(f), select_editor(f), select_parser(f))
+    GameData(jwb, validator, select_localizer(f), select_editor(f), select_parser(f))
 end
 
 """

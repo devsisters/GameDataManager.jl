@@ -1,12 +1,14 @@
 const GAMEPATH = Dict{Symbol, Any}()
-const GAMEDATA = Dict{Symbol, Any}(
+const GAMEDATA = Dict{Symbol, Dict}(
     :data    => Dict{Symbol, GameData}(),
-    :julia   => Dict{Symbol, Any}())
+    :julia   => Dict{Symbol, Any}()) #제거 예정
 
 function __init__()
     if isdefined(Main, :PATH_MARS_PROTOTYPE)
         init_path(joinpath(Main.PATH_MARS_PROTOTYPE, "patch-resources"))
         init_meta(joinpath(GAMEPATH[:json]["root"]))
+        init_typechecker(joinpath(GAMEPATH[:json]["root"]))
+
         init_history(GAMEPATH[:history])
         init_xlsxasjson()
         @info """사용법
@@ -44,38 +46,69 @@ end
 
 """
     init_meta(path)
-'path'의 하위에 있는 5_GameData 폴더내의 파일정보를 불러온다.
-경로가 틀리면 GameDataManager 사용 불가
+
+path 경로에 있는 _Meta.json을 읽는다
 """
 function init_meta(path = GAMEPATH[:json]["root"])
-    GAMEDATA[:meta] = read_meta(path)
-    println("-"^7, "_Meta.json 로딩이 완료되었습니다","-"^7)
-end
-function read_meta(path)
-    meta = JSON.parsefile("$path/_Meta.json"; dicttype=OrderedDict{Symbol, Any})
-
-    d = OrderedDict{String, Any}()
-    d2 = Dict()
-    for f in meta[:files]
-        xlsx = string(f[:xlsx])
-        d[xlsx] = f[:sheets]
-        for (k, v) in f[:sheets]
-            d[v] = (xlsx, k)
+    # 개별 시트에대한 kwargs 값이 있으면 가져오고, 없으면 global 세팅 사용
+    function get_kwargs(json_row, sheet)
+        x = json_row
+        if haskey(json_row, :kwargs)
+            x = get(json_row[:kwargs], sheet, x)
         end
-        # kwargs가 지금은 하드코딩, meta에 있는걸로 동적 생성하도록 수정
-        d2[xlsx] = NamedTuple{(:row_oriented, :start_line, :compact_to_singleline)}((
-                    get(f, :row_oriented, true),
-                    get(f, :start_line, 2),
-                    get(f, :compact_to_singleline, false)
+        NamedTuple{(:row_oriented, :start_line, :compact_to_singleline)}((
+                    get(x, :row_oriented, true),
+                    get(x, :start_line, 2),
+                    get(x, :compact_to_singleline, false)
                     ))
     end
-    meta[:files] = d
-    meta[:xlsxfile_shortcut] =  broadcast(x -> (split(x, ".")[1], x),
-                                                filter(k -> (endswith(k, ".xlsx") || endswith(k, ".xlsm")), keys(d))) |> Dict
-    meta[:kwargs] = d2
+    GAMEDATA[:meta] = begin
+        meta = JSON.parsefile("$path/_Meta.json"; dicttype=OrderedDict{Symbol, Any})
 
-    return meta
+        d = OrderedDict{String, Any}()
+        d2 = Dict()
+        for f in meta[:files]
+            xlsx = string(f[:xlsx])
+            d[xlsx] = f[:sheets]
+            d2[xlsx] = Dict()
+            for (sheetname, json_file) in f[:sheets]
+                d[json_file] = (xlsx, sheetname)
+
+                # 개별 시트 설정이 있을 경우 덮어 쒸우기
+                d2[xlsx][sheetname] = get_kwargs(f, sheetname)
+            end
+        end
+        meta[:files] = d
+        meta[:xlsxfile_shortcut] =  broadcast(x -> (split(x, ".")[1], x),
+                                                    filter(k -> (endswith(k, ".xlsx") || endswith(k, ".xlsm")), keys(d))) |> Dict
+        meta[:kwargs] = d2
+        meta
+    end
+    println("-"^7, "_Meta.json 로딩이 완료되었습니다","-"^7)
 end
+
+"""
+    init_typechecker()
+
+"""
+function init_typechecker(path = GAMEPATH[:json]["root"])
+    function recrusive_typeparser(p::Pair)
+        if isa(p[2], String)
+            T = @eval $(Symbol(p[2]))
+            r = T
+        else
+            r = Dict{String, Any}()
+            for el in p[2]
+                r[el[1]] = recrusive_typeparser(el)
+            end
+        end
+        return r
+    end
+
+    checker = JSON.parsefile("$path/_TypeCheck.json") |> x -> merge(x...)
+    GAMEDATA[:json_typechecke] = checker
+end
+
 
 function init_history(file)
     GAMEDATA[:history] = begin

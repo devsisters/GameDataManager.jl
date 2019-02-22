@@ -22,7 +22,7 @@ function editor_RewardTable!(jwb)
         for df in groupby(jws[:], :RewardKey)
             d = OrderedDict(:TraceTag => df[1, :TraceTag],
                             :Rewards => Vector{Vector{String}}[])
-                            
+
             for col in [:r1, :r2, :r3, :r4, :r5]
                 if haskey(df, col)
                     re = get_reward(df[col])
@@ -86,7 +86,14 @@ end
 function editor_CashStore!(jwb)
     combine_args_sheet!(jwb, :Data, :args; key = :ProductKey)
 end
+function editor_Estate!(jwb)
+    combine_args_sheet!(jwb, :Data, :args; key = :ProductKey)
+end
 
+
+function editor_ItemTable!(jwb)
+    # replace_nullvalue!(jwb, :Data, :args; key = :ProductKey)
+end
 
 """
     combine_args_sheet!(jwb::JSONWorkbook, mother_sheet, arg_sheet; key::Symbol)
@@ -113,6 +120,14 @@ function combine_args_sheet!(jwb::JSONWorkbook, mother_sheet, arg_sheet; key = :
     end
     deleteat!(jwb, arg_sheet)
     jwb
+end
+"""
+    지정된 컬럼의 null 값을 바꿔준다
+    추후 XLSXasJSON으로 이동
+"""
+function replace_nullvalue!(jwb::JSONWorkbook, sheet, key, value)
+    jws = jwb[sheet]
+
 end
 
 

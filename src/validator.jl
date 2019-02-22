@@ -13,16 +13,20 @@ function validate_general(jwb::JSONWorkbook)
         @assert !any(check) "Key에는 공백, 줄바꿈, 탭이 들어갈 수 없습니다 \n $(jws[:Key][check])"
     end
     function validate_RewardKey(jws)
-        @show "여기서 RewardKey 체크할꺼임!"
         rewardkey = getgamedata("RewardTable", 1, :RewardKey; check_modified = true)
+        rewardkey = [-1; rewardkey]
 
+        if !issubset(jws[:RewardKey],  rewardkey)
+            x = setdiff(jws[:RewardKey], rewardkey)
+            @error "RewardKey가 RewardTable에 없습니다\n $(x)"
+        end
 
     end
     #################
     for ws in jwb
         haskey(ws, :Key) && validate_Key(ws)
         if basename(xlsxpath(jwb)) != "RewardTable.xlsm"
-            haskey(ws, :RewardKey) && validate_RewardKey(ws)
+            # haskey(ws, :RewardKey) && validate_RewardKey(ws)
         end
     end
     nothing
