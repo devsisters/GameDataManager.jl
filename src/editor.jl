@@ -1,6 +1,11 @@
 function editor_Block!(jwb)
-    sort!(jwb[:Deco], :Key)
+    # 시트 합치기
+    append!(jwb[:Building][:], jwb[:Deco][:])
+
+    deleteat!(jwb, :Deco)
+
     sort!(jwb[:Building], :Key)
+    return jwb
 end
 
 function editor_RewardTable!(jwb)

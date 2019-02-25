@@ -12,7 +12,7 @@ struct GameData
     localizer::Union{Missing, Function}
     editor::Union{Missing, Function}
     parser::Union{Missing, Function}
-    cache::Array{Any, 1} # 중간 연산물 cache에 차곡차곡 쌓는다. Dict로 할까?
+    cache::Dict{Symbol, Any}
 
     function GameData(jwb::JSONWorkbook, validator, localizer, editor, parser)
         validate_general(jwb)
@@ -21,7 +21,7 @@ struct GameData
         !ismissing(editor)    && editor(jwb)
         !ismissing(localizer) && localizer(jwb)
 
-        new(jwb, validator, localizer, editor, parser, Any[])
+        new(jwb, validator, localizer, editor, parser, Dict{Symbol, Any}())
     end
 end
 function GameData(file; validate = true)
