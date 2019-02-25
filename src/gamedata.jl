@@ -17,8 +17,8 @@ struct GameData
     function GameData(jwb::JSONWorkbook, validator, localizer, editor, parser)
         validate_general(jwb)
 
-        !ismissing(validator) && validator(jwb)
         !ismissing(editor)    && editor(jwb)
+        !ismissing(validator) && validator(jwb)
         !ismissing(localizer) && localizer(jwb)
 
         new(jwb, validator, localizer, editor, parser, Dict{Symbol, Any}())

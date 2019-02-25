@@ -79,25 +79,13 @@ function validator_Block(jwb::JSONWorkbook)
         x = filter(x -> startswith(x, "  - Key:"), readlines(f))
         unique(broadcast(x -> split(x, "Key: ")[2], x))
     end
-    missing_key = setdiff(unique(jwb[:Building][:TemplateKey]), b)
+    missing_key = setdiff(unique(jwb[1][:TemplateKey]), b)
     if !isempty(missing_key)
         @warn "Buidling의 TemplateKey가 BlockTemplateBalanceTable.asset 에 없습니다 \n $(missing_key)"
     end
 
-    missing_key = setdiff(unique(jwb[:Deco][:TemplateKey]), b)
-    if !isempty(missing_key)
-        @warn "Deco의 TemplateKey가 BlockTemplateBalanceTable.asset 에 없습니다 \n $(missing_key)"
-    end
-
-    combined_key = [jwb[:Building][:Key]; jwb[:Deco][:Key]]
-    if !allunique(combined_key)
-        duplicate = filter(el -> el[2] > 1, countmap(combined_key))
-        throw(AssertionError("다음의 Key가 중복되었습니다 \n $(keys(duplicate))"))
-    end
-
     # 임시로 ArtAsset이 중복되면 안됨. 추후 삭제
-    validate_duplicate(jwb[:Building], :ArtAsset; assert = false)
-    validate_duplicate(jwb[:Deco], :ArtAsset; assert = false)
+    validate_duplicate(jwb[1], :ArtAsset; assert = false)
     nothing
 end
 
