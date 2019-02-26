@@ -23,9 +23,9 @@ include("_wip.jl")
 export GAMEPATH, GAMEDATA,
        #
        GameData,
-         loadgamedata!, getgamedata,
+         loadgamedata!, getgamedata, parse!,
        #
        xlsx_to_json!, xl, autoxl, init_meta,
 
-       update_xlsx_reference!
+       update!
 end

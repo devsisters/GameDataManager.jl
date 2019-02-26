@@ -21,7 +21,8 @@ struct GameData
         !ismissing(validator) && validator(jwb)
         !ismissing(localizer) && localizer(jwb)
 
-        new(jwb, validator, localizer, editor, parser, Dict{Symbol, Any}())
+        cache = Dict{Symbol, Any}()
+        new(jwb, validator, localizer, editor, parser, cache)
     end
 end
 function GameData(file; validate = true)
@@ -41,6 +42,18 @@ function GameData(file; validate = true)
 
     GameData(jwb, validator, select_localizer(f), select_editor(f), select_parser(f))
 end
+
+function Base.show(io::IO, gd::GameData)
+    println(io, ".data")
+    print(io, gd.data)
+
+    println(io, "\n.cache")
+    println(io, typeof(gd.cache), " with $(length(gd.cache)) entry")
+    for el in gd.cache
+        println(io, "  :$(el[1]) => $(summary(el[2]))")
+    end
+end
+
 
 """
     select_validator(f)

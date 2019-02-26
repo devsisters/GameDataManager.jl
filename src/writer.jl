@@ -158,15 +158,21 @@ end
 ##
 ##############################################################################
 
-# 함수명 적절하게 변경?? f를 참조하는 파일들을 업데이트하는건데...
-function update_xlsx_reference!(f)
+function update!(f)
     if f == "ItemTable"
-        data = parse(loadgamedata!(f))
+        gd = getgamedata(f; check_modified = true)
+        parse!(gd)
+
+        data = gd.cache[:output]
+
         write_on_xlsx!("RewardTable.xlsx", "_ItemTable", data)
         write_on_xlsx!("Quest.xlsx", "_ItemTable", data)
 
     elseif f == "RewardTable"
-        data = parse(loadgamedata!(f))
+        gd = getgamedata(f; check_modified = true)
+        parse!(gd)
+        data = gd.cache[:output]
+
         write_on_xlsx!("Quest.xlsx", "_RewardTable", data)
         write_on_xlsx!("RewardTable.xlsm", "_RewardTable", data)
 
@@ -181,7 +187,11 @@ function write_on_xlsx!(f, sheetname, data::DataFrame)
                     [hcat(string.(names(data))...); convert(Matrix, data)])
 end
 function write_on_xlsx!(f, sheetname, data::Array)
-    XLSX.openxlsx(joinpath_gamedata(f), mode="rw") do xf
+    file = joinpath_gamedata(f)
+    # @show stat(file)
+    # TODO: 파일 쓰기 금지 상태 확인법????
+    # 안되면 그냥 try catch
+    XLSX.openxlsx(file, mode="rw") do xf
         s = xf[sheetname]
         for row in 1:size(data, 1), col in 1:size(data, 2)
             x = data[row, col]
