@@ -58,8 +58,8 @@ function parser_RewardTable(gd::GameData)
 
             s = vcat(vcat(map(el1 -> map(el2 -> el2[1:2], el1), rewards)...)...)
             s = replace(string(s), r"Any\[|\]" => "")
-            replace(s, "\"," => ":")
-            replace(s, "\"" => "")
+            s = replace(s, "\"," => ":")
+            s = replace(s, "\"" => "")
         end
     end
     gd.cache[:output] = df
