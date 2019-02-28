@@ -16,6 +16,7 @@ include("editor.jl")
 include("writer.jl")
 include("history.jl")
 
+include("util.jl")
 include("_wip.jl")
 
 
@@ -27,5 +28,7 @@ export GAMEPATH, GAMEDATA,
        #
        xlsx_to_json!, xl, autoxl, init_meta,
 
-       update!
+       update!,
+       
+       findblock
 end
