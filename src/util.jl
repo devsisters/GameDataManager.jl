@@ -1,10 +1,9 @@
 
-function findblock()
-    # 블
+function findblock(reverse = true)
     root = joinpath(GAMEPATH[:data], "../unity/Assets/4_ArtAssets/GameResources/Blocks/")
 
     v1 = String[]
-    v2 = String[]
+    artassets = String[]
     for (folder, dir, files) in walkdir(root)
         prefabs = filter(x -> endswith(x, ".prefab"), files)
         if !isempty(prefabs)
@@ -12,20 +11,25 @@ function findblock()
              "C:/Users/Devsisters/Mars/mars-prototype/patch-resources/../unity/Assets/4_ArtAssets/GameResources/" => "")
 
             append!(v1, fill(x, length(prefabs)))
-            append!(v2, collect(prefabs))
+            append!(artassets, collect(prefabs))
         end
     end
-
-    df = DataFrame(:Folder => v1, :Files => broadcast(x -> split(x, ".")[1], v2))
-
+    artassets = broadcast(x -> split(x, ".")[1], artassets)
+    #TODO: 출력해서 Block.xlsm에 결과 저장하도록
+    # df = DataFrame(:Folder => v1, :Files => broadcast(x -> split(x, ".")[1], artassets))
     gd = getgamedata("Block"; check_modified = true)
+    artasset_on_xls = [gd.data[1][:ArtAsset]; gd.data[2][:ArtAsset]]
 
-    exist_data = [gd.data[1][:ArtAsset]; gd.data[2][:ArtAsset]]
+    if reverse
+        x = setdiff(artassets, artasset_on_xls)
+        msg = "ArtAsset은 있지만 Block.xlsm에는 없는 "
+    else
+        x = setdiff(artasset_on_xls, artassets)
+        msg = "Block.xlsm에 있지만 ArtAsset에는 없는 "
+    end
+    msg = msg * "$(length(x))를 반환하였습니다.\n clipboard(findblock()) 명령어를 사용하여 복사해보세요"
 
-    # 없는거 목록
-    없는거 = setdiff(df[:Files], exist_data)
     # 클립보드에 넣고 안내메세지
-    printstyled("""Block.xlsm에 없는 ArtAsset $(length(없는거))개를 복사했습니다
-                    Ctrl+v로 붙여넣기 해보세요"""; color=:green)
-    return join(없는거, "\n")
+    printstyled(msg; color=:green)
+    return join(x, "\n")
 end

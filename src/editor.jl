@@ -1,6 +1,6 @@
 function editor_Block!(jwb)
     #TODO: Block과 Deco시트 통합하기 전 임시처리
-    temp = GAMEDATA[:meta][:files]["Block.xlsm"][:Deco]
+    temp = MANAGERCACHE[:meta][:files]["Block.xlsm"][:Deco]
     if !endswith(temp, ".json")
         append!(jwb[:Building][:], jwb[:Deco][:])
         deleteat!(jwb, :Deco)

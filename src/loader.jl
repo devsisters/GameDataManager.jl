@@ -10,14 +10,14 @@ end
 
 """
     loadgamedata!(f; gamedata = GAMEDATA)
-gamedata[:data]로 데이터를 불러온다
+gamedata로 데이터를 불러온다
 """
 function loadgamedata!(f, gamedata = GAMEDATA; kwargs...)
     k = Symbol(split(f, ".")[1])
-    gamedata[:data][k] = GameData(f; kwargs...)
+    gamedata[k] = GameData(f; kwargs...)
 
     printstyled("GAMEDATA[:$(k)] is loaded from Excel\n"; color=:yellow)
-    return gamedata[:data][k]
+    return gamedata[k]
 end
 
 
@@ -42,7 +42,7 @@ function getgamedata(file::AbstractString, sheet_index::Integer; kwargs...)
 end
 function getgamedata(file::AbstractString; check_loaded = true, check_modified = false)
     if check_loaded
-        if !haskey(GAMEDATA[:data], Symbol(file)) # 로딩 여부 체크
+        if !haskey(GAMEDATA, Symbol(file)) # 로딩 여부 체크
             loadgamedata!(file)
         end
     end
@@ -52,5 +52,5 @@ function getgamedata(file::AbstractString; check_loaded = true, check_modified =
         end
     end
 
-    return GAMEDATA[:data][Symbol(file)]
+    return GAMEDATA[Symbol(file)]
 end

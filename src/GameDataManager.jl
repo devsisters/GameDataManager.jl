@@ -29,6 +29,6 @@ export GAMEPATH, GAMEDATA,
        xlsx_to_json!, xl, autoxl, init_meta,
 
        update!,
-       
+
        findblock
 end

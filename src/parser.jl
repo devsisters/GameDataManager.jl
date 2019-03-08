@@ -6,22 +6,22 @@ function parse!(gd::GameData)
     return gd
 end
 
-
 function parser_ItemTable(gd::GameData)
     #TODO: RewardKey는 아이템으로 파싱 할 것
-    d = Dict()
+    d = Dict{Int32, Any}()
     cols = [Symbol("\$Name"), :Category, :RewardKey]
     for row in eachrow(gd.data[:Stackable])
         d[row[:Key]] = Dict(zip(cols, map(x -> row[x], cols)))
     end
-    cols = [Symbol("\$Name")]
-    for row in eachrow(gd.data[:Currency])
-        d[row[:Key]] = Dict(zip(cols, map(x -> row[x], cols)))
-    end
+    # cols = [Symbol("\$Name")]
+    # for row in eachrow(gd.data[:Currency])
+    #     d[Symbol(row[:Key])] = Dict(zip(cols, map(x -> row[x], cols)))
+    # end
     gd.cache[:julia] = d
 
     return gd
 end
+
 function parser_RewardTable(gd::GameData)
     function 이름과기대값추가(data)
         v = Array{Array{Any}}(undef, length(data))
@@ -97,8 +97,8 @@ end
 RewardScript 아이템의 이름을 가져옴
 """
 function parse_item(s::Tuple{String,Int64})
-    gd = getgamedata("ItemTable")
-    ref = gd.cache[:julia][s[1]]
+    ref =  getgamedata("ItemTable", :Currency)
+    ref = ref[ref.Key .== s[1], :]
 
     name = ref[Symbol("\$Name")]
     return (name, s...)

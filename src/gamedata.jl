@@ -27,10 +27,10 @@ struct GameData
 end
 function GameData(file; validate = true)
     # TODO: JSON일 경우 처리?
-    f = is_xlsxfile(file) ? file : GAMEDATA[:meta][:xlsxfile_shortcut][file]
+    f = is_xlsxfile(file) ? file : MANAGERCACHE[:meta][:xlsxfile_shortcut][file]
 
-    kwargs_per_sheet = GAMEDATA[:meta][:kwargs][f]
-    sheets = GAMEDATA[:meta][:files][f]
+    kwargs_per_sheet = MANAGERCACHE[:meta][:kwargs][f]
+    sheets = MANAGERCACHE[:meta][:files][f]
 
     jwb = JSONWorkbook(joinpath_gamedata(f), keys(sheets), kwargs_per_sheet)
 

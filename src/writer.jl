@@ -28,7 +28,7 @@ function xlsx_to_json!(exportall::Bool = false; kwargs...)
     end
 end
 function xlsx_to_json!(file::AbstractString; kwargs...)
-    file = is_xlsxfile(file) ? file : GAMEDATA[:meta][:xlsxfile_shortcut][file]
+    file = is_xlsxfile(file) ? file : MANAGERCACHE[:meta][:xlsxfile_shortcut][file]
     xlsx_to_json!([file]; kwargs...)
 end
 function xlsx_to_json!(files::Vector; loadgamedata = false)
@@ -53,7 +53,7 @@ end
 """
 function write_json(jwb::JSONWorkbook)
     dir = GAMEPATH[:json]["root"]
-    meta = GAMEDATA[:meta][:files][basename(xlsxpath(jwb))]
+    meta = MANAGERCACHE[:meta][:files][basename(xlsxpath(jwb))]
 
     for s in sheetnames(jwb)
         file = joinpath(dir, meta[s])
@@ -71,11 +71,11 @@ mars-server: https://github.com/devsisters/mars-server/tree/develop/Data/GameDat
 TODO...
 """
 function typecheck(jwb::JSONWorkbook)
-    ref = GAMEDATA[:json_typechecke]
+    ref = MANAGERCACHE[:json_typechecke]
 
     f = basename(xlsxpath(jwb))
     # 시트명
-    for el in GAMEDATA[:meta][:files][f]
+    for el in MANAGERCACHE[:meta][:files][f]
         if haskey(ref, el[2])
             typecheck(jwb[el[1]], ref[el[2]])
         end
@@ -122,24 +122,24 @@ autoxl(interval = 3, timeout = 10000) = autoxl(collect_xlsx_for_autoxl(), interv
         감시 종료를 원할경우 'Ctrl + c'를 누르면 감시를 멈출 수 있습니다
     """
     # @async로 task로 생성할 수도 있지만... history 파일을 동시 편집할 위험이 있기 때문에 @async는 사용하지 않는다
-    IO = stderr
     @inbounds for i in 1:timeout
         bar = isodd(i) ? repeat("↗↘", 23) : repeat("←↑", 23)
-        print(IO, "\r")
-        printstyled(IO, ".Xlsx/ 폴더를 감시 중 입니다 \\ $bar \\"; color=:green)
+        printover(stderr, ".Xlsx/ 폴더를 감시 중 입니다 \\ $bar \\", :green)
 
         target = ismodified.(candidate)
         if any(target)
-            print(IO, "\n")
             xlsx_to_json!(candidate[target])
         else
             sleep(interval)
         end
         bar = isodd(i) ? repeat("↗↘", 23) : repeat("←↑", 23)
-        print(IO, "\r")
-        printstyled(IO, ".Xlsx/ 폴더를 감시 중 입니다 \\ $bar \\"; color=:green)
+        printover(stderr, ".Xlsx/ 폴더를 감시 중 입니다 \\ $bar \\", :green)
     end
-    println(IO, "\n timeout이 끝나 감시를 종료합니다. 이용해주셔서 감사합니다.")
+    println(stderr, "\n timeout이 끝나 감시를 종료합니다. 이용해주셔서 감사합니다.")
+end
+function printover(io::IO, s::AbstractString, color::Symbol = :color_normal)
+    print(io, "\r")
+    printstyled(io, s; color=color)
 end
 
 """
@@ -160,12 +160,12 @@ end
 
 function update!(f)
     if f == "ItemTable"
-        gd = getgamedata(f; check_modified = true)
-        parse!(gd)
+        data = getgamedata(f, :Stackable; check_modified = true)
 
-        data = gd.cache[:output]
+        data = data[:, [:Key, Symbol("\$Name"), Symbol("\$Desc"), :Category,
+                        :BuyCurrencyKey, :BuyPrice, :SellCurrencyKey, :SellPrice, :IsSell, :RewardKey]]
 
-        write_on_xlsx!("RewardTable.xlsx", "_ItemTable", data)
+        write_on_xlsx!("RewardTable.xlsm", "_ItemTable", data)
         write_on_xlsx!("Quest.xlsx", "_ItemTable", data)
 
     elseif f == "RewardTable"

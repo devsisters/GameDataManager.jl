@@ -51,10 +51,10 @@ function validator_Ability(jwb)
     # https://github.com/devsisters/mars-prototype/blob/develop/unity/Assets/6_UIAssets/TempShared/Base/AbilityKeyType.cs 의 리스트와 일치해야 한다
     for k in unique(jws[:GroupKey])
         check = broadcast(x -> startswith(k, x),
-            ["CoinStorageCap", "PipoInterviewQueue", "PipoInterviewInterval",
+            ["CoinStorageCap", "AddInventory", "PipoInterviewInterval",
             "PipoEmployeeCap", "ProfitCoin", "CoinCounterCap", "RentCoin","RenterCap","RenterTalentBonus"])
         if !any(check)
-            @warn "Ability_Level.json의 '$(k)'가 클라이언트 prefix 규칙과 일치하지 않습니다. @전정은님께 문의 바랍니다"
+            @warn "Ability_Level.json의 '$(k)'가 클라이언트 prefix 규칙과 일치하지 않습니다. @진정은님께 문의 바랍니다"
         end
     end
     nothing
