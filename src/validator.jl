@@ -1,4 +1,28 @@
 """
+    select_validator(f)
+개별 파일에 독자적으로 적용되는 규칙
+파일명, 컬럼명으로 검사한다.
+
+**파일별 검사 항목**
+* Ability.xlsx : 'Level' 시트의 GroupKey가 C#코드에 정의된 enum 리스트와 일치해야 한다
+* Residence.xlsx :
+* Building.xlsx
+* Block.xlsx   : 'Building'과 'Deco'시트의 Key가 중복되면 안된다
+                 'Building'시트의 TemplateKey가 'Template' 시트의 Key에 있어야 한다
+"""
+function select_validator(f)
+    startswith(f,"Ability.") ? validator_Ability :
+    startswith(f,"Residence.")   ? validator_Residence :
+    startswith(f,"Shop.")        ? validator_Shop :
+    startswith(f,"Block.")       ? validator_Block :
+    startswith(f,"RewardTable.") ? validator_RewardTable :
+    startswith(f,"Quest.")       ? validator_Quest :
+    missing
+end
+
+
+
+"""
     validate_general(jwb::JSONWorkbook)
 모든 파일에 공용으로 적용되는 규칙
 
@@ -92,11 +116,15 @@ end
 function validator_RewardTable(jwb::JSONWorkbook)
     # 시트를 합쳐둠
     validate_duplicate(jwb[1], :RewardKey)
-    itemkey = getgamedata("ItemTable", :Stackable, :Key; check_modified = true)
 
-    # check = issubset(row, unique(ability_groupkey))
-    # @assert check "AbilityKey가 Ability_Level에 없습니다\n
-    #                     $(setdiff(row, unique(ability_groupkey)))"
+    # TODO: 아이템 인지 검사
+    # parse!(getgamedata("ItemTable"))
+    # for row in eachrow(jwb[1][:])
+    #     x = row[:RewardScript][:Rewards] |> parse_rewardscript
+    #     for el in x
+    #         @show parse_item(el[2][2])
+    #     end
+    # end
 
     nothing
 end

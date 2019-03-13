@@ -1,3 +1,13 @@
+function select_parser(f)
+    startswith(f,"ItemTable.")   ? parser_ItemTable :
+    startswith(f,"RewardTable.") ? parser_RewardTable :
+    startswith(f,"Ability.")     ? parser_Ability :
+    startswith(f,"Home.")        ? parser_Home :
+    startswith(f,"Shop.")        ? parser_Shop :
+    startswith(f,"Residence.")   ? parser_Residence :
+    missing
+end
+
 function parse!(gd::GameData)
     @assert !ismissing(gd.parser) "parser가 없습니다"
 
@@ -66,6 +76,13 @@ function parser_RewardTable(gd::GameData)
 
     return gd
 end
+
+# MarsSimulator에서 관리
+function parser_Ability end
+function parser_Home end
+function parser_Shop end
+function parser_Residence end
+
 
 """
     parse_rewardscript(data)

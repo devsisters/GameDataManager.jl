@@ -5,13 +5,7 @@ using XLSXasJSON
 GDM = GameDataManager
 
 @testset "loader 테스트" begin
-    for k in keys(GAMEDATA[:meta][:xlsxfile_shortcut])
-        getgamedata(k)
-        @test haskey(GAMEDATA[:xlsx], Symbol(k)) == true
-    end
-
-    jwb = GAMEDATA[:xlsx][:Player]
-    @test sheetnames(jwb) == [:AccountLevel, :HomeLevel]
+  
 end
 
 

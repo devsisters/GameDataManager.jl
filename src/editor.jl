@@ -1,3 +1,22 @@
+"""
+    select_editor(f)
+
+하드코딩된 기준으로 데이터를 2차가공한다
+* Block : Key로 오름차순 정렬
+* RewardTable : 시트를 합치고 여러가지 복잡한 가공
+* Quest : 여러 복잡한 가공
+* NameGenerator : null 제거
+* CashStore : key 컬럼을 기준으로 'Data'시트에 'args'시트를 합친다
+"""
+function select_editor(f)
+    startswith(f,"Block.")         ? editor_Block! :
+    startswith(f,"RewardTable.")   ? editor_RewardTable! :
+    startswith(f,"Quest.")         ? editor_Quest! :
+    startswith(f,"NameGenerator.") ? editor_NameGenerator! :
+    startswith(f,"CashStore.")     ? editor_CashStore! :
+    missing
+end
+
 function editor_Block!(jwb)
     #TODO: Block과 Deco시트 통합하기 전 임시처리
     temp = MANAGERCACHE[:meta][:files]["Block.xlsm"][:Deco]

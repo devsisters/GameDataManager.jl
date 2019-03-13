@@ -54,53 +54,7 @@ function Base.show(io::IO, gd::GameData)
     end
 end
 
-
-"""
-    select_validator(f)
-개별 파일에 독자적으로 적용되는 규칙
-파일명, 컬럼명으로 검사한다.
-
-**파일별 검사 항목**
-* Ability.xlsx : 'Level' 시트의 GroupKey가 C#코드에 정의된 enum 리스트와 일치해야 한다
-* Residence.xlsx :
-* Building.xlsx
-* Block.xlsx   : 'Building'과 'Deco'시트의 Key가 중복되면 안된다
-                 'Building'시트의 TemplateKey가 'Template' 시트의 Key에 있어야 한다
-"""
-function select_validator(f)
-    startswith(f,"Ability.") ? validator_Ability :
-    startswith(f,"Residence.")   ? validator_Residence :
-    startswith(f,"Shop.")        ? validator_Shop :
-    startswith(f,"Block.")       ? validator_Block :
-    startswith(f,"RewardTable.") ? validator_RewardTable :
-    startswith(f,"Quest.")       ? validator_Quest :
-    missing
-end
+# TODO: GameLocalizer로 옮길 것
 function select_localizer(f)
     dummy_localizer!
-end
-
-"""
-    select_editor(f)
-
-하드코딩된 기준으로 데이터를 2차가공한다
-* Block : Key로 오름차순 정렬
-* RewardTable : 시트를 합치고 여러가지 복잡한 가공
-* Quest : 여러 복잡한 가공
-* NameGenerator : null 제거
-* CashStore : key 컬럼을 기준으로 'Data'시트에 'args'시트를 합친다
-"""
-function select_editor(f)
-    startswith(f,"Block.")         ? editor_Block! :
-    startswith(f,"RewardTable.")   ? editor_RewardTable! :
-    startswith(f,"Quest.")         ? editor_Quest! :
-    startswith(f,"NameGenerator.") ? editor_NameGenerator! :
-    startswith(f,"CashStore.")     ? editor_CashStore! :
-    missing
-end
-
-function select_parser(f)
-    startswith(f,"ItemTable.")   ? parser_ItemTable :
-    startswith(f,"RewardTable.") ? parser_RewardTable :
-    missing
 end
