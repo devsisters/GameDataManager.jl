@@ -35,11 +35,11 @@ end
 function parser_RewardTable(gd::GameData)
     function 이름과기대값추가(data)
         v = Array{Array{Any}}(undef, length(data))
-        for (i, el) in enumerate(data)
+        @inbounds for (i, el) in enumerate(data)
             v[i] = Array{Any}(undef, length(el[2]))
 
             prob = values(el[1]) / sum(el[1])
-            for (j, item) in enumerate(el[2])
+            @inbounds for (j, item) in enumerate(el[2])
                 x = parse_item(item)
                 exp_value = round(x[end] * prob[j];digits=2)
                 # 아이템명, 수량, ItemKey
