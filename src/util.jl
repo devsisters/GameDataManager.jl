@@ -1,4 +1,3 @@
-
 function help(idx = 1)
     intro = "GameDataManager를 이용해주셔서 " * rand(["감사합니다", "Thank You", "Danke schön", "Grazie", "Gracias",
     "Merci beaucoup", "ありがとうございます", "cпасибо", "谢谢你", "khop kun", "Dank je wel", "obrigado", " Tusen tack",
@@ -39,22 +38,16 @@ GAMEDATA[:Block] 과 ../4_ArtAssets/GameResources/Blocks/ 하위에 있는 .pref
 function findblock()
     root = joinpath(GAMEPATH[:data], "../unity/Assets/4_ArtAssets/GameResources/Blocks/")
 
-    # v1 = String[]
     artassets = String[]
     for (folder, dir, files) in walkdir(root)
         prefabs = filter(x -> endswith(x, ".prefab"), files)
         if !isempty(prefabs)
-            # x = replace(folder, "C:/Users/Devsisters/Mars/mars-prototype/patch-resources/../unity/Assets/4_ArtAssets/GameResources/" => "")
-            # append!(v1, fill(x, length(prefabs))) 폴더 정보
             x = getindex.(split.(collect(prefabs), "."), 1)
             append!(artassets, x)
         end
     end
 
-    artasset_on_xls = begin
-            gd = getgamedata("Block"; check_modified = true)
-            [gd.data[1][:ArtAsset]; gd.data[2][:ArtAsset]]
-    end
+    artasset_on_xls = getgamedata("Block", 1; check_modified = true)[:ArtAsset]
 
     a = setdiff(artassets, artasset_on_xls)
     b = setdiff(artasset_on_xls, artassets)
@@ -62,16 +55,16 @@ function findblock()
     file = joinpath(GAMEPATH[:cache], "findblock.txt")
     open(file, "w") do io
            write(io, "## ArtAsset은 있지만 Block는 없는 $(length(a))개\n")
-           for el in a
-               write(io, el, "\n")
-           end
+           [write(io, el, "\n") for el in a]
 
-           write(io, "\n## Block 데이터는 있지만 ArtAsset은 없는 $(length(b))개\n")
-           for el in b
-               write(io, el, "\n")
-           end
+           write(io, "\n## Block데이터는 있지만 ArtAsset은 없는 $(length(b))개\n")
+           [write(io, el, "\n") for el in b]
        end
 
-    printstyled("Block 데이터와 '..4_ArtAssets/GameResources/Blocks/' 폴더를 비교하여 다음 파일에 저장했습니다.\n\t"; color=:green)
+    # 요약 정보
+    p = normpath("$(GAMEPATH[:data])/../unity/Assets")
+    x = replace(normpath(root), p => "..")
+
+    printstyled("'$x'폴더와 Block데이터를 비교하여 아래에 저장했습니다.\n  "; color=:green)
     print(normpath(file))
 end

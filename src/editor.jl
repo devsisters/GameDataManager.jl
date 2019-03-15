@@ -18,14 +18,9 @@ function select_editor(f)
 end
 
 function editor_Block!(jwb)
-    #TODO: Block과 Deco시트 통합하기 전 임시처리
-    temp = MANAGERCACHE[:meta][:files]["Block.xlsx"][:Deco]
-    if !endswith(temp, ".json")
-        append!(jwb[:Building][:], jwb[:Deco][:])
-        deleteat!(jwb, :Deco)
-    else
-        sort!(jwb[:Deco], :Key)
-    end
+    append!(jwb[:Building][:], jwb[:Deco][:])
+    deleteat!(jwb, :Deco)
+
     sort!(jwb[:Building], :Key)
 
     return jwb
