@@ -4,7 +4,7 @@
 파일명, 컬럼명으로 검사한다.
 
 **파일별 검사 항목**
-* Ability.xlsx : 'Level' 시트의 GroupKey가 C#코드에 정의된 enum 리스트와 일치해야 한다
+* Ability.xlsx : 사용가능한 'Group'은 코드에서 정의된다
 * Residence.xlsx :
 * Building.xlsx
 * Block.xlsx   : 'Building'과 'Deco'시트의 Key가 중복되면 안된다
@@ -19,7 +19,6 @@ function select_validator(f)
     startswith(f,"Quest.")       ? validator_Quest :
     missing
 end
-
 
 
 """
@@ -72,25 +71,27 @@ end
 
 function validator_Ability(jwb)
     jws = jwb[:Level]
-    # https://github.com/devsisters/mars-prototype/blob/develop/unity/Assets/6_UIAssets/TempShared/Base/AbilityKeyType.cs 의 리스트와 일치해야 한다
-    for k in unique(jws[:GroupKey])
-        check = broadcast(x -> startswith(k, x),
-            ["CoinStorageCap", "AddInventory", "PipoInterviewInterval",
+
+    x = setdiff(unique(jws[:Group]), ["CoinStorageCap", "AddInventory", "PipoInterviewInterval",
             "PipoEmployeeCap", "ProfitCoin", "CoinCounterCap", "RentCoin","RenterCap","RenterTalentBonus"])
-        if !any(check)
-            @warn "Ability_Level.json의 '$(k)'가 클라이언트 prefix 규칙과 일치하지 않습니다. @진정은님께 문의 바랍니다"
-        end
+    @assert length(x) == 0 "코드상 정의된 Group이 아닙니다\n  $x\n@mars-client에 문의 바랍니다"
+
+
+    key_level = broadcast(x -> (x[:AbilityKey], x[:Level]), eachrow(jws[:]))
+    if !allunique(key_level)
+        dup = filter(el -> el[2] > 1, countmap(key_level))
+        throw(AssertionError("다음의 Ability, Level이 중복되었습니다\n$(dup)"))
     end
     nothing
 end
 function validator_Residence(jwb)
     jws = jwb[:Building]
 
-    ability_groupkey = getgamedata("Ability", :Level, :GroupKey; check_modified = true)
+    abilitykey = getgamedata("Ability", :Level, :AbilityKey; check_modified = true)
     for row in jws[:AbilityKey]
-        check = issubset(row, unique(ability_groupkey))
+        check = issubset(row, unique(abilitykey))
         @assert check "AbilityKey가 Ability_Level에 없습니다\n
-                            $(setdiff(row, unique(ability_groupkey)))"
+                            $(setdiff(row, unique(abilitykey)))"
     end
     nothing
 end
