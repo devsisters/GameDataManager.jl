@@ -1,35 +1,77 @@
 
-function findblock(reverse = true)
+function help(idx = 1)
+    intro = "GameDataManager를 이용해주셔서 " * rand(["감사합니다", "Thank You", "Danke schön", "Grazie", "Gracias",
+    "Merci beaucoup", "ありがとうございます", "cпасибо", "谢谢你", "khop kun", "Dank je wel", "obrigado", " Tusen tack",
+    "cám ơn", "köszönöm szépen", "asante sana", "बोहोत धन्यवाद/शुक्रिया", "شكرا جزيلا", "děkuji"])
+
+    basic ="""
+    # 기본 기능
+      xl("Player"): Player.xlsx 파일만 json으로 추출합니다
+      xl()        : 수정된 엑셀파일만 검색하여 json으로 추출합니다
+      xl(true)    : '_Meta.json'에서 관리하는 모든 파일을 json으로 추출합니다
+      autoxl()    : '01_XLSX/' 폴더를 감시하면서 변경된 파일을 자동으로 json 추출합니다""
+    """
+
+    if idx == 1
+        msg = intro * "\n" * basic * """\n
+        # 보조 기능
+          findblock(): 'Block'데이터와 '../4_ArtAssets/GameResources/Blocks/' 폴더를 비교하여 누락된 파일을 찾습니다
+
+        `help()`를 입력하면 도움을 드립니다!
+        """
+    elseif idx == 2
+        msg = """json으로 변환할 파일이 없습니다 ♫
+        ---------------------------------------------------------------------------
+        """ * basic
+    end
+
+@info msg
+
+nothing
+end
+
+"""
+    findblock()
+
+GAMEDATA[:Block] 과 ../4_ArtAssets/GameResources/Blocks/ 하위에 있는 .prefab을 비교하여
+상호 누락된 파일명 리스트를 '.cache'폴더에 저장합니다
+"""
+function findblock()
     root = joinpath(GAMEPATH[:data], "../unity/Assets/4_ArtAssets/GameResources/Blocks/")
 
-    v1 = String[]
+    # v1 = String[]
     artassets = String[]
     for (folder, dir, files) in walkdir(root)
         prefabs = filter(x -> endswith(x, ".prefab"), files)
         if !isempty(prefabs)
-            x = replace(folder,
-             "C:/Users/Devsisters/Mars/mars-prototype/patch-resources/../unity/Assets/4_ArtAssets/GameResources/" => "")
-
-            append!(v1, fill(x, length(prefabs)))
-            append!(artassets, collect(prefabs))
+            # x = replace(folder, "C:/Users/Devsisters/Mars/mars-prototype/patch-resources/../unity/Assets/4_ArtAssets/GameResources/" => "")
+            # append!(v1, fill(x, length(prefabs))) 폴더 정보
+            x = getindex.(split.(collect(prefabs), "."), 1)
+            append!(artassets, x)
         end
     end
-    artassets = broadcast(x -> split(x, ".")[1], artassets)
-    #TODO: 출력해서 Block.xlsm에 결과 저장하도록
-    # df = DataFrame(:Folder => v1, :Files => broadcast(x -> split(x, ".")[1], artassets))
-    gd = getgamedata("Block"; check_modified = true)
-    artasset_on_xls = [gd.data[1][:ArtAsset]; gd.data[2][:ArtAsset]]
 
-    if reverse
-        x = setdiff(artassets, artasset_on_xls)
-        msg = "ArtAsset은 있지만 Block.xlsm에는 없는 "
-    else
-        x = setdiff(artasset_on_xls, artassets)
-        msg = "Block.xlsm에 있지만 ArtAsset에는 없는 "
+    artasset_on_xls = begin
+            gd = getgamedata("Block"; check_modified = true)
+            [gd.data[1][:ArtAsset]; gd.data[2][:ArtAsset]]
     end
-    msg = msg * "$(length(x))를 반환하였습니다.\n clipboard(findblock()) 명령어를 사용하여 복사해보세요"
 
-    # 클립보드에 넣고 안내메세지
-    printstyled(msg; color=:green)
-    return join(x, "\n")
+    a = setdiff(artassets, artasset_on_xls)
+    b = setdiff(artasset_on_xls, artassets)
+
+    file = joinpath(GAMEPATH[:cache], "findblock.txt")
+    open(file, "w") do io
+           write(io, "## ArtAsset은 있지만 Block는 없는 $(length(a))개\n")
+           for el in a
+               write(io, el, "\n")
+           end
+
+           write(io, "\n## Block 데이터는 있지만 ArtAsset은 없는 $(length(b))개\n")
+           for el in b
+               write(io, el, "\n")
+           end
+       end
+
+    printstyled("Block 데이터와 '..4_ArtAssets/GameResources/Blocks/' 폴더를 비교하여 다음 파일에 저장했습니다.\n\t"; color=:green)
+    print(normpath(file))
 end

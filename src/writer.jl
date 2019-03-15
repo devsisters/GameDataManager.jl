@@ -16,13 +16,7 @@ mars 메인 저장소의 '.../_META.json'에 명시된 파일만 추출가능합
 function xlsx_to_json!(exportall::Bool = false; kwargs...)
     files = exportall ? collect_allxlsx() : collect_modified_xlsx()
     if isempty(files)
-        @info """추출할 .xlsx 파일이 없습니다 ♫
-        ---------------------------------------------------------------------------
-            xl("Player"): Player.xlsx 파일만 json으로 추출합니다
-            xl()        : 수정된 엑셀파일만 검색하여 json으로 추출합니다
-            xl(true)    : '_Meta.json'에서 관리하는 모든 파일을 json으로 추출합니다
-            autoxl()    : '01_XLSX/' 폴더를 감시하면서 변경된 파일을 자동으로 json 추출합니다.
-        """
+        help(2)
     else
         xlsx_to_json!(files; kwargs...)
     end

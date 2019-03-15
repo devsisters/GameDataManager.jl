@@ -6,15 +6,9 @@ function __init__()
     if isdefined(Main, :PATH_MARS_PROTOTYPE)
         init_path(joinpath(Main.PATH_MARS_PROTOTYPE, "patch-resources"))
         init_managercache()
-
         init_xlsxasjson()
-        @info """사용법
-            init_meta() : '_Meta.json'을 다시 읽습니다.
-            xl("Player"): Player.xlsx 파일만 json으로 추출합니다
-            xl()        : 수정된 엑셀파일만 검색하여 json으로 추출합니다
-            xl(true)    : '_Meta.json'에서 관리하는 모든 파일을 json으로 추출합니다
-            autoxl()    : '01_XLSX/' 폴더를 감시하면서 변경된 파일을 자동으로 json 추출합니다.
-        """
+
+        help()
     else
         @warn """
             https://github.com/devsisters/mars-prototype 저장소의 로컬 경로를 지정한 후 다시 시도해주세요
@@ -115,7 +109,7 @@ function init_history(file)
                     Dict{String, Float64}()
     # 좀 이상하긴 한데... 가끔식 히스토리 청소해 줌
     rand() < 0.02 && cleanup_history!()
-    
+
     return h
 end
 

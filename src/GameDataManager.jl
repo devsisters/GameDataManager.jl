@@ -21,7 +21,7 @@ include("_wip.jl")
 
 
 
-export GAMEPATH, GAMEDATA,
+export GAMEPATH, GAMEDATA, help,
        #
        GameData,
          loadgamedata!, getgamedata, parse!,
