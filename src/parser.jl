@@ -92,22 +92,20 @@ function parse_rewardscript(data::Array{Array{Array{T,1},1},1}) where T
     parse_rewardscript.(data)
 end
 function parse_rewardscript(data::Array{Array{T,1},1}) where T
-    reward = parse_rewardscript.(data)
-    w = pweights(getindex.(reward, 1))
-    items = getindex.(reward, 2)
-
-    return w, items
-end
-function parse_rewardscript(el::Array{T,1}) where T
-    w = parse(Int, el[1])
-    item = if length(el) < 4
-            (el[2], parse(Int, el[3]))
+    weights = Int[]
+    items = []
+    for el in data
+        push!(weights, parse(Int, el[1]))
+        if length(el) < 4
+            x = (el[2], parse(Int, el[3]))
         else
-            (el[2], parse(Int, el[3]), parse(Int, el[4]))
+            x = (el[2], parse(Int, el[3]), parse(Int, el[4]))
         end
-
-    return w, item
+        push!(items, x)
+    end
+    return weights, items
 end
+
 
 """
     parse_item

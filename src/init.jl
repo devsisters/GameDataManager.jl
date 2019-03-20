@@ -74,8 +74,7 @@ function init_meta(path)
         end
     end
     meta[:files] = d
-    meta[:xlsxfile_shortcut] =  broadcast(x -> (split(x, ".")[1], x),
-                                                filter(k -> (endswith(k, ".xlsx") || endswith(k, ".xlsm")), keys(d))) |> Dict
+    meta[:xlsx_shortcut] =  broadcast(x -> (split(x, ".")[1], x), filter(is_xlsxfile, keys(d))) |> Dict
     meta[:kwargs] = d2
     println("-"^7, "_Meta.json 로딩이 완료되었습니다","-"^7)
 

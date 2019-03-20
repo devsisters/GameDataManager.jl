@@ -2,7 +2,7 @@
 xl(; kwargs...) = xlsx_to_json!(; kwargs...)
 xl(x; kwargs...) = xlsx_to_json!(x; kwargs...)
 
-is_xlsxfile(f) = (endswith(f, ".xlsx") || endswith(f, ".xlsm"))
+is_xlsxfile(f)::Bool = (endswith(f, ".xlsx") || endswith(f, ".xlsm"))
 """
     xlsx_to_json!(file::AbstractString)
     xlsx_to_json!(exportall::Bool = false)
@@ -22,7 +22,7 @@ function xlsx_to_json!(exportall::Bool = false; kwargs...)
     end
 end
 function xlsx_to_json!(file::AbstractString; kwargs...)
-    file = is_xlsxfile(file) ? file : MANAGERCACHE[:meta][:xlsxfile_shortcut][file]
+    file = is_xlsxfile(file) ? file : MANAGERCACHE[:meta][:xlsx_shortcut][file]
     xlsx_to_json!([file]; kwargs...)
 end
 function xlsx_to_json!(files::Vector; loadgamedata = false)

@@ -23,8 +23,8 @@ function collect_alljson()
 end
 
 function ismodified(f)::Bool
-    file = is_xlsxfile(f) ? f : MANAGERCACHE[:meta][:xlsxfile_shortcut][f]
-    
+    file = is_xlsxfile(f) ? f : MANAGERCACHE[:meta][:xlsx_shortcut][f]
+
     mtime(joinpath_gamedata(file)) > get(MANAGERCACHE[:history], file ,0.)
 end
 
