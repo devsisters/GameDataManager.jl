@@ -28,7 +28,7 @@ export GAMEPATH, GAMEDATA, help,
        GameData, XLSXGameData, JSONGameData, UnityGameData,
          loadgamedata!, getgamedata, parse!,
        #
-       xlsx_to_json!, xl, autoxl, init_meta,
+       xlsx_to_json!, xl, autoxl, init_meta, write_json,
 
        update!,
 

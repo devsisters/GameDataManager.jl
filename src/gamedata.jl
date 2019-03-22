@@ -58,7 +58,7 @@ end
 JSON을 쥐고 있음
 """
 struct JSONGameData{T} <: GameData where T
-    data::T 
+    data::T
     filepath::AbstractString
 end
 function JSONGameData(filepath::String)

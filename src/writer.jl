@@ -56,6 +56,14 @@ function write_json(jwb::JSONWorkbook)
         @printf("   saved => \"%s\" \n", file)
     end
 end
+function write_json(jgd::JSONGameData, indent = 2)
+    file = jgd.filepath
+    open(file, "w") do io
+        JSON.print(io, jgd.data, indent)
+    end
+    @printf("   saved => \"%s\" \n", file)
+end
+
 
 """
     typecheck
