@@ -5,7 +5,7 @@ const MANAGERCACHE = Dict{Symbol, Dict}()
 function __init__()
     if isdefined(Main, :PATH_MARS_PROTOTYPE)
         init_path(joinpath(Main.PATH_MARS_PROTOTYPE, "patch-resources"))
-        init_managercache()
+        init_cache()
         init_xlsxasjson()
 
         help()
@@ -33,8 +33,8 @@ function init_path(path)
         end
     end
 end
-function init_managercache()
-    MANAGERCACHE[:meta] = init_meta(joinpath(GAMEPATH[:json]["root"]))
+function init_cache()
+    MANAGERCACHE[:meta] = init_meta(GAMEPATH[:json]["root"])
     MANAGERCACHE[:json_typechecke] = init_typechecker(joinpath(GAMEPATH[:json]["root"]))
     MANAGERCACHE[:history] = init_history(GAMEPATH[:history])
 end
@@ -62,20 +62,21 @@ function init_meta(path)
 
     d = OrderedDict{String, Any}()
     d2 = Dict()
-    for f in meta[:files]
-        xlsx = string(f[:xlsx])
-        d[xlsx] = f[:sheets]
+    for el in meta[:files]
+        xlsx = string(el[:xlsx])
+        d[xlsx] = el[:sheets]
         d2[xlsx] = Dict()
-        for (sheetname, json_file) in f[:sheets]
+        for (sheetname, json_file) in el[:sheets]
             d[json_file] = (xlsx, sheetname)
 
             # 개별 시트 설정이 있을 경우 덮어 쒸우기
-            d2[xlsx][sheetname] = get_kwargs(f, sheetname)
+            d2[xlsx][sheetname] = get_kwargs(el, sheetname)
         end
     end
-    meta[:files] = d
+    meta[:files] = d #덮어 씌우기
     meta[:xlsx_shortcut] =  broadcast(x -> (split(x, ".")[1], x), filter(is_xlsxfile, keys(d))) |> Dict
     meta[:kwargs] = d2
+
     println("-"^7, "_Meta.json 로딩이 완료되었습니다","-"^7)
 
     return meta

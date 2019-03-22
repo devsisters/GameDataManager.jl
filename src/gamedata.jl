@@ -9,6 +9,8 @@ abstract type GameData end
 function GameData(file; kwargs...)
     if endswith(file, ".json")
         JSONGameData(file; kwargs...)
+    elseif endswith(file, ".prefab") || endswith(file, ".asset")
+        UnityGameData(file; kwagrs...)
     else #XLSX만 shortcut 있음. JSON은 확장자 기입 필요
         f = is_xlsxfile(file) ? file : MANAGERCACHE[:meta][:xlsx_shortcut][file]
         XLSXGameData(f; kwargs...)
@@ -56,13 +58,26 @@ end
 JSON을 쥐고 있음
 """
 struct JSONGameData{T} <: GameData where T
-    data::T #Array{T, 1} <: AbstractDict 혹은 AbstractDict
-    jsonpath::AbstractString
+    data::T 
+    filepath::AbstractString
 end
-function JSONGameData(jsonpath)
-    data = JSON.parsefile(jsonpath; dicttype=OrderedDict)
-    JSONGameData(data, jsonpath)
+function JSONGameData(filepath::String)
+    data = JSON.parsefile(filepath; dicttype=OrderedDict)
+    if isa(data, Array)
+        data = convert(Vector{OrderedDict}, data)
+    end
+    JSONGameData(data, filepath)
 end
+
+"""
+    UnityGameData
+unity .prefab과 .asset 파일
+"""
+struct UnityGameData <: GameData
+    data
+    filepath::AbstractString
+end
+
 
 
 function Base.show(io::IO, gd::XLSXGameData)
@@ -75,10 +90,12 @@ function Base.show(io::IO, gd::XLSXGameData)
         println(io, "  :$(el[1]) => $(summary(el[2]))")
     end
 end
-function Base.show(io::IO, gd::JSONGameData)
-    println(io, gd.jsonpath)
-    println(io, summary(gd.data))
-    print(io, "  keys: ", unique(keys.(gd.data)...))
+function Base.show(io::IO, gd::JSONGameData{T}) where T
+    println(io, "JSONGameData{$T}")
+    println(io, replace(gd.filepath, GAMEPATH[:data] => ".."))
+
+    k = vcat(collect.(keys.(gd.data))...) |> unique
+    print(io, "    keys: ", k)
 end
 
 # TODO: GameLocalizer로 옮길 것
