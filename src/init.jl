@@ -3,6 +3,7 @@ const GAMEDATA = Dict{Symbol, GameData}()
 const MANAGERCACHE = Dict{Symbol, Dict}()
 
 function __init__()
+    #NOTE Julia setting에 넣을 수 있는 ARGS로 교체 고려
     if isdefined(Main, :PATH_MARS_PROTOTYPE)
         init_path(joinpath(Main.PATH_MARS_PROTOTYPE, "patch-resources"))
         init_cache()
@@ -77,7 +78,7 @@ function init_meta(path)
     meta[:xlsx_shortcut] =  broadcast(x -> (split(x, ".")[1], x), filter(is_xlsxfile, keys(d))) |> Dict
     meta[:kwargs] = d2
 
-    println("-"^7, "_Meta.json 로딩이 완료되었습니다","-"^7)
+    println("_Meta.json 로딩이 완료되었습니다", "."^max(6, displaysize(stdout)[2]-34))
 
     return meta
 end
@@ -108,7 +109,7 @@ function init_history(file)
     h = isfile(file) ? JSON.parsefile(file; dicttype=Dict{String, Float64}) :
                     Dict{String, Float64}()
     # 좀 이상하긴 한데... 가끔식 히스토리 청소해 줌
-    rand() < 0.02 && cleanup_history!()
+    rand() < 0.002 && cleanup_history!()
 
     return h
 end

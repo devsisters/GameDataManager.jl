@@ -18,9 +18,8 @@ function help(idx = 1)
           `help()`를 입력하면 도움을 드립니다!
         """
     elseif idx == 2
-        msg = """json으로 변환할 파일이 없습니다 ♫
-        ---------------------------------------------------------------------------
-        """ * basic
+        line_breaker = "-"^(displaysize(stdout)[2]-4)
+        msg = string("json으로 변환할 파일이 없습니다 ♫\n", line_breaker, "\n", basic)
     end
 
 @info msg

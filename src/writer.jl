@@ -27,8 +27,7 @@ function xlsx_to_json!(file::AbstractString; kwargs...)
 end
 function xlsx_to_json!(files::Vector; loadgamedata = false)
     if !isempty(files)
-        @info "xlsx -> json 추출을 시작합니다 ⚒"
-        println("-"^75)
+        @info "xlsx -> json 추출을 시작합니다 ⚒\n" * "-"^(displaysize(stdout)[2]-4)
         for f in files
             gd = loadgamedata ? loadgamedata!(f) : GameData(f)
 
@@ -124,9 +123,10 @@ autoxl(interval = 3, timeout = 10000) = autoxl(collect_xlsx_for_autoxl(), interv
         감시 종료를 원할경우 'Ctrl + c'를 누르면 감시를 멈출 수 있습니다
     """
     # @async로 task로 생성할 수도 있지만... history 파일을 동시 편집할 위험이 있기 때문에 @async는 사용하지 않는다
+    bars = [repeat("↗↘", 15), repeat("←↑", 10)]
     @inbounds for i in 1:timeout
-        bar = isodd(i) ? repeat("↗↘", 23) : repeat("←↑", 23)
-        printover(stderr, ".Xlsx/ 폴더를 감시 중 입니다 \\ $bar \\", :green)
+        bar = bars[isodd(i)+1]
+        printover(stdout, "/01_XLSX 폴더 감시 중... $bar", :green)
 
         target = ismodified.(candidate)
         if any(target)
@@ -134,10 +134,8 @@ autoxl(interval = 3, timeout = 10000) = autoxl(collect_xlsx_for_autoxl(), interv
         else
             sleep(interval)
         end
-        bar = isodd(i) ? repeat("↗↘", 23) : repeat("←↑", 23)
-        printover(stderr, ".Xlsx/ 폴더를 감시 중 입니다 \\ $bar \\", :green)
     end
-    println(stderr, "\n timeout이 끝나 감시를 종료합니다. 이용해주셔서 감사합니다.")
+    println("timeout이 끝나 감시를 종료합니다. 이용해주셔서 감사합니다.")
 end
 function printover(io::IO, s::AbstractString, color::Symbol = :color_normal)
     print(io, "\r")
