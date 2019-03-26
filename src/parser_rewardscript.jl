@@ -1,16 +1,17 @@
 abstract type RewardScript end
 struct FixedReward <: RewardScript
-    reward::Tuple
+    reward::Array{Tuple, 1}
 end
 struct RandomReward <: RewardScript
     weight::AbstractWeights
-    reward::Vector{Tuple}
+    reward::Array{Tuple, 1}
+    function RandomReward(weight, reward)
+        new(pweights(weight), reward)
+    end
 end
 
-function RewardSxlcript(data::Array{Array{Array{T,1},1},1}) where T
-
-    rewards = RewardScript.(data)
-
+function RewardScript(data::Array{Array{Array{T,1},1},1}) where T
+    convert(Vector{RewardScript}, RewardScript.(data))
 end
 
 function RewardScript(data::Array{Array{T,1},1}) where T
@@ -25,34 +26,73 @@ function RewardScript(data::Array{Array{T,1},1}) where T
         end
         push!(items, x)
     end
-    @show weights
-    @show items
 
-    if length(weights) > 1
-        FixedReward
+    if length(weights) == 1
+        FixedReward(items)
+    else
+        RandomReward(weights, items)
     end
-
-    return w, items
 end
 
-
-function 건물경험치(종류::String, 등급::Int, 레벨::Int, 면적::Int)
-    expoint = 0
-    if 종류 == "Shop"
-        expoint +=1
-    elseif 종류 == "Residence"
-        expoint +=1
-    else #저택
-        expoint +=2
+################################################################################
+## Printing
+## NOTE parser_RewardTable 함수에서 캐싱을 해 뒀어야 사용 가능
+################################################################################
+function Base.show(io::IO, item::FixedReward)
+    for x in item.reward
+        print_item(io, x)
     end
+    print(io)
+end
+function Base.show(io::IO, item::RandomReward)
+    rows = displaysize(io)[1]
+    rows < 2   && (print(io, " …"); return)
+    rows -= 1 # Subtract the summary
 
-    if 등급 < 3
-        expoint += 1
-    else 등급 < 3
-        expoint += 2
+    for (i, x) in enumerate(item.reward)
+        w = item.weight[i] / sum(item.weight)
+        if isa(x, Tuple{String, Int, Int})
+            print_item(io, x[2], x[3] * w)
+        else
+            print_item(io, x[1], x[2] * w)
+        end
+        println(io)
+
+        if i >= rows
+            @printf(io, "……%i개 아이템 생략……", length(item.reward)-rows)
+            break
+        end
     end
+end
+function print_item(io::IO, x::Tuple{String, Int})
+    print_item(io, x[1], x[2])
+end
 
-    expoint = expoint * 레벨 * 면적
+# MarsSimulator src/structs/show.jl과 동일
+function print_item(io::IO, x::Tuple{String, Int, Int})
+    print_item(io, x[2], x[3])
+end
 
-    return expoint
+function print_item(io::IO, itemtype::AbstractString, val::T) where T <: Real
+    name = itemtype == "Coin" ? "CON" :
+           itemtype == "PaidCrystal" ? "CRY" :
+           itemtype == "FreeCrystal" ? "CRY" : itemtype
+
+   if T <: Integer
+       @printf(io, "%-6s%-20s: %i", " ", name, val)
+   else
+       @printf(io, "%-6s%-20s: %.3f", " ", name, val)
+   end
+end
+
+function print_item(io::IO, itemkey::Integer, val::T) where T <: Real
+    ref = getgamedata("ItemTable").cache[:julia][itemkey]
+
+    name = ref[Symbol("\$Name")] |> x -> length(x) > 10 ? chop(x, head=0, tail=length(x)-10) *"…" : x
+
+    if T <: Integer
+        @printf(io, "(%i)%-20s: %-2i개", itemkey, name, val)
+    else
+        @printf(io, "(%i)%-20s: %.3f개", itemkey, name, val)
+    end
 end

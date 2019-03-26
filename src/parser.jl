@@ -8,10 +8,14 @@ function select_parser(f)
     missing
 end
 
-function parse!(gd::GameData)
+isparsed(gd::GameData) = get(gd.cache, :isparsed, false)
+function parse!(gd::GameData, force_parse = false)
     @assert !ismissing(gd.parser) "parser가 없습니다"
 
-    gd.parser(gd)
+    if !isparsed(gd) || force_parse
+        gd.parser(gd)
+        gd.cache[:isparsed] = true
+    end
 
     return gd
 end
@@ -29,52 +33,21 @@ function parser_ItemTable(gd::GameData)
     # end
     gd.cache[:julia] = d
 
-    return gd
+    nothing
 end
 
 function parser_RewardTable(gd::GameData)
-    function 이름과기대값추가(data)
-        v = Array{Array{Any}}(undef, length(data))
-        @inbounds for (i, el) in enumerate(data)
-            v[i] = Array{Any}(undef, length(el[2]))
-
-            prob = values(el[1]) / sum(el[1])
-            @inbounds for (j, item) in enumerate(el[2])
-                x = parse_item(item)
-                exp_value = round(x[end] * prob[j];digits=2)
-                # 아이템명, 수량, ItemKey
-                v[i][j] = [x[1], exp_value, x[2:end]]
-            end
-        end
-        return v
-    end
-    parse!(getgamedata("ItemTable"))
+    parse!(getgamedata("ItemTable"; check_modified=true))
 
     jws = gd.data[1] # 1번 시트로 하드코딩됨
-
-    df = DataFrame(RewardKey = jws[:RewardKey])
-    df[:TraceTag] = ""
-    df[:Summary] = ""
-
-    for (i, row) in enumerate(eachrow(jws[:]))
-        x = row[:RewardScript]
-
-        df[i, :TraceTag] = x[:TraceTag]
-        # TODO: 크.... 이거좀....
-        # 개별 아이템 Key랑 수량, 확룰도 저장하자
-        df[i, :Summary] = begin
-            rewards = parse_rewardscript(x[:Rewards])
-            rewards = 이름과기대값추가(rewards)
-
-            s = vcat(vcat(map(el1 -> map(el2 -> el2[1:2], el1), rewards)...)...)
-            s = replace(string(s), r"Any\[|\]" => "")
-            s = replace(s, "\"," => ":")
-            s = replace(s, "\"" => "")
-        end
+    d = Dict{Int32, Any}()
+    for row in eachrow(jws)
+        el = row[:RewardScript]
+        d[row[:RewardKey]] = (TraceTag = el[:TraceTag], Rewards = RewardScript(el[:Rewards]))
     end
-    gd.cache[:output] = df
+    gd.cache[:julia] = d
 
-    return gd
+    nothing
 end
 
 # MarsSimulator에서 관리
@@ -82,46 +55,3 @@ function parser_Ability end
 function parser_Home end
 function parser_Shop end
 function parser_Residence end
-
-
-"""
-    parse_rewardscript(data)
-
-"""
-function parse_rewardscript(data::Array{Array{Array{T,1},1},1}) where T
-    parse_rewardscript.(data)
-end
-function parse_rewardscript(data::Array{Array{T,1},1}) where T
-    weights = Int[]
-    items = []
-    for el in data
-        push!(weights, parse(Int, el[1]))
-        if length(el) < 4
-            x = (el[2], parse(Int, el[3]))
-        else
-            x = (el[2], parse(Int, el[3]), parse(Int, el[4]))
-        end
-        push!(items, x)
-    end
-    return weights, items
-end
-
-
-"""
-    parse_item
-RewardScript 아이템의 이름을 가져옴
-"""
-function parse_item(s::Tuple{String,Int64})
-    ref =  getgamedata("ItemTable", :Currency)
-    ref = ref[ref.Key .== s[1], :]
-
-    name = ref[Symbol("\$Name")]
-    return (name, s...)
-end
-function parse_item(s::Tuple{String,Int64,Int64})
-    gd = getgamedata("ItemTable")
-    ref = gd.cache[:julia][s[2]]
-
-    name = ref[Symbol("\$Name")]
-    return (name, s...)
-end
