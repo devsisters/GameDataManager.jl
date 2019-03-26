@@ -39,15 +39,21 @@ end
 function parser_RewardTable(gd::GameData)
     parse!(getgamedata("ItemTable"; check_modified=true))
 
-    jws = gd.data[1] # 1번 시트로 하드코딩됨
+    d = parser_RewardTable(gd.data) # 1번 시트로 하드코딩됨
+    gd.cache[:julia] = d
+
+    nothing
+end
+function parser_RewardTable(jwb::JSONWorkbook)
+    parse!(getgamedata("ItemTable"; check_modified=true))
+
+    jws = jwb[1] # 1번 시트로 하드코딩됨
     d = Dict{Int32, Any}()
     for row in eachrow(jws)
         el = row[:RewardScript]
         d[row[:RewardKey]] = (TraceTag = el[:TraceTag], Rewards = RewardScript(el[:Rewards]))
     end
-    gd.cache[:julia] = d
-
-    nothing
+    return d
 end
 
 # MarsSimulator에서 관리

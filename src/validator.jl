@@ -116,16 +116,16 @@ end
 
 function validator_RewardTable(jwb::JSONWorkbook)
     # 시트를 합쳐둠
-    validate_duplicate(jwb[1], :RewardKey)
+    jws = jwb[1]
+    validate_duplicate(jws, :RewardKey)
 
-    # TODO: 아이템 인지 검사
-    # parse!(getgamedata("ItemTable"))
-    # for row in eachrow(jwb[1][:])
-    #     x = row[:RewardScript][:Rewards] |> parse_rewardscript
-    #     for el in x
-    #         @show parse_item(el[2][2])
-    #     end
-    # end
+    # 아이템이름 검색하다가 안나오면 에러 던짐
+    rewards = parser_RewardTable(jwb)
+    items = broadcast(x -> x[2], values(rewards))
+    itemnames.(items)
+
+    # ref = getgamedata("ItemTable"; check_modified=true)
+
 
     nothing
 end
