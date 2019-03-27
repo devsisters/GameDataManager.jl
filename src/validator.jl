@@ -4,11 +4,12 @@
 파일명, 컬럼명으로 검사한다.
 
 **파일별 검사 항목**
-* Ability.xlsx : 사용가능한 'Group'은 코드에서 정의된다
-* Residence.xlsx :
-* Building.xlsx
-* Block.xlsx   : 'Building'과 'Deco'시트의 Key가 중복되면 안된다
-                 'Building'시트의 TemplateKey가 'Template' 시트의 Key에 있어야 한다
+* Ability   : 사용가능한 'Group'은 코드에서 정의된다
+* Residence : AbilityKey 검사
+* Building  : AbiliyKey 검사
+* Block     : 'Building'과 'Deco'시트의 Key가 중복되면 안된다
+              'Building'시트의 TemplateKey가 'Template' 시트의 Key에 있어야 한다
+* RewardTable : ItemKey 검사
 """
 function select_validator(f)
     startswith(f,"Ability.") ? validator_Ability :
@@ -125,8 +126,6 @@ function validator_RewardTable(jwb::JSONWorkbook)
     itemnames.(items)
 
     # ref = getgamedata("ItemTable"; check_modified=true)
-
-
     nothing
 end
 function validator_Quest(jwb::JSONWorkbook)

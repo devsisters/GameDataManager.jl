@@ -10,11 +10,13 @@ end
 
 isparsed(gd::GameData) = get(gd.cache, :isparsed, false)
 function parse!(gd::GameData, force_parse = false)
-    @assert !ismissing(gd.parser) "parser가 없습니다"
-
-    if !isparsed(gd) || force_parse
-        gd.parser(gd)
-        gd.cache[:isparsed] = true
+    if ismissing(gd.parser)
+        @warn "$(xlsxpath(gd.data))는 parser가 정의되지 않았습니다"
+    else
+        if !isparsed(gd) || force_parse
+            gd.parser(gd)
+            gd.cache[:isparsed] = true
+        end
     end
 
     return gd

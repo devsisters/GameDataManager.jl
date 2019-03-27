@@ -40,7 +40,7 @@ function getgamedata(file::AbstractString, sheet_index::Integer; kwargs...)
     jwb = getgamedata(file; kwargs...).data
     return jwb[sheet_index]
 end
-function getgamedata(file::AbstractString; check_loaded = true, check_modified = false)
+function getgamedata(file::AbstractString; check_loaded = true, check_modified = false, parse = false)
     if check_loaded
         if !haskey(GAMEDATA, Symbol(file)) # 로딩 여부 체크
             loadgamedata!(file)
@@ -52,5 +52,8 @@ function getgamedata(file::AbstractString; check_loaded = true, check_modified =
         end
     end
 
-    return GAMEDATA[Symbol(file)]
+    gd = GAMEDATA[Symbol(file)]
+    parse && parse!(gd)
+
+    return gd
 end

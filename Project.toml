@@ -1,7 +1,7 @@
 name = "GameDataManager"
 uuid = "88844230-ccf1-11e8-233b-3f48c6dac397"
 authors = ["김용희 <yongheekim@devsisters.com>"]
-version = "0.2.32"
+version = "0.2.4"
 
 [deps]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"

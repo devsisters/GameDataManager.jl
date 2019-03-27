@@ -15,16 +15,16 @@ function RewardScript(data::Array{Array{Array{T,1},1},1}) where T
 end
 
 function RewardScript(data::Array{Array{T,1},1}) where T
-    weights = Int[]
-    items = []
-    for el in data
-        push!(weights, parse(Int, el[1]))
+    weights = Array{Int, 1}(undef, length(data))
+    items = Array{Tuple, 1}(undef, length(data))
+    for (i, el) in enumerate(data)
+        weights[i] = parse(Int, el[1])
         if length(el) < 4
             x = (el[2], parse(Int, el[3]))
         else
             x = (el[2], parse(Int, el[3]), parse(Int, el[4]))
         end
-        push!(items, x)
+        items[i] = x
     end
 
     if length(weights) == 1
@@ -34,10 +34,48 @@ function RewardScript(data::Array{Array{T,1},1}) where T
     end
 end
 
+#fallback
+Base.length(item::RewardScript) = length(item.reward)
+
+
 ################################################################################
 ## Printing
-## NOTE parser_RewardTable 함수에서 캐싱을 해 뒀어야 사용 가능
+##
 ################################################################################
+function itemnames(x::Array{T, 1}) where T <: RewardScript
+    itemnames.(x)
+end
+itemnames(x::RewardScript) = itemnames.(x.reward)
+function itemnames(x::Tuple{String, Int})
+    name = x[1] == "Coin" ? "CON" :
+           x[1] == "PaidCrystal" ? "CRY" :
+           x[1] == "FreeCrystal" ? "CRY" : error("정의되지 않은 아이템 / ", x[1])
+end
+
+function itemnames(x::Tuple{String, Int, Int}, length_limit = 10)
+    gd = getgamedata("ItemTable"; check_modified = true, parse = true)
+    ref = gd.cache[:julia]
+    name = ref[x[2]][Symbol("\$Name")]
+    
+    # TODO: 글자 길이 제한 넣기...
+    # if length(name) > length_limit
+    #     name = chop(name, head=0, tail=length(x)-length_limit) *"…"
+    # end
+
+    return name
+end
+
+function itemvalues(x::Array{T, 1}) where T <: RewardScript
+    itemvalues.(x)
+end
+function itemvalues(it::RandomReward)
+    w = values(it.weight) / sum(it.weight)
+    w .* broadcast(x -> x[end], it.reward)
+end
+function itemvalues(it::FixedReward)
+    broadcast(x -> x[end], it.reward)
+end
+
 function Base.show(io::IO, item::FixedReward)
     for x in item.reward
         print_item(io, x)
