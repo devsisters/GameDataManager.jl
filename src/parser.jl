@@ -2,9 +2,9 @@ function select_parser(f)
     startswith(f,"ItemTable.")   ? parser_ItemTable :
     startswith(f,"RewardTable.") ? parser_RewardTable :
     startswith(f,"Ability.")     ? parser_Ability :
-    startswith(f,"Home.")        ? parser_Home :
-    startswith(f,"Shop.")        ? parser_Shop :
-    startswith(f,"Residence.")   ? parser_Residence :
+    startswith(f,"Home.")        ? parser_Building :
+    startswith(f,"Shop.")        ? parser_Building :
+    startswith(f,"Residence.")   ? parser_Building :
     missing
 end
 
@@ -60,6 +60,4 @@ end
 
 # MarsSimulator에서 관리
 function parser_Ability end
-function parser_Home end
-function parser_Shop end
-function parser_Residence end
+function parser_Building end

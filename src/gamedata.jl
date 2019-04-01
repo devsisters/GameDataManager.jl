@@ -78,7 +78,9 @@ struct UnityGameData <: GameData
     filepath::AbstractString
 end
 
-
+# fallback function
+Base.basename(xgd::XLSXGameData) = basename(xlsxpath(xgd.data))
+Base.dirname(xgd::XLSXGameData) = dirname(xlsxpath(xgd.data))
 
 function Base.show(io::IO, gd::XLSXGameData)
     println(io, ".data")

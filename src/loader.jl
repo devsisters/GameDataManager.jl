@@ -22,7 +22,7 @@ end
 
 
 """
-    getgamedata(fname, sheetname, colname)
+    getgamedata(file, sheetname, colname)
 해당하는 Excel 파일의 시트의 컬럼을 가져온다
 loadgamedata!가 안되어있을 경우 해당 파일을 load한다
 
@@ -51,9 +51,23 @@ function getgamedata(file::AbstractString; check_loaded = true, check_modified =
             xl(file; loadgamedata = true)
         end
     end
-
     gd = GAMEDATA[Symbol(file)]
-    parse && parse!(gd)
+
+    if parse
+        parse!(gd)
+    end
 
     return gd
+end
+"""
+    getjuliadata(file)
+
+이미 파싱이 끝났다고 가정함
+그냥 GAMEDATA(Symbol(file)) 의 단축키
+"""
+
+getjuliadata(file::AbstractString) = getjuliadata(Symbol(file))
+function getjuliadata(file::Symbol)
+    gd = GAMEDATA[file]
+    return gd.cache[:julia]
 end

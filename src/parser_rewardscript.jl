@@ -1,12 +1,12 @@
 abstract type RewardScript end
 struct FixedReward <: RewardScript
-    reward::Array{Tuple, 1}
+    item::Array{Tuple, 1}
 end
 struct RandomReward <: RewardScript
     weight::AbstractWeights
-    reward::Array{Tuple, 1}
-    function RandomReward(weight, reward)
-        new(pweights(weight), reward)
+    item::Array{Tuple, 1}
+    function RandomReward(weight, item)
+        new(pweights(weight), item)
     end
 end
 
@@ -35,7 +35,7 @@ function RewardScript(data::Array{Array{T,1},1}) where T
 end
 
 #fallback
-Base.length(item::RewardScript) = length(item.reward)
+Base.length(a::RewardScript) = length(a.item)
 
 
 ################################################################################
@@ -45,7 +45,7 @@ Base.length(item::RewardScript) = length(item.reward)
 function itemnames(x::Array{T, 1}) where T <: RewardScript
     itemnames.(x)
 end
-itemnames(x::RewardScript) = itemnames.(x.reward)
+itemnames(x::RewardScript) = itemnames.(x.item)
 function itemnames(x::Tuple{String, Int})
     name = x[1] == "Coin" ? "CON" :
            x[1] == "PaidCrystal" ? "CRY" :
@@ -56,7 +56,7 @@ function itemnames(x::Tuple{String, Int, Int}, length_limit = 10)
     gd = getgamedata("ItemTable"; check_modified = true, parse = true)
     ref = gd.cache[:julia]
     name = ref[x[2]][Symbol("\$Name")]
-    
+
     # TODO: 글자 길이 제한 넣기...
     # if length(name) > length_limit
     #     name = chop(name, head=0, tail=length(x)-length_limit) *"…"
@@ -70,24 +70,23 @@ function itemvalues(x::Array{T, 1}) where T <: RewardScript
 end
 function itemvalues(it::RandomReward)
     w = values(it.weight) / sum(it.weight)
-    w .* broadcast(x -> x[end], it.reward)
+    w .* broadcast(x -> x[end], it.item)
 end
 function itemvalues(it::FixedReward)
-    broadcast(x -> x[end], it.reward)
+    broadcast(x -> x[end], it.item)
 end
 
 function Base.show(io::IO, item::FixedReward)
-    for x in item.reward
+    for x in item.item
         print_item(io, x)
     end
-    print(io)
 end
 function Base.show(io::IO, item::RandomReward)
     rows = displaysize(io)[1]
     rows < 2   && (print(io, " …"); return)
     rows -= 1 # Subtract the summary
 
-    for (i, x) in enumerate(item.reward)
+    for (i, x) in enumerate(item.item)
         w = item.weight[i] / sum(item.weight)
         if isa(x, Tuple{String, Int, Int})
             print_item(io, x[2], x[3] * w)
@@ -97,7 +96,7 @@ function Base.show(io::IO, item::RandomReward)
         println(io)
 
         if i >= rows
-            @printf(io, "……%i개 아이템 생략……", length(item.reward)-rows)
+            @printf(io, "……지면상 %i개 아이템이 생략되었음……", length(item)-rows)
             break
         end
     end
