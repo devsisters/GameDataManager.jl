@@ -1,7 +1,14 @@
 function help(idx = 1)
-    intro = "GameDataManager를 이용해주셔서 " * rand(["감사합니다", "Thank You", "Danke schön", "Grazie", "Gracias",
-    "Merci beaucoup", "ありがとうございます", "cпасибо", "谢谢你", "khop kun", "Dank je wel", "obrigado", " Tusen tack",
-    "cám ơn", "köszönöm szépen", "asante sana", "बोहोत धन्यवाद/शुक्रिया", "شكرا جزيلا", "děkuji"])
+    intro = "GameDataManager를 이용해주셔서 "
+
+    thankyou = ["감사합니다", "Thank You", "Danke schön", "Grazie", "Gracias", "Merci beaucoup",
+        "ありがとうございます", "cпасибо", "谢谢你", "khop kun", "Dank je wel", "obrigado", "Tusen tack",
+        "cám ơn", "köszönöm szépen", "asante sana", "बोहोत धन्यवाद/शुक्रिया", "شكرا جزيلا", "děkuji"]
+
+    oneline_asciiarts = ["♫♪.ılılıll|̲̅̅●̲̅̅|̲̅̅=̲̅̅|̲̅̅●̲̅̅|llılılı.♫♪", "ô¿ô", "(-.-)Zzz...",
+        "☁ ▅▒░☼‿☼░▒▅ ☁","▓⚗_⚗▓","✌(◕‿-)✌", "[̲̅\$̲̅(̲̅ιοο̲̅)̲̅\$̲̅]","(‾⌣‾)♉", "d(^o^)b¸¸♬·¯·♩¸¸♪·¯·♫¸¸",
+        "▂▃▅▇█▓▒░۩۞۩        ۩۞۩░▒▓█▇▅▃▂", "█▬█ █▄█ █▬█ █▄█", "／人 ◕‿‿◕ 人＼", "இڿڰۣ-ڰۣ—",
+        "♚ ♛ ♜ ♝ ♞ ♟ ♔ ♕ ♖ ♗ ♘ ♙", "♪└(￣◇￣)┐♪└(￣◇￣)┐♪└(￣◇￣)┐♪"]
 
     basic ="""
     # 기본 기능
@@ -12,7 +19,7 @@ function help(idx = 1)
     """
 
     if idx == 1
-        msg = intro * "\n" * basic * """\n
+        msg = intro * rand([thankyou; oneline_asciiarts]) * "\n" * basic * """\n
         # 보조 기능
           findblock(): 'Block'데이터와 '../4_ArtAssets/GameResources/Blocks/' 폴더를 비교하여 누락된 파일을 찾습니다
           `help()`를 입력하면 도움을 드립니다!
@@ -20,6 +27,8 @@ function help(idx = 1)
     elseif idx == 2
         line_breaker = "-"^(displaysize(stdout)[2]-4)
         msg = string("json으로 변환할 파일이 없습니다 ♫\n", line_breaker, "\n", basic)
+
+        msg *= rand(oneline_asciiarts)
     end
 
 @info msg
