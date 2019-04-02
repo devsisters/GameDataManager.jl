@@ -68,6 +68,5 @@ end
 
 getjuliadata(file::AbstractString) = getjuliadata(Symbol(file))
 function getjuliadata(file::Symbol)
-    gd = GAMEDATA[file]
-    return gd.cache[:julia]
+    GAMEDATA[file].cache[:julia]
 end
