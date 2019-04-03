@@ -94,6 +94,9 @@ function validator_Residence(jwb)
         @assert check "AbilityKey가 Ability_Level에 없습니다\n
                             $(setdiff(row, unique(abilitykey)))"
     end
+    buildgkey_level = broadcast(row -> (row[:BuildingKey], row[:Level]), eachrow(jwb[:Level]))
+    @assert allunique(buildgkey_level) "$(basename(jwb))'Level' 시트에 중복된 Level이 있습니다"
+
     nothing
 end
 validator_Shop(jwb) = validator_Residence(jwb)

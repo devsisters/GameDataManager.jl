@@ -79,8 +79,12 @@ struct UnityGameData <: GameData
 end
 
 # fallback function
-Base.basename(xgd::XLSXGameData) = basename(xlsxpath(xgd.data))
-Base.dirname(xgd::XLSXGameData) = dirname(xlsxpath(xgd.data))
+Base.basename(xgd::XLSXGameData) = basename(xgd.data)
+Base.basename(jwb::JSONWorkbook) = basename(xlsxpath(jwb))
+
+Base.dirname(xgd::XLSXGameData) = dirname(xgd)
+Base.dirname(jwb::JSONWorkbook) = dirname(xlsxpath(jwb))
+
 
 function Base.show(io::IO, gd::XLSXGameData)
     println(io, ".data")
