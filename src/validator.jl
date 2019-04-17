@@ -113,8 +113,16 @@ function validator_Block(jwb::JSONWorkbook)
         @warn "Buidling의 TemplateKey가 BlockTemplateBalanceTable.asset 에 없습니다 \n $(missing_key)"
     end
 
+    subcat = unique(jwb[:Block][:SubCategory])
+    if !issubset(subcat, jwb[:SubCategory][:CategoryKey])
+        @warn """SubCategory에서 정의하지 않은 SubCategory가 있습니다
+        $(setdiff(subcat, jwb[:SubCategory][:CategoryKey]))"""
+    end
+
     # 임시로 ArtAsset이 중복되면 안됨. 추후 삭제
-    validate_duplicate(jwb[1], :ArtAsset; assert = false)
+    validate_duplicate(jwb[:Block], :ArtAsset; assert = false)
+
+
     nothing
 end
 

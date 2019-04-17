@@ -18,7 +18,7 @@ function select_editor(f)
 end
 
 function editor_Block!(jwb)
-    sort!(jwb[:Data], :Key)
+    sort!(jwb[:Block], :Key)
 
     return jwb
 end
