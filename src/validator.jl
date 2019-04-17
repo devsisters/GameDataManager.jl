@@ -86,7 +86,7 @@ function validator_Ability(jwb)
     nothing
 end
 function validator_Residence(jwb)
-    jws = jwb[:Building]
+    jws = jwb[:Data]
 
     abilitykey = getgamedata("Ability", :Level, :AbilityKey; check_modified = true)
     for row in jws[:AbilityKey]

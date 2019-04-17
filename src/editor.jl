@@ -18,10 +18,7 @@ function select_editor(f)
 end
 
 function editor_Block!(jwb)
-    append!(jwb[:Building][:], jwb[:Deco][:])
-    deleteat!(jwb, :Deco)
-
-    sort!(jwb[:Building], :Key)
+    sort!(jwb[:Data], :Key)
 
     return jwb
 end
