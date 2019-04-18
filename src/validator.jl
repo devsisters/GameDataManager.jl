@@ -17,6 +17,7 @@ function select_validator(f)
     startswith(f,"Shop.")        ? validator_Shop :
     startswith(f,"Block.")       ? validator_Block :
     startswith(f,"RewardTable.") ? validator_RewardTable :
+    startswith(f,"BlockRewardTable.") ? validator_BlockRewardTable :
     startswith(f,"Quest.")       ? validator_Quest :
     missing
 end
@@ -68,6 +69,18 @@ function validate_duplicate(jws::JSONWorksheet, k::Symbol; assert=true)
         end
     end
     nothing
+end
+
+function validate_subset(a, b, msg = "다음의 멤버가 subset이 아닙니다"; assert=true)
+    if !issubset(a, b)
+        dif = setdiff(a, b)
+        if assert
+            throw(AssertionError("$msg\n$(dif)"))
+        else
+            @warn msg dif
+        end
+    end
+
 end
 
 function validator_Ability(jwb)
@@ -130,6 +143,8 @@ function validator_RewardTable(jwb::JSONWorkbook)
     # 시트를 합쳐둠
     jws = jwb[1]
     validate_duplicate(jws, :RewardKey)
+    # 1백만 이상은 BlockRewardTable에서만 쓴다
+    @assert maximum(jws[:RewardKey]) < 1000000 "RewardTable의 RewardKey는 1,000,000 미만을 사용해 주세요."
 
     # 아이템이름 검색하다가 안나오면 에러 던짐
     # NOTE: 성능 문제 있으면 Key만 뽑아서 비교하면 더 빠를 것 ref = getgamedata("ItemTable"; check_modified=true)
@@ -139,6 +154,29 @@ function validator_RewardTable(jwb::JSONWorkbook)
 
     nothing
 end
+
+
+function validator_BlockRewardTable(jwb::JSONWorkbook)
+    # 시트를 합쳐둠
+    jws = jwb[:Data]
+    validate_duplicate(jws, :RewardKey)
+    # 1백만 이상은 BlockRewardTable에서만 쓴다
+    @assert minimum(jws[:RewardKey]) >= 1000000 "BlockRewardTable의 RewardKey는 1,000,000 이상을 사용해 주세요."
+
+    rewards = broadcast(x -> x[:Rewards], jwb[:Data][:, :RewardScript])
+    blocksetkeys = String[]
+    for v in rewards
+        for el in v
+            append!(blocksetkeys, getindex.(el, 3))
+        end
+    end
+    ref = getgamedata("Block", :Set; check_modified=true)
+    validate_subset(blocksetkeys, string.(ref[:BlockSetKey]), "존재하지 않는 BlockSetKey 입니다")
+
+    nothing
+end
+
+
 function validator_Quest(jwb::JSONWorkbook)
     if maximum(jwb[:Main][:QuestKey]) > 1023 || minimum(jwb[:Main][:QuestKey]) < 0
         throw(AssertionError("Quest_Main.json의 QuestKey는 0~1023만 사용 가능합니다."))
