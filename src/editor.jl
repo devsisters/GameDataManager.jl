@@ -11,6 +11,7 @@
 function select_editor(f)
     startswith(f,"Block.")         ? editor_Block! :
     startswith(f,"RewardTable.")   ? editor_RewardTable! :
+    startswith(f,"BlockRewardTable.") ? editor_BlockRewardTable! :
     startswith(f,"Quest.")         ? editor_Quest! :
     startswith(f,"NameGenerator.") ? editor_NameGenerator! :
     startswith(f,"CashStore.")     ? editor_CashStore! :
@@ -18,10 +19,31 @@ function select_editor(f)
 end
 
 function editor_Block!(jwb)
+    function concatenate_blockset(jws)
+        for i in 2:size(jws, 1)
+            if ismissing(jws[i, :BlockSetKey])
+                jws[:][i, :BlockSetKey] = jws[i-1, :BlockSetKey]
+            end
+        end
+        NameCol = Symbol("\$Name")
+        df = DataFrame(:BlockSetKey => Int[], NameCol => String[], :Members => [])
+
+        for gdf in groupby(jws[:], :BlockSetKey)
+            push!(df[:BlockSetKey], gdf[1, :BlockSetKey])
+            push!(df[NameCol], gdf[1, NameCol])
+            push!(df[:Members], gdf[:Members])
+        end
+        df
+    end
+    idx = findfirst(x -> x == :Set, sheetnames(jwb))
+    new_ws = concatenate_blockset(jwb[idx])
+    jwb[idx] = JSONWorksheet(new_ws, xlsxpath(jwb), sheetnames(jwb)[idx])
+
     sort!(jwb[:Block], :Key)
 
     return jwb
 end
+
 
 function editor_RewardTable!(jwb)
     function get_reward(rewards)
@@ -61,6 +83,34 @@ function editor_RewardTable!(jwb)
     jwb[1] = JSONWorksheet(vcat(sheets...), xlsxpath(jwb), sheetnames(jwb)[1])
     deleteat!(jwb, 2)
     sort!(jwb[1], :RewardKey)
+
+    return jwb
+end
+function editor_BlockRewardTable!(jwb)
+    function get_reward(rewards)
+        v = Vector{Vector{String}}(undef, length(rewards))
+        for (i, el) in enumerate(rewards)
+            v[i] = String[string(el["Weight"]), "BlockSet",
+                            string(el["SetKey"]), string(el["Amount"])]
+        end
+        return v
+    end
+    function concatenate_rewards(jws)
+        v = DataFrame[]
+        for df in groupby(jws[:], :RewardKey)
+            d = OrderedDict(:TraceTag => df[1, :TraceTag],
+                            :Rewards => Vector{Vector{String}}[])
+
+            re = get_reward(df[:r1])
+            push!(d[:Rewards], re)
+            push!(v, DataFrame(RewardKey = df[1, :RewardKey], RewardScript = d))
+        end
+        vcat(v...)
+    end
+    # RewardScript 형태로 변경
+    new_data = concatenate_rewards(jwb[1])
+    jwb[1] = JSONWorksheet(new_data, xlsxpath(jwb), sheetnames(jwb)[1])
+    sort!(jwb[:Data], :RewardKey)
 
     return jwb
 end
