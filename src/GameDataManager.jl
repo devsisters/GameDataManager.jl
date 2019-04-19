@@ -32,5 +32,6 @@ export GAMEPATH, GAMEDATA, help,
 
        update!,
 
-       findblock
+       # 유틸리티
+       findblock, report_buildtemplate
 end

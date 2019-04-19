@@ -21,7 +21,8 @@ function help(idx = 1)
     if idx == 1
         msg = intro * rand([thankyou; oneline_asciiarts]) * "\n" * basic * """\n
         # 보조 기능
-          findblock(): 'Block'데이터와 '../4_ArtAssets/GameResources/Blocks/' 폴더를 비교하여 누락된 파일을 찾습니다
+          findblock(): 'Block'데이터와 '../4_ArtAssets/GameResources/Blocks/' 폴더를 비교하여 누락된 항목을 찾습니다.
+          report_buildtemplate(): '../BuildTemplate/Buildings/' 에서 사용되는 블록 통계를 내드립니다.
           `help()`를 입력하면 도움을 드립니다!
         """
     elseif idx == 2
@@ -80,6 +81,54 @@ function findblock()
     print("비교보고서: ")
     printstyled(normpath(file); color=:light_blue) # 왜 Atom에서 클릭 안됨???
 end
+
+function countblock_buildtemplate()
+    root = joinpath(GAMEPATH[:data], "00_Files/BuildTemplate/Buildings")
+    templates = Dict{String, Any}()
+
+    for (folder, dir, files) in walkdir(root)
+        jsonfiles = filter(x -> endswith(x, ".json"), files)
+        if !isempty(jsonfiles)
+            for f in jsonfiles
+                file = joinpath(folder, f)
+                templates[file] = JSON.parsefile(file)
+            end
+        end
+    end
+    # NOTE 이렇게 두번에 나누지말고 한방에 할까?
+    # 파일 많아지면 고려...
+    report = Dict{String, Any}()
+    for kv in templates
+        k = replace(kv[1], root => "")
+        v = kv[2]["Blocks"]
+        report[k] = countmap(get.(v, "BlockKey", 0))
+    end
+    return report
+end
+
+function report_buildtemplate(delim ="\t")
+    report = countblock_buildtemplate()
+
+    output = joinpath(GAMEPATH[:cache], "buildtemplate.csv")
+    jsonpaths = collect(keys(report)) |> sort
+    open(output, "w") do io
+        write(io, "Path", delim, "BlockKey", delim, "Amount", "\n")
+        for k in jsonpaths
+            for kv in sort(report[k])
+                write(io, k, delim)
+                write(io, string(kv[1]), delim)
+                write(io, string(kv[2]), "\n")
+            end
+        end
+     end
+
+    # 요약 정보
+    printstyled("BuildTemplate별 사용 블록량 통계입니다\n"; color=:green)
+    print("  ", "$(length(jsonpaths))개: ")
+    printstyled(normpath(output); color=:light_blue) # 왜 Atom에서 클릭 안됨???
+end
+
+
 
 # TODO: 이거 임시...
 function server_error_code()
