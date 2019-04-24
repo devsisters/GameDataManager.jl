@@ -2,6 +2,7 @@ module GameDataManager
 
 # using GameDataLocalizer TODO
 using Printf, Dates
+using Compat
 using XLSX, JSON, XLSXasJSON
 using StatsBase
 using DataFrames, DataStructures
@@ -33,5 +34,5 @@ export GAMEPATH, GAMEDATA, help,
        update!,
 
        # 유틸리티
-       findblock, report_buildtemplate
+       findblock, report_buildtemplate, compress_continentDB
 end

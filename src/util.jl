@@ -55,7 +55,7 @@ function findblock()
         end
     end
 
-    artasset_on_xls = getgamedata("Block", 1; check_modified = true)[:ArtAsset]
+    artasset_on_xls = getgamedata("Block", :Block; check_modified = true)[:ArtAsset]
 
     a = setdiff(artassets, artasset_on_xls)
     b = setdiff(artasset_on_xls, artassets)
@@ -126,6 +126,38 @@ function report_buildtemplate(delim ="\t")
     printstyled("BuildTemplate별 사용 블록량 통계입니다\n"; color=:green)
     print("  ", "$(length(jsonpaths))개: ")
     printstyled(normpath(output); color=:light_blue) # 왜 Atom에서 클릭 안됨???
+end
+
+"""
+https://www.notion.so/devsisters/bd0f40e315424d6894a1f90594d03f20
+
+일단 나 혼자 쓸 수 있음
+"""
+function compress_continentDB(sourcefile, outputpath = "C:/Users/devsisters/Mars/mars-world-seeds", date = today())
+    @assert endswith(sourcefile, ".db") ".db 파일의 경로를 입력해 주세요"
+    @assert isfile(sourcefile) "파일이 아닙니다"
+
+    filename = "CONTINENT-$(string(date))"
+    cp(sourcefile, joinpath(GAMEPATH[:cache], "$(filename).db"); force=true)
+    exe7z = joinpath(Compat.Sys.BINDIR, "7z.exe")
+
+    # 절대 경로 하면 잘 안되서.. 상대 경로로 가도록
+    cd(GAMEPATH[:cache])
+    run(`$exe7z a $(filename).tar "$(filename).db"`)
+    run(`$exe7z a $(filename).tar.bz2 "$(filename).tar"`)
+
+    # 결과는 Source폴더로 카피
+    output = joinpath(outputpath, "$(filename).tar.bz2")
+    if isfile(output)
+        rm(output)
+    end
+    cp("$(filename).tar.bz2", output)
+
+    # 캐시 폴더 정리
+    cd(GAMEPATH[:cache])
+    rm("$(filename).db")
+    rm("$(filename).tar")
+    rm("$(filename).tar.bz2")
 end
 
 
