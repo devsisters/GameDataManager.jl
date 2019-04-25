@@ -148,10 +148,7 @@ function compress_continentDB(sourcefile, outputpath = "C:/Users/devsisters/Mars
 
     # 결과는 Source폴더로 카피
     output = joinpath(outputpath, "$(filename).tar.bz2")
-    if isfile(output)
-        rm(output)
-    end
-    cp("$(filename).tar.bz2", output)
+    cp("$(filename).tar.bz2", output; force=true)
 
     # 캐시 폴더 정리
     cd(GAMEPATH[:cache])

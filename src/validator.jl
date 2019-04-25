@@ -86,8 +86,10 @@ end
 function validator_Ability(jwb)
     jws = jwb[:Level]
 
-    x = setdiff(unique(jws[:Group]), ["CoinStorageCap", "AddInventory", "PipoInterviewInterval",
-            "PipoEmployeeCap", "ProfitCoin", "CoinCounterCap", "RentCoin","RenterCap","RenterTalentBonus"])
+    x = setdiff(unique(jws[:Group]), [
+            "CoinStorageCap", "AddInventory",
+            "PipoEmployeeCap", "ProfitCoin", "CoinCounterCap", "RentCoin","RenterCap","RenterTalentBonus",
+            "PipoInterviewInterval", "PipoInterviewQue"])
     @assert length(x) == 0 "코드상 정의된 Group이 아닙니다\n  $x\n@mars-client에 문의 바랍니다"
 
 
