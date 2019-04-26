@@ -133,12 +133,17 @@ https://www.notion.so/devsisters/bd0f40e315424d6894a1f90594d03f20
 
 일단 나 혼자 쓸 수 있음
 """
-function compress_continentDB(sourcefile, outputpath = "C:/Users/devsisters/Mars/mars-world-seeds", date = today())
-    @assert endswith(sourcefile, ".db") ".db 파일의 경로를 입력해 주세요"
-    @assert isfile(sourcefile) "파일이 아닙니다"
+function compress_continentDB(roaddb,
+        sourcepath = joinpath(GAMEPATH["mars-world-tools"], "ContinentGenerator/output"),
+        outputpath = GAMEPATH["mars-world-seeds"], date = today())
+
+    roaddb = joinpath(sourcepath, roaddb)
+
+    @assert endswith(roaddb, ".db") ".db 파일을 입력해 주세요"
+    @assert isfile(roaddb) "파일이 존재하지 않습니다 $roaddb"
 
     filename = "CONTINENT-$(string(date))"
-    cp(sourcefile, joinpath(GAMEPATH[:cache], "$(filename).db"); force=true)
+    cp(roaddb, joinpath(GAMEPATH[:cache], "$(filename).db"); force=true)
     exe7z = joinpath(Compat.Sys.BINDIR, "7z.exe")
 
     # 절대 경로 하면 잘 안되서.. 상대 경로로 가도록

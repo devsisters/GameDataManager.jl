@@ -1,4 +1,4 @@
-const GAMEPATH = Dict{Symbol, Any}()
+const GAMEPATH = Dict{Any, Any}()
 const GAMEDATA = Dict{Symbol, GameData}()
 const MANAGERCACHE = Dict{Symbol, Dict}()
 
@@ -33,11 +33,20 @@ function init_path(path)
             GAMEPATH[:json][f] = replace(root, GAMEPATH[:data]*"/" => "")
         end
     end
+
+    # 이거 사용할꺼면 미리 경로 저장해두기
+    mars_gitrepo = joinpath(ENV["HOMEPATH"], "MARS_GITREOP.json")
+    if isfile(mars_gitrepo)
+        merge!(GAMEPATH, JSON.parsefile(mars_gitrepo))
+    end
+    GAMEPATH
 end
 function init_cache()
     MANAGERCACHE[:meta] = init_meta(GAMEPATH[:json]["root"])
     MANAGERCACHE[:json_typechecke] = init_typechecker(joinpath(GAMEPATH[:json]["root"]))
     MANAGERCACHE[:history] = init_history(GAMEPATH[:history])
+
+    MANAGERCACHE
 end
 
 
