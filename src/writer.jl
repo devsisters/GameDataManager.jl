@@ -29,9 +29,8 @@ function xlsx_to_json!(files::Vector; loadgamedata = false)
     if !isempty(files)
         @info "xlsx -> json 추출을 시작합니다 ⚒\n" * "-"^(displaysize(stdout)[2]-4)
         for f in files
-            gd = loadgamedata ? loadgamedata!(f) : GameData(f)
-
             println("『", f, "』")
+            gd = loadgamedata ? loadgamedata!(f) : GameData(f)
             write_json(gd.data)
         end
         @info "json 추출이 완료되었습니다 ☺"
