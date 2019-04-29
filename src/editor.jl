@@ -20,18 +20,22 @@ end
 
 function editor_Block!(jwb)
     function concatenate_blockset(jws)
-        for i in 2:size(jws, 1)
-            if ismissing(jws[i, :BlockSetKey])
-                jws[:][i, :BlockSetKey] = jws[i-1, :BlockSetKey]
-            end
-        end
         NameCol = Symbol("\$Name")
-        df = DataFrame(:BlockSetKey => Int[], NameCol => String[], :Members => [])
+        df = DataFrame(:BlockSetKey => filter(!ismissing, unique(jws[:BlockSetKey])),
+                       NameCol => filter(!ismissing, unique(jws[NameCol])))
+        df[:Members] = Array{Any}(undef, size(df, 1))
 
-        for gdf in groupby(jws[:], :BlockSetKey)
-            push!(df[:BlockSetKey], gdf[1, :BlockSetKey])
-            push!(df[NameCol], gdf[1, NameCol])
-            push!(df[:Members], gdf[:Members])
+        i = 1
+        df[i, :Members] = []
+        for row in eachrow(jws[:])
+            if !ismissing(row[:BlockSetKey])
+                i +=1
+                if i > size(df, 1)
+                    break
+                end
+                df[i, :Members] = []
+            end
+            push!(df[i, :Members], row[:Members])
         end
         df
     end
