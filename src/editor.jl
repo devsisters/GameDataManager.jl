@@ -22,7 +22,8 @@ function editor_Block!(jwb)
     function concatenate_blockset(jws)
         NameCol = Symbol("\$Name")
         df = DataFrame(:BlockSetKey => filter(!ismissing, unique(jws[:BlockSetKey])),
-                       NameCol => filter(!ismissing, unique(jws[NameCol])))
+                       :Icon        => filter(!ismissing, jws[:Icon]),
+                        NameCol     => filter(!ismissing, unique(jws[NameCol])))
         df[:Members] = Array{Any}(undef, size(df, 1))
 
         i = 1
