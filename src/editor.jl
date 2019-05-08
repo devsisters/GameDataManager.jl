@@ -105,9 +105,11 @@ function editor_BlockRewardTable!(jwb)
             d = OrderedDict(:TraceTag => df[1, :TraceTag],
                             :Rewards => Vector{Vector{String}}[])
 
-            re = get_reward(df[:r1])
-            push!(d[:Rewards], re)
-            push!(v, DataFrame(RewardKey = df[1, :RewardKey], RewardScript = d))
+            #NOTE: BlockRewardTable에서는 1개의 BlockSet만 지급
+            push!(d[:Rewards], get_reward(df[:r1]))
+            df_out = df[setdiff(collect(names(df)), [:r1])] |> x -> convert(DataFrame, x)
+            df_out[:RewardScript] = d
+            push!(v, df_out)
         end
         vcat(v...)
     end
