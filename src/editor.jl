@@ -169,24 +169,26 @@ function editor_ItemTable!(jwb)
 end
 
 function editor_PartTime!(jwb)
-    function prepare_export(x)
+    function get_dice(sheet)
+        jwb[:Setting][1, sheet] |> x -> range(x["Min"], step = x["Step"], stop = x["Max"])
+    end
+    # 데이터 불러오기
+    ndices = jwb[:Setting][1, :Rounds] * jwb[:Setting][1, :MaxPipo]
+    for s in [:BaseScore, :PerkBonusScore]
+        x = dice_distribution(ndices, get_dice(s))
+        # TODO PartTime Group별로 테이블 분리
         df = DataFrame(Throw = 1:length(x))
         for k in keys(x[1])
             df[k] = broadcast(el -> el[k], x)
         end
-        df
-    end
-    dt = generate_parttime_scoretable(jwb)
-
-    for sheet in [:BaseScore, :PerkBonusScore]
-        jwb[sheet] = prepare_export(dt[sheet])
+        jwb[s] = df
     end
     jwb
 end
 
 
 """
-    combine_args_sheet!(jwb::JSONWorkbook, mother_sheet, arg_sheet; key::Symbol):
+    combine_args_sheet!(jwb::JSONWorkbook, mother_sheet, arg_sheet; key::Symbol):@
 
 주어진 jwb의 mother_sheet에 arg_sheet의 key가 일치하는 row를 합쳐준다.
 arg_sheet에 있는 모든 key는 mother_sheet에 있어야 한다

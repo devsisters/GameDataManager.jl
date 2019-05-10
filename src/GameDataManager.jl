@@ -4,7 +4,7 @@ module GameDataManager
 using Printf, Dates
 using Compat
 using XLSX, JSON, XLSXasJSON
-using StatsBase
+using StatsBase, Distributions
 using DataFrames, DataStructures
 
 include("gamedata.jl")
@@ -22,6 +22,8 @@ include("history.jl")
 include("util.jl")
 include("_wip.jl")
 
+# 콘텐츠 특화 내용
+include("feature/pipoparttime.jl")
 
 
 export GAMEPATH, GAMEDATA, help,
@@ -35,4 +37,5 @@ export GAMEPATH, GAMEDATA, help,
 
        # 유틸리티
        findblock, report_buildtemplate, compress_continentDB
+
 end
