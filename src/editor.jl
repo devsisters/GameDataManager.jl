@@ -15,6 +15,7 @@ function select_editor(f)
     startswith(f,"Quest.")         ? editor_Quest! :
     startswith(f,"NameGenerator.") ? editor_NameGenerator! :
     startswith(f,"CashStore.")     ? editor_CashStore! :
+    startswith(f,"PartTime.")      ? editor_PartTime! :
     missing
 end
 
@@ -40,9 +41,7 @@ function editor_Block!(jwb)
         end
         df
     end
-    idx = findfirst(x -> x == :Set, sheetnames(jwb))
-    new_ws = concatenate_blockset(jwb[idx])
-    jwb[idx] = JSONWorksheet(new_ws, xlsxpath(jwb), sheetnames(jwb)[idx])
+    jwb[:Set] = concatenate_blockset(jwb[:Set])
 
     sort!(jwb[:Block], :Key)
 
@@ -85,7 +84,7 @@ function editor_RewardTable!(jwb)
 
     # 합치고 둘 중 한개 삭제
     sheets = concatenate_rewards.(jwb)
-    jwb[1] = JSONWorksheet(vcat(sheets...), xlsxpath(jwb), sheetnames(jwb)[1])
+    jwb[1] = vcat(sheets...)
     deleteat!(jwb, 2)
     sort!(jwb[1], :RewardKey)
 
@@ -115,8 +114,7 @@ function editor_BlockRewardTable!(jwb)
         vcat(v...)
     end
     # RewardScript 형태로 변경
-    new_data = concatenate_rewards(jwb[1])
-    jwb[1] = JSONWorksheet(new_data, xlsxpath(jwb), sheetnames(jwb)[1])
+    jwb[1] = concatenate_rewards(jwb[1])
     sort!(jwb[:Data], :RewardKey)
 
     return jwb
@@ -139,8 +137,7 @@ function editor_Quest!(jwb)
     end
     sheets = concatenate_columns.(jwb)
     for i in 1:length(jwb)
-        jws_replace = JSONWorksheet(vcat(sheets...), xlsxpath(jwb), sheetnames(jwb)[i])
-        jwb[i] = jws_replace
+        jwb[i] = vcat(sheets...)
     end
     return jwb
 end
@@ -155,9 +152,8 @@ function editor_NameGenerator!(jwb)
     end
     for i in 1:length(jwb)
         df = foo(jwb[i])
-        jws_replace = JSONWorksheet(df, xlsxpath(jwb), sheetnames(jwb)[i])
-
-        jwb[i] = jws_replace
+        # jws_replace = JSONWorksheet(df, xlsxpath(jwb), sheetnames(jwb)[i])
+        jwb[i] = df
     end
     jwb
 end
@@ -168,14 +164,29 @@ end
 function editor_Estate!(jwb)
     combine_args_sheet!(jwb, :Data, :args; key = :ProductKey)
 end
-
-
 function editor_ItemTable!(jwb)
     # replace_nullvalue!(jwb, :Data, :args; key = :ProductKey)
 end
 
+function editor_PartTime!(jwb)
+    function prepare_export(x)
+        df = DataFrame(Throw = 1:length(x))
+        for k in keys(x[1])
+            df[k] = broadcast(el -> el[k], x)
+        end
+        df
+    end
+    dt = generate_parttime_scoretable(jwb)
+
+    for sheet in [:BaseScore, :PerkBonusScore]
+        jwb[sheet] = prepare_export(dt[sheet])
+    end
+    jwb
+end
+
+
 """
-    combine_args_sheet!(jwb::JSONWorkbook, mother_sheet, arg_sheet; key::Symbol)
+    combine_args_sheet!(jwb::JSONWorkbook, mother_sheet, arg_sheet; key::Symbol):
 
 주어진 jwb의 mother_sheet에 arg_sheet의 key가 일치하는 row를 합쳐준다.
 arg_sheet에 있는 모든 key는 mother_sheet에 있어야 한다
