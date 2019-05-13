@@ -176,6 +176,7 @@ function editor_PartTime!(jwb)
     # TODO PartTime Group별로 테이블 분리
     ndices = jwb[:Setting][1, :Rounds] * jwb[:Setting][1, :MaxPipo]
     for s in [:BaseScore, :PerkBonusScore]
+        # 매번 계산할 필요는 없는데... Cache할까?
         x = dice_distribution(ndices, get_dice(s))
         df = DataFrame(Throw = 1:length(x))
         for k in keys(x[1])
