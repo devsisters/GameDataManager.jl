@@ -20,7 +20,6 @@ function loadgamedata!(f, gamedata = GAMEDATA; kwargs...)
     return gamedata[k]
 end
 
-
 """
     getgamedata(file, sheetname, colname)
 해당하는 Excel 파일의 시트의 컬럼을 가져온다
@@ -59,6 +58,19 @@ function getgamedata(file::AbstractString; check_loaded = true, check_modified =
 
     return gd
 end
+
+"""
+    getmetadata(file)
+"""
+function getmetadata(f::AbstractString)
+    if haskey(MANAGERCACHE[:meta][:auto], f)
+        MANAGERCACHE[:meta][:auto][f]
+    else
+        MANAGERCACHE[:meta][:manual][f]
+    end
+end
+getmetadata(jwb::JSONWorkbook) =  getmetadata(basename(xlsxpath(jwb)))
+
 """
     getjuliadata(file)
 

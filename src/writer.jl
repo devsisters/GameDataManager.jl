@@ -45,10 +45,10 @@ end
 """
 function write_json(jwb::JSONWorkbook)
     dir = GAMEPATH[:json]["root"]
-    meta = MANAGERCACHE[:meta][:files][basename(xlsxpath(jwb))]
+    meta = getmetadata(jwb)
 
     for s in sheetnames(jwb)
-        file = joinpath(dir, meta[s])
+        file = joinpath(dir, meta[s][1])
         XLSXasJSON.write(file, jwb[s])
 
         @printf("   saved => \"%s\" \n", file)
@@ -75,7 +75,7 @@ function typecheck(jwb::JSONWorkbook)
 
     f = basename(xlsxpath(jwb))
     # 시트명
-    for el in MANAGERCACHE[:meta][:files][f]
+    for el in getmetadata(f)
         if haskey(ref, el[2])
             typecheck(jwb[el[1]], ref[el[2]])
         end

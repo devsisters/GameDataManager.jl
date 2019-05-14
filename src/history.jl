@@ -15,11 +15,9 @@ function collect_modified_xlsx()
     end
     return files = files[x]
 end
+# 자동 검출하는 파일만
 function collect_allxlsx()
-    filter(x -> is_xlsxfile(x), keys(MANAGERCACHE[:meta][:files])) |> collect
-end
-function collect_alljson()
-    filter(x -> endswith(x, ".json"), keys(MANAGERCACHE[:meta][:files])) |> collect
+    filter(x -> is_xlsxfile(x), keys(MANAGERCACHE[:meta][:auto])) |> collect
 end
 
 function ismodified(f)::Bool
@@ -42,7 +40,7 @@ end
 
 # _Meta.json에 없는 파일 제거함
 function cleanup_history!()
-    a = keys(MANAGERCACHE[:meta][:files])
+    a = keys(MANAGERCACHE[:meta][:auto])
     deleted_file = setdiff(keys(MANAGERCACHE[:history]), a)
     if length(deleted_file) > 0
         for x in deleted_file

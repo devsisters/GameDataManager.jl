@@ -41,10 +41,13 @@ struct XLSXGameData <: GameData
     end
 end
 function XLSXGameData(f; validate = true)
-    kwargs_per_sheet = MANAGERCACHE[:meta][:kwargs][f]
-    sheets = MANAGERCACHE[:meta][:files][f]
+    meta = getmetadata(f)
 
-    jwb = JSONWorkbook(joinpath_gamedata(f), keys(sheets), kwargs_per_sheet)
+    kwargs_per_sheet = Dict()
+    for el in meta
+        kwargs_per_sheet[el[1]] = el[2][2]
+    end
+    jwb = JSONWorkbook(joinpath_gamedata(f), keys(meta), kwargs_per_sheet)
 
     if validate
         validator = select_validator(f)

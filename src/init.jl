@@ -68,24 +68,28 @@ function init_meta(path)
                     get(x, :compact_to_singleline, false)
                     ))
     end
-    meta = JSON.parsefile("$path/_Meta.json"; dicttype=OrderedDict{Symbol, Any})
-
-    d = OrderedDict{String, Any}()
-    d2 = Dict()
-    for el in meta[:files]
-        xlsx = string(el[:xlsx])
-        d[xlsx] = el[:sheets]
-        d2[xlsx] = Dict()
-        for (sheetname, json_file) in el[:sheets]
-            d[json_file] = (xlsx, sheetname)
-
-            # 개별 시트 설정이 있을 경우 덮어 쒸우기
-            d2[xlsx][sheetname] = get_kwargs(el, sheetname)
+    function parse_metainfo(origin)
+        d = OrderedDict{String, Any}()
+        for el in origin
+            xl = string(el[:xlsx])
+            d[xl] = Dict()
+            # d[xl] = el[:sheets]
+            for (sheet, json) in el[:sheets]
+                d[xl][sheet] = (json, get_kwargs(el, sheet))
+            end
         end
+        d
     end
-    meta[:files] = d #덮어 씌우기
-    meta[:xlsx_shortcut] =  broadcast(x -> (split(x, ".")[1], x), filter(is_xlsxfile, keys(d))) |> Dict
-    meta[:kwargs] = d2
+    function foo(d)
+        broadcast(x -> (split(x, ".")[1], x), filter(is_xlsxfile, keys(d))) |> Dict
+    end
+    jsonfile = JSON.parsefile("$path/_Meta.json"; dicttype=OrderedDict{Symbol, Any})
+
+    meta = Dict()
+    # xl()로 자동 추출하는 파일
+    meta[:auto] = parse_metainfo(jsonfile[:auto])
+    meta[:manual] = parse_metainfo(jsonfile[:manual])
+    meta[:xlsx_shortcut] = merge(foo(meta[:auto]), foo(meta[:manual]))
 
     println("_Meta.json 로딩이 완료되었습니다", "."^max(6, displaysize(stdout)[2]-34))
 
