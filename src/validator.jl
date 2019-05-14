@@ -165,7 +165,7 @@ function validator_BlockRewardTable(jwb::JSONWorkbook)
     # 1백만 이상은 BlockRewardTable에서만 쓴다
     @assert minimum(jws[:RewardKey]) >= 1000000 "BlockRewardTable의 RewardKey는 1,000,000 이상을 사용해 주세요."
 
-    rewards = broadcast(x -> x[:Rewards], jwb[:Data][:, :RewardScript])
+    rewards = broadcast(x -> x[:Rewards], jwb[:Data][:][:, :RewardScript])
     blocksetkeys = String[]
     for v in rewards
         for el in v
