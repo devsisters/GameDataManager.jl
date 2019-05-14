@@ -80,6 +80,7 @@ function init_meta(path)
         end
         d
     end
+    # TODO: 이름 중복 체크하기
     function foo(d)
         broadcast(x -> (split(x, ".")[1], x), filter(is_xlsxfile, keys(d))) |> Dict
     end
