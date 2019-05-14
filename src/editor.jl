@@ -205,7 +205,7 @@ function editor_PipoDemographic!(jwb)
 
     # 좀 지저분하지만 한번만 쓸테니...
     d1 = Dict(:Unisex => broadcast(x -> x["Unisex"], values(jws[1, :LastName])),
-              :Weight => broadcast(x -> x["Weight"], values(jws[1, :LastName]))
+              :UnisexWeight => broadcast(x -> x["UnisexWeight"], values(jws[1, :LastName]))
         )
 
     d2 = Dict(:Male => filter(!ismissing, broadcast(x -> x["Male"], values(jws[1, :FirstName]))),
