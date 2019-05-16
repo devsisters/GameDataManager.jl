@@ -5,7 +5,7 @@ const MANAGERCACHE = Dict{Symbol, Dict}()
 function __init__()
     #NOTE Julia setting에 넣을 수 있는 ARGS로 교체 고려
     if isdefined(Main, :PATH_MARS_PROTOTYPE)
-        init_path(joinpath(Main.PATH_MARS_PROTOTYPE, "patch-resources"))
+        init_path(Main.PATH_MARS_PROTOTYPE)
         init_cache()
         init_xlsxasjson()
 
@@ -18,19 +18,21 @@ function __init__()
     end
 end
 function init_path(path)
-    GAMEPATH[:data] = path
+    GAMEPATH[:mars_repo] = path
     GAMEPATH[:cache] = normpath(joinpath(@__DIR__, "../.cache"))
     GAMEPATH[:history] = joinpath(GAMEPATH[:cache], "history.json")
-    GAMEPATH[:xlsx] = Dict("root" => joinpath(GAMEPATH[:data], "01_XLSX"))
+    GAMEPATH[:xlsx] = Dict("root" => joinpath(GAMEPATH[:mars_repo], "patch-data/_GameData"))
     for (root, dirs, files) in walkdir(GAMEPATH[:xlsx]["root"])
         for f in filter(x -> (is_xlsxfile(x) && !startswith(x, "~\$")), files)
-            GAMEPATH[:xlsx][f] = replace(root, GAMEPATH[:data]*"/" => "")
+            @assert !haskey(GAMEPATH[:xlsx], f) "$f 파일이 중복됩니다. 폴더가 다르더라도 파일명을 다르게 해주세요"
+            GAMEPATH[:xlsx][f] = replace(root, GAMEPATH[:mars_repo]*"/" => "")
         end
     end
-    GAMEPATH[:json] = Dict("root" => joinpath(GAMEPATH[:data], "00_Files/BalanceTables"))
+    GAMEPATH[:json] = Dict("root" => joinpath(GAMEPATH[:mars_repo], "patch-data/BalanceTables"))
     for (root, dirs, files) in walkdir(GAMEPATH[:json]["root"])
         for f in filter(x -> endswith(x, ".json"), files)
-            GAMEPATH[:json][f] = replace(root, GAMEPATH[:data]*"/" => "")
+            @assert !haskey(GAMEPATH[:json], f) "$f 파일이 중복됩니다. 폴더가 다르더라도 파일명을 다르게 해주세요"
+            GAMEPATH[:json][f] = replace(root, GAMEPATH[:mars_repo]*"/" => "")
         end
     end
 

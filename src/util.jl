@@ -44,7 +44,7 @@ GAMEDATA[:Block] 과 ../4_ArtAssets/GameResources/Blocks/ 하위에 있는 .pref
 상호 누락된 파일명 리스트를 '.cache'폴더에 저장합니다
 """
 function findblock()
-    root = joinpath(GAMEPATH[:data], "../unity/Assets/4_ArtAssets/GameResources/Blocks/")
+    root = joinpath(GAMEPATH[:mars_repo], "unity/Assets/4_ArtAssets/GameResources/Blocks/")
 
     artassets = String[]
     for (folder, dir, files) in walkdir(root)
@@ -72,7 +72,7 @@ function findblock()
        end
 
     # 요약 정보
-    p = normpath("$(GAMEPATH[:data])/../unity/Assets")
+    p = normpath("$(GAMEPATH[:mars_repo])/unity/Assets")
     x = replace(normpath(root), p => "..")
 
     printstyled("'$x'폴더와 Block데이터를 비교하여 다음 파일에 저장했습니다\n"; color=:green)
@@ -83,7 +83,7 @@ function findblock()
 end
 
 function countblock_buildtemplate()
-    root = joinpath(GAMEPATH[:data], "00_Files/BuildTemplate/Buildings")
+    root = joinpath(GAMEPATH[:json]["root"], "../BuildTemplate/Buildings")
     templates = Dict{String, Any}()
 
     for (folder, dir, files) in walkdir(root)

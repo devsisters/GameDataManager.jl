@@ -101,7 +101,7 @@ function Base.show(io::IO, gd::XLSXGameData)
 end
 function Base.show(io::IO, gd::JSONGameData{T}) where T
     println(io, "JSONGameData{$T}")
-    println(io, replace(gd.filepath, GAMEPATH[:data] => ".."))
+    println(io, replace(gd.filepath, GAMEPATH[:xlsx]["root"] => ".."))
 
     k = vcat(collect.(keys.(gd.data))...) |> unique
     print(io, "    keys: ", k)

@@ -4,7 +4,7 @@ function Base.readdir(dir; extension::String)
 end
 function joinpath_gamedata(file)
     mid_folder = is_xlsxfile(file) ? GAMEPATH[:xlsx][file] : GAMEPATH[:json][file]
-    joinpath(GAMEPATH[:data], mid_folder, file)
+    joinpath(GAMEPATH[:mars_repo], mid_folder, file)
 end
 
 
