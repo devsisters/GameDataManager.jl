@@ -15,7 +15,7 @@ function select_editor(f)
     startswith(f,"Quest.")         ? editor_Quest! :
     startswith(f,"NameGenerator.") ? editor_NameGenerator! :
     startswith(f,"CashStore.")     ? editor_CashStore! :
-    startswith(f,"PartTime.")      ? editor_PartTime! :
+    # startswith(f,"PartTime.")      ? editor_PartTime! : 기획 수정
     startswith(f,"PipoDemographic.") ? editor_PipoDemographic! :
     missing
 end
