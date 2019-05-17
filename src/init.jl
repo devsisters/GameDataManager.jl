@@ -37,7 +37,7 @@ function init_path(path)
     end
 
     # 이거 사용할꺼면 미리 경로 저장해두기
-    mars_gitrepo = joinpath(ENV["HOMEPATH"], "MARS_GITREOP.json")
+    mars_gitrepo = joinpath(GAMEPATH[:cache], "MARS_GITREOP.json")
     if isfile(mars_gitrepo)
         merge!(GAMEPATH, JSON.parsefile(mars_gitrepo))
     end
