@@ -15,6 +15,7 @@ function select_validator(f)
     startswith(f,"Ability.") ? validator_Ability :
     startswith(f,"Residence.")   ? validator_Residence :
     startswith(f,"Shop.")        ? validator_Shop :
+    startswith(f,"Special.")        ? validator_Special :
     startswith(f,"Block.")       ? validator_Block :
     startswith(f,"RewardTable.") ? validator_RewardTable :
     startswith(f,"BlockRewardTable.") ? validator_BlockRewardTable :
@@ -105,7 +106,7 @@ function validator_Residence(jwb)
     jws = jwb[:Building]
 
     abilitykey = getgamedata("Ability", :Level, :AbilityKey; check_modified = true)
-    for row in jws[:AbilityKey]
+    for row in filter(!ismissing, jws[:AbilityKey])
         check = issubset(row, unique(abilitykey))
         @assert check "AbilityKey가 Ability_Level에 없습니다\n
                             $(setdiff(row, unique(abilitykey)))"
@@ -116,6 +117,7 @@ function validator_Residence(jwb)
     nothing
 end
 validator_Shop(jwb) = validator_Residence(jwb)
+validator_Special(jwb) = validator_Residence(jwb)
 
 function validator_Block(jwb::JSONWorkbook)
     b = begin
