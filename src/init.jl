@@ -21,6 +21,7 @@ function init_path(path)
     GAMEPATH[:mars_repo] = path
     GAMEPATH[:cache] = normpath(joinpath(@__DIR__, "../.cache"))
     GAMEPATH[:history] = joinpath(GAMEPATH[:cache], "history.json")
+    GAMEPATH[:referencedata_history] = joinpath(GAMEPATH[:cache], "referencedata_history.json")
     GAMEPATH[:xlsx] = Dict("root" => joinpath(GAMEPATH[:mars_repo], "patch-data/_GameData"))
     for (root, dirs, files) in walkdir(GAMEPATH[:xlsx]["root"])
         for f in filter(x -> (is_xlsxfile(x) && !startswith(x, "~\$")), files)
@@ -46,7 +47,8 @@ end
 function init_cache()
     MANAGERCACHE[:meta] = init_meta(GAMEPATH[:json]["root"])
     MANAGERCACHE[:json_typechecke] = init_typechecker(joinpath(GAMEPATH[:json]["root"]))
-    MANAGERCACHE[:history] = init_history(GAMEPATH[:history])
+    MANAGERCACHE[:history] = init_gamedata_history(GAMEPATH[:history])
+    MANAGERCACHE[:referencedata_history] = init_referencedata_history(GAMEPATH[:referencedata_history])
 
     MANAGERCACHE
 end
@@ -56,6 +58,8 @@ end
     init_meta(path)
 
 path 경로에 있는 _Meta.json을 읽는다
+
+TODO meta 리로딩
 """
 function init_meta(path)
     # 개별 시트에대한 kwargs 값이 있으면 가져오고, 없으면 global 세팅 사용
@@ -93,6 +97,7 @@ function init_meta(path)
     meta[:auto] = parse_metainfo(jsonfile[:auto])
     meta[:manual] = parse_metainfo(jsonfile[:manual])
     meta[:xlsx_shortcut] = merge(foo(meta[:auto]), foo(meta[:manual]))
+    meta[:referencedata] = OrderedDict(broadcast(x -> Pair(x[:gamedata], x), jsonfile[:referencedata]))
 
     println("_Meta.json 로딩이 완료되었습니다", "."^max(6, displaysize(stdout)[2]-34))
 
@@ -121,15 +126,19 @@ function init_typechecker(path)
 end
 
 
-function init_history(file)
+function init_gamedata_history(file)
     h = isfile(file) ? JSON.parsefile(file; dicttype=Dict{String, Float64}) :
-                    Dict{String, Float64}()
+                       Dict{String, Float64}()
     # 좀 이상하긴 한데... 가끔식 히스토리 청소해 줌
     rand() < 0.002 && cleanup_history!()
 
     return h
 end
-
+function init_referencedata_history(file)
+    h = isfile(file) ? JSON.parsefile(file; dicttype=OrderedDict) :
+                       OrderedDict{String, OrderedDict}()
+    return h
+end
 function init_xlsxasjson()
     # Vector[] 컬럼 데이터 구분자 추가 [";", ","]
     push!(XLSXasJSON.DELIM, ",")

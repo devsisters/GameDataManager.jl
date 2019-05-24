@@ -57,6 +57,40 @@ function XLSXGameData(f; validate = true)
     XLSXGameData(jwb, validator, select_localizer(f), select_editor(f), select_parser(f))
 end
 """
+    ReferenceGameData
+"""
+struct ReferenceGameData <: GameData
+    parent::GameData
+    data::Any
+end
+function ReferenceGameData(f)
+    meta = get(MANAGERCACHE[:meta][:referencedata], f, missing)
+
+    @assert !ismissing(meta) "_Meta.json의 referencedata에 \"$(f)\"가 존재하지 않습니다."
+
+    parent = getgamedata(f; check_modified = true)
+
+    if f == "RewardTable"
+        origin = parent.data[Symbol(meta[:sheet])]
+        df = DataFrame(RewardKey = origin[:RewardKey])
+        df[:TraceTag] = ""
+        df[:Rewards] = Vector{Any}(undef, size(df, 1))
+
+        for i in 1:size(df, 1)
+            el = origin[i, :RewardScript]
+            df[i, :TraceTag] = el[:TraceTag]
+            #TODO 개별
+            df[i, :Rewards] = join(show_item.(RewardScript(el[:Rewards])))
+        end
+    else
+        df = parent.data[Symbol(meta[:sheet])][:]
+        df = df[:, Symbol.(meta[:columns])]
+    end
+    ReferenceGameData(parent, df)
+end
+
+
+"""
     JSONGameData
 JSON을 쥐고 있음
 """
@@ -81,8 +115,10 @@ struct UnityGameData <: GameData
     filepath::AbstractString
 end
 
+
 # fallback function
 Base.basename(xgd::XLSXGameData) = basename(xgd.data)
+Base.basename(rgd::ReferenceGameData) = basename(rgd.parent)
 Base.basename(jwb::JSONWorkbook) = basename(xlsxpath(jwb))
 
 Base.dirname(xgd::XLSXGameData) = dirname(xgd)
@@ -90,14 +126,20 @@ Base.dirname(jwb::JSONWorkbook) = dirname(xlsxpath(jwb))
 
 
 function Base.show(io::IO, gd::XLSXGameData)
-    println(io, ".data")
-    print(io, gd.data)
+    println(io, ".data ┕━")
+    println(io, gd.data)
 
-    println(io, "\n.cache")
+    println(io, ".cache ┕━")
     println(io, typeof(gd.cache), " with $(length(gd.cache)) entry")
     for el in gd.cache
         println(io, "  :$(el[1]) => $(summary(el[2]))")
     end
+end
+function Base.show(io::IO, gd::ReferenceGameData)
+    print(io, ".parent\n ┕━")
+    summary(io, gd.parent.data)
+    println(io, ".data")
+    show(io, gd.data)
 end
 function Base.show(io::IO, gd::JSONGameData{T}) where T
     println(io, "JSONGameData{$T}")

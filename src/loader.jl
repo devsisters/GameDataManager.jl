@@ -31,6 +31,9 @@ function getgamedata(file::AbstractString, sheet, colname; kwargs...)
     jws = getgamedata(file, sheet; kwargs...)
     return jws[colname]
 end
+function getgamedata(file::AbstractString, sheetname::AbstractString; kwargs...)
+    getgamedata(file, Symbol(sheetname); kwargs...)
+end
 function getgamedata(file::AbstractString, sheetname::Symbol; kwargs...)
     jwb = getgamedata(file; kwargs...).data
     return jwb[sheetname]
@@ -68,6 +71,10 @@ function getmetadata(f::AbstractString)
     else
         MANAGERCACHE[:meta][:manual][f]
     end
+end
+function getmetadata(rgd::ReferenceGameData)
+    f = split(basename(rgd), ".")[1]
+    MANAGERCACHE[:meta][:referencedata][f]
 end
 getmetadata(jwb::JSONWorkbook) =  getmetadata(basename(xlsxpath(jwb)))
 

@@ -78,7 +78,7 @@ end
 
 function Base.show(io::IO, item::FixedReward)
     for x in item.item
-        print_item(io, x)
+        print(io, show_item(x))
     end
 end
 function Base.show(io::IO, item::RandomReward)
@@ -89,9 +89,9 @@ function Base.show(io::IO, item::RandomReward)
     for (i, x) in enumerate(item.item)
         w = item.weight[i] / sum(item.weight)
         if isa(x, Tuple{String, Int, Int})
-            print_item(io, x[2], x[3] * w)
+            print(io, show_item(x[2], x[3] * w))
         else
-            print_item(io, x[1], x[2] * w)
+            print(io, show_item(x[1], x[2] * w))
         end
         println(io)
 
@@ -101,35 +101,58 @@ function Base.show(io::IO, item::RandomReward)
         end
     end
 end
-function print_item(io::IO, x::Tuple{String, Int})
-    print_item(io, x[1], x[2])
+
+function show_item(item::FixedReward)
+    show_item.(item.item)
+end
+function show_item(item::RandomReward)
+    s = String[]
+    for (i, x) in enumerate(item.item)
+        w = item.weight[i] / sum(item.weight)
+        if isa(x, Tuple{String, Int, Int})
+            push!(s, show_item(x[2], x[3] * w))
+        else
+            push!(s, show_item(x[1], x[2] * w))
+        end
+    end
+    return s
 end
 
+function show_item(x::Tuple{String, Int})
+    show_item(x[1], x[2])
+end
 # MarsSimulator src/structs/show.jl과 동일
-function print_item(io::IO, x::Tuple{String, Int, Int})
-    print_item(io, x[2], x[3])
+function show_item(x::Tuple{String, Int, Int})
+    show_item(x[2], x[3])
 end
 
-function print_item(io::IO, itemtype::AbstractString, val::T) where T <: Real
+function show_item(itemtype::AbstractString, val::T) where T <: Real
     name = itemtype == "Coin" ? "CON" :
            itemtype == "PaidCrystal" ? "CRY" :
            itemtype == "FreeCrystal" ? "CRY" : itemtype
 
    if T <: Integer
-       @printf(io, "%-6s%-20s: %i", " ", name, val)
+       @sprintf("%s: %i", name, val)
    else
-       @printf(io, "%-6s%-20s: %.3f", " ", name, val)
+       @sprintf("%s: %.3f", name, val)
    end
 end
-
-function print_item(io::IO, itemkey::Integer, val::T) where T <: Real
+function show_item(itemkey::Integer, val::T;
+                    remove_whitespace = true, print_on_console = true) where T <: Real
     ref = getgamedata("ItemTable").cache[:julia][itemkey]
 
-    name = ref[Symbol("\$Name")] |> x -> length(x) > 10 ? chop(x, head=0, tail=length(x)-10) *"…" : x
+    name = ref[Symbol("\$Name")]
+    if remove_whitespace
+        name = replace(name, " " => "")
+    end
+    if print_on_console
+        sz = displaysize(stdout)[2]-6
+        name = length(name) > sz ? chop(x, head=0, tail=length(name)-sz) *"…" : name
+    end
 
     if T <: Integer
-        @printf(io, "(%i)%-20s: %-2i개", itemkey, name, val)
+        @sprintf("(%i)%s: %-2i개", itemkey, name, val)
     else
-        @printf(io, "(%i)%-20s: %.3f개", itemkey, name, val)
+        @sprintf("(%i)%s: %.3f개", itemkey, name, val)
     end
 end

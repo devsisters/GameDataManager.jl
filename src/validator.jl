@@ -12,10 +12,10 @@
 * RewardTable : ItemKey 검사
 """
 function select_validator(f)
-    startswith(f,"Ability.") ? validator_Ability :
+    startswith(f,"Ability.")     ? validator_Ability :
     startswith(f,"Residence.")   ? validator_Residence :
     startswith(f,"Shop.")        ? validator_Shop :
-    startswith(f,"Special.")        ? validator_Special :
+    startswith(f,"Special.")     ? validator_Special :
     startswith(f,"Block.")       ? validator_Block :
     startswith(f,"RewardTable.") ? validator_RewardTable :
     startswith(f,"BlockRewardTable.") ? validator_BlockRewardTable :
