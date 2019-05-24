@@ -24,6 +24,9 @@ function help(idx = 1)
           findblock(): 'Block'데이터와 '../4_ArtAssets/GameResources/Blocks/' 폴더를 비교하여 누락된 항목을 찾습니다.
           report_buildtemplate(): '../BuildTemplate/Buildings/' 에서 사용되는 블록 통계를 내드립니다.
           `help()`를 입력하면 도움을 드립니다!
+        # WIP
+          export_referencedata("ItemTable")
+          export_referencedata("RewardTable")
         """
     elseif idx == 2
         line_breaker = "-"^(displaysize(stdout)[2]-4)
