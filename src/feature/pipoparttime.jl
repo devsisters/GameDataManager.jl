@@ -3,7 +3,6 @@
    dice_distribution
 
 모든면이 동일한 확률의 Dice 확률 구하기
-
 """
 function dice_distribution(ndices::Integer, nfaces::Integer)
    function _dicetable(throw)
@@ -31,8 +30,6 @@ function dice_distribution(ndices::Integer, nfaces::Integer)
    end
    return dt
 end
-
-
 function dice_distribution(ndices::Integer, dice::AbstractRange)
    nfaces = length(dice)
 
@@ -40,5 +37,5 @@ function dice_distribution(ndices::Integer, dice::AbstractRange)
    for x in dicetable
       x[:Outcome] = x[:Outcome].* step(dice)
    end
-   dicetable
+   return dicetable
 end

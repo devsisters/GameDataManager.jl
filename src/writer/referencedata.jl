@@ -26,7 +26,6 @@ function export_referencedata(f)
     end
 end
 
-
 function export_referencedata(rgd::ReferenceGameData, x::AbstractString)
     export_result = false
     file = joinpath_gamedata(x)
@@ -39,13 +38,14 @@ function export_referencedata(rgd::ReferenceGameData, x::AbstractString)
                 if !in(sheet, XLSX.sheetnames(xf))
                     XLSX.addsheet!(xf, sheet)
                 end
-                ws = xf[sheet]
-                XLSX.writetable!(ws, eachcol(rgd.data), names(rgd.data))
+                XLSX.writetable!(xf[sheet], eachcol(rgd.data), names(rgd.data))
             end
             @info "\'$(basename(file))\'에 $sheet 를 업데이트 하였습니다"
             export_result = true
-        catch
-            @warn "\'$(basename(file))\'업데이트 실패 하였습니다"
+        catch e
+            #TODO: Shop. Residence, Special이 실패하는 이유 무엇???
+            @show e
+            @warn "\'$file\'업데이트 실패 하였습니다"
         end
     else
         @error "이거 만들어야 됨..."

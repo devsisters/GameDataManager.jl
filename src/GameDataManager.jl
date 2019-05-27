@@ -4,7 +4,7 @@ module GameDataManager
 using Printf, Dates
 using Compat
 using XLSX, JSON, XLSXasJSON
-using StatsBase, Distributions
+using Random, StatsBase, Distributions
 using DataFrames, DataStructures
 
 include("gamedata.jl")
