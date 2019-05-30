@@ -27,6 +27,7 @@ include("util.jl")
 
 # 콘텐츠 특화 내용
 include("feature/pipoparttime.jl")
+include("feature/pipotalent.jl")
 
 
 export GAMEPATH, GAMEDATA, help,

@@ -17,6 +17,8 @@ function select_editor(f)
     startswith(f,"CashStore.")     ? editor_CashStore! :
     # startswith(f,"PartTime.")      ? editor_PartTime! : 기획 수정
     startswith(f,"PipoDemographic.") ? editor_PipoDemographic! :
+    startswith(f,"PipoTalent.") ? editor_PipoTalent! :
+
     missing
 end
 
@@ -216,6 +218,12 @@ function editor_PipoDemographic!(jwb)
     jwb[:enName] = DataFrame(LastName = d1, FirstName = d2)
     jwb
 end
+function editor_PipoTalent!(jwb)
+    export_pipoperk_dialogue()
+    jwb
+end
+
+
 
 
 """
