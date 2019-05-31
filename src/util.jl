@@ -134,18 +134,18 @@ end
 """
 https://www.notion.so/devsisters/bd0f40e315424d6894a1f90594d03f20
 
-일단 나 혼자 쓸 수 있음
+
 """
-function compress_continentDB(roaddb,
+function compress_continentDB(roaddb, tag = v"0.0.1";
         sourcepath = joinpath(GAMEPATH["mars-world-tools"], "ContinentGenerator/output"),
-        outputpath = GAMEPATH["mars-world-seeds"], date = today())
+        outputpath = GAMEPATH["mars-world-seeds"])
 
     roaddb = joinpath(sourcepath, roaddb)
 
     @assert endswith(roaddb, ".db") ".db 파일을 입력해 주세요"
     @assert isfile(roaddb) "파일이 존재하지 않습니다 $roaddb"
 
-    filename = "CONTINENT-$(string(date))"
+    filename = "CONTINENT-$(tag)"
     cp(roaddb, joinpath(GAMEPATH[:cache], "$(filename).db"); force=true)
     exe7z = joinpath(Compat.Sys.BINDIR, "7z.exe")
 
