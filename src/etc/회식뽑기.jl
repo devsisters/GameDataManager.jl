@@ -34,14 +34,16 @@ function 회식뽑기_전체(열외자)
     전체 = setdiff(전체, 열외자)
     shuffle!(전체)
 
-    a = 전체[1:7]
-    b = 전체[8:end]
+    _size = round(Int, length(전체) / 2)
+
+    a = 전체[1:_size]
+    b = 전체[_size+1:end]
     return a, b
 end
 
 function 히스토리고려해_회식뽑기(열외자, h)
     function count_history(team)
-        x = Dict(1 =>0, 2 =>0)
+        x = Dict(0 => 0, 1 =>0, 2 =>0)
         if !isempty(team)
             x[1] = sum(map(x -> get(과거조, x, 0), team) .== 1)
             x[2] = sum(map(x -> get(과거조, x, 0), team) .== 2)
@@ -59,15 +61,15 @@ function 히스토리고려해_회식뽑기(열외자, h)
     # 히스토리 공유가 한명이라도 적은 곳에 넣기
     for me in 전체
         me_before = get(과거조, me, 0)
-        if me_before > 0
-            if count_history(a)[me_before] < count_history(b)[me_before]
-                push!(a, me)
-            else
-                push!(b, me)
-            end
+        if count_history(a)[me_before] < count_history(b)[me_before]
+            push!(a, me)
+        else
+            push!(b, me)
         end
     end
-    if abs(length(a) - length(b)) > 1
+
+    while abs(length(a) - length(b)) > 1
+        # TODO: 이거도 제일 중복많은 사람 검출학 ㅔ수정?
         if length(a) > length(b)
             push!(b, pop!(a))
         else
@@ -99,7 +101,7 @@ history = Dict(:십구년일월 =>
 ###########################################################
 ## 실행 단
 #############################################################
-a, b = 히스토리고려해_회식뽑기(["백승대"], history[:십구년오월])
+a, b = 히스토리고려해_회식뽑기(["백승대", "김대원"], history[:십구년오월])
 
 println("ㅁ---좌석 배정 1조---ㅁ")
 드라마틱하게_결과보여주기(a, :blink)
