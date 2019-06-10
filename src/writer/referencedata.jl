@@ -21,31 +21,34 @@ function export_referencedata(f)
     rgd = ReferenceGameData(f)
     meta = getmetadata(rgd)
 
-    for target in meta[:targets]
+    #TODO: 한꺼번에 3개이상 편집하면 안되는 이상한 버그때문에
+    # 임시로 shuffle해서 함
+    for target in shuffle(meta[:targets])
         export_referencedata(rgd, target)
     end
 end
 
-function export_referencedata(rgd::ReferenceGameData, x::AbstractString)
+function export_referencedata(rgd::ReferenceGameData, f::AbstractString)
     export_result = false
-    file = joinpath_gamedata(x)
+    xl_origin = joinpath_gamedata(f)
+    xl_cache = joinpath(GAMEPATH[:cache], f)
 
     if isa(rgd.data, DataFrame)
         sheet = "_"*split(basename(rgd), ".")[1]
 
         try
-            XLSX.openxlsx(file, mode="rw") do xf
+            XLSX.openxlsx(xl_origin, mode="rw") do xf
                 if !in(sheet, XLSX.sheetnames(xf))
-                    XLSX.addsheet!(xf, sheet)
+                    throw(Base.IOError("$sheet 가 없습니다.", xf))
                 end
                 XLSX.writetable!(xf[sheet], eachcol(rgd.data), names(rgd.data))
             end
-            @info "\'$(basename(file))\'에 $sheet 를 업데이트 하였습니다"
+
+            @info "\'$(basename(xl_origin))\'에 $sheet 를 업데이트 하였습니다"
             export_result = true
         catch e
-            #TODO: Shop. Residence, Special이 실패하는 이유 무엇???
             @show e
-            @warn "\'$file\'업데이트 실패 하였습니다"
+            @warn "\'$xl_origin\'업데이트 실패 하였습니다"
         end
     else
         @error "이거 만들어야 됨..."

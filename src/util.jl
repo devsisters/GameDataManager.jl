@@ -94,7 +94,7 @@ function countblock_buildtemplate()
         if !isempty(jsonfiles)
             for f in jsonfiles
                 file = joinpath(folder, f)
-                templates[file] = JSON.parsefile(file)
+                templates[chop(file;tail = 5)] = JSON.parsefile(file)
             end
         end
     end
@@ -136,7 +136,7 @@ https://www.notion.so/devsisters/bd0f40e315424d6894a1f90594d03f20
 
 
 """
-function compress_continentDB(roaddb, tag = v"0.0.1";
+function compress_continentDB(roaddb, tag = "v0.0.1";
         sourcepath = joinpath(GAMEPATH["mars-world-tools"], "ContinentGenerator/output"),
         outputpath = GAMEPATH["mars-world-seeds"])
 
@@ -164,8 +164,6 @@ function compress_continentDB(roaddb, tag = v"0.0.1";
     rm("$(filename).tar")
     rm("$(filename).tar.bz2")
 end
-
-
 
 # TODO: 이거 임시...
 function server_error_code()
