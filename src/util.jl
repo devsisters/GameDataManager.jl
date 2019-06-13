@@ -108,7 +108,10 @@ function countblock_buildtemplate()
     end
     return report
 end
-
+"""
+    report_buildtemplate()
+BuildTemplate별 사용 블록량 통계를 .csv로 추출한다
+"""
 function report_buildtemplate(delim ="\t")
     report = countblock_buildtemplate()
 
@@ -127,13 +130,15 @@ function report_buildtemplate(delim ="\t")
 
     # 요약 정보
     printstyled("BuildTemplate별 사용 블록량 통계입니다\n"; color=:green)
-    print("  ", "$(length(jsonpaths))개: ")
-    printstyled(normpath(output); color=:light_blue) # 왜 Atom에서 클릭 안됨???
+    print("  ", "$(length(jsonpaths))개: \n")
+    printstyled(normpath(output); color=:light_blue)
 end
 
 """
-https://www.notion.so/devsisters/bd0f40e315424d6894a1f90594d03f20
+    compress_continentDB(roaddb, tag)
 
+# https://www.notion.so/devsisters/bd0f40e315424d6894a1f90594d03f20
+# db 파일을 tar.bz2로 합축해주는 스크립트
 
 """
 function compress_continentDB(roaddb, tag = "v0.0.1";
@@ -163,10 +168,4 @@ function compress_continentDB(roaddb, tag = "v0.0.1";
     rm("$(filename).db")
     rm("$(filename).tar")
     rm("$(filename).tar.bz2")
-end
-
-# TODO: 이거 임시...
-function server_error_code()
-    address = "https://docs.google.com/spreadsheets/d/18JawRUJv0GgYvgPHCWT_bkr4bB3uhhW7oFRoc_ReytI/export?format=tsv"
-    # var savePath = Path.Combine(EditorPath.FileLoadPath, "ServerErrorCode.tsv");
 end

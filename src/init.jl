@@ -3,6 +3,9 @@ const GAMEDATA = Dict{Symbol, GameData}()
 const MANAGERCACHE = Dict{Symbol, Dict}()
 
 function __init__()
+    global CON = Currency{:CON}(1)
+    global CRY = Currency{:CRY}(1)
+    
     #NOTE Julia setting에 넣을 수 있는 ARGS로 교체 고려
     if isdefined(Main, :PATH_MARS_PROTOTYPE)
         init_path(Main.PATH_MARS_PROTOTYPE)

@@ -1,33 +1,57 @@
 module GameDataManager
 
-# using GameDataLocalizer TODO
-using Printf, Dates
 using Compat
-using XLSX, JSON, XLSXasJSON
+using Printf, UUIDs, Random, Dates, Statistics
 using Random, StatsBase, Distributions
-using DataFrames, DataStructures
+using XLSX, JSON, XLSXasJSON
+using DataFrames, DataStructures, CSV
 
-include("gamedata.jl")
+import Base: +, -, *, /, ==
+
+
+include("datahandler/gamedata.jl")
 
 include("init.jl")
-include("loader.jl")
-include("parser.jl")
-include("parser_rewardscript.jl")
+include("datahandler/loader.jl")
+include("datahandler/parser.jl")
+include("datahandler/parser_rewardscript.jl")
 
-include("validator.jl")
-include("editor.jl")
+include("datahandler/validator.jl")
+include("datahandler/editor.jl")
 
-include("writer/json.jl")
-include("writer/autoxl.jl")
-include("writer/history.jl")
-include("writer/referencedata.jl")
+include("datahandler/writer/json.jl")
+include("datahandler/writer/autoxl.jl")
+include("datahandler/writer/history.jl")
+include("datahandler/writer/referencedata.jl")
 # include("writer/typecheck.jl")
 
 include("util.jl")
 
-# 콘텐츠 특화 내용
+# TODO MarsSimulator 통합 중
 include("feature/pipoparttime.jl")
-include("feature/pipotalent.jl")
+include("feature/village.jl")
+
+
+# structs
+include("feature/abstract.jl")
+include("feature/stackitem/stackitem.jl")
+include("feature/stackitem/itemcollection.jl")
+include("feature/building/building.jl")
+include("feature/user/user.jl")
+include("feature/world/world.jl")
+include("feature/world/site.jl")
+include("feature/user/server.jl")
+
+# functions
+include("feature/stackitem/guid.jl")
+include("feature/stackitem/arithmetic.jl")
+include("feature/stackitem/cost.jl")
+
+include("feature/user/addremove.jl")
+
+include("feature/show.jl")
+include("feature/parser.jl")
+include("feature/query.jl")
 
 
 export GAMEPATH, GAMEDATA, help,
@@ -39,7 +63,12 @@ export GAMEPATH, GAMEDATA, help,
        # writer
        xl, autoxl, write_json, export_referencedata,
 
+       # 피쳐 기능
+       Village,
+
        # 유틸리티
-       findblock, report_buildtemplate, compress_continentDB
+       findblock, report_buildtemplate, compress_continentDB,
+       create_dummyaccount
+
 
 end
