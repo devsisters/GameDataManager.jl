@@ -30,17 +30,10 @@ function editor_Block!(jwb)
                         NameCol     => filter(!ismissing, unique(jws[NameCol])))
         df[:Members] = Array{Any}(undef, size(df, 1))
 
-        i = 1
-        df[i, :Members] = []
-        for row in eachrow(jws[:])
-            if !ismissing(row[:BlockSetKey])
-                i +=1
-                if i > size(df, 1)
-                    break
-                end
-                df[i, :Members] = []
-            end
-            push!(df[i, :Members], row[:Members])
+        i = 0
+        for gdf in groupby(jws[:], :BlockSetKey)
+            i += 1
+            df[i, :Members] = gdf[:Members]
         end
         df
     end
