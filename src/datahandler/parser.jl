@@ -2,7 +2,7 @@ function select_parser(f)
     startswith(f,"ItemTable.")   ? parser_ItemTable :
     startswith(f,"RewardTable.") ? parser_RewardTable :
     startswith(f,"Ability.")     ? parser_Ability :
-    startswith(f,"Home.")        ? parser_Building :
+    startswith(f,"Special.")     ? parser_Building :
     startswith(f,"Shop.")        ? parser_Building :
     startswith(f,"Residence.")   ? parser_Building :
     missing
@@ -39,12 +39,10 @@ function parser_ItemTable(gd::GameData)
 end
 
 function parser_RewardTable(gd::GameData)
-    parse!(getgamedata("ItemTable"; check_modified=true))
-
     d = parser_RewardTable(gd.data) # 1번 시트로 하드코딩됨
     gd.cache[:julia] = d
 
-    nothing
+    return gd
 end
 function parser_RewardTable(jwb::JSONWorkbook)
     parse!(getgamedata("ItemTable"; check_modified=true))
@@ -59,5 +57,100 @@ function parser_RewardTable(jwb::JSONWorkbook)
 end
 
 # MarsSimulator에서 관리
-function parser_Ability end
-function parser_Building end
+"""
+    parser_Ability(gd::GameData)
+
+컬럼명 하드 코딩되어있으니 변경, 추가시 반영 필요!!
+"""
+function parser_Ability(gd::GameData)
+    d = OrderedDict{Symbol, Dict}()
+    for gdf in groupby(gd.data[:Level][:], :AbilityKey)
+        key = Symbol(gdf[1, :AbilityKey])
+
+        d[key] = Dict{Symbol, Any}()
+        # single value
+        for col in (:Group, :IsValueReplace)
+            d[key][col] = begin
+                x = unique(gdf[col])
+                @assert length(x) == 1 "Ability $(key)에 일치하지 않는 $(col)데이터가 있습니다"
+                col == :Group ? Symbol(x[1]) : x[1]
+            end
+        end
+
+        for col in [:Level, :Value]
+            d[key][col] = gdf[col]
+        end
+    end
+    gd.cache[:julia] = d
+
+    return gd
+end
+
+function parser_Building(gd::GameData)
+    d = OrderedDict{Symbol, Dict}()
+    for row in eachrow(gd.data[:Building][:])
+        buildingkey = Symbol(row[:BuildingKey])
+        d[buildingkey] = Dict{Symbol, Any}()
+        for k in names(row)
+            d[buildingkey][k] = row[k]
+        end
+    end
+
+    for gdf in groupby(gd.data[:Level][:], :BuildingKey)
+        d2 = OrderedDict{Int8, Any}()
+        for row in eachrow(gdf)
+            d2[row[:Level]] = row
+        end
+        d[Symbol(gdf[1, :BuildingKey])][:Level] = d2
+    end
+
+    gd.cache[:julia] = d
+
+    return gd
+end
+
+
+
+# 이것들 뭐임? 왜 있어...
+function parse_gamedata(jws::JSONWorksheet)
+    if haskey(jws, :Key)
+        convert(Dict, jws)
+    else
+        df = deepcopy(jws[:])
+        for k in names(df)
+            v = df[k]
+            if eltype(v) <: AbstractDict
+                df[k] = parse_gamedata.(v)
+            end
+        end
+        df
+    end
+end
+function parse_gamedata(x::T) where T <: AbstractDict
+    Dict(map(k -> parse_gamedata(Symbol(k), x[k]), collect(keys(x))))
+end
+
+"""
+    parse_gamedata(k::Symbol, v)
+데이터 key에 적합한 GameItem 타입으로 변환한다.
+"""
+function parse_gamedata(k::Symbol, v)::Tuple
+    if k == :PriceCoin || k == :AddItemCoin
+        (k, Coin(v))
+    elseif k == :PriceCtystal || k == :AddItemCrystal
+        (k, Crystal(v))
+    else
+        (k, v)
+    end
+end
+
+function Base.convert(::Type{T}, jws::JSONWorksheet) where T <: AbstractDict
+    d = T{Symbol, Any}()
+    for row in eachrow(jws)
+        key = Symbol(row[:Key])
+        d[key] = Dict(map(k ->
+                      parse_gamedata(Symbol(k), row[k]),
+                      filter(x -> x != :Key, keys(row))))
+    end
+    return d
+end

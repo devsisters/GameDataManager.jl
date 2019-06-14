@@ -72,7 +72,22 @@ mutable struct Shop{Key} <: Building
 
     function (::Type{Shop{KEY}})(level) where KEY
         ref = getjuliadata(:Shop)[KEY]
-        new{KEY}(building_uid(), missing, level, Ability.(ref[:AbilityKey]))
+        abilities = Ability.(ref[:AbilityKey])
+        # TODO: 이거 무식함...... levelup! 함수 정의 필요
+        if level > 1
+            for lv in 2:level
+                target = ref[:Level][lv - 1][:Abilityup]
+                ability_groups = groupkey.(abilities)
+
+                for el in target
+                    idx = findfirst(x -> x == Symbol(el["Group"]), ability_groups)
+                    x = abilities[idx]
+                    abilities[idx] = Ability(itemkey(x), el["Level"])
+                end
+            end
+        end
+
+        new{KEY}(building_uid(), missing, level, abilities)
     end
 end
 Shop(key::AbstractString, level = 1) = Shop(Symbol(key), level)
@@ -86,6 +101,7 @@ end
 
 # Functions
 itemkey(x::Ability) = x.key
+groupkey(x::Ability) = typeof(x).parameters[1]
 itemkey(::Type{T}) where T <: Building = T.parameters[1]
 function itemkey(x::T) where T <: Building
     T.parameters[1]

@@ -23,8 +23,8 @@ function Village(category = "")
     end
 
     site_segment = Array{Union{Vector, Missing}}(missing, size(site_size))
-    home = Tuple(ref[1, :StartSitePosition])
-    site_segment[home[1]+1, home[2]+1] = ["Home"]
+    home = Tuple(ref[1, :AllocateSite_Home])
+    site_segment[home[2]+1, home[1]+1] = ["Home"]
 
     Village("", home, site_size, site_segment)
 end

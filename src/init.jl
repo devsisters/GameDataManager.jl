@@ -5,7 +5,7 @@ const MANAGERCACHE = Dict{Symbol, Dict}()
 function __init__()
     global CON = Currency{:CON}(1)
     global CRY = Currency{:CRY}(1)
-    
+
     #NOTE Julia setting에 넣을 수 있는 ARGS로 교체 고려
     if isdefined(Main, :PATH_MARS_PROTOTYPE)
         init_path(Main.PATH_MARS_PROTOTYPE)
@@ -107,28 +107,6 @@ function init_meta(path)
     return meta
 end
 
-"""
-    init_typechecker()
-
-"""
-function init_typechecker(path)
-    function recrusive_typeparser(p::Pair)
-        if isa(p[2], String)
-            T = @eval $(Symbol(p[2]))
-            r = T
-        else
-            r = Dict{String, Any}()
-            for el in p[2]
-                r[el[1]] = recrusive_typeparser(el)
-            end
-        end
-        return r
-    end
-
-    checker = JSON.parsefile("$path/_TypeCheck.json") |> x -> merge(x...)
-end
-
-
 function init_gamedata_history(file)
     h = isfile(file) ? JSON.parsefile(file; dicttype=Dict{String, Float64}) :
                        Dict{String, Float64}()
@@ -145,4 +123,25 @@ end
 function init_xlsxasjson()
     # Vector[] 컬럼 데이터 구분자 추가 [";", ","]
     push!(XLSXasJSON.DELIM, ",")
+end
+
+"""
+    init_typechecker()
+TODO...
+"""
+function init_typechecker(path)
+    function recrusive_typeparser(p::Pair)
+        if isa(p[2], String)
+            T = @eval $(Symbol(p[2]))
+            r = T
+        else
+            r = Dict{String, Any}()
+            for el in p[2]
+                r[el[1]] = recrusive_typeparser(el)
+            end
+        end
+        return r
+    end
+
+    checker = JSON.parsefile("$path/_TypeCheck.json") |> x -> merge(x...)
 end

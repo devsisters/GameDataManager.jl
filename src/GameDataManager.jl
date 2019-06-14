@@ -31,8 +31,8 @@ include("util.jl")
 include("feature/pipoparttime.jl")
 include("feature/village.jl")
 
-
 # structs
+include("feature/init.jl")
 include("feature/abstract.jl")
 include("feature/stackitem/stackitem.jl")
 include("feature/stackitem/itemcollection.jl")
@@ -50,17 +50,14 @@ include("feature/stackitem/cost.jl")
 include("feature/user/addremove.jl")
 
 include("feature/show.jl")
-include("feature/parser.jl")
 include("feature/query.jl")
 
 
 export GAMEPATH, GAMEDATA, help,
-       #
+       # datahandler
        GameData, ReferenceGameData, XLSXGameData, JSONGameData, UnityGameData,
          loadgamedata!, getgamedata, getjuliadata, parse!,
-       #
        init_meta,
-       # writer
        xl, autoxl, write_json, export_referencedata,
 
        # 피쳐 기능
@@ -68,7 +65,24 @@ export GAMEPATH, GAMEDATA, help,
 
        # 유틸리티
        findblock, report_buildtemplate, compress_continentDB,
-       create_dummyaccount
+       create_dummyaccount,
 
+       # Features
+      init_feature,
+      User,
+           area, pricecoin,
+      GameItem, ItemCollection,
+          Currency, CON, CRY,
+          StackItem, itemkey, itemcat, itemname,
+          ItemCollection,
+      NonStackItem, Building, Home, Residence, Shop, Ability,
+      AbstractCost, TotalCost, LevelupCost, AbilityCost,
+      #
+      Continent, City, Borough,
+      AbstractSite, PrivateSite,
+      #
+      value, has, add!, remove!,
+
+      AverageLandArea
 
 end
