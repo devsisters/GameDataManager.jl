@@ -96,6 +96,16 @@ function create_dummyaccount(amount; )
 
     v = []
     villagenames = getgamedata("NameGenerator", :WorldENG)[1, :Borough]
+    accountnames = ["인생이트롤", "단호박정식", "사기캐다", "사약왕드링킹",
+    "엄마쟤흙먹어", "인간되기글른인간", "난폭한말광량이", "데마시아의귀감", "아프리카청춘이다",
+    "벼랑위의당뇨", "돈들어손내놔", "이마로도끼까", "오뎅볶이데스까", "나름전설이다", "원할머니봐쌈", "캐리비안의해녀",
+    "반만고양이", "이웃집또털어", "오십칠분고통정보", "집수리영역가형", "반지하의제왕", "이빨까기인형", "메뚜기3분요리", "천국의계란",
+    "난앓아요", "뭔개소문", "생갈치1호의행방불명", "톱과젤리", "건넛집토토로", "양들의메밀묵", "짱구는목말라", "카드값어체리",
+    "보일러댁에아버님", "악의공룡둘리", "추적60인분", "라스트사물놀이", "시베리안허숙히", "백마탄환자", "환갑포청천", "벼락식혜",
+    "운도형밴드", "아줌마가대왕", "고스톱바둑왕", "음주소년아톰", "하얀마음뷁구", "닭큐멘터리", "유치원일진", "무즙파워레인저",
+    "농약먹구쿠우", "곰탕재료푸우", "오사마빈모뎀", "엎드려벌쳐", "노스트라단무지", "통키왕피구", "바람의점심", "스님백원만", "초록불고기",
+    "사담후시단", "태조샷건"]
+
     profile_pics = begin
         p = joinpath(GAMEPATH[:mars_repo], "unity/Assets/5_GameData/Images_BotProfile")
         chop.(readdir(p; extension = "png"); tail=4)
@@ -118,7 +128,7 @@ function create_dummyaccount(amount; )
         push!(v, OrderedDict(
                 "Mid" => "dummy_ac_$i",
                 "VillageName" => rand(villagenames),
-                "ProfilePic" => rand(profile_pics),
+                "ProfilePic" => rand(accountnames),
                 "TotalDevPoint" => 1,
                 "UserResources" => Dict("Coin" => 1, "Fuel" => 1),
                 "Segments" => segments))
