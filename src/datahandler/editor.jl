@@ -25,6 +25,8 @@ end
 function editor_Block!(jwb)
     function concatenate_blockset(jws)
         NameCol = Symbol("\$Name")
+
+        # TODO: DataFrame Groupby에서 구성하도록 수정 필수!!
         df = DataFrame(:BlockSetKey => filter(!ismissing, unique(jws[:BlockSetKey])),
                        :Icon        => filter(!ismissing, jws[:Icon]),
                         NameCol     => filter(!ismissing, unique(jws[NameCol])))

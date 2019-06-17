@@ -65,15 +65,20 @@ struct StackItem{CATEGORY, KEY} <: GameItem
     end
 end
 function StackItem(key, val=1)
+    @assert haskey(StackItem, key) "'Key:$(key)'은 ItemTable에 존재하지 않습니다"
     ref = GAMEDATA[:ItemTable].cache[:julia]
-    @assert haskey(ref, key) "'Key:$(key)''은 ItemTable에 존재하지 않습니다"
     T = Symbol(ref[key][:Category])
     StackItem{T, key}(val)
 end
 function StackItem(x::AbstractDict)
     # TODO: 이거 좀 구린데....
-
     StackItem(x["ItemKey"], x["Count"])
+end
+
+Base.haskey(::Type{StackItem}, key) = haskey(StackItem, parse(Int, key))
+function Base.haskey(::Type{StackItem}, key::Integer)
+    ref = GAMEDATA[:ItemTable].cache[:julia]
+    haskey(ref, key)
 end
 
 # access to composite type information

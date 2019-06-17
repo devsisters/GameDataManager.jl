@@ -1,3 +1,14 @@
+
+Base.haskey(::Type{Building}, x) = haskey(Building, Symbol(x))
+function Base.haskey(::Type{Building}, x::Symbol)
+    in(x, keys(getjuliadata(:Shop))) | in(x, keys(getjuliadata(:Residence))) | in(x, keys(getjuliadata(:Special)))
+end
+
+Base.haskey(::Type{Ability}, key) = haskey(Ability, Symbol(key))
+function Base.haskey(::Type{Ability}, key::Symbol)
+    haskey(getjuliadata(:Ability), key)
+end
+
 """
     Ability
 개조 항목
@@ -13,6 +24,8 @@ mutable struct Ability{GROUP}
 end
 Ability(key::AbstractString, level = 1) = Ability(Symbol(key), level)
 function Ability(key::Symbol, level = 1)
+    @assert haskey(Ability, key) "'Key:$(key)'은 Ability에 존재하지 않습니다"
+
     ref = getjuliadata(:Ability)[key]
     val = ref[:IsValueReplace] ? ref[:Value][level] : sum(ref[:Value][1:level])
 
@@ -111,6 +124,23 @@ function itemname(x::T) where T <: Building
     ref[Symbol("\$Name")]
 end
 
+function developmentpoint(x::T) where T <: Building
+    lv = x.level
+    ref = getjuliadata(nameof(T))[itemkey(x)]
+    ref[:Level][lv][:Reward]["DevelopmentPoint"]
+end
+function developmentpoint(x::T; cumulated=false) where T <: Building
+    ref = getjuliadata(nameof(T))[itemkey(x)]
+    if cumulated
+        sum(lv -> ref[:Level][lv][:Reward]["DevelopmentPoint"], 1:x.level)
+    else
+        lv = x.level
+        ref[:Level][lv][:Reward]["DevelopmentPoint"]
+    end
+end
+
+
+#fallback bunctions
 function Base.haskey(::Type{T}, k) where T <: Building
     haskey(getjuliadata(nameof(T)), k)
 end
