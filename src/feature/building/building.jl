@@ -1,13 +1,4 @@
 
-Base.haskey(::Type{Building}, x) = haskey(Building, Symbol(x))
-function Base.haskey(::Type{Building}, x::Symbol)
-    in(x, keys(getjuliadata(:Shop))) | in(x, keys(getjuliadata(:Residence))) | in(x, keys(getjuliadata(:Special)))
-end
-
-Base.haskey(::Type{Ability}, key) = haskey(Ability, Symbol(key))
-function Base.haskey(::Type{Ability}, key::Symbol)
-    haskey(getjuliadata(:Ability), key)
-end
 
 """
     Ability
@@ -141,6 +132,16 @@ end
 
 
 #fallback bunctions
+Base.haskey(::Type{Building}, x) = haskey(Building, Symbol(x))
+function Base.haskey(::Type{Building}, x::Symbol)
+    in(x, keys(getjuliadata(:Shop))) | in(x, keys(getjuliadata(:Residence))) | in(x, keys(getjuliadata(:Special)))
+end
+
+Base.haskey(::Type{Ability}, key) = haskey(Ability, Symbol(key))
+function Base.haskey(::Type{Ability}, key::Symbol)
+    haskey(getjuliadata(:Ability), key)
+end
+
 function Base.haskey(::Type{T}, k) where T <: Building
     haskey(getjuliadata(nameof(T)), k)
 end
