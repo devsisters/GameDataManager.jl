@@ -35,7 +35,7 @@ Dict(:sIcecream=>6,:sBarber=>4,:sHotdogstand=>4, :sGas=>4, :sCafe=>3, :sPolice=>
 Dict(:sIcecream=>6,:sBarber=>4,:sHotdogstand=>4, :sGas=>7, :sCafe=>3, :sPolice=>7, :sLibrary=>6, :sGrocery=>1, :rEcomodern=>31, :rMoneyparty=>19),
 Dict(:sIcecream=>6,:sBarber=>4,:sHotdogstand=>4, :sGas=>7, :sCafe=>8, :sPolice=>7, :sLibrary=>11, :sGrocery=>6,	:rEcomodern=>46, :rMoneyparty=>32)
 ]
-건물평균레벨 = [2,3,4,5,6,7,8,9,10,11,12]
+건물평균레벨 = [2,3,4,5,6, 7,8,9,10,11, 12]
 
 d = Dict()
 for lv in 1:10
@@ -47,6 +47,14 @@ for lv in 1:10
         append!(d[lv], broadcast(x -> T(key, 건물평균레벨[lv]), 1:el[2]))
     end
 end
+
+# 건물 평균레벨에 도달하면 습득하는 개척점수 총량 계산
+개척점수총량 = Int[]
+for lv in 1:10
+    p = broadcast(x -> GameDataManager.developmentpoint(x), d[lv])
+    push!(개척점수총량, sum(p))
+end
+
 
 # 레벨별 모든 ability 합계
 생산력총합 = []
@@ -98,7 +106,6 @@ function price_per_chunk(totalchunk, cost, prev_cost)
     chunk_prices = broadcast(i -> round(Int, solved_x + solved_d * i), 1:totalchunk)
 end
 
-area = village_initarea()
 
 v = Array{Any}(undef, 10)
 v[1] = fill(1, village_initarea())
