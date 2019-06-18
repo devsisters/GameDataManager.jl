@@ -88,3 +88,10 @@ function Base.show(io::IO, x::Continent)
     println(io, "Contient-", x.name)
     print(summary(x.child))
 end
+
+
+function Base.show(io::IO, x::DroneDelivery)
+    ref = getjuliadata("DroneDelivery")[x.group]
+    ref[:Order][x.order]
+    println(io, "{$(x.group)}:", "$(x.order) ", ref[:Order][x.order][:Desc])
+end

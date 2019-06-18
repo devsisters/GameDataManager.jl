@@ -129,7 +129,7 @@ open(joinpath(GAMEPATH[:cache], "siteprice.csv"), "w") do io
 end
 
 
-# 가게 레벨업 소모량보고 소요 시간 계산
+# 가게 레벨업 소모량보고 필요한 드론 배송 횟수 계산
 레벨별성장비용 = []
 for lv in 1:10
     mean_bdlevel = bdlevel_per_villagelevel[lv]
@@ -141,6 +141,14 @@ for lv in 1:10
     end
     push!(레벨별성장비용, sum(v))
 end
+
+
+getgamedata("Player", :DevelopmentLevel)[:DeliveryGroupPool]
+
+
+# 파트타임
+
+
 
 
 

@@ -6,6 +6,13 @@ function init_feature()
     # 사용할 데이터 테이블 메모리 로딩
     getgamedata("ItemTable"; parse = true)
     getgamedata("RewardTable"; parse = true)
+
+    init_buildingdata()
+
+    getgamedata("DroneDelivery"; parse = true)
+
+end
+function init_buildingdata()
     getgamedata("Residence"; parse = true)
     getgamedata("Shop"; parse = true)
     getgamedata("Special"; parse = true)

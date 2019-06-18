@@ -28,10 +28,6 @@ include("datahandler/writer/referencedata.jl")
 include("util.jl")
 
 # TODO MarsSimulator 통합 중
-include("feature/pipoparttime.jl")
-include("feature/village.jl")
-include("feature/rewardtable.jl")
-
 # structs
 include("feature/init.jl")
 include("feature/abstract.jl")
@@ -43,10 +39,15 @@ include("feature/world/world.jl")
 include("feature/world/site.jl")
 include("feature/user/server.jl")
 
+include("feature/pipoparttime.jl")
+include("feature/village.jl")
+include("feature/rewardtable.jl")
+include("feature/dronedelivery.jl")
+
 # functions
 include("feature/stackitem/guid.jl")
 include("feature/stackitem/arithmetic.jl")
-include("feature/stackitem/cost.jl")
+# include("feature/stackitem/cost.jl")
 
 include("feature/user/addremove.jl")
 
@@ -79,6 +80,8 @@ export GAMEPATH, GAMEDATA, help,
       NonStackItem, Building, Home, Residence, Shop, Ability,
       AbstractCost, TotalCost, LevelupCost, AbilityCost,
       RewardTable,
+      sample,
+      DroneDelivery,
       #
       Continent, City, Borough,
       AbstractSite, PrivateSite,

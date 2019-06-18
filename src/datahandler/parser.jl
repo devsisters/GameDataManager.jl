@@ -5,6 +5,7 @@ function select_parser(f)
     startswith(f,"Special.")     ? parser_Building :
     startswith(f,"Shop.")        ? parser_Building :
     startswith(f,"Residence.")   ? parser_Building :
+    startswith(f,"DroneDelivery.")   ? parser_DroneDelivery :
     missing
 end
 
@@ -108,6 +109,26 @@ function parser_Building(gd::GameData)
 
     return gd
 end
+function parser_DroneDelivery(gd::GameData)
+    d = OrderedDict{Symbol, Dict}()
+    for row in eachrow(gd.data[:Group][:])
+        key = Symbol(row[:GroupKey])
+        d[key] = Dict{Symbol, Any}(:RewardKey => row[:RewardKey])
+    end
+
+    for gdf in groupby(gd.data[:Order][:], :GroupKey)
+        key = Symbol(gdf[1, :GroupKey])
+        v =  map((dec, item) -> NamedTuple{(:Desc, :Items)}((dec, item)),
+                                            gdf[Symbol("\$Desc")], gdf[:Items])
+        d[key][:Order] = Dict{Int32, Any}(zip(gdf[:Key], v))
+    end
+
+    gd.cache[:julia] = d
+
+    return gd
+end
+
+
 
 
 

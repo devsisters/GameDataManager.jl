@@ -206,6 +206,9 @@ function validate_questtrigger(arr::Array)
     validate_questtrigger.(arr)
 end
 function validate_questtrigger(x::Array{T, 1}) where T <: AbstractString
+    init_buildingdata() #Shop, Residence, Building Data 준비
+    getgamedata("ItemTable"; parse = true) #ItemTable 준비
+
     trigger = Dict(
         "ShopCount"                    => (:equality, :number),
         "SiteCount"                    => (:equality, :number),
@@ -220,7 +223,13 @@ function validate_questtrigger(x::Array{T, 1}) where T <: AbstractString
         "SiteGradeCount"               => (:number,     :equality),
         "CoinCollecting"               => (:equality,   :number),
         "AbilityLevel"                 => (:abilitykey, :equality, :number),
-        "CoinPurchasing"               => (:equality, :number))
+        "CoinPurchasing"               => (:equality, :number),
+        "OwnedPipoCount"               => (:equality, :number),
+        "MaxVillageGrade"              => (:equality, :number),
+        "CompletePartTime"             => (:equality, :number),
+        "CompleteDelivery"             => (:equality, :number),
+        "CompleteBlockEdit"            => (:equality, :number))
+
 
     ref = get(trigger, string(x[1]), missing)
 

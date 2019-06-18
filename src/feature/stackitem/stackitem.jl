@@ -39,7 +39,7 @@ end
 function Currency(name::String, val)
     if name == "Coin"
         Currency(:CON, val)
-    elseif name == "Crystal"
+    elseif name == "Crystal" || name == "FreeCrystal"
         Currency(:CRY, val)
     end
 end

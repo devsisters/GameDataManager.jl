@@ -1,3 +1,12 @@
+
+"""
+    AbstractContent
+DroneDelivery
+PartTime
+Quest 등
+"""
+abstract type AbstractContent end
+
 """
     AbstractSite
 청크가 직사각형으로 모여 있는 땅
