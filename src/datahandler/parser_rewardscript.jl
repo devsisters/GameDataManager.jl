@@ -34,9 +34,14 @@ function RewardScript(data::Array{Array{T,1},1}) where T
     end
 end
 
+StatsBase.sample(a::FixedReward) = a.item
+
+function StatsBase.sample(a::RandomReward)
+    sample(a.item, a.weight)
+end
+
 #fallback
 Base.length(a::RewardScript) = length(a.item)
-
 
 ################################################################################
 ## Printing

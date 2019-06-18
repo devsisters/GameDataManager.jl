@@ -115,11 +115,6 @@ function itemname(x::T) where T <: Building
     ref[Symbol("\$Name")]
 end
 
-function developmentpoint(x::T) where T <: Building
-    lv = x.level
-    ref = getjuliadata(nameof(T))[itemkey(x)]
-    ref[:Level][lv][:Reward]["DevelopmentPoint"]
-end
 function developmentpoint(x::T; cumulated=false) where T <: Building
     ref = getjuliadata(nameof(T))[itemkey(x)]
     if cumulated
@@ -129,7 +124,19 @@ function developmentpoint(x::T; cumulated=false) where T <: Building
         ref[:Level][lv][:Reward]["DevelopmentPoint"]
     end
 end
+function levelupcost(x::T) where T <: Building
+    ref = getjuliadata(nameof(T))[itemkey(x)]
 
+end
+function levelupcost(key, lv)
+    T = buildingtype(key)
+    ref = getjuliadata(nameof(T))[key]
+    ref = ref[:Level][lv]
+
+    ItemCollection([Currency(:CON, ref[:LevelupCost]["PriceCoin"]),
+                    broadcast(el -> StackItem(el["Key"], el["Amount"]),
+                                        values(ref[:LevelupCostItem]))...])
+end
 
 #fallback bunctions
 Base.haskey(::Type{Building}, x) = haskey(Building, Symbol(x))
@@ -141,7 +148,6 @@ Base.haskey(::Type{Ability}, key) = haskey(Ability, Symbol(key))
 function Base.haskey(::Type{Ability}, key::Symbol)
     haskey(getjuliadata(:Ability), key)
 end
-
 function Base.haskey(::Type{T}, k) where T <: Building
     haskey(getjuliadata(nameof(T)), k)
 end

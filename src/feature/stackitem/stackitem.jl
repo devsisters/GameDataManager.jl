@@ -36,8 +36,15 @@ struct Currency{NAME, T} <: AbstractMonetary
         end
     end
 end
+function Currency(name::String, val)
+    if name == "Coin"
+        Currency(:CON, val)
+    elseif name == "Crystal"
+        Currency(:CRY, val)
+    end
+end
 Currency(NAME::Symbol; storage::DataType = Int) = Currency{NAME}(storage(1))
-Currency(NAME::Symbol, x) = Currency{NAME}(x)
+Currency(NAME::Symbol, val) = Currency{NAME}(val)
 # 실제 화폐와 달리 FixedDecimal을 사용할 필요가 없다
 # Monetary{NAME, I} = Currency{NAME, I}
 
@@ -70,16 +77,17 @@ function StackItem(key, val=1)
     T = Symbol(ref[key][:Category])
     StackItem{T, key}(val)
 end
-function StackItem(x::AbstractDict)
-    # TODO: 이거 좀 구린데....
-    StackItem(x["ItemKey"], x["Count"])
-end
 
 Base.haskey(::Type{StackItem}, key) = haskey(StackItem, parse(Int, key))
 function Base.haskey(::Type{StackItem}, key::Integer)
     ref = GAMEDATA[:ItemTable].cache[:julia]
     haskey(ref, key)
 end
+
+# RewardScript 대응
+GameItem(x::Tuple{String,Integer}) = Currency(x...)
+GameItem(x::Tuple{String, Integer, Integer}) = StackItem(x[2], x[3])
+
 
 # access to composite type information
 itemkey(::StackItem{CAT, KEY}) where {CAT, KEY} = KEY

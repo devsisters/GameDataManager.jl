@@ -30,6 +30,7 @@ include("util.jl")
 # TODO MarsSimulator 통합 중
 include("feature/pipoparttime.jl")
 include("feature/village.jl")
+include("feature/rewardtable.jl")
 
 # structs
 include("feature/init.jl")
@@ -77,6 +78,7 @@ export GAMEPATH, GAMEDATA, help,
           ItemCollection,
       NonStackItem, Building, Home, Residence, Shop, Ability,
       AbstractCost, TotalCost, LevelupCost, AbilityCost,
+      RewardTable,
       #
       Continent, City, Borough,
       AbstractSite, PrivateSite,

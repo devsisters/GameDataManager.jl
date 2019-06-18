@@ -119,7 +119,9 @@ function +(m::Currency{N1,T1}, n::Currency{N2,T2}) where {N1,N2,T1,T2}
 end
 +(m::ItemCollection, n::T) where T<:GameItem = m + ItemCollection(n)
 +(m::T, n::ItemCollection) where T<:GameItem = ItemCollection(m) + n
-
+function *(m::ItemCollection, i::Real)
+    ItemCollection(map(el -> el[2] * i, m))
+end
 
 function ==(m::ItemCollection{UUID, T}, n::ItemCollection{UUID, U}) where {T, U}
     b = true

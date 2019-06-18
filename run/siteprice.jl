@@ -2,6 +2,7 @@ using GameDataManager
 using DataStructures
 using JuMP, GLPK
 using CSV
+using StatsBase
 
 init_feature()
 
@@ -20,9 +21,8 @@ function village_initarea(vill = Village())
     area
 end
 
-# 계정레벨별 건물 종류와 레벨 놓고 시간당 코인 생산량 계산하자!!!
-
-레벨별건물수 = [
+# 마을 레벨별 건물 종류와 레벨 놓고 시간당 코인 생산량 계산하자!!!
+bd_per_villagelevel = [
 Dict(:sIcecream=>1,:rEcomodern=>1),
 Dict(:sIcecream=>3,:rEcomodern=>2),
 Dict(:sIcecream=>5,:sBarber=>1,:rEcomodern=>4),
@@ -35,23 +35,23 @@ Dict(:sIcecream=>6,:sBarber=>4,:sHotdogstand=>4, :sGas=>4, :sCafe=>3, :sPolice=>
 Dict(:sIcecream=>6,:sBarber=>4,:sHotdogstand=>4, :sGas=>7, :sCafe=>3, :sPolice=>7, :sLibrary=>6, :sGrocery=>1, :rEcomodern=>31, :rMoneyparty=>19),
 Dict(:sIcecream=>6,:sBarber=>4,:sHotdogstand=>4, :sGas=>7, :sCafe=>8, :sPolice=>7, :sLibrary=>11, :sGrocery=>6,	:rEcomodern=>46, :rMoneyparty=>32)
 ]
-건물평균레벨 = [2,3,4,5,6, 7,8,9,10,11, 12]
+bdlevel_per_villagelevel = [2,3,4,5,6, 7,8,9,10,11, 12]
 
-d = Dict()
+레벨별건물 = OrderedDict()
 for lv in 1:10
-    d[lv] = []
-    bd = 레벨별건물수[lv]
+    레벨별건물[lv] = []
+    bd = bd_per_villagelevel[lv]
     for el in bd
         key = el[1]
         T = startswith(string(key), "s") ? Shop : Residence
-        append!(d[lv], broadcast(x -> T(key, 건물평균레벨[lv]), 1:el[2]))
+        append!(레벨별건물[lv], broadcast(x -> T(key, bdlevel_per_villagelevel[lv]), 1:el[2]))
     end
 end
 
 # 건물 평균레벨에 도달하면 습득하는 개척점수 총량 계산
 개척점수총량 = Int[]
 for lv in 1:10
-    p = broadcast(x -> GameDataManager.developmentpoint(x), d[lv])
+    p = broadcast(x -> GameDataManager.developmentpoint(x), 레벨별건물[lv])
     push!(개척점수총량, sum(p))
 end
 
@@ -60,7 +60,7 @@ end
 생산력총합 = []
 for lv in 1:10
     d2 = Dict()
-    for el in d[lv]
+    for el in 레벨별건물[lv]
         for x in el.abilities
             g = GameDataManager.groupkey(x)
             d2[g] = get(d2, g, 0) + x.val
@@ -74,7 +74,7 @@ end
     1 => [0,   0],   2=>[2,  15],
     3 => [4,  25],  4=> [8,  40],
     5 => [16, 60],  6=> [32, 90],
-    7 => [64, 145], 8=> [128, 235],
+    7 => [64, 145], 8=> [128,235],
     9 => [256,385],10=> [512,640])
 
 for lv in 1:10
@@ -93,6 +93,7 @@ function price_per_chunk(totalchunk, cost, prev_cost)
         @variable(model, xmin <= d <= (cost / totalchunk), base_name="등차값")
 
         @constraint(model, cost >= (totalchunk * x) + (sum(1:totalchunk) * d))
+        # @constraint(model, d <= x)
 
         @objective(model, Min, cost - (totalchunk * x) - (sum(1:totalchunk) * d))
         optimize!(model)
@@ -126,3 +127,30 @@ open(joinpath(GAMEPATH[:cache], "siteprice.csv"), "w") do io
         write(io, string(el), "\n")
     end
 end
+
+
+# 가게 레벨업 소모량보고 소요 시간 계산
+레벨별성장비용 = []
+for lv in 1:10
+    mean_bdlevel = bdlevel_per_villagelevel[lv]
+    bd = bd_per_villagelevel[lv]
+
+    v = Array{Any, 1}(undef, length(bd))
+    for (i, el) in enumerate(bd)
+        v[i] = GameDataManager.levelupcost(el[1], mean_bdlevel) * el[2]
+    end
+    push!(레벨별성장비용, sum(v))
+end
+
+
+
+
+
+
+
+# 계산 결과들
+레벨별건물
+개척점수총량
+생산력총합
+사이트구매시간과면적
+레벨별성장비용
