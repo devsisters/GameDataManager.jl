@@ -20,7 +20,20 @@ function RewardTable(key)
          end
      elseif isa(r.reward, Array{RandomReward, 1})
          x = sample.(r.reward, n)
-         x = ItemCollection(GameItem.(x[1]))
+         items = broadcast(el -> GameItem.(el), x)
+         x = ItemCollection(convert(Array{GameItem, 1}, vcat(items...)))
      end
      return x
  end
+
+"""
+    expectedvalue
+보상 기대값
+Key, value로 제공
+"""
+function expectedvalue(r::RewardTable)
+    x = vcat(expectedvalue.(r.reward)...)
+    # 키가 같으면 합쳐주기
+    map(k -> (k, sum(getindex.(filter(el -> el[1] == k, x), 2))),
+                    unique(getindex.(x, 1)))
+end

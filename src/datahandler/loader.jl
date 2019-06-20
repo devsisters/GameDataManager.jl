@@ -84,8 +84,5 @@ getmetadata(jwb::JSONWorkbook) =  getmetadata(basename(xlsxpath(jwb)))
 이미 파싱이 끝났다고 가정함
 그냥 GAMEDATA(Symbol(file)) 의 단축키
 """
-
 getjuliadata(file::AbstractString) = getjuliadata(Symbol(file))
-function getjuliadata(file::Symbol)
-    GAMEDATA[file].cache[:julia]
-end
+getjuliadata(file::Symbol) = GAMEDATA[file].cache[:julia]

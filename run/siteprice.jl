@@ -4,7 +4,7 @@ using JuMP, GLPK
 using CSV
 using StatsBase
 
-init_feature()
+parse_juliadata(:All)
 
 """
     village_initarea()
@@ -71,14 +71,14 @@ end
 
 # 계정레벨별 구매할 사이트 구매에 사용할 비용과 청크 크기 책정 (몇분 채집)
 사이트구매시간과면적 = OrderedDict{Int, Any}(
-    1 => [0,   0],   2=>[2,  15],
-    3 => [4,  25],  4=> [8,  40],
-    5 => [16, 60],  6=> [32, 90],
-    7 => [64, 145], 8=> [128,235],
-    9 => [256,385],10=> [512,640])
+    1 => [0,  0],   2=>Real[0.5,  15],
+    3 => [1, 25],  4=> [2,  40],
+    5 => [3, 60],  6=> [6, 90],
+    7 => [12, 145], 8=> [24,235],
+    9 => [48,385],10=> [96,640])
 
 for lv in 1:10
-    totalcost = 생산력총합[lv][:ProfitCoin] * 사이트구매시간과면적[lv][1]
+    totalcost = convert(Int, 생산력총합[lv][:ProfitCoin] * 사이트구매시간과면적[lv][1])
     push!(사이트구매시간과면적[lv], totalcost)
 end
 
@@ -119,8 +119,9 @@ for lv in 2:10
     if lv > 2
         prev_cost = v[lv-1][end]
     end
-    x = price_per_chunk(totalchunk, cost, prev_cost)
-    v[lv] = x
+    # x = price_per_chunk(totalchunk, cost, prev_cost)
+    # 그냥 간단하게 하자...
+    v[lv] = fill(round(Int, cost / totalchunk), totalchunk)
 end
 open(joinpath(GAMEPATH[:cache], "siteprice.csv"), "w") do io
     for el in vcat(v...)
@@ -143,22 +144,68 @@ for lv in 1:10
 end
 
 
-getgamedata("Player", :DevelopmentLevel)[:DeliveryGroupPool]
-
-
-# 파트타임
 
 
 
+# 코인 생산 시간 계산
+레벨별코인비용 = map(x -> collect(values(x))[end], 레벨별성장비용)
+레벨별코인비용 .+=map(lv -> 사이트구매시간과면적[lv][end] * CON, 1:10)
+레벨별코인생산시간 = map(x -> x.val, 레벨별코인비용) ./ map(lv -> 생산력총합[lv][:ProfitCoin], 1:10)
 
 
 
 
 
+
+# 드론 배송 요구 횟수
+레벨별성장비용
+
+
+드론배송보상기대값 = Dict()
+for el in getjuliadata("DroneDelivery")
+    드론배송보상기대값[el[1]] = RewardTable(el[2][:RewardKey]) |> expectedvalue
+end
+
+function dronedelivery_reward_per_level(lv)
+    pool = getgamedata("Player", :DevelopmentLevel; check_modified=true)[:DeliveryGroupPool][lv]
+
+    ref = getjuliadata("DroneDelivery")
+
+    v = []
+    for el in pool
+        k = Symbol(el[1])
+        w = el[2] / sum(values(pool))
+        if !isnan(w) & !iszero(w)
+            ev = expectedvalue(RewardTable(ref[k][:RewardKey]))
+            append!(v, map(x -> (x[1], x[2] * w), ev))
+        end
+    end
+    return map(k -> (k, sum(getindex.(filter(el -> el[1] == k, v), 2))),
+                    unique(getindex.(v, 1)))
+end
+
+v = []
+ref = getgamedata("Player", :DevelopmentLevel)[:DeliveryGroupPool]
+for lv in 1:10
+
+end
+
+
+
+
+# 1만회 보상
+rewards = OrderedDict()
+for el in deliver
+    x = GameDataManager.deliveryreward(el[2])
+    rewards[el[1]] = sample(x, 10000)
+end
+
+GameDataManager.guid(CON)
 
 # 계산 결과들
 레벨별건물
 개척점수총량
 생산력총합
 사이트구매시간과면적
-레벨별성장비용
+레벨별성장비용, 레벨별코인비용
+레벨별코인생산시간

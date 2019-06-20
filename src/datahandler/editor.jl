@@ -1,5 +1,5 @@
 """
-    select_editor(f)
+    find_editor(f)
 
 하드코딩된 기준으로 데이터를 2차가공한다
 * Block : Key로 오름차순 정렬
@@ -8,7 +8,7 @@
 * NameGenerator : null 제거
 * CashStore : key 컬럼을 기준으로 'Data'시트에 'args'시트를 합친다
 """
-function select_editor(f)
+function find_editor(f)
     startswith(f,"Block.")         ? editor_Block! :
     startswith(f,"RewardTable.")   ? editor_RewardTable! :
     startswith(f,"BlockRewardTable.") ? editor_BlockRewardTable! :

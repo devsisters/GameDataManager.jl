@@ -18,6 +18,7 @@ function Ability(key::Symbol, level = 1)
     @assert haskey(Ability, key) "'Key:$(key)'은 Ability에 존재하지 않습니다"
 
     ref = getjuliadata(:Ability)[key]
+    @show ref
     val = ref[:IsValueReplace] ? ref[:Value][level] : sum(ref[:Value][1:level])
 
     Ability{ref[:Group]}(key, level, val)

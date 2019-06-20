@@ -29,7 +29,6 @@ include("util.jl")
 
 # TODO MarsSimulator 통합 중
 # structs
-include("feature/init.jl")
 include("feature/abstract.jl")
 include("feature/stackitem/stackitem.jl")
 include("feature/stackitem/itemcollection.jl")
@@ -70,18 +69,17 @@ export GAMEPATH, GAMEDATA, help,
        create_dummyaccount,
 
        # Features
-      init_feature,
+      parse_juliadata,
       User,
            area, pricecoin,
       GameItem, ItemCollection,
           Currency, CON, CRY,
-          StackItem, itemkey, itemcat, itemname,
+          StackItem, itemkey, itemvalue, itemcat, itemname,
           ItemCollection,
       NonStackItem, Building, Home, Residence, Shop, Ability,
-      AbstractCost, TotalCost, LevelupCost, AbilityCost,
-      RewardTable,
-      sample,
-      DroneDelivery,
+
+      RewardTable, sample, expectedvalue,
+      DroneDelivery, deliveryreward, deliverycost,
       #
       Continent, City, Borough,
       AbstractSite, PrivateSite,

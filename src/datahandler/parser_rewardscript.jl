@@ -37,11 +37,18 @@ end
 StatsBase.sample(a::FixedReward) = a.item
 
 StatsBase.sample(a::RandomReward) = sample(a.item, a.weight)
-function StatsBase.sample(a::RandomReward, n=1)
+function StatsBase.sample(a::RandomReward, n::Integer)
     # TODO 최적화 필요! 숫자만 뽑은 다음 더해주는게 좋을 듯...
     sample(a.item, a.weight, n; replace = true)
 end
 
+function expectedvalue(a::FixedReward)
+    broadcast(el -> (el[end-1], el[end] * 1.0), a.item)
+end
+function expectedvalue(a::RandomReward)
+    ev = a.weight / sum(a.weight)
+    broadcast(i -> (a.item[i][end-1], a.item[i][end] * ev[i]), 1:length(a.item))
+end
 #fallback
 Base.length(a::RewardScript) = length(a.item)
 

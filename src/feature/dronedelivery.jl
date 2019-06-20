@@ -1,4 +1,7 @@
-
+"""
+    DroneDelivery(group, order)
+해당 그룹의 order 중 무작위로 1개를 생성한다 
+"""
 struct DroneDelivery <: AbstractContent
     group::Symbol
     order::Int32
@@ -17,7 +20,7 @@ function deliverycost(x::DroneDelivery)
     items = broadcast(x -> StackItem(x["Key"], x["Amount"]), ref[:Order][x.order][:Items])
     ItemCollection(items)
 end
-function completereward(x::DroneDelivery)
+function deliveryreward(x::DroneDelivery)
     ref = getjuliadata("DroneDelivery")[x.group]
     return RewardTable(ref[:RewardKey])
 end

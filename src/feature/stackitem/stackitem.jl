@@ -56,7 +56,7 @@ partially-specified one.
 """
 filltype(::Type{Currency{NAME}}) where NAME = Currency{NAME, Int}
 itemkey(::Currency{T}) where {T} = T
-
+itemvalue(x::Currency) = x.val
 """
     StackItem
 * Material
@@ -92,3 +92,4 @@ GameItem(x::Tuple{String, Integer, Integer}) = StackItem(x[2], x[3])
 # access to composite type information
 itemkey(::StackItem{CAT, KEY}) where {CAT, KEY} = KEY
 itemcat(::StackItem{CAT, KEY}) where {CAT, KEY} = CAT
+itemvalue(x::StackItem) = x.val

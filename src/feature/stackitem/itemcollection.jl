@@ -33,6 +33,11 @@ Base.get(ic::ItemCollection, x, default) = get(ic.map, x, default)
 # need to allow user specified default in order to
 # correctly implement "informal" AbstractDict interface
 Base.getindex(ic::ItemCollection{T,V}, x) where {T,V} = getindex(ic.map, x)
+# function Base.getindex(ic::ItemCollection{T,V}, x::Type{GameItem}) where {T,V}
+#     @show x
+#     getindex(ic.map, guid(x))
+# end
+
 Base.setindex!(ic::ItemCollection, x, v) = setindex!(ic.map, x, v)
 
 Base.haskey(ic::ItemCollection, x) = haskey(ic.map, x)

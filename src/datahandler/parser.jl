@@ -1,4 +1,4 @@
-function select_parser(f)
+function find_parser(f)
     startswith(f,"ItemTable.")   ? parser_ItemTable :
     startswith(f,"RewardTable.") ? parser_RewardTable :
     startswith(f,"Ability.")     ? parser_Ability :
@@ -8,6 +8,25 @@ function select_parser(f)
     startswith(f,"DroneDelivery.")   ? parser_DroneDelivery :
     missing
 end
+"""
+        parse_juliadata()
+getjuliadata에서 불러오기 위해 파싱하여 저장
+"""
+function parse_juliadata(category::Symbol)
+    if category == :All
+        getgamedata("ItemTable"; parse = true)
+        getgamedata("RewardTable"; parse = true)
+
+        getgamedata("DroneDelivery"; parse = true)
+    end
+    if (category == :Building || category == :All)
+        getgamedata("Residence"; parse = true)
+        getgamedata("Shop"; parse = true)
+        getgamedata("Special"; parse = true)
+        getgamedata("Ability"; parse = true)
+    end
+end
+parse_juliadata(f::AbstractString) = getgamedata(f; parse = true)
 
 isparsed(gd::GameData) = get(gd.cache, :isparsed, false)
 function parse!(gd::GameData, force_parse = false)
@@ -24,7 +43,6 @@ function parse!(gd::GameData, force_parse = false)
 end
 
 function parser_ItemTable(gd::GameData)
-    #TODO: RewardKey는 아이템으로 파싱 할 것
     d = Dict{Int32, Any}()
     cols = [Symbol("\$Name"), :Category, :RewardKey]
     for row in eachrow(gd.data[:Stackable])

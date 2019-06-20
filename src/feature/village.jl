@@ -117,6 +117,9 @@ function create_dummyaccount(amount; )
         chop.(readdir(p; extension = "png"); tail=4)
     end
 
+    # TODO
+    # VillageIndex 번호 할당하기 http://marspot.devscake.com:25078/worldmap 참조
+    
     for i in 1:amount
         vill = Village()
         segments = OrderedDict{String, Any}()

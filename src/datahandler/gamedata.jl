@@ -50,11 +50,11 @@ function XLSXGameData(f; validate = true)
     jwb = JSONWorkbook(joinpath_gamedata(f), keys(meta), kwargs_per_sheet)
 
     if validate
-        validator = select_validator(f)
+        validator = find_validator(f)
     else
         validator = missing
     end
-    XLSXGameData(jwb, validator, select_localizer(f), select_editor(f), select_parser(f))
+    XLSXGameData(jwb, validator, find_localizer(f), find_editor(f), find_parser(f))
 end
 """
     ReferenceGameData
@@ -150,6 +150,6 @@ function Base.show(io::IO, gd::JSONGameData{T}) where T
 end
 
 # TODO: GameLocalizer로 옮길 것
-function select_localizer(f)
+function find_localizer(f)
     dummy_localizer!
 end
