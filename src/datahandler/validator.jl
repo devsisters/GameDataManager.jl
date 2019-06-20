@@ -15,6 +15,7 @@ function find_validator(f)
     startswith(f,"Ability.")     ? validator_Ability :
     startswith(f,"Residence.")   ? validator_Residence :
     startswith(f,"Shop.")        ? validator_Shop :
+    startswith(f,"Sandbox.")        ? validator_Sandbox :
     startswith(f,"Special.")     ? validator_Special :
     startswith(f,"Block.")       ? validator_Block :
     startswith(f,"RewardTable.") ? validator_RewardTable :
@@ -133,6 +134,14 @@ function validator_Residence(jwb)
 end
 validator_Shop(jwb) = validator_Residence(jwb)
 validator_Special(jwb) = validator_Residence(jwb)
+function validator_Sandbox(jwb)
+    path_template = joinpath(GAMEPATH[:mars_repo], "patch-data/BuildTemplate/Buildings")
+    for el in filter(!ismissing, jwb[:Level][:BuildingTemplate])
+        f = joinpath(path_template, "$el.json")
+        validate_file(path_template, "$el.json", "BuildingTemolate가 존재하지 않습니다")
+    end
+    nothing
+end
 
 function validator_Block(jwb::JSONWorkbook)
     b = begin
