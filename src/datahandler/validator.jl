@@ -1,5 +1,5 @@
 """
-    select_validator(f)
+    find_validator(f)
 개별 파일에 독자적으로 적용되는 규칙
 파일명, 컬럼명으로 검사한다.
 
@@ -11,7 +11,7 @@
               'Building'시트의 TemplateKey가 'Template' 시트의 Key에 있어야 한다
 * RewardTable : ItemKey 검사
 """
-function select_validator(f)
+function find_validator(f)
     startswith(f,"Ability.")     ? validator_Ability :
     startswith(f,"Residence.")   ? validator_Residence :
     startswith(f,"Shop.")        ? validator_Shop :
@@ -78,10 +78,19 @@ function validate_subset(a, b, msg = "다음의 멤버가 subset이 아닙니다
         if assert
             throw(AssertionError("$msg\n$(dif)"))
         else
-            @warn msg dif
+            @warn "$msg\n$(dif)"
         end
     end
-
+end
+function validate_file(root, file, msg = "가 존재하지 않습니다"; assert = false)
+    f = joinpath(root, file)
+    if !isfile(f)
+        if assert
+            throw(AssertionError("`$f` $msg"))
+        else
+            @warn "`$f` $msg"
+        end
+    end
 end
 
 function validator_Ability(jwb)
@@ -113,6 +122,12 @@ function validator_Residence(jwb)
     end
     buildgkey_level = broadcast(row -> (row[:BuildingKey], row[:Level]), eachrow(jwb[:Level]))
     @assert allunique(buildgkey_level) "$(basename(jwb))'Level' 시트에 중복된 Level이 있습니다"
+
+    path_template = joinpath(GAMEPATH[:mars_repo], "patch-data/BuildTemplate/Buildings")
+    for el in filter(!ismissing, jwb[:Level][:BuildingTemplate])
+        f = joinpath(path_template, "$el.json")
+        validate_file(path_template, "$el.json", "BuildingTemolate가 존재하지 않습니다")
+    end
 
     nothing
 end
@@ -206,7 +221,8 @@ function validate_questtrigger(arr::Array)
     validate_questtrigger.(arr)
 end
 function validate_questtrigger(x::Array{T, 1}) where T <: AbstractString
-    init_buildingdata() #Shop, Residence, Building Data 준비
+    parse_juliadata(:Building)
+    parse_juliadata("ItemTable")
     getgamedata("ItemTable"; parse = true) #ItemTable 준비
 
     trigger = Dict(
@@ -229,7 +245,6 @@ function validate_questtrigger(x::Array{T, 1}) where T <: AbstractString
         "CompletePartTime"             => (:equality, :number),
         "CompleteDelivery"             => (:equality, :number),
         "CompleteBlockEdit"            => (:equality, :number))
-
 
     ref = get(trigger, string(x[1]), missing)
 
