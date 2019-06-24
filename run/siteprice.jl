@@ -23,18 +23,18 @@ end
 
 # 마을 레벨별 건물 종류와 레벨 놓고 시간당 코인 생산량 계산하자!!!
 bd_per_villagelevel = [
-Dict(:sIcecream=>1,:rEcomodern=>1),
-Dict(:sIcecream=>3,:rEcomodern=>2),
-Dict(:sIcecream=>5,:sBarber=>1,:rEcomodern=>4),
-Dict(:sIcecream=>6,:sBarber=>3,:sHotdogstand=>1, :rEcomodern=>7),
-Dict(:sIcecream=>6,:sBarber=>4,:sHotdogstand=>3, :sGas=>1, :rEcomodern=>11),
-Dict(:sIcecream=>6,:sBarber=>4,:sHotdogstand=>3, :sGas=>3, :sCafe=>1, :rEcomodern=>12, :rMoneyparty=>1),
-Dict(:sIcecream=>6,:sBarber=>4,:sHotdogstand=>4, :sGas=>4, :sCafe=>2, :sPolice=>1, :rEcomodern=>13,	:rMoneyparty=>3),
-Dict(:sIcecream=>6,:sBarber=>4,:sHotdogstand=>4, :sGas=>4, :sCafe=>3, :sPolice=>2, :sLibrary=>1, :rEcomodern=>19, :rMoneyparty=>6),
-Dict(:sIcecream=>6,:sBarber=>4,:sHotdogstand=>4, :sGas=>4, :sCafe=>3, :sPolice=>4, :sLibrary=>3, :sGrocery=>1, :rEcomodern=>22,	:rMoneyparty=>11),
-Dict(:sIcecream=>6,:sBarber=>4,:sHotdogstand=>4, :sGas=>7, :sCafe=>3, :sPolice=>7, :sLibrary=>6, :sGrocery=>1, :rEcomodern=>31, :rMoneyparty=>19),
-Dict(:sIcecream=>6,:sBarber=>4,:sHotdogstand=>4, :sGas=>7, :sCafe=>8, :sPolice=>7, :sLibrary=>11, :sGrocery=>6,	:rEcomodern=>46, :rMoneyparty=>32)
-]
+Dict(:sIcecream=>1,	:rEcomodern=>1),
+Dict(:sIcecream=>1,	:sBarber=>1,    :rEcomodern=>1,		:rMailboxhouse=>1),
+Dict(:sIcecream=>2,	:sBarber=>1,	:sHotdogstand=>1,:rEcomodern=>1, :rMoneyparty=>1,	:rMailboxhouse=>1),
+Dict(:sIcecream=>2,	:sBarber=>2,	:sHotdogstand=>1,:rEcomodern=>4, :rMoneyparty=>1,	:rMailboxhouse=>1),
+Dict(:sIcecream=>3,	:sBarber=>2,	:sHotdogstand=>2,	:sGas=>1,	:rEcomodern=>4,	:rMoneyparty=>4,	:rMailboxhouse=>2),
+Dict(:sIcecream=>3,	:sBarber=>3,	:sHotdogstand=>2,	:sGas=>1,	:sCafe=>1,				:rEcomodern=>7,	:rMoneyparty=>4,	:rMailboxhouse=>2),
+Dict(:sIcecream=>3,	:sBarber=>3,	:sHotdogstand=>2,	:sGas=>1,	:sCafe=>1,	:sPolice=>1,	:sLibrary=>1,	:sGrocery=>1,	:rEcomodern=>7,	:rMoneyparty=>4,	:rMailboxhouse=>3,	:rWoodenhouse=>1),
+Dict(:sIcecream=>4,	:sBarber=>3,	:sHotdogstand=>3,	:sGas=>2,	:sCafe=>1,	:sPolice=>1,	:sLibrary=>1,	:sGrocery=>1,	:rEcomodern=>10,	:rMoneyparty=>7,	:rMailboxhouse=>3,	:rWoodenhouse=>1),
+Dict(:sIcecream=>4,	:sBarber=>4,	:sHotdogstand=>3,	:sGas=>2,	:sCafe=>2,	:sPolice=>2,	:sLibrary=>1,	:sGrocery=>2,	:rEcomodern=>10,	:rMoneyparty=>7,	:rMailboxhouse=>4,	:rWoodenhouse=>1),
+Dict(:sIcecream=>4,	:sBarber=>4,	:sHotdogstand=>4,	:sGas=>3,	:sCafe=>2,	:sPolice=>2,	:sLibrary=>2,	:sGrocery=>2,	:rEcomodern=>13,	:rMoneyparty=>10,	:rMailboxhouse=>4,	:rWoodenhouse=>1),
+Dict(:sIcecream=>4,	:sBarber=>4,	:sHotdogstand=>4,	:sGas=>4,	:sCafe=>4,	:sPolice=>2,	:sLibrary=>6,	:sGrocery=>4,	:rEcomodern=>13,	:rMoneyparty=>10,	:rMailboxhouse=>7,	:rWoodenhouse=>6)]
+
 bdlevel_per_villagelevel = [2,3,4,5,6, 7,8,9,10,11, 12]
 
 레벨별건물 = OrderedDict()
@@ -71,17 +71,16 @@ end
 
 # 계정레벨별 구매할 사이트 구매에 사용할 비용과 청크 크기 책정 (몇분 채집)
 사이트구매시간과면적 = OrderedDict{Int, Any}(
-    1 => [0,  0],   2=>Real[0.5,  15],
-    3 => [1, 25],  4=> [2,  40],
-    5 => [3, 60],  6=> [6, 90],
-    7 => [12, 145], 8=> [24,235],
-    9 => [48,385],10=> [96,640])
+    1 => Real[0,  0],   2=>Real[0.15,  15],
+    3 => Real[0.5, 25],  4=> Real[1,  40],
+    5 => Real[1.5, 60],  6=> Real[4, 90],
+    7 => Real[8, 145], 8=> Real[15,235],
+    9 => Real[30,385],10=> Real[60,640])
 
 for lv in 1:10
-    totalcost = convert(Int, 생산력총합[lv][:ProfitCoin] * 사이트구매시간과면적[lv][1])
+    totalcost = round(Int, 생산력총합[lv][:ProfitCoin] * 사이트구매시간과면적[lv][1])
     push!(사이트구매시간과면적[lv], totalcost)
 end
-
 
 function price_per_chunk(totalchunk, cost, prev_cost)
     solved_x = 0.
