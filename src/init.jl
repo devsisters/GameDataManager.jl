@@ -22,17 +22,18 @@ function __init__()
 end
 function init_path(path)
     GAMEPATH[:mars_repo] = path
+    GAMEPATH[:patch_data] = joinpath(path, "patch-data")
     GAMEPATH[:cache] = normpath(joinpath(@__DIR__, "../.cache"))
     GAMEPATH[:history] = joinpath(GAMEPATH[:cache], "history.json")
     GAMEPATH[:referencedata_history] = joinpath(GAMEPATH[:cache], "referencedata_history.json")
-    GAMEPATH[:xlsx] = Dict("root" => joinpath(GAMEPATH[:mars_repo], "patch-data/_GameData"))
+    GAMEPATH[:xlsx] = Dict("root" => joinpath(GAMEPATH[:patch_data], "_GameData"))
     for (root, dirs, files) in walkdir(GAMEPATH[:xlsx]["root"])
         for f in filter(x -> (is_xlsxfile(x) && !startswith(x, "~\$")), files)
             @assert !haskey(GAMEPATH[:xlsx], f) "$f 파일이 중복됩니다. 폴더가 다르더라도 파일명을 다르게 해주세요"
             GAMEPATH[:xlsx][f] = replace(root, GAMEPATH[:mars_repo]*"/" => "")
         end
     end
-    GAMEPATH[:json] = Dict("root" => joinpath(GAMEPATH[:mars_repo], "patch-data/BalanceTables"))
+    GAMEPATH[:json] = Dict("root" => joinpath(GAMEPATH[:patch_data], "BalanceTables"))
     for (root, dirs, files) in walkdir(GAMEPATH[:json]["root"])
         for f in filter(x -> endswith(x, ".json"), files)
             @assert !haskey(GAMEPATH[:json], f) "$f 파일이 중복됩니다. 폴더가 다르더라도 파일명을 다르게 해주세요"

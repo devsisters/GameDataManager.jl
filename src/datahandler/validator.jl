@@ -124,7 +124,7 @@ function validator_Residence(jwb)
     buildgkey_level = broadcast(row -> (row[:BuildingKey], row[:Level]), eachrow(jwb[:Level]))
     @assert allunique(buildgkey_level) "$(basename(jwb))'Level' 시트에 중복된 Level이 있습니다"
 
-    path_template = joinpath(GAMEPATH[:mars_repo], "patch-data/BuildTemplate/Buildings")
+    path_template = joinpath(GAMEPATH[:patch_data], "BuildTemplate/Buildings")
     for el in filter(!ismissing, jwb[:Level][:BuildingTemplate])
         f = joinpath(path_template, "$el.json")
         validate_file(path_template, "$el.json", "BuildingTemolate가 존재하지 않습니다")
@@ -214,6 +214,14 @@ function validator_Quest(jwb::JSONWorkbook)
     for i in 1:size(jws, 1)
         validate_questtrigger(jws[i, :Trigger])
         validate_questtrigger(jws[i, :CompleteCondition])
+    end
+    # Dialogue 파일 유무 체크
+    path_dialogue = joinpath(GAMEPATH[:patch_data], "Dialogue")
+    for el in jws[:CompleteAction]
+        f = el["QuestDialogue"]
+        if !ismissing(f)
+            validate_file(path_dialogue, "$(f).json", "Dialogue가 존재하지 않습니다")
+        end
     end
     nothing
 end
