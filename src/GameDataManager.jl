@@ -8,21 +8,20 @@ using DataFrames, DataStructures, CSV
 
 import Base: +, -, *, /, ==
 
-
-include("datahandler/gamedata.jl")
+# BalanceTable
+include("datahandler/balancetable/balancetable.jl")
 
 include("init.jl")
 include("datahandler/loader.jl")
 include("datahandler/parser.jl")
 include("datahandler/parser_rewardscript.jl")
 
-include("datahandler/validator.jl")
-include("datahandler/editor.jl")
-
 include("datahandler/writer/json.jl")
 include("datahandler/writer/autoxl.jl")
 include("datahandler/writer/history.jl")
 include("datahandler/writer/referencedata.jl")
+
+
 # include("writer/typecheck.jl")
 
 include("util.jl")
@@ -56,7 +55,7 @@ include("feature/query.jl")
 
 export GAMEPATH, GAMEDATA, help,
        # datahandler
-       GameData, ReferenceGameData, XLSXGameData, JSONGameData, UnityGameData,
+       BalanceTable, XLSXBalanceTable, JSONBalanceTable, UnityBalanceTable,
          loadgamedata!, getgamedata, getjuliadata, parse!,
        init_meta,
        xl, autoxl, write_json, export_referencedata,
@@ -84,8 +83,6 @@ export GAMEPATH, GAMEDATA, help,
       Continent, City, Borough,
       AbstractSite, PrivateSite,
       #
-      value, has, add!, remove!,
-
-      AverageLandArea
+      has, add!, remove!
 
 end

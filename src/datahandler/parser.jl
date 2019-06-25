@@ -28,8 +28,8 @@ function parse_juliadata(category::Symbol)
 end
 parse_juliadata(f::AbstractString) = getgamedata(f; parse = true)
 
-isparsed(gd::GameData) = get(gd.cache, :isparsed, false)
-function parse!(gd::GameData, force_parse = false)
+isparsed(gd::BalanceTable) = get(gd.cache, :isparsed, false)
+function parse!(gd::BalanceTable, force_parse = false)
     if ismissing(gd.parser)
         @warn "$(xlsxpath(gd.data))는 parser가 정의되지 않았습니다"
     else
@@ -42,7 +42,7 @@ function parse!(gd::GameData, force_parse = false)
     return gd
 end
 
-function parser_ItemTable(gd::GameData)
+function parser_ItemTable(gd::BalanceTable)
     d = Dict{Int32, Any}()
     cols = [Symbol("\$Name"), :Category, :RewardKey]
     for row in eachrow(gd.data[:Stackable])
@@ -57,7 +57,7 @@ function parser_ItemTable(gd::GameData)
     nothing
 end
 
-function parser_RewardTable(gd::GameData)
+function parser_RewardTable(gd::BalanceTable)
     d = parser_RewardTable(gd.data) # 1번 시트로 하드코딩됨
     gd.cache[:julia] = d
 
@@ -77,11 +77,11 @@ end
 
 # MarsSimulator에서 관리
 """
-    parser_Ability(gd::GameData)
+    parser_Ability(gd::BalanceTable)
 
 컬럼명 하드 코딩되어있으니 변경, 추가시 반영 필요!!
 """
-function parser_Ability(gd::GameData)
+function parser_Ability(gd::BalanceTable)
     d = OrderedDict{Symbol, Dict}()
     for gdf in groupby(gd.data[:Level][:], :AbilityKey)
         key = Symbol(gdf[1, :AbilityKey])
@@ -105,7 +105,7 @@ function parser_Ability(gd::GameData)
     return gd
 end
 
-function parser_Building(gd::GameData)
+function parser_Building(gd::BalanceTable)
     d = OrderedDict{Symbol, Dict}()
     for row in eachrow(gd.data[:Building][:])
         buildingkey = Symbol(row[:BuildingKey])
@@ -127,7 +127,7 @@ function parser_Building(gd::GameData)
 
     return gd
 end
-function parser_DroneDelivery(gd::GameData)
+function parser_DroneDelivery(gd::BalanceTable)
     d = OrderedDict{Symbol, Dict}()
     for row in eachrow(gd.data[:Group][:])
         key = Symbol(row[:GroupKey])

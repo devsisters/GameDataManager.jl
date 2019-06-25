@@ -30,7 +30,7 @@ function export_gamedata(files::Vector; loadgamedata = false)
         @info "xlsx -> json 추출을 시작합니다 ⚒\n" * "-"^(displaysize(stdout)[2]-4)
         for f in files
             println("『", f, "』")
-            gd = loadgamedata ? loadgamedata!(f) : GameData(f)
+            gd = loadgamedata ? loadgamedata!(f) : BalanceTable(f)
             write_json(gd.data)
         end
         @info "json 추출이 완료되었습니다 ☺"
@@ -54,7 +54,7 @@ function write_json(jwb::JSONWorkbook)
         @printf("   saved => \"%s\" \n", file)
     end
 end
-function write_json(jgd::JSONGameData, indent = 2)
+function write_json(jgd::JSONBalanceTable, indent = 2)
     file = jgd.filepath
     open(file, "w") do io
         JSON.print(io, jgd.data, indent)

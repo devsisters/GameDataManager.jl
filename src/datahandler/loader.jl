@@ -14,7 +14,7 @@ gamedata로 데이터를 불러온다
 """
 function loadgamedata!(f, gamedata = GAMEDATA; kwargs...)
     k = Symbol(split(f, ".")[1])
-    gamedata[k] = GameData(f; kwargs...)
+    gamedata[k] = BalanceTable(f; kwargs...)
 
     printstyled("GAMEDATA[:$(k)] is loaded from Excel\n"; color=:yellow)
     return gamedata[k]

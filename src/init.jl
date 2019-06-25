@@ -1,5 +1,5 @@
 const GAMEPATH = Dict{Any, Any}()
-const GAMEDATA = Dict{Symbol, GameData}()
+const GAMEDATA = Dict{Symbol, BalanceTable}()
 const MANAGERCACHE = Dict{Symbol, Dict}()
 
 function __init__()
