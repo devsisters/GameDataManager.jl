@@ -76,9 +76,9 @@ end
 function create_dummyaccount(amount; )
     function foo(vill, segment_type, level_range = 1:1)
         bds = []
-        ref = getgamedata(segment_type, :Building)
+        ref = getgamedata(segment_type, :Building; check_modified = true)
         for key in ref[:BuildingKey]
-            if !in(key, ["sShopTest", "Home"])
+            if !in(key, ["Home"])
                 d = Dict()
                 d["BuildingKey"] = key
                 d["Level"] = rand(level_range)
