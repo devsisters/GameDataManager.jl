@@ -32,7 +32,7 @@ end
 function ismodified(f)::Bool
     file = is_xlsxfile(f) ? f : MANAGERCACHE[:meta][:xlsx_shortcut][f]
 
-    mtime(joinpath_gamedata(file)) != get(MANAGERCACHE[:history], file ,0.)
+    mtime(joinpath_gamedata(file)) >= get(MANAGERCACHE[:history], file ,0.)
 end
 
 """
