@@ -4,7 +4,7 @@ using XLSXasJSON
 
 GDM = GameDataManager
 
-include("rewardscript.jl")
+include("datahandler.jl")
 
 
 @testset "loader 테스트" begin

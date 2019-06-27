@@ -64,7 +64,7 @@ export GAMEPATH, GAMEDATA, help,
        Village,
 
        # 유틸리티
-       findblock, report_buildtemplate, compress_continentDB,
+       findblock, get_buildings, get_blocks, compress_continentDB,
        create_dummyaccount,
 
        # Features

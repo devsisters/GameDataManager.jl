@@ -85,7 +85,14 @@ function findblock()
     printstyled(normpath(file); color=:light_blue) # 왜 Atom에서 클릭 안됨???
 end
 
-function countblock_buildtemplate()
+
+
+
+"""
+get_buildings()
+    건물에 사용된 block 리스트를 가져온다
+"""
+function get_buildings()
     root = joinpath(GAMEPATH[:json]["root"], "../BuildTemplate/Buildings")
     templates = Dict{String, Any}()
 
@@ -108,6 +115,16 @@ function countblock_buildtemplate()
     end
     return report
 end
+
+"""
+get_block()
+블록이 사용된 건물 리스트를 가져온다
+"""
+function get_block()
+
+end
+
+
 """
     report_buildtemplate()
 BuildTemplate별 사용 블록량 통계를 .csv로 추출한다
