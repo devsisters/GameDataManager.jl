@@ -57,3 +57,16 @@ function editor_RewardTable!(jwb)
 
     return jwb
 end
+
+
+function parser_RewardTable(jwb::JSONWorkbook)
+    parse!(getgamedata("ItemTable"; check_modified=true))
+
+    jws = jwb[1] # 1번 시트로 하드코딩됨
+    d = Dict{Int32, Any}()
+    for row in eachrow(jws)
+        el = row[:RewardScript]
+        d[row[:RewardKey]] = (TraceTag = el[:TraceTag], Rewards = RewardScript(el[:Rewards]))
+    end
+    return d
+end

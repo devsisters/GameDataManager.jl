@@ -1,5 +1,7 @@
-
-function validator_Residence(jwb)
+validator_Shop(jwb) = validator_Building(jwb)
+validator_Residence(jwb) = validator_Building(jwb)
+validator_Special(jwb) = validator_Building(jwb)
+function validator_Building(jwb)
     jws = jwb[:Building]
 
     abilitykey = getgamedata("Ability", :Level, :AbilityKey; check_modified = true)
@@ -19,8 +21,6 @@ function validator_Residence(jwb)
 
     nothing
 end
-validator_Shop(jwb) = validator_Residence(jwb)
-validator_Special(jwb) = validator_Residence(jwb)
 function validator_Sandbox(jwb)
     path_template = joinpath(GAMEPATH[:mars_repo], "patch-data/BuildTemplate/Buildings")
     for el in filter(!ismissing, jwb[:Level][:BuildingTemplate])
@@ -28,4 +28,27 @@ function validator_Sandbox(jwb)
         validate_file(path_template, "$el.json", "BuildingTemolate가 존재하지 않습니다")
     end
     nothing
+end
+
+parser_Special(jwb) = parser_Building(jwb)
+parser_Shop(jwb) = parser_Building(jwb)
+parser_Residence(jwb) = parser_Building(jwb)
+function parser_Building(jwb::JSONWorkbook)
+    d = OrderedDict{Symbol, Dict}()
+    for row in eachrow(jwb[:Building][:])
+        buildingkey = Symbol(row[:BuildingKey])
+        d[buildingkey] = Dict{Symbol, Any}()
+        for k in names(row)
+            d[buildingkey][k] = row[k]
+        end
+    end
+
+    for gdf in groupby(jwb[:Level][:], :BuildingKey)
+        d2 = OrderedDict{Int8, Any}()
+        for row in eachrow(gdf)
+            d2[row[:Level]] = row
+        end
+        d[Symbol(gdf[1, :BuildingKey])][:Level] = d2
+    end
+    return d
 end

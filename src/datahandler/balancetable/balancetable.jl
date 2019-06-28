@@ -28,23 +28,17 @@ JSONWorksheet를 쥐고 있음
 struct XLSXBalanceTable <: BalanceTable
     data::JSONWorkbook
     # 사용할 함수들
-    validator::Union{Missing, Function}
-    localizer::Union{Missing, Function}
-    editor::Union{Missing, Function}
-    parser::Union{Missing, Function}
     cache::Dict{Symbol, Any}
-    function XLSXBalanceTable(jwb::JSONWorkbook, validator, localizer, editor, parser)
-        validate_general(jwb)
-
-        !ismissing(editor)    && editor(jwb)
-        !ismissing(validator) && validator(jwb)
-        !ismissing(localizer) && localizer(jwb)
+    function XLSXBalanceTable(jwb::JSONWorkbook; check_valid = true)
+        editor!(jwb)
+        check_valid && validator(jwb)
+        dummy_localizer!(jwb)
 
         cache = Dict{Symbol, Any}()
-        new(jwb, validator, localizer, editor, parser, cache)
+        new(jwb, cache)
     end
 end
-function XLSXBalanceTable(f; validate = true)
+function XLSXBalanceTable(f::AbstractString)
     meta = getmetadata(f)
 
     kwargs_per_sheet = Dict()
@@ -53,12 +47,7 @@ function XLSXBalanceTable(f; validate = true)
     end
     jwb = JSONWorkbook(joinpath_gamedata(f), keys(meta), kwargs_per_sheet)
 
-    if validate
-        validator = find_validator(f)
-    else
-        validator = missing
-    end
-    XLSXBalanceTable(jwb, validator, find_localizer(f), find_editor(f), find_parser(f))
+    XLSXBalanceTable(jwb)
 end
 """
     ReferenceGameData
@@ -159,33 +148,26 @@ end
 # 
 ############################################################################
 """
-    find_validator(f)
+    validator(f)
 개별 파일에 독자적으로 적용되는 규칙
 파일명, 컬럼명으로 검사한다.
 
-**파일별 검사 항목**
-* Ability   : 사용가능한 'Group'은 코드에서 정의된다
-* Residence : AbilityKey 검사
-* Building  : AbiliyKey 검사
-* Block     : 'Building'과 'Deco'시트의 Key가 중복되면 안된다
-              'Building'시트의 TemplateKey가 'Template' 시트의 Key에 있어야 한다
-* RewardTable : ItemKey 검사
 """
-function find_validator(f)
-    startswith(f,"Ability.")     ? validator_Ability :
-    startswith(f,"Residence.")   ? validator_Residence :
-    startswith(f,"Shop.")        ? validator_Shop :
-    startswith(f,"Sandbox.")        ? validator_Sandbox :
-    startswith(f,"Special.")     ? validator_Special :
-    startswith(f,"Block.")       ? validator_Block :
-    startswith(f,"RewardTable.") ? validator_RewardTable :
-    startswith(f,"BlockRewardTable.") ? validator_BlockRewardTable :
-    startswith(f,"Quest.")       ? validator_Quest :
-    missing
+function validator(jwb::JSONWorkbook)
+    # 공통 규칙
+    validate_general(jwb)
+
+    filename = basename(jwb)
+    f = Symbol("validator_", split(filename, ".")[1])
+    # validator 함수명 규칙에 따라 해당 함수가 있는지 찾는다
+    if isdefined(GameDataManager, f)
+        foo = getfield(GameDataManager, f)
+        foo(jwb)
+    end
 end
 
 """
-    find_editor(f)
+    editor!(f)
 
 하드코딩된 기준으로 데이터를 2차가공한다
 * Block : Key로 오름차순 정렬
@@ -194,18 +176,15 @@ end
 * NameGenerator : null 제거
 * CashStore : key 컬럼을 기준으로 'Data'시트에 'args'시트를 합친다
 """
-function find_editor(f)
-    startswith(f,"Block.")         ? editor_Block! :
-    startswith(f,"RewardTable.")   ? editor_RewardTable! :
-    startswith(f,"BlockRewardTable.") ? editor_BlockRewardTable! :
-    startswith(f,"Quest.")         ? editor_Quest! :
-    startswith(f,"NameGenerator.") ? editor_NameGenerator! :
-    startswith(f,"CashStore.")     ? editor_CashStore! :
-    # startswith(f,"PartTime.")      ? editor_PartTime! : 기획 수정
-    startswith(f,"PipoDemographic.") ? editor_PipoDemographic! :
-    startswith(f,"PipoTalent.") ? editor_PipoTalent! :
-
-    missing
+function editor!(jwb::JSONWorkbook)
+    filename = basename(jwb)
+    f = Symbol("editor_", split(filename, ".")[1], "!")
+    # editor 함수명 규칙에 따라 해당 함수가 있는지 찾는다
+    if isdefined(GameDataManager, f)
+        foo = getfield(GameDataManager, f)
+        foo(jwb)
+    end
+    return jwb
 end
 
 """
@@ -315,12 +294,39 @@ function replace_nullvalue!(jwb::JSONWorkbook, sheet, key, value)
 end
 
 ############################################################################
+# Parser
+# Julia에서 사용하기 좋은 형태로 가공한다
+############################################################################
+function parse!(gd::BalanceTable, force_parse = false)
+    if !isparsed(gd) || force_parse
+        x = parse(gd.data)
+        if !ismissing(x)
+            gd.cache[:isparsed] = true
+            gd.cache[:julia] = x
+        else
+            @warn "$(xlsxpath(gd.data))는 parser가 존재하지 않습니다."
+        end
+    end
+
+    return gd
+end
+
+function Base.parse(jwb::JSONWorkbook)
+    filename = basename(jwb)
+    f = Symbol("parser_", split(filename, ".")[1])
+    # editor 함수명 규칙에 따라 해당 함수가 있는지 찾는다
+    r = missing
+    if isdefined(GameDataManager, f)
+        foo = getfield(GameDataManager, f)
+        r = foo(jwb)
+    end
+    return r
+end
+
+############################################################################
 # Localizer
 # TODO: GameLocalizer로 옮길 것
 ############################################################################
-function find_localizer(f)
-    dummy_localizer!
-end
 """
     dummy_localizer!
 진짜 로컬라이저 만들기 전에 우선 컬럼명만 복제해서 2개로 만듬
