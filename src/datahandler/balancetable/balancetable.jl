@@ -1,5 +1,5 @@
 for f in readdir(joinpath(@__DIR__, "xlsx"))
-    include("XLSX/$f")
+    include("xlsx/$f")
 end
 
 """
