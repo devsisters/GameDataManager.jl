@@ -23,7 +23,7 @@ end
 function init_path(path)
     GAMEPATH[:mars_repo] = path
     GAMEPATH[:patch_data] = joinpath(path, "patch-data")
-    GAMEPATH[:cache] = normpath(joinpath(@__DIR__, "../.cache"))
+    GAMEPATH[:cache] = normpath(joinpath(GAMEPATH[:patch_data], ".cache"))
     GAMEPATH[:history] = joinpath(GAMEPATH[:cache], "history.json")
     GAMEPATH[:referencedata_history] = joinpath(GAMEPATH[:cache], "referencedata_history.json")
     GAMEPATH[:xlsx] = Dict("root" => joinpath(GAMEPATH[:patch_data], "_GameData"))

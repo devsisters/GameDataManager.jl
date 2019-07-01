@@ -19,7 +19,6 @@ function validator_BlockRewardTable(jwb::JSONWorkbook)
     nothing
 end
 
-
 function editor_BlockRewardTable!(jwb)
     function get_reward(rewards)
         v = Vector{Vector{String}}(undef, length(rewards))

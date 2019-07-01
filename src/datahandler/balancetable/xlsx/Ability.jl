@@ -1,4 +1,3 @@
-
 function validator_Ability(jwb)
     jws = jwb[:Level]
 
