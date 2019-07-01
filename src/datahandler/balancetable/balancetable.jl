@@ -297,7 +297,7 @@ end
 # Parser
 # Julia에서 사용하기 좋은 형태로 가공한다
 ############################################################################
-function parse!(gd::BalanceTable, force_parse = false)
+function parser!(gd::BalanceTable, force_parse = false)
     if !isparsed(gd) || force_parse
         x = parse(gd.data)
         if !ismissing(x)

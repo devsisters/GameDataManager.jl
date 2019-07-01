@@ -23,22 +23,20 @@ function Ability(key::Symbol, level = 1)
     Ability{ref[:Group]}(key, level, val)
 end
 """
-    Home(ac::User)
-계정에 종속된다.
-** fields
-level - 집 레벨, UserLevel 까지만 성장 가능
+    Special(ac::User)
+
 """
-mutable struct Home{KEY} <: Building
+mutable struct Special{KEY} <: Building
     uid::UInt64
     owner::Union{AbstractSite, Missing}
     level::Int8
     abilities::Array{Ability, 1}
     # blueprint  건물 도면
 
-    function (::Type{Home})(level = 1)
-        ref = getjuliadata(:Home)[:Home]
+    function (::Type{Special{KEY}})(level) where KEY
+        ref = getjuliadata(:Special)[KEY]
         # abs = Ability.(ref[:AbilityKey])
-        new{:Home}(building_uid(), missing, level, Ability.(ref[:AbilityKey]))
+        new{KEY}(building_uid(), missing, level, Ability.(ref[:AbilityKey]))
     end
 end
 mutable struct Residence{KEY} <: Building

@@ -13,7 +13,6 @@ include("datahandler/balancetable/balancetable.jl")
 
 include("init.jl")
 include("datahandler/loader.jl")
-include("datahandler/parser.jl")
 include("datahandler/parser_rewardscript.jl")
 
 include("datahandler/writer/json.jl")
@@ -56,7 +55,7 @@ include("feature/query.jl")
 export GAMEPATH, GAMEDATA, help,
        # datahandler
        BalanceTable, XLSXBalanceTable, JSONBalanceTable, UnityBalanceTable,
-         loadgamedata!, getgamedata, getjuliadata, parse!,
+         loadgamedata!, getgamedata, getjuliadata, parser!,
        init_meta,
        xl, autoxl, write_json, export_referencedata,
 

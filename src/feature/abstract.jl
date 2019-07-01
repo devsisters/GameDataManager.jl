@@ -48,10 +48,15 @@ abstract type NonStackItem <: GameItem end
 * Shop-업종
 """
 abstract type Building <: NonStackItem end
+function Building(x)
+    T = buildingtype(x)
+    T(x)
+end
 let uid = UInt64(0)
     global building_uid
     building_uid() = (uid +=1; uid)
 end
+
 buildingtype(x) = buildingtype(Symbol(x))
 function buildingtype(x::Symbol)
     if in(x, keys(getjuliadata(:Shop)))
@@ -64,7 +69,6 @@ function buildingtype(x::Symbol)
         throw(KeyError(x))
     end
 end
-
 
 """
     Inventory

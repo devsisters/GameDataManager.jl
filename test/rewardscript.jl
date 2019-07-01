@@ -4,7 +4,7 @@ import GameDataManager.RewardScript
 @testset "RewardTable 파서 테스트" begin
 
     gd = getgamedata("RewardTable")
-    parse!(gd)
+    parser!(gd)
 
     @test GameDataManager.isparsed(gd) == true
 

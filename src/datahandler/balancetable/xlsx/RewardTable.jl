@@ -60,7 +60,7 @@ end
 
 
 function parser_RewardTable(jwb::JSONWorkbook)
-    parse!(getgamedata("ItemTable"; check_modified=true))
+    parser!(getgamedata("ItemTable"; check_modified=true))
 
     jws = jwb[1] # 1번 시트로 하드코딩됨
     d = Dict{Int32, Any}()
