@@ -25,7 +25,6 @@ end
 해당하는 Excel 파일의 시트의 컬럼을 가져온다
 loadgamedata!가 안되어있을 경우 해당 파일을 load한다
 
-매번 key 검사하느라 느릴테니 테스트 스크립트용으로 사용하고, MarsSimulator에서는 직접 access 하도록 작업할 것
 """
 function getgamedata(file::AbstractString, sheet, colname; kwargs...)
     jws = getgamedata(file, sheet; kwargs...)
@@ -84,7 +83,7 @@ getmetadata(jwb::JSONWorkbook) =  getmetadata(basename(xlsxpath(jwb)))
         parse_juliadata()
 getjuliadata에서 불러오기 위해 파싱하여 저장
 """
-function parse_juliadata(category::Symbol)
+function parse_juliadata(category::Symbol = :All)
     if category == :All
         getgamedata("ItemTable"; parse = true)
         getgamedata("RewardTable"; parse = true)
@@ -97,6 +96,8 @@ function parse_juliadata(category::Symbol)
         getgamedata("Special"; parse = true)
         getgamedata("Ability"; parse = true)
     end
+
+    nothing
 end
 parse_juliadata(f::AbstractString) = getgamedata(f; parse = true)
 
@@ -110,3 +111,6 @@ isparsed(gd::BalanceTable) = get(gd.cache, :isparsed, false)
 """
 getjuliadata(file::AbstractString) = getjuliadata(Symbol(file))
 getjuliadata(file::Symbol) = GAMEDATA[file].cache[:julia]
+function getjuliadata(::Type{T}) where T <: Building
+    getjuliadata(split(string(T), ".")[end])
+end

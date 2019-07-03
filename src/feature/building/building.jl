@@ -39,6 +39,15 @@ mutable struct Special{KEY} <: Building
         new{KEY}(building_uid(), missing, level, Ability.(ref[:AbilityKey]))
     end
 end
+Special(key::AbstractString, level = 1) = Special(Symbol(key), level)
+function Special(key::Symbol, level = 1)
+    if haskey(Special, key)
+        Special{key}(level)
+    else
+        throw(KeyError("$(key)는 Special 건물이 아닙니다"))
+    end
+end
+
 mutable struct Residence{KEY} <: Building
     uid::UInt64
     owner::Union{AbstractSite, Missing}
@@ -57,7 +66,7 @@ function Residence(key::Symbol, level = 1)
     if haskey(Residence, key)
         Residence{key}(level)
     else
-        throw(KeyError("$(key)는 Residence가 아닙니다"))
+        throw(KeyError("$(key)는 Residence 건물이 아닙니다"))
     end
 end
 """
@@ -97,7 +106,7 @@ function Shop(key::Symbol, level = 1)
     if haskey(Shop, key)
         Shop{key}(level)
     else
-        throw(KeyError("$(key)는 Shop이 아닙니다"))
+        throw(KeyError("$(key)는 Shop 건물이 아닙니다"))
     end
 end
 

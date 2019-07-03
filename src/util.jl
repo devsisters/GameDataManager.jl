@@ -22,7 +22,8 @@ function help(idx = 1)
         msg = intro * rand([thankyou; oneline_asciiarts]) * "\n" * basic * """\n
         # 보조 기능
           findblock(): 'Block'데이터와 '../4_ArtAssets/GameResources/Blocks/' 폴더를 비교하여 누락된 항목을 찾습니다.
-          report_buildtemplate(): '../BuildTemplate/Buildings/' 에서 사용되는 블록 통계를 내드립니다.
+          get_blocks(): 블록Key별 '../BuildTemplate/Buildings/' 에서 사용되는 빈도를 계산합니다
+          get_buildings(): 건물Key별 사용되는 블록의 종류와 수량을 계산합니다.
           `help()`를 입력하면 도움을 드립니다!
         # WIP
           export_referencedata("ItemTable")
@@ -89,10 +90,77 @@ end
 
 
 """
-get_buildings()
-    건물에 사용된 block 리스트를 가져온다
+    get_buildings()
+
+모든건물에 사용된 Block의 종류와 수량을 확인합니다
+
 """
-function get_buildings()
+function get_buildings(;kwargs...)
+    parse_juliadata(:Building)
+
+    v = []
+    for T in (:Shop, :Residence, :Special)
+        append!(v, keys(getjuliadata(T)))
+    end
+
+    data = get_buildings.(v, false;kwargs...)
+
+    file = joinpath(GAMEPATH[:cache], "get_buildings.tsv")
+    open(file, "w") do io
+        write(io, join(data, '\n'))
+    end
+
+    printstyled("각 건물에 사용된 Block들은 다음과 같습니다\n"; color=:green)
+    print("경로: ")
+    printstyled(normpath(file); color=:light_blue)
+    print('\n')
+end
+"""
+    get_buildings(building_key)
+building_key 건물에 사용된 Block의 종류와 수량을 확인합니다
+"""
+get_buildings(building_key::AbstractString, savetsv = true; kwargs...) = get_buildings(Symbol(building_key), savetsv; kwargs...)
+function get_buildings(key::Symbol, savetsv = true; delim = '\t')
+    parse_juliadata(:Building)
+
+    templates = begin 
+        ref = getjuliadata(buildingtype(key))[key]
+        x = map(el -> el[:BuildingTemplate], values(ref[:Level]))
+        convert(Vector{String}, filter(!ismissing, x))
+    end
+    blocks = if isempty(templates)
+        Dict("missing" => missing)
+    else 
+        merge(+, get_buildingtemplate_blocks.(templates)...)
+    end
+
+    l1 = string(key) * delim * join(keys(blocks), delim)
+    l2 = string(key) * delim * join(values(blocks), delim)
+    if savetsv
+        file = joinpath(GAMEPATH[:cache], "get_buildings_$key.tsv")
+        open(file, "w") do io
+            write(io, l1, '\n', l2)
+        end
+        printstyled("'$key'건물에 사용된 Block들은 다음과 같습니다\n"; color=:green)
+        print("경로: ")
+        printstyled(normpath(file); color=:light_blue) 
+        print('\n')
+    else
+        return l1 * '\n' * l2
+    end
+end
+
+function get_buildingtemplate_blocks(f::AbstractString)
+    root = joinpath(GAMEPATH[:json]["root"], "../BuildTemplate/Buildings")
+    x = joinpath(root, "$(f).json") |> JSON.parsefile
+    countmap(map(x -> x["BlockKey"], x["Blocks"]))
+end
+
+"""
+    get_blocks()
+블록이 사용된 건물 리스트를 가져온다
+"""
+function get_blocks(; delim = '\t')
     root = joinpath(GAMEPATH[:json]["root"], "../BuildTemplate/Buildings")
     templates = Dict{String, Any}()
 
@@ -101,55 +169,36 @@ function get_buildings()
         if !isempty(jsonfiles)
             for f in jsonfiles
                 file = joinpath(folder, f)
-                templates[chop(file;tail = 5)] = JSON.parsefile(file)
+                k = chop(replace(file, root => ""); tail = 5)
+                templates[k] = JSON.parsefile(file)
             end
         end
     end
-    # NOTE 이렇게 두번에 나누지말고 한방에 할까?
-    # 파일 많아지면 고려...
-    report = Dict{String, Any}()
-    for kv in templates
-        k = replace(kv[1], root => "")
-        v = kv[2]["Blocks"]
-        report[k] = countmap(get.(v, "BlockKey", 0))
-    end
-    return report
-end
 
-"""
-get_block()
-블록이 사용된 건물 리스트를 가져온다
-"""
-function get_block()
-
-end
-
-
-"""
-    report_buildtemplate()
-BuildTemplate별 사용 블록량 통계를 .csv로 추출한다
-"""
-function report_buildtemplate(delim ="\t")
-    report = countblock_buildtemplate()
-
-    output = joinpath(GAMEPATH[:cache], "buildtemplate.csv")
-    jsonpaths = collect(keys(report)) |> sort
-    open(output, "w") do io
-        write(io, "Path", delim, "BlockKey", delim, "Amount", "\n")
-        for k in jsonpaths
-            for kv in sort(report[k])
-                write(io, k, delim)
-                write(io, string(kv[1]), delim)
-                write(io, string(kv[2]), "\n")
+    d2 = OrderedDict()
+    for f in keys(templates)
+        blocks = countmap(get.(templates[f]["Blocks"], "BlockKey", 0))
+        for block_key in keys(blocks)
+            if !haskey(d2, block_key)
+                d2[block_key] = OrderedDict()
             end
+            d2[block_key][f] = blocks[block_key]
         end
-     end
+    end 
 
-    # 요약 정보
-    printstyled("BuildTemplate별 사용 블록량 통계입니다\n"; color=:green)
-    print("  ", "$(length(jsonpaths))개: \n")
-    printstyled(normpath(output); color=:light_blue)
-end
+    file = joinpath(GAMEPATH[:cache], "get_blocks.tsv")
+    open(file, "w") do io
+        for kv in d2
+            block_key = string(kv[1])
+            l1 = block_key * delim * join(keys(kv[2]), delim)
+            l2 = block_key * delim * join(values(kv[2]), delim)
+            write(io, l1, '\n', l2, '\n')
+        end
+    end
+    printstyled("Block별 사용된 빈도는 다음과 같습니다\n"; color=:green)
+    print("경로: ")
+    printstyled(normpath(file); color=:light_blue) 
+    print('\n')end
 
 """
     compress_continentDB(roaddb, tag)
