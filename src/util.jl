@@ -122,6 +122,7 @@ function get_buildings(;kwargs...)
 end
 """
     get_buildings(building_key)
+
 building_key 건물에 사용된 Block의 종류와 수량을 확인합니다
 """
 get_buildings(building_key::AbstractString, savetsv = true; kwargs...) = get_buildings(Symbol(building_key), savetsv; kwargs...)
@@ -160,7 +161,8 @@ end
 
 """
     get_blocks()
-블록이 사용된 건물 리스트를 가져온다
+
+블록 Key별로 사용된 BuildTempalte과 수량을 확인합니다
 """
 function get_blocks(savetsv::Bool = true; delim = '\t')
     root = joinpath(GAMEPATH[:json]["root"], "../BuildTemplate/Buildings")
@@ -206,8 +208,9 @@ function get_blocks(savetsv::Bool = true; delim = '\t')
 end 
 
 """
-    get_blocks()
-블록이 사용된 건물 리스트를 가져온다
+    get_blocks(block_key)
+
+블록 block_key가 사용된 BuildTempalte과 수량을 확인합니다
 """
 function get_blocks(key; kwargs...)
     report = get_blocks(false; kwargs...)
