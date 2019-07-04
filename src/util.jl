@@ -35,10 +35,8 @@ function help(idx = 1)
 
         msg *= rand(oneline_asciiarts)
     end
-
-@info msg
-
-nothing
+    @info msg
+    nothing
 end
 
 """
@@ -106,16 +104,19 @@ end
 function get_buildings(;kwargs...)
     parse_juliadata(:Building)
 
-    v = []
+    bdkeys = []
     for T in (:Shop, :Residence, :Special)
-        append!(v, keys(getjuliadata(T)))
+        append!(bdkeys, keys(getjuliadata(T)))
     end
-
-    data = get_buildings.(v, false;kwargs...)
 
     file = joinpath(GAMEPATH[:cache], "get_buildings.tsv")
     open(file, "w") do io
-        write(io, join(data, '\n'))
+        for el in bdkeys
+            report = get_buildings(el, false;kwargs...)
+            if !isempty(report)
+                write(io, join(report, '\n'), "\n\n")
+            end
+        end
     end
     print_write_result(file, "각 건물에 사용된 Block들은 다음과 같습니다")
 end
@@ -133,18 +134,17 @@ function get_buildings(key::Symbol, savetsv = true; delim = '\t')
         convert(Vector{String}, filter(!ismissing, x))
     end
 
-    report = ""
+    report = String[]
     for el in templates
         blocks = count_buildingtemplate_blocks(el)
-        l1 = string(key, delim, el, delim) * join(keys(blocks), delim)
-        l2 = string(key, delim, el, delim) * join(values(blocks), delim)
-        report = report * l1 * '\n' * l2 * '\n'
+        push!(report, string(key, delim, el, delim) * join(keys(blocks), delim))
+        push!(report, string(key, delim, el, delim) * join(values(blocks), delim))
     end
 
     if savetsv
         file = joinpath(GAMEPATH[:cache], "get_buildings_$key.tsv")
         open(file, "w") do io
-            write(io, report)
+            write(io, join(report, '\n'))
         end
         print_write_result(file, "'$key'건물에 사용된 Block들은 다음과 같습니다")
     else
