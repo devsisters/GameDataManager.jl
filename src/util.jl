@@ -88,6 +88,14 @@ end
 
 
 
+function print_write_result(path, msg = "결과는 다음과 같습니다")
+    printstyled("$(msg)\n"; color=:green)
+    print("경로: ")
+    printstyled(normpath(path); color=:light_blue)
+    print('\n')
+
+    nothing
+end
 
 """
     get_buildings()
@@ -109,11 +117,7 @@ function get_buildings(;kwargs...)
     open(file, "w") do io
         write(io, join(data, '\n'))
     end
-
-    printstyled("각 건물에 사용된 Block들은 다음과 같습니다\n"; color=:green)
-    print("경로: ")
-    printstyled(normpath(file); color=:light_blue)
-    print('\n')
+    print_write_result(file, "각 건물에 사용된 Block들은 다음과 같습니다")
 end
 """
     get_buildings(building_key)
@@ -128,29 +132,27 @@ function get_buildings(key::Symbol, savetsv = true; delim = '\t')
         x = map(el -> el[:BuildingTemplate], values(ref[:Level]))
         convert(Vector{String}, filter(!ismissing, x))
     end
-    blocks = if isempty(templates)
-        Dict("missing" => missing)
-    else 
-        merge(+, get_buildingtemplate_blocks.(templates)...)
+
+    report = ""
+    for el in templates
+        blocks = count_buildingtemplate_blocks(el)
+        l1 = string(key, delim, el, delim) * join(keys(blocks), delim)
+        l2 = string(key, delim, el, delim) * join(values(blocks), delim)
+        report = report * l1 * '\n' * l2 * '\n'
     end
 
-    l1 = string(key) * delim * join(keys(blocks), delim)
-    l2 = string(key) * delim * join(values(blocks), delim)
     if savetsv
         file = joinpath(GAMEPATH[:cache], "get_buildings_$key.tsv")
         open(file, "w") do io
-            write(io, l1, '\n', l2)
+            write(io, report)
         end
-        printstyled("'$key'건물에 사용된 Block들은 다음과 같습니다\n"; color=:green)
-        print("경로: ")
-        printstyled(normpath(file); color=:light_blue) 
-        print('\n')
+        print_write_result(file, "'$key'건물에 사용된 Block들은 다음과 같습니다")
     else
-        return l1 * '\n' * l2
+        return report
     end
 end
 
-function get_buildingtemplate_blocks(f::AbstractString)
+function count_buildingtemplate_blocks(f::AbstractString)
     root = joinpath(GAMEPATH[:json]["root"], "../BuildTemplate/Buildings")
     x = joinpath(root, "$(f).json") |> JSON.parsefile
     countmap(map(x -> x["BlockKey"], x["Blocks"]))
@@ -160,7 +162,7 @@ end
     get_blocks()
 블록이 사용된 건물 리스트를 가져온다
 """
-function get_blocks(; delim = '\t')
+function get_blocks(savetsv::Bool = true; delim = '\t')
     root = joinpath(GAMEPATH[:json]["root"], "../BuildTemplate/Buildings")
     templates = Dict{String, Any}()
 
@@ -185,20 +187,40 @@ function get_blocks(; delim = '\t')
             d2[block_key][f] = blocks[block_key]
         end
     end 
-
-    file = joinpath(GAMEPATH[:cache], "get_blocks.tsv")
-    open(file, "w") do io
-        for kv in d2
-            block_key = string(kv[1])
-            l1 = block_key * delim * join(keys(kv[2]), delim)
-            l2 = block_key * delim * join(values(kv[2]), delim)
-            write(io, l1, '\n', l2, '\n')
-        end
+    report = String[]
+    for kv in d2
+        block_key = string(kv[1])
+        push!(report, string(block_key, delim) * join(keys(kv[2]), delim))
+        push!(report, string(block_key, delim) * join(values(kv[2]), delim))
     end
-    printstyled("Block별 사용된 빈도는 다음과 같습니다\n"; color=:green)
-    print("경로: ")
-    printstyled(normpath(file); color=:light_blue) 
-    print('\n')end
+
+    if savetsv
+        file = joinpath(GAMEPATH[:cache], "get_blocks.tsv")
+        open(file, "w") do io
+            write(io, join(report, '\n'))
+        end
+        print_write_result(file, "Block별 사용된 빈도는 다음과 같습니다")
+    else
+        return report
+    end
+end 
+
+"""
+    get_blocks()
+블록이 사용된 건물 리스트를 가져온다
+"""
+function get_blocks(key; kwargs...)
+    report = get_blocks(false; kwargs...)
+    filter!(el -> startswith(el, string(key)), report)
+
+    @assert !isempty(report) "'$key' Block이 사용된 건물은 없습니다"
+  
+    file = joinpath(GAMEPATH[:cache], "get_blocks_$key.tsv")
+    open(file, "w") do io
+        write(io, join(report, '\n'))
+    end
+    print_write_result(file, "'$key' Block이 사용된 건물은 다음과 같습니다")
+end
 
 """
     compress_continentDB(roaddb, tag)
