@@ -8,7 +8,7 @@ end
 function RewardTable(key)
      ref = getjuliadata("RewardTable")[key]
      reward = ref.Rewards
-     # Randome인지 Fixed인지 정보를 저장
+     # Array{RandomReward, 1} or Array{FixedReward, 1}
      RewardTable(key, convert(Array{typeof(reward[1]), 1}, reward))
  end
 
