@@ -245,6 +245,13 @@ function validate_subset(a, b, msg = "다음의 멤버가 subset이 아닙니다
         end
     end
 end
+
+function validate_file(root, files::Vector, extension = "", msg = "가 존재하지 않습니다"; kwargs...)
+    for el in filter(!ismissing, files)
+        validate_file(root, "$(el)$(extension)", msg; kwargs...)
+    end
+    nothing
+end
 function validate_file(root, file, msg = "가 존재하지 않습니다"; assert = false)
     f = joinpath(root, file)
     if !isfile(f)

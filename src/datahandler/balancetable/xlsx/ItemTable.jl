@@ -1,3 +1,10 @@
+function validator_ItemTable(jwb::JSONWorkbook)
+    path = joinpath(GAMEPATH[:CollectionResources], "ItemIcons")
+    validate_file(path, jwb[:Currency][:Icon], ".png", "아이템 Icon이 존재하지 않습니다")
+    validate_file(path, jwb[:Stackable][:Icon], ".png", "아이템 Icon이 존재하지 않습니다")
+
+    nothing
+end
 
 function parser_ItemTable(jwb::JSONWorkbook)
     d = Dict{Int32, Any}()

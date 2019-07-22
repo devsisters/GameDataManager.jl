@@ -14,19 +14,22 @@ function validator_Building(jwb)
     @assert allunique(buildgkey_level) "$(basename(jwb))'Level' 시트에 중복된 Level이 있습니다"
 
     path_template = joinpath(GAMEPATH[:patch_data], "BuildTemplate/Buildings")
-    for el in filter(!ismissing, jwb[:Level][:BuildingTemplate])
-        f = joinpath(path_template, "$el.json")
-        validate_file(path_template, "$el.json", "BuildingTemolate가 존재하지 않습니다")
-    end
+    path_thumbnails = joinpath(GAMEPATH[:CollectionResources], "BusinessBuildingThumbnails")
+
+    validate_file(path_template, jwb[:Level][:BuildingTemplate], ".json", 
+                "BuildingTemolate가 존재하지 않습니다")
+    validate_file(path_thumbnails, jwb[:Building][:Icon], ".png", "Icon이 존재하지 않습니다")
 
     nothing
 end
 function validator_Sandbox(jwb)
-    path_template = joinpath(GAMEPATH[:mars_repo], "patch-data/BuildTemplate/Buildings")
-    for el in filter(!ismissing, jwb[:Level][:BuildingTemplate])
-        f = joinpath(path_template, "$el.json")
-        validate_file(path_template, "$el.json", "BuildingTemolate가 존재하지 않습니다")
-    end
+    path_template = joinpath(GAMEPATH[:mars_repo], "unity/Buildings")
+    path_thumbnails = joinpath(GAMEPATH[:CollectionResources], "BusinessBuildingThumbnails")
+
+    validate_file(path_template, jwb[:Level][:BuildingTemplate], ".json", 
+                "BuildingTemolate가 존재하지 않습니다")
+    validate_file(path_thumbnails, jwb[:Building][:Icon], ".png", "Icon이 존재하지 않습니다")
+    
     nothing
 end
 
