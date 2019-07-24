@@ -77,8 +77,7 @@ function md5hash()
         end
     end
     @printf("MD5 checksum saved => \"%s\" \n", result)
-    @warn "지금 MD5 값이 틀림, 라이브러리 문제로 보인다"
 end
 function md5hash(f)
-    bytes2hex(md5(joinpath_gamedata(f)))
+    bytes2hex(md5(read(joinpath_gamedata(f), String)))
 end
