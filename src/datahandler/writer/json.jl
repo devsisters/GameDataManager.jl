@@ -61,3 +61,24 @@ function write_json(jgd::JSONBalanceTable, indent = 2)
     end
     @printf("   saved => \"%s\" \n", file)
 end
+
+"""
+    md5hash()
+"""
+function md5hash()
+    jsons = readdir(GAMEPATH[:json]["root"]; extension = ".json")
+
+    result = joinpath(GAMEPATH[:cache], "md5hash.tsv")
+    open(result, "w") do io
+        for (i, el) in enumerate(jsons)
+            write(io, string(i), "\t", el, "\t")
+            write(io, md5hash(el))
+            write(io, "\n")
+        end
+    end
+    @printf("MD5 checksum saved => \"%s\" \n", result)
+    @warn "지금 MD5 값이 틀림, 라이브러리 문제로 보인다"
+end
+function md5hash(f)
+    bytes2hex(md5(joinpath_gamedata(f)))
+end

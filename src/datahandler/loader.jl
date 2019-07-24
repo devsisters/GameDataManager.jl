@@ -7,7 +7,6 @@ function joinpath_gamedata(file)
     joinpath(GAMEPATH[:mars_repo], mid_folder, file)
 end
 
-
 """
     loadgamedata!(f; gamedata = GAMEDATA)
 gamedata로 데이터를 불러온다

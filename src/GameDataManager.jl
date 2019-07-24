@@ -5,6 +5,7 @@ using Printf, UUIDs, Random, Dates, Statistics
 using Random, StatsBase, Distributions
 using XLSX, JSON, XLSXasJSON
 using DataFrames, DataStructures, CSV
+using MD5
 
 import Base: +, -, *, /, ==
 
@@ -59,7 +60,7 @@ export GAMEPATH, GAMEDATA, help,
        BalanceTable, XLSXBalanceTable, JSONBalanceTable, UnityBalanceTable,
          loadgamedata!, getgamedata, getjuliadata, parser!,
        init_meta,
-       xl, autoxl, write_json, export_referencedata,
+       xl, autoxl, write_json, export_referencedata, md5hash,
 
        # 피쳐 기능
        Village,
