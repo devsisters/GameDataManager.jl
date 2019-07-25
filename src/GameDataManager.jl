@@ -70,14 +70,14 @@ export GAMEPATH, GAMEDATA, help,
        create_dummyaccount,
 
        # Features
-      parse_juliadata,
+      caching,
       User,
            area, pricecoin,
       GameItem, ItemCollection,
           Currency, CON, CRY,
           StackItem, itemkey, itemvalue, itemcat, itemname,
           ItemCollection,
-      NonStackItem, Building, Home, Residence, Shop, Ability,
+      NonStackItem, Building, Special, Residence, Shop, Ability,
 
       RewardTable, sample, expectedvalue,
       DroneDelivery, deliveryreward, deliverycost,

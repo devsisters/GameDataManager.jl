@@ -4,7 +4,7 @@ using JuMP, GLPK
 using CSV
 using StatsBase
 
-parse_juliadata(:All)
+caching(:All)
 
 """
     village_initarea()

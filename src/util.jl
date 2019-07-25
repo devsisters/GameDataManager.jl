@@ -103,7 +103,7 @@ end
 
 """
 function get_buildings(;kwargs...)
-    parse_juliadata(:Building)
+    caching(:Building)
 
     bdkeys = []
     for T in (:Shop, :Residence, :Special)
@@ -128,7 +128,7 @@ building_key 건물에 사용된 Block의 종류와 수량을 확인합니다
 """
 get_buildings(building_key::AbstractString, savetsv = true; kwargs...) = get_buildings(Symbol(building_key), savetsv; kwargs...)
 function get_buildings(key::Symbol, savetsv = true; delim = '\t')
-    parse_juliadata(:Building)
+    caching(:Building)
 
     templates = begin 
         ref = getjuliadata(buildingtype(key))[key]

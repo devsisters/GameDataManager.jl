@@ -1,4 +1,35 @@
 
+"""
+Building
+
+* Special - 특수 건물
+* Residence- 피포 보관
+* Shop-업종
+"""
+abstract type Building <: NonStackItem end
+function Building(x)
+    T = buildingtype(x)
+    T(x)
+end
+
+let uid = UInt64(0)
+    global building_uid
+    building_uid() = (uid +=1; uid)
+end
+
+buildingtype(x) = buildingtype(Symbol(x))
+function buildingtype(x::Symbol)
+    if in(x, keys(getjuliadata(:Shop)))
+        Shop
+    elseif in(x, keys(getjuliadata(:Residence)))
+        Residence
+    elseif in(x, keys(getjuliadata(:Special)))
+        Special
+    else
+        throw(KeyError(x))
+    end
+end
+
 
 """
     Ability
@@ -22,15 +53,15 @@ function Ability(key::Symbol, level = 1)
 
     Ability{ref[:Group]}(key, level, val)
 end
+Ability(key::Missing) = missing
 """
-    Special(ac::User)
-
+    Special(key, level)
 """
 mutable struct Special{KEY} <: Building
     uid::UInt64
     owner::Union{AbstractSite, Missing}
     level::Int8
-    abilities::Array{Ability, 1}
+    abilities::Union{Array{Ability, 1}, Missing}
     # blueprint  건물 도면
 
     function (::Type{Special{KEY}})(level) where KEY
@@ -47,7 +78,9 @@ function Special(key::Symbol, level = 1)
         throw(KeyError("$(key)는 Special 건물이 아닙니다"))
     end
 end
-
+"""
+    Residence(key, level)
+"""
 mutable struct Residence{KEY} <: Building
     uid::UInt64
     owner::Union{AbstractSite, Missing}

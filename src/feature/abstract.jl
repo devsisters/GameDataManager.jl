@@ -41,36 +41,6 @@ abstract type GameItem end
 abstract type NonStackItem <: GameItem end
 
 """
-    Building
-
-* Special - 특수 건물
-* Residence- 피포 보관
-* Shop-업종
-"""
-abstract type Building <: NonStackItem end
-function Building(x)
-    T = buildingtype(x)
-    T(x)
-end
-let uid = UInt64(0)
-    global building_uid
-    building_uid() = (uid +=1; uid)
-end
-
-buildingtype(x) = buildingtype(Symbol(x))
-function buildingtype(x::Symbol)
-    if in(x, keys(getjuliadata(:Shop)))
-        Shop
-    elseif in(x, keys(getjuliadata(:Residence)))
-        Residence
-    elseif in(x, keys(getjuliadata(:Special)))
-        Special
-    else
-        throw(KeyError(x))
-    end
-end
-
-"""
     Inventory
 """
 abstract type Inventory end

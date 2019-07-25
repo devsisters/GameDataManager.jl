@@ -79,17 +79,17 @@ getmetadata(jwb::JSONWorkbook) =  getmetadata(basename(xlsxpath(jwb)))
 
 #################################################################################
 """
-        parse_juliadata()
+        prepare()
 getjuliadata에서 불러오기 위해 파싱하여 저장
 """
-function parse_juliadata(category::Symbol = :All)
-    if category == :All
+function caching(feature::Symbol = :All)
+    if feature == :All
         getgamedata("ItemTable"; parse = true)
         getgamedata("RewardTable"; parse = true)
 
         getgamedata("DroneDelivery"; parse = true)
     end
-    if (category == :Building || category == :All)
+    if (feature == :Building || feature == :All)
         getgamedata("Residence"; parse = true)
         getgamedata("Shop"; parse = true)
         getgamedata("Special"; parse = true)
@@ -98,7 +98,6 @@ function parse_juliadata(category::Symbol = :All)
 
     nothing
 end
-parse_juliadata(f::AbstractString) = getgamedata(f; parse = true)
 
 isparsed(gd::BalanceTable) = get(gd.cache, :isparsed, false)
 
