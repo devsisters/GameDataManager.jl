@@ -49,10 +49,12 @@ function editor_RewardTable!(jwb)
         vcat(v...)
     end
 
-    # 합치고 둘 중 한개 삭제
+    # 합치고 나머지 삭제
     sheets = concatenate_rewards.(jwb)
     jwb[1] = vcat(sheets...)
-    deleteat!(jwb, 2)
+    for i in 2:length(jwb)
+        deleteat!(jwb, 2)
+    end
     sort!(jwb[1], :RewardKey)
 
     return jwb
