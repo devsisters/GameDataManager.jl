@@ -64,6 +64,9 @@ end
 
 """
     md5hash()
+http://marspot.devscake.com:25078/develop/balancescriptlist
+
+의 MD5해시와 비교하여 파일이 일치하는지 확인 가능
 """
 function md5hash()
     jsons = readdir(GAMEPATH[:json]["root"]; extension = ".json")
@@ -76,7 +79,7 @@ function md5hash()
             write(io, "\n")
         end
     end
-    @printf("MD5 checksum saved => \"%s\" \n", result)
+    @printf("json파일별 MD5해시가 저장되었습니다 => \"%s\" \n", result)
 end
 function md5hash(f)
     bytes2hex(md5(read(joinpath_gamedata(f), String)))
