@@ -83,7 +83,7 @@ function init_gamedata_history(file)
     h = isfile(file) ? JSON.parsefile(file; dicttype=Dict{String, Float64}) :
                        Dict{String, Float64}()
     # 좀 이상하긴 한데... 가끔식 히스토리 청소해 줌
-    rand() < 0.002 && cleanup_history!()
+    rand() < 0.002 && cleanup_gamedata_export_history!()
 
     return h
 end
@@ -92,7 +92,6 @@ end
 #                        OrderedDict{String, OrderedDict}()
 #     return h
 # end
-
 
 """
     init_typechecker()

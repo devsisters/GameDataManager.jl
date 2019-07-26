@@ -64,12 +64,3 @@ function cleanup_gamedata_export_history!()
     end
     nothing
 end
-"""
-    referencedata_export_history()
-
-referencedata를 엑셀파일에 저장한 이력
-
-"""
-function referencedata_export_history()
-    meta = getmetadata(gd)
-end
