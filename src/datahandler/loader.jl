@@ -107,8 +107,15 @@ isparsed(gd::BalanceTable) = get(gd.cache, :isparsed, false)
 이미 파싱이 끝났다고 가정함
 그냥 GAMEDATA(Symbol(file)) 의 단축키
 """
+function getjuliadata(file::Symbol) 
+    a = get(GAMEDATA, file, Exception)
+    if a != Exception 
+        a = get(a.cache, :julia, Exception)
+    end
+    @assert a != Exception "$file 이 GAMEDATA에 caching 되지 않았습니다. cashing() 함수를 실행해 주세요"
+    return a
+end
 getjuliadata(file::AbstractString) = getjuliadata(Symbol(file))
-getjuliadata(file::Symbol) = GAMEDATA[file].cache[:julia]
 function getjuliadata(::Type{T}) where T <: Building
     getjuliadata(split(string(T), ".")[end])
 end

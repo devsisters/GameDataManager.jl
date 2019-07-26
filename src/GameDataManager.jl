@@ -78,6 +78,7 @@ export GAMEPATH, GAMEDATA, help,
           StackItem, itemkey, itemvalue, itemcat, itemname,
           ItemCollection,
       NonStackItem, Building, Special, Residence, Shop, Ability,
+      abilitysum,
 
       RewardTable, sample, expectedvalue,
       DroneDelivery, deliveryreward, deliverycost,

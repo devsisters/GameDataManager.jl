@@ -7,9 +7,9 @@ Building
 * Shop-업종
 """
 abstract type Building <: NonStackItem end
-function Building(x)
+function Building(x, lv = 1)
     T = buildingtype(x)
-    T(x)
+    T(x, lv)
 end
 
 let uid = UInt64(0)
@@ -165,10 +165,9 @@ function developmentpoint(x::T; cumulated=false) where T <: Building
     end
 end
 function levelupcost(x::T) where T <: Building
-    ref = getjuliadata(nameof(T))[itemkey(x)]
-
+    levelupcost(itemkey(x), x.level)
 end
-function levelupcost(key, lv)
+function levelupcost(key::Symbol, lv)
     T = buildingtype(key)
     ref = getjuliadata(nameof(T))[key]
     ref = ref[:Level][lv]
@@ -176,6 +175,22 @@ function levelupcost(key, lv)
     ItemCollection([Currency(:CON, ref[:LevelupCost]["PriceCoin"]),
                     broadcast(el -> StackItem(el["Key"], el["Amount"]),
                                         values(ref[:LevelupCostItem]))...])
+end
+
+abilitysum(x::T) where T <: Building = abilitysum(x.abilities)
+function abilitysum(a::Array{T, 1}) where T <: Building
+    x = abilitysum.(a)
+    merge(+, x...)
+end
+function abilitysum(a::Array{Ability, 1})
+    groups = groupkey.(a)
+    # 필요할 경우 Ability{Group}(:abilitysum, 0, val) 타입으로 변경
+    d = Dict{Symbol, Int}()
+    for x in a
+        g = groupkey(x)
+        d[g] = get(d, g, 0) + x.val  
+    end 
+    return d
 end
 
 #fallback bunctions
@@ -193,7 +208,7 @@ function Base.haskey(::Type{T}, k) where T <: Building
 end
 
 function Base.size(x::T) where T <: Building
-    @assert !isa(x, Home) "Home은 크기가 고정되어 있지 않습니다"
+    @assert itemkey(x) != :pHome "Home은 크기가 고정되어 있지 않습니다"
 
     ref = getjuliadata(nameof(T))[itemkey(x)]
     (ref[:Condition]["ChunkWidth"], ref[:Condition]["ChunkLength"])

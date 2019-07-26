@@ -73,14 +73,14 @@ struct StackItem{CATEGORY, KEY} <: GameItem
 end
 function StackItem(key, val=1)
     @assert haskey(StackItem, key) "'Key:$(key)'은 ItemTable에 존재하지 않습니다"
-    ref = GAMEDATA[:ItemTable].cache[:julia]
+    ref = getjuliadata(:ItemTable)
     T = Symbol(ref[key][:Category])
     StackItem{T, key}(val)
 end
 
 Base.haskey(::Type{StackItem}, key) = haskey(StackItem, parse(Int, key))
 function Base.haskey(::Type{StackItem}, key::Integer)
-    ref = GAMEDATA[:ItemTable].cache[:julia]
+    ref = getjuliadata(:ItemTable)
     haskey(ref, key)
 end
 

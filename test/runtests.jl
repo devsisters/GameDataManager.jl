@@ -5,12 +5,12 @@ using XLSXasJSON
 GDM = GameDataManager
 
 include("datahandler.jl")
+include("building.jl")
 
 
 @testset "loader 테스트" begin
 
 end
-
 
 @testset "validator 테스트" begin
     jwb = read_gamedata("Shop.xlsx"; validate = false)
@@ -29,25 +29,11 @@ end
     @test_throws AssertionError GDM.validation(jwb)
 end
 
-
-
 @testset "history 테스트" begin
     xl()
     @test isempty(GDM.collect_modified_xlsx())
 end
 
-
-
 @testset "XLSX to JSON" begin
     xl("Player.xlsx")
-end
-
-@testset "addinfo to XLSX" begin
-    addinfo!("Block.xlsx")
-end
-
-@testset "RewardTable 특별 처리" begin
-    # 음... 어떻게 테스트하지???
-    jwb = getgamedata("RewardTable.xlsx")
-
 end
