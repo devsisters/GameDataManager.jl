@@ -1,6 +1,6 @@
 function validator_Block(jwb::JSONWorkbook)
     b = begin
-        f = joinpath(GAMEPATH[:mars_repo], "unity/Assets/ScriptableObjects/BalanceTable",
+        f = joinpath(GAMEENV["mars_repo"], "unity/Assets/ScriptableObjects/BalanceTable",
                                       "BlockTemplateBalanceTable.asset")
         x = filter(x -> startswith(x, "  - Key:"), readlines(f))
         unique(broadcast(x -> split(x, "Key: ")[2], x))

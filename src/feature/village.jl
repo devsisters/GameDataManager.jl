@@ -113,7 +113,7 @@ function create_dummyaccount(amount; )
     "헌신하면헌신짝","되면한다"])
 
     profile_pics = begin
-        p = joinpath(GAMEPATH[:mars_repo], "unity/Assets/5_GameData/Images_BotProfile")
+        p = joinpath(GAMEENV["mars_repo"], "unity/Assets/5_GameData/Images_BotProfile")
         chop.(readdir(p; extension = "png"); tail=4)
     end
 
@@ -142,7 +142,7 @@ function create_dummyaccount(amount; )
                 "Segments" => segments))
     end
 
-    output = joinpath(GAMEPATH[:json]["root"], "DefaultAccount.json")
+    output = joinpath(GAMEENV["json"]["root"], "DefaultAccount.json")
     open(output, "w") do io
         write(io, JSON.json(v, 2))
      end

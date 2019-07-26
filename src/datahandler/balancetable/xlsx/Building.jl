@@ -13,8 +13,8 @@ function validator_Building(jwb)
     buildgkey_level = broadcast(row -> (row[:BuildingKey], row[:Level]), eachrow(jwb[:Level]))
     @assert allunique(buildgkey_level) "$(basename(jwb))'Level' 시트에 중복된 Level이 있습니다"
 
-    path_template = joinpath(GAMEPATH[:patch_data], "BuildTemplate/Buildings")
-    path_thumbnails = joinpath(GAMEPATH[:CollectionResources], "BusinessBuildingThumbnails")
+    path_template = joinpath(GAMEENV["patch_data"], "BuildTemplate/Buildings")
+    path_thumbnails = joinpath(GAMEENV["CollectionResources"], "BusinessBuildingThumbnails")
 
     validate_file(path_template, jwb[:Level][:BuildingTemplate], ".json", 
                 "BuildingTemolate가 존재하지 않습니다")
@@ -23,8 +23,8 @@ function validator_Building(jwb)
     nothing
 end
 function validator_Sandbox(jwb)
-    path_template = joinpath(GAMEPATH[:mars_repo], "unity/Buildings")
-    path_thumbnails = joinpath(GAMEPATH[:CollectionResources], "BusinessBuildingThumbnails")
+    path_template = joinpath(GAMEENV["mars_repo"], "unity/Buildings")
+    path_thumbnails = joinpath(GAMEENV["CollectionResources"], "BusinessBuildingThumbnails")
 
     validate_file(path_template, jwb[:Level][:BuildingTemplate], ".json", 
                 "BuildingTemolate가 존재하지 않습니다")

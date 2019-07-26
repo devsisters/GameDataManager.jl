@@ -41,7 +41,7 @@ end
 gamedata_export() 로 뽑는 파일들 이력
 """
 function gamedata_export_history()
-    open(GAMEPATH[:history], "w") do io
+    open(GAMEENV["history"], "w") do io
         write(io, JSON.json(MANAGERCACHE[:history]))
     end
 end

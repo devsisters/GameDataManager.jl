@@ -3,7 +3,7 @@ function editor_PipoTalent!(jwb)
     file = GameDataManager.joinpath_gamedata("PipoTalent.xlsx")
     @assert isfile(file) "PipoTalent 파일이 존재하지 않습니다"
 
-    output_path = joinpath(GAMEPATH[:mars_repo], "patch-data/Dialogue/PipoTalk")
+    output_path = joinpath(GAMEENV["mars_repo"], "patch-data/Dialogue/PipoTalk")
 
     intro = JSON.parsefile(joinpath(output_path, "_Introduction.json"); dicttype=OrderedDict)
     accept = JSON.parsefile(joinpath(output_path, "_Accepted.json"); dicttype=OrderedDict)

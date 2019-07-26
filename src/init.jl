@@ -1,4 +1,4 @@
-const GAMEPATH = Dict{Any, Any}()
+# const GAMEENV = Dict{String, Any}()
 const GAMEDATA = Dict{Symbol, BalanceTable}()
 const MANAGERCACHE = Dict{Symbol, Dict}()
 
@@ -6,55 +6,24 @@ function __init__()
     global CON = Currency{:CON}(1)
     global CRY = Currency{:CRY}(1)
 
-    #NOTE Julia setting에 넣을 수 있는 ARGS로 교체 고려
-    if isdefined(Main, :PATH_MARS_PROTOTYPE)
-        init_path(Main.PATH_MARS_PROTOTYPE)
-        init_cache()
-        init_xlsxasjson()
+    env_file = joinpath(ENV["HOMEPATH"], ".GameDataManager.json")
+    if !isfile(env_file)
+        setup!(env_file)
+    end
+    global GAMEENV = convert(Dict{String, Any}, JSON.parsefile(env_file))
+    setup_env!(GAMEENV)
 
-        help()
-    else
-        @warn """
-            https://github.com/devsisters/mars-prototype 저장소의 로컬 경로를 지정한 후 다시 시도해주세요
-            PATH_MARS_PROTOTYPE = "?/?"
-        """
-    end
+    # cache 준비
+    init_cache!(GAMEENV)
+    # DELIM에 ,쉼표 추가
+    push!(XLSXasJSON.DELIM, ",")
 end
-function init_path(path)
-    GAMEPATH[:mars_repo] = path
-    GAMEPATH[:patch_data] = joinpath(path, "patch-data")
-    GAMEPATH[:CollectionResources] = joinpath(path, "unity/Assets/1_CollectionResources")
-    
-    GAMEPATH[:cache] = normpath(joinpath(GAMEPATH[:patch_data], ".cache"))
-    GAMEPATH[:history] = joinpath(GAMEPATH[:cache], "history.json")
-    GAMEPATH[:referencedata_history] = joinpath(GAMEPATH[:cache], "referencedata_history.json")
-    GAMEPATH[:xlsx] = Dict("root" => joinpath(GAMEPATH[:patch_data], "_GameData"))
-    for (root, dirs, files) in walkdir(GAMEPATH[:xlsx]["root"])
-        for f in filter(x -> (is_xlsxfile(x) && !startswith(x, "~\$")), files)
-            @assert !haskey(GAMEPATH[:xlsx], f) "$f 파일이 중복됩니다. 폴더가 다르더라도 파일명을 다르게 해주세요"
-            GAMEPATH[:xlsx][f] = replace(root, GAMEPATH[:mars_repo]*"/" => "")
-        end
-    end
-    GAMEPATH[:json] = Dict("root" => joinpath(GAMEPATH[:patch_data], "BalanceTables"))
-    for (root, dirs, files) in walkdir(GAMEPATH[:json]["root"])
-        for f in filter(x -> endswith(x, ".json"), files)
-            @assert !haskey(GAMEPATH[:json], f) "$f 파일이 중복됩니다. 폴더가 다르더라도 파일명을 다르게 해주세요"
-            GAMEPATH[:json][f] = replace(root, GAMEPATH[:mars_repo]*"/" => "")
-        end
-    end
 
-    # 이거 사용할꺼면 미리 경로 저장해두기
-    mars_gitrepo = joinpath(GAMEPATH[:cache], "MARS_GITREOP.json")
-    if isfile(mars_gitrepo)
-        merge!(GAMEPATH, JSON.parsefile(mars_gitrepo))
-    end
-    GAMEPATH
-end
-function init_cache()
-    MANAGERCACHE[:meta] = init_meta(GAMEPATH[:json]["root"])
-    MANAGERCACHE[:json_typechecke] = init_typechecker(joinpath(GAMEPATH[:json]["root"]))
-    MANAGERCACHE[:history] = init_gamedata_history(GAMEPATH[:history])
-    MANAGERCACHE[:referencedata_history] = init_referencedata_history(GAMEPATH[:referencedata_history])
+function init_cache!(env)
+    MANAGERCACHE[:meta] = init_meta(env["json"]["root"])
+    MANAGERCACHE[:json_typechecke] = init_typechecker(joinpath(env["json"]["root"]))
+    MANAGERCACHE[:history] = init_gamedata_history(env["history"])
+    # MANAGERCACHE[:referencedata_history] = init_referencedata_history(env[:referencedata_history])
 
     MANAGERCACHE
 end
@@ -118,15 +87,12 @@ function init_gamedata_history(file)
 
     return h
 end
-function init_referencedata_history(file)
-    h = isfile(file) ? JSON.parsefile(file; dicttype=OrderedDict) :
-                       OrderedDict{String, OrderedDict}()
-    return h
-end
-function init_xlsxasjson()
-    # Vector[] 컬럼 데이터 구분자 추가 [";", ","]
-    push!(XLSXasJSON.DELIM, ",")
-end
+# function init_referencedata_history(file)
+#     h = isfile(file) ? JSON.parsefile(file; dicttype=OrderedDict) :
+#                        OrderedDict{String, OrderedDict}()
+#     return h
+# end
+
 
 """
     init_typechecker()

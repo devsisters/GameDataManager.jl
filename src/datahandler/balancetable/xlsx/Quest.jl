@@ -9,7 +9,7 @@ function validator_Quest(jwb::JSONWorkbook)
         validate_questtrigger(jws[i, :CompleteCondition])
     end
     # Dialogue 파일 유무 체크
-    path_dialogue = joinpath(GAMEPATH[:patch_data], "Dialogue")
+    path_dialogue = joinpath(GAMEENV["patch_data"], "Dialogue")
     for el in jws[:CompleteAction]
         f = el["QuestDialogue"]
         if !ismissing(f)

@@ -31,7 +31,7 @@ end
 function export_referencedata(rgd::ReferenceGameData, f::AbstractString)
     export_result = false
     xl_origin = joinpath_gamedata(f)
-    xl_cache = joinpath(GAMEPATH[:cache], f)
+    xl_cache = joinpath(GAMEENV["cache"], f)
 
     if isa(rgd.data, DataFrame)
         sheet = "_"*split(basename(rgd), ".")[1]

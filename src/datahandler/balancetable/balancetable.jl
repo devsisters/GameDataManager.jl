@@ -136,7 +136,7 @@ function Base.show(io::IO, gd::ReferenceGameData)
 end
 function Base.show(io::IO, gd::JSONBalanceTable{T}) where T
     println(io, "JSONGameData{$T}")
-    println(io, replace(gd.filepath, GAMEPATH[:xlsx]["root"] => ".."))
+    println(io, replace(gd.filepath, GAMEENV["xlsx"]["root"] => ".."))
 
     k = vcat(collect.(keys.(gd.data))...) |> unique
     print(io, "    keys: ", k)

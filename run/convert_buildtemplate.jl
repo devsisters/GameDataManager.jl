@@ -13,7 +13,7 @@ meta = JSON.parse("""
 
 rotation_check = []
 
-p = joinpath(GAMEPATH[:patch_data], "BuildTemplate/Buildings/UserCustomize")
+p = joinpath(GAMEENV["patch_data"], "BuildTemplate/Buildings/UserCustomize")
 d = OrderedDict()
 for f in filter(x -> endswith(x, ".json"), readdir(p))
     io = read(joinpath(p, f), String)

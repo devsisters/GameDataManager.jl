@@ -27,7 +27,7 @@ ref = getgamedata("ArchipelagoGenerator").data
 w = ref[1][1, :WidthbyChunk]
 l = ref[1][1, :LengthbyChunk]
 
-Drawing(sum(l)+10, w+10, joinpath(GAMEPATH[:cache], "hexagon.png"))
+Drawing(sum(l)+10, w+10, joinpath(GAMEENV["cache"], "hexagon.png"))
 background("white"); setline(1); sethue((0.5, 0.5, 0.0))
 
 hexagon(w, l)

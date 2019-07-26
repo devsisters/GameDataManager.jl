@@ -34,4 +34,4 @@ sd = parttime_score_simulation(deck, 6; simcount = simcount)
 
 sd_prob = broadcast(el -> el / simcount, sd)
 
-CSV.write(joinpath(GAMEPATH[:cache], "blackjack.tsv"), Tables.table(sd_prob); delim='\t')
+CSV.write(joinpath(GAMEENV["cache"], "blackjack.tsv"), Tables.table(sd_prob); delim='\t')

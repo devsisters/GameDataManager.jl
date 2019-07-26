@@ -6,6 +6,7 @@ using Random, StatsBase, Distributions
 using XLSX, JSON, XLSXasJSON
 using DataFrames, DataStructures, CSV
 using MD5
+# using LibGit2 Git 함수 라이브러리
 
 import Base: +, -, *, /, ==
 
@@ -43,6 +44,7 @@ include("feature/query.jl")
 
 #############################################
 include("init.jl")
+include("setup.jl")
 include("datahandler/loader.jl")
 
 include("datahandler/writer/json.jl")
@@ -55,7 +57,7 @@ include("datahandler/writer/referencedata.jl")
 include("util.jl")
 
 
-export GAMEPATH, GAMEDATA, help,
+export GAMEENV, GAMEDATA, help,
        # datahandler
        BalanceTable, XLSXBalanceTable, JSONBalanceTable, UnityBalanceTable,
          loadgamedata!, getgamedata, getjuliadata, parser!,

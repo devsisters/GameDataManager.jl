@@ -44,7 +44,7 @@ end
 메타 정보를 참조하여 시트마다 다른 이름으로 저장한다
 """
 function write_json(jwb::JSONWorkbook)
-    dir = GAMEPATH[:json]["root"]
+    dir = GAMEENV["json"]["root"]
     meta = getmetadata(jwb)
 
     for s in sheetnames(jwb)
@@ -69,9 +69,9 @@ http://marspot.devscake.com:25078/develop/balancescriptlist
 의 MD5해시와 비교하여 파일이 일치하는지 확인 가능
 """
 function md5hash()
-    jsons = readdir(GAMEPATH[:json]["root"]; extension = ".json")
+    jsons = readdir(GAMEENV["json"]["root"]; extension = ".json")
 
-    result = joinpath(GAMEPATH[:cache], "md5hash.tsv")
+    result = joinpath(GAMEENV["cache"], "md5hash.tsv")
     open(result, "w") do io
         for (i, el) in enumerate(jsons)
             write(io, string(i), "\t", el, "\t")

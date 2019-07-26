@@ -47,7 +47,7 @@ GAMEDATA[:Block] 과 ../4_ArtAssets/GameResources/Blocks/ 하위에 있는 .pref
 상호 누락된 파일명 리스트를 '.cache'폴더에 저장합니다
 """
 function findblock()
-    root = joinpath(GAMEPATH[:mars_repo], "unity/Assets/4_ArtAssets/GameResources/Blocks/")
+    root = joinpath(GAMEENV["mars_repo"], "unity/Assets/4_ArtAssets/GameResources/Blocks/")
 
     artassets = String[]
     for (folder, dir, files) in walkdir(root)
@@ -65,7 +65,7 @@ function findblock()
     msg_a = "## ArtAsset은 있지만 Block는 없는 $(length(a))개\n"
     msg_b = "## Block데이터는 있지만 ArtAsset은 없는 $(length(b))개\n"
 
-    file = joinpath(GAMEPATH[:cache], "findblock.txt")
+    file = joinpath(GAMEENV["cache"], "findblock.txt")
     open(file, "w") do io
            write(io, msg_a)
            [write(io, el, "\n") for el in a]
@@ -75,7 +75,7 @@ function findblock()
        end
 
     # 요약 정보
-    p = normpath("$(GAMEPATH[:mars_repo])/unity/Assets")
+    p = normpath("$(GAMEENV["mars_repo"])/unity/Assets")
     x = replace(normpath(root), p => "..")
 
     printstyled("'$x'폴더와 Block데이터를 비교하여 다음 파일에 저장했습니다\n"; color=:green)
@@ -110,7 +110,7 @@ function get_buildings(;kwargs...)
         append!(bdkeys, keys(getjuliadata(T)))
     end
 
-    file = joinpath(GAMEPATH[:cache], "get_buildings.tsv")
+    file = joinpath(GAMEENV["cache"], "get_buildings.tsv")
     open(file, "w") do io
         for el in bdkeys
             report = get_buildings(el, false;kwargs...)
@@ -144,7 +144,7 @@ function get_buildings(key::Symbol, savetsv = true; delim = '\t')
     end
 
     if savetsv
-        file = joinpath(GAMEPATH[:cache], "get_buildings_$key.tsv")
+        file = joinpath(GAMEENV["cache"], "get_buildings_$key.tsv")
         open(file, "w") do io
             write(io, join(report, '\n'))
         end
@@ -155,7 +155,7 @@ function get_buildings(key::Symbol, savetsv = true; delim = '\t')
 end
 
 function count_buildingtemplate_blocks(f::AbstractString)
-    root = joinpath(GAMEPATH[:json]["root"], "../BuildTemplate/Buildings")
+    root = joinpath(GAMEENV["json"]["root"], "../BuildTemplate/Buildings")
     x = joinpath(root, "$(f).json") |> JSON.parsefile
     countmap(map(x -> x["BlockKey"], x["Blocks"]))
 end
@@ -166,7 +166,7 @@ end
 블록 Key별로 사용된 BuildTempalte과 수량을 확인합니다
 """
 function get_blocks(savetsv::Bool = true; delim = '\t')
-    root = joinpath(GAMEPATH[:json]["root"], "../BuildTemplate/Buildings")
+    root = joinpath(GAMEENV["json"]["root"], "../BuildTemplate/Buildings")
     templates = Dict{String, Any}()
 
     for (folder, dir, files) in walkdir(root)
@@ -198,7 +198,7 @@ function get_blocks(savetsv::Bool = true; delim = '\t')
     end
 
     if savetsv
-        file = joinpath(GAMEPATH[:cache], "get_blocks.tsv")
+        file = joinpath(GAMEENV["cache"], "get_blocks.tsv")
         open(file, "w") do io
             write(io, join(report, '\n'))
         end
@@ -219,7 +219,7 @@ function get_blocks(key; kwargs...)
 
     @assert !isempty(report) "'$key' Block이 사용된 건물은 없습니다"
   
-    file = joinpath(GAMEPATH[:cache], "get_blocks_$key.tsv")
+    file = joinpath(GAMEENV["cache"], "get_blocks_$key.tsv")
     open(file, "w") do io
         write(io, join(report, '\n'))
     end
@@ -234,8 +234,8 @@ end
 
 """
 function compress_continentDB(roaddb, tag = "v0.0.1";
-        sourcepath = joinpath(GAMEPATH["mars-world-tools"], "ContinentGenerator/output"),
-        outputpath = GAMEPATH["mars-world-seeds"])
+        sourcepath = joinpath(GAMEENV["mars-world-tools"], "ContinentGenerator/output"),
+        outputpath = GAMEENV["mars-world-seeds"])
 
     roaddb = joinpath(sourcepath, roaddb)
 
@@ -243,11 +243,11 @@ function compress_continentDB(roaddb, tag = "v0.0.1";
     @assert isfile(roaddb) "파일이 존재하지 않습니다 $roaddb"
 
     filename = "CONTINENT-$(tag)"
-    cp(roaddb, joinpath(GAMEPATH[:cache], "$(filename).db"); force=true)
+    cp(roaddb, joinpath(GAMEENV["cache"], "$(filename).db"); force=true)
     exe7z = joinpath(Compat.Sys.BINDIR, "7z.exe")
 
     # 절대 경로 하면 잘 안되서.. 상대 경로로 가도록
-    cd(GAMEPATH[:cache])
+    cd(GAMEENV["cache"])
     run(`$exe7z a $(filename).tar "$(filename).db"`)
     run(`$exe7z a $(filename).tar.bz2 "$(filename).tar"`)
 
@@ -256,7 +256,7 @@ function compress_continentDB(roaddb, tag = "v0.0.1";
     cp("$(filename).tar.bz2", output; force=true)
 
     # 캐시 폴더 정리
-    cd(GAMEPATH[:cache])
+    cd(GAMEENV["cache"])
     rm("$(filename).db")
     rm("$(filename).tar")
     rm("$(filename).tar.bz2")

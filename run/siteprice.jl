@@ -122,7 +122,7 @@ for lv in 2:10
     # 그냥 간단하게 하자...
     v[lv] = fill(round(Int, cost / totalchunk), totalchunk)
 end
-open(joinpath(GAMEPATH[:cache], "siteprice.csv"), "w") do io
+open(joinpath(GAMEENV["cache"], "siteprice.csv"), "w") do io
     for el in vcat(v...)
         write(io, string(el), "\n")
     end
