@@ -87,29 +87,3 @@ function init_gamedata_history(file)
 
     return h
 end
-# function init_referencedata_history(file)
-#     h = isfile(file) ? JSON.parsefile(file; dicttype=OrderedDict) :
-#                        OrderedDict{String, OrderedDict}()
-#     return h
-# end
-
-"""
-    init_typechecker()
-TODO...
-"""
-function init_typechecker(path)
-    function recrusive_typeparser(p::Pair)
-        if isa(p[2], String)
-            T = @eval $(Symbol(p[2]))
-            r = T
-        else
-            r = Dict{String, Any}()
-            for el in p[2]
-                r[el[1]] = recrusive_typeparser(el)
-            end
-        end
-        return r
-    end
-
-    checker = JSON.parsefile("$path/_TypeCheck.json") |> x -> merge(x...)
-end
