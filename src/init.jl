@@ -17,13 +17,12 @@ function __init__()
     init_cache!(GAMEENV)
     # DELIM에 ,쉼표 추가
     push!(XLSXasJSON.DELIM, ",")
+    help()
 end
 
 function init_cache!(env)
     MANAGERCACHE[:meta] = init_meta(env["json"]["root"])
-    MANAGERCACHE[:json_typechecke] = init_typechecker(joinpath(env["json"]["root"]))
     MANAGERCACHE[:history] = init_gamedata_history(env["history"])
-    # MANAGERCACHE[:referencedata_history] = init_referencedata_history(env[:referencedata_history])
 
     MANAGERCACHE
 end
@@ -72,7 +71,6 @@ function init_meta(path)
     meta[:auto] = parse_metainfo(jsonfile[:auto])
     meta[:manual] = parse_metainfo(jsonfile[:manual])
     meta[:xlsx_shortcut] = merge(foo(meta[:auto]), foo(meta[:manual]))
-    meta[:referencedata] = OrderedDict(broadcast(x -> Pair(x[:gamedata], x), jsonfile[:referencedata]))
 
     println("_Meta.json 로딩이 완료되었습니다", "."^max(6, displaysize(stdout)[2]-34))
 
