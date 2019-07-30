@@ -7,7 +7,6 @@ function validator_RewardTable(jwb::JSONWorkbook)
     @assert maximum(jws[:RewardKey]) < 1000000 "RewardTable의 RewardKey는 1,000,000 미만을 사용해 주세요."
 
     # 아이템이름 검색하다가 안나오면 에러 던짐
-    # NOTE: 성능 문제 있으면 Key만 뽑아서 비교하면 더 빠를 것 ref = getgamedata("ItemTable"; check_modified=true)
     rewards = parser_RewardTable(jwb)
     items = broadcast(x -> x[2], values(rewards))
     itemnames.(items)

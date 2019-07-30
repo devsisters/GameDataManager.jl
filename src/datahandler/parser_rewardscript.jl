@@ -67,8 +67,7 @@ function itemnames(x::Tuple{String, Int})
 end
 
 function itemnames(x::Tuple{String, Int, Int}, length_limit = 10)
-    gd = getgamedata("ItemTable"; check_modified = true, parse = true)
-    ref = gd.cache[:julia]
+    ref = getjuliadata("ItemTable")
     name = ref[x[2]][Symbol("\$Name")]
 
     # TODO: 글자 길이 제한 넣기...
