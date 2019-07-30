@@ -23,7 +23,7 @@ function validator_Building(jwb)
     nothing
 end
 function validator_Sandbox(jwb)
-    path_template = joinpath(GAMEENV["mars_repo"], "unity/Buildings")
+    path_template = joinpath(GAMEENV["patch_data"], "BuildTemplate/Buildings")
     path_thumbnails = joinpath(GAMEENV["CollectionResources"], "BusinessBuildingThumbnails")
 
     validate_file(path_template, jwb[:Level][:BuildingTemplate], ".json", 
