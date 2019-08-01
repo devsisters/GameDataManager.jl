@@ -14,7 +14,7 @@ function setup_env()
         @assert isfile(env_file) "$(env_file)을 생성해 주세요 / @김용희 문의"
         env = convert(Dict{String, Any}, JSON.parsefile(env_file))
     else
-        env = Dict("mars_repo" => repo_candidate)
+        env = Dict{String, Any}("mars_repo" => repo_candidate)
     end
 
     # patch-data
