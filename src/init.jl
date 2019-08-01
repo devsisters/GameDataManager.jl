@@ -5,13 +5,7 @@ const MANAGERCACHE = Dict{Symbol, Dict}()
 function __init__()
     global CON = Currency{:CON}(1)
     global CRY = Currency{:CRY}(1)
-
-    env_file = joinpath(ENV["HOMEPATH"], ".GameDataManager.json")
-    if !isfile(env_file)
-        setup!(env_file)
-    end
-    global GAMEENV = convert(Dict{String, Any}, JSON.parsefile(env_file))
-    setup_env!(GAMEENV)
+    global GAMEENV = setup_env()
 
     # cache 준비
     init_cache!(GAMEENV)

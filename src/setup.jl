@@ -1,45 +1,36 @@
 """
-    setup!(gdm_config)
+setup_env()
 
-프로젝트 https://github.com/devsisters/mars-prototype 로컬 위치를 찾아 gdm_config에 저장해 둠
+프로젝트 https://github.com/devsisters/mars-prototype 로컬 위치를 찾기...
 
 """
-function setup!(env_path)
+function setup_env()
     # NOTE gitrepo인지만 확인한다. 정확히 주소까지 맞는지 볼 필요 없어 보임
-    env = Dict("mars_repo" => "https://github.com/devsisters/mars-prototype 의 로컬 경로를 입력해 주세요")
-
-    repo_candidate = normpath(joinpath(@__DIR__, "../../.."))
-    # gitrepo인지 아닌지만 체크하면 될 듯??
-    if isfile(joinpath(repo_candidate, ".gitconfig"))
-        open(env_path, "w") do io 
-            JSON.print(io, env, 2)
-        end
+    repo_candidate = normpath(joinpath(@__DIR__, "../../.."))    
+    # 저기가 gitrepo가 아니면 무언가 잘못된 것...
+    if !isfile(joinpath(repo_candidate, ".gitconfig"))
+        env_file = normpath(joinpath(ENV["HOMEPATH"], ".GameDataManager.json"))
+        
+        @assert isfile(env_file) "$(env_file)을 생성해 주세요 / @김용희 문의"
+        env = convert(Dict{String, Any}, JSON.parsefile(env_file))
     else
-        # .julia/config/juno_startup 파싱해서 위치 찾을 수 도 있겠네
-        open(env_path, "w") do io 
-            JSON.print(io, env, 2)
-        end
-        throw(AssertionError("""
-        mars_repo의 위치를 찾을 수 없습니다. 수동으로 mars_repo의 경로를 입력해 주세요
-        c:$env_path"""))   
+        env = Dict("mars_repo" => repo_candidate)
     end
-end
-function setup_env!(env)
-    root = env["mars_repo"]
+
     # patch-data
-    env["patch_data"] = joinpath(root, "patch-data")
+    env["patch_data"] = joinpath(env["mars_repo"], "patch-data")
     setup_env_patchdata!(env)
 
     # unity folders
-    env["CollectionResources"] = joinpath(root, "unity/Assets/1_CollectionResources")
+    env["CollectionResources"] = joinpath(env["mars_repo"], "unity/Assets/1_CollectionResources")
     
     # GameDataManager paths
     env["cache"] = joinpath(env["patch_data"], ".cache")
     env["history"] = joinpath(env["cache"], "history.json")
     # env["referencedata_history"] = joinpath(env[:cache], "referencedata_history.json")
-
-    env
+    return env
 end
+
 function setup_env_patchdata!(env)
     env["xlsx"] = Dict("root" => joinpath(env["patch_data"], "_GameData"))
     env["json"] = Dict("root" => joinpath(env["patch_data"], "BalanceTables"))
