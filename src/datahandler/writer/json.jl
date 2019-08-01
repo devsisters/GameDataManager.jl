@@ -26,6 +26,7 @@ function export_gamedata(file::AbstractString; kwargs...)
     export_gamedata([file]; kwargs...)
 end
 function export_gamedata(files::Vector; loadgamedata = false)
+    run(`git checkout master`)
     if !isempty(files)
         @info "xlsx -> json 추출을 시작합니다 ⚒\n" * "-"^(displaysize(stdout)[2]-4)
         for f in files
