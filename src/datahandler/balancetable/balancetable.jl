@@ -213,7 +213,7 @@ function validate_general(jwb::JSONWorkbook)
     end
     #################
     for ws in jwb
-        haskey(ws, :Key) && validate_Key(ws)
+        hasproperty(ws, :Key) && validate_Key(ws)
         if basename(xlsxpath(jwb)) != "RewardTable.xlsm"
             # haskey(ws, :RewardKey) && validate_RewardKey(ws)
         end

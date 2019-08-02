@@ -36,7 +36,7 @@ function editor_RewardTable!(jwb)
                             :Rewards => Vector{Vector{String}}[])
 
             for col in [:r1, :r2, :r3, :r4, :r5]
-                if haskey(df, col)
+                if hasproperty(df, col)
                     re = get_reward(df[col])
                     if !isempty(re)
                         push!(d[:Rewards], re)
