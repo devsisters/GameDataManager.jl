@@ -301,23 +301,9 @@ end
 # end
 
 ############################################################################
-# Parser
+# parse
 # Julia에서 사용하기 좋은 형태로 가공한다
 ############################################################################
-function parser!(gd::BalanceTable, force_parse = false)
-    if !isparsed(gd) || force_parse
-        x = parse(gd.data)
-        if !ismissing(x)
-            gd.cache[:isparsed] = true
-            gd.cache[:julia] = x
-        else
-            @warn "$(xlsxpath(gd.data))는 parser가 존재하지 않습니다."
-        end
-    end
-
-    return gd
-end
-
 function Base.parse(jwb::JSONWorkbook)
     filename = basename(jwb)
     f = Symbol("parser_", split(filename, ".")[1])

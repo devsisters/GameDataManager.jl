@@ -40,7 +40,7 @@ function getgamedata(file::AbstractString, sheet_index::Integer; kwargs...)
     jwb = getgamedata(file; kwargs...).data
     return jwb[sheet_index]
 end
-function getgamedata(file::AbstractString; check_loaded = true, check_modified = false, parse = false)
+function getgamedata(file::AbstractString; check_loaded = true, check_modified = false, tryparse =  false)
     if check_loaded
         if !haskey(GAMEDATA, Symbol(file)) # 로딩 여부 체크
             loadgamedata!(file)
@@ -53,8 +53,16 @@ function getgamedata(file::AbstractString; check_loaded = true, check_modified =
     end
     gd = GAMEDATA[Symbol(file)]
 
-    if parse
-        parser!(gd)
+    if tryparse
+        if !isparsed(gd)
+            x = parse(gd.data)
+            if !ismissing(x)
+                gd.cache[:isparsed] = true
+                gd.cache[:julia] = x
+            else
+                @warn "$(xlsxpath(gd.data))는 parser가 존재하지 않습니다."
+            end
+        end
     end
 
     return gd
@@ -79,21 +87,22 @@ getmetadata(jwb::JSONWorkbook) =  getmetadata(basename(xlsxpath(jwb)))
 
 #################################################################################
 """
-        prepare()
+    caching()
 getjuliadata에서 불러오기 위해 파싱하여 저장
 """
 function caching(feature::Symbol = :All)
     if feature == :All
-        getgamedata("ItemTable"; parse = true)
-        getgamedata("RewardTable"; parse = true)
+        getgamedata("ItemTable"; check_modified=true, tryparse=true)
+        getgamedata("RewardTable"; check_modified=true, tryparse=true)
 
-        getgamedata("DroneDelivery"; parse = true)
+        getgamedata("DroneDelivery"; check_modified=true, tryparse=true)
     end
     if (feature == :Building || feature == :All)
-        getgamedata("Residence"; parse = true)
-        getgamedata("Shop"; parse = true)
-        getgamedata("Special"; parse = true)
-        getgamedata("Ability"; parse = true)
+        getgamedata("Residence"; check_modified=true, tryparse=true)
+        getgamedata("Shop"; check_modified=true, tryparse=true)
+        getgamedata("Special"; check_modified=true, tryparse=true)
+        getgamedata("Sandbox"; check_modified=true, tryparse=true)
+        getgamedata("Ability"; check_modified=true, tryparse=true)
     end
 
     nothing
@@ -112,7 +121,7 @@ function getjuliadata(file::Symbol)
     if a != Exception 
         a = get(a.cache, :julia, Exception)
     end
-    @assert a != Exception "$file 이 GAMEDATA에 caching 되지 않았습니다. cashing() 함수를 실행해 주세요"
+    @assert a != Exception "$file 이 GAMEDATA에 caching 되지 않았습니다. caching() 함수를 실행해 주세요"
     return a
 end
 getjuliadata(file::AbstractString) = getjuliadata(Symbol(file))

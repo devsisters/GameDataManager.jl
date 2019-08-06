@@ -152,7 +152,7 @@ function show_item(itemtype::AbstractString, val::T) where T <: Real
 end
 function show_item(itemkey::Integer, val::T;
                     remove_whitespace = true, print_on_console = true) where T <: Real
-    ref = getgamedata("ItemTable").cache[:julia][itemkey]
+    ref = getjuliadata("ItemTable")[itemkey]
 
     name = ref[Symbol("\$Name")]
     if remove_whitespace

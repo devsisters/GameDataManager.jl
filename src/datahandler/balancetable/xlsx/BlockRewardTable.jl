@@ -34,11 +34,15 @@ function editor_BlockRewardTable!(jwb)
             d = OrderedDict(:TraceTag => df[1, :TraceTag],
                             :Rewards => Vector{Vector{String}}[])
 
-            #NOTE: BlockRewardTable에서는 1개의 BlockSet만 지급
-            push!(d[:Rewards], get_reward(df[:r1]))
-            df_out = df[setdiff(collect(names(df)), [:r1])] |> x -> convert(DataFrame, x)
-            df_out[:RewardScript] = d
-            push!(v, df_out)
+            for col in [:r1, :r2, :r3, :r4, :r5]
+                if hasproperty(df, col)
+                    re = get_reward(df[col])
+                    if !isempty(re)
+                        push!(d[:Rewards], re)
+                    end
+                end
+            end
+            push!(v, DataFrame(RewardKey = df[1, :RewardKey], RewardScript = d))
         end
         vcat(v...)
     end
