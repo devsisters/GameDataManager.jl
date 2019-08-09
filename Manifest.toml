@@ -40,9 +40,9 @@ uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
 version = "2.1.0"
 
 [[DataAPI]]
-git-tree-sha1 = "891a09f4f90361a28d0391c104a65c0202e22624"
+git-tree-sha1 = "8903f0219d3472543fc4b2f5ebaf675a07f817c0"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
-version = "1.0.0"
+version = "1.0.1"
 
 [[DataFrames]]
 deps = ["CategoricalArrays", "Compat", "IteratorInterfaceExtensions", "Missings", "PooledArrays", "Printf", "REPL", "Reexport", "SortingAlgorithms", "Statistics", "StatsBase", "TableTraits", "Tables", "Unicode"]
@@ -144,9 +144,9 @@ version = "1.1.0"
 
 [[PDMats]]
 deps = ["Arpack", "LinearAlgebra", "SparseArrays", "SuiteSparse", "Test"]
-git-tree-sha1 = "8b68513175b2dc4023a564cb0e917ce90e74fd69"
+git-tree-sha1 = "f99548922adf8dd5df2f02ab0063944201a12ed8"
 uuid = "90014a1f-27ba-587c-ab20-58faa44d9150"
-version = "0.9.7"
+version = "0.9.8"
 
 [[Parsers]]
 deps = ["Dates", "Test"]
@@ -289,11 +289,11 @@ version = "0.5.3"
 
 [[XLSXasJSON]]
 deps = ["DataFrames", "DataStructures", "JSON", "Printf", "XLSX"]
-git-tree-sha1 = "b2669d78ec98c9824e9dcfd273763f179f82a49b"
+git-tree-sha1 = "96dfd2b76788a2094c4183602d2dfd6b3cb37085"
 repo-rev = "master"
-repo-url = "https://github.com/devsisters/XLSXasJSON.jl"
+repo-url = "https://github.com/devsisters/XLSXasJSON.jl.git"
 uuid = "8c9e00cc-ccf1-11e8-3de6-5b028f480d9e"
-version = "0.2.1"
+version = "0.3.0"
 
 [[ZipFile]]
 deps = ["BinaryProvider", "Libdl", "Printf"]
