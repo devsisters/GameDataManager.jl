@@ -1,3 +1,4 @@
 function editor_CashStore!(jwb)
-    combine_args_sheet!(jwb, :Data, :args; key = :ProductKey)
+    jwb[:Data] = merge(jwb[:Data], jwb[:args], "ProductKey")
+    deleteat!(jwb, :args)
 end

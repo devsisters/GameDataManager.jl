@@ -1,7 +1,7 @@
 
 function validator_Quest(jwb::JSONWorkbook)
-    jws = jwb[:Main]
-    if maximum(jws[:QuestKey]) > 1023 || minimum(jwb[:Main][:QuestKey]) < 0
+    jws = df(jwb[:Main])
+    if maximum(jws[:QuestKey]) > 1023 || minimum(jws[:QuestKey]) < 0
         throw(AssertionError("Quest_Main.json의 QuestKey는 0~1023만 사용 가능합니다."))
     end
     for i in 1:size(jws, 1)
@@ -87,23 +87,19 @@ end
 
 
 function editor_Quest!(jwb)
-    function concatenate_columns(jws)
-        df = jws[:]
-        col_names = string.(names(jws))
-        k1 = filter(x -> startswith(x, "Trigger"), col_names) .|> Symbol
-        k2 = filter(x -> startswith(x, "CompleteCondition"), col_names) .|> Symbol
+    data = jwb[:Main].data
+    for el in data
+        overwrite = []
+        for x in el["Trigger"]
+            push!(overwrite, collect(values(x)))
+        end
+        el["Trigger"] = overwrite
 
-        df[:Trigger] =  map(i -> filter(!ismissing, broadcast(el -> df[i, el], k1)), 1:size(df, 1))
-        df[:CompleteCondition] = map(i -> filter(!ismissing, broadcast(el -> df[i, el], k2)), 1:size(df, 1))
-        # 컬럼 삭제
-        deletecols!(df, k1)
-        deletecols!(df, k2)
+        overwrite = []
+        for x in el["CompleteCondition"]
+            push!(overwrite, collect(values(x)))
+        end
+        el["CompleteCondition"] = overwrite
+    end
 
-        df
-    end
-    sheets = concatenate_columns.(jwb)
-    for i in 1:length(jwb)
-        jwb[i] = vcat(sheets...)
-    end
-    return jwb
 end

@@ -34,11 +34,11 @@ function getgamedata(file::AbstractString, sheetname::AbstractString; kwargs...)
 end
 function getgamedata(file::AbstractString, sheetname::Symbol; kwargs...)
     jwb = getgamedata(file; kwargs...).data
-    return jwb[sheetname]
+    return df(jwb[sheetname])
 end
 function getgamedata(file::AbstractString, sheet_index::Integer; kwargs...)
     jwb = getgamedata(file; kwargs...).data
-    return jwb[sheet_index]
+    return df(jwb[sheet_index])
 end
 function getgamedata(file::AbstractString; check_loaded = true, check_modified = false, tryparse =  false)
     if check_loaded

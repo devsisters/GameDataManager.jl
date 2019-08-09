@@ -1,5 +1,5 @@
 function validator_Ability(jwb)
-    jws = jwb[:Level]
+    jws = df(jwb[:Level])
 
     x = setdiff(unique(jws[:Group]), [
             "CoinStorageCap", "AddInventory", "PipoArrivalIntervalSec", "PipoMaxQueue",
@@ -24,7 +24,7 @@ end
 """
 function parser_Ability(jwb::JSONWorkbook)
     d = OrderedDict{Symbol, Dict}()
-    for gdf in groupby(jwb[:Level][:], :AbilityKey)
+    for gdf in groupby(df(jwb[:Level]), :AbilityKey)
         key = Symbol(gdf[1, :AbilityKey])
 
         d[key] = Dict{Symbol, Any}()

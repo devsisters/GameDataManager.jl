@@ -31,8 +31,9 @@ struct XLSXBalanceTable <: BalanceTable
     cache::Dict{Symbol, Any}
     function XLSXBalanceTable(jwb::JSONWorkbook; check_valid = true)
         editor!(jwb)
-        check_valid && validator(jwb)
         dummy_localizer!(jwb)
+        construct_dataframe!(jwb)
+        check_valid && validator(jwb)
 
         cache = Dict{Symbol, Any}()
         new(jwb, cache)
@@ -221,8 +222,9 @@ function validate_general(jwb::JSONWorkbook)
     nothing
 end
 
-function validate_duplicate(jws::JSONWorksheet, k::Symbol; assert=true)
-    target = jws[k]
+validate_duplicate(jws::JSONWorksheet, k::Symbol; kwargs...) = validate_duplicate(df(jws), k; kwargs...)
+function validate_duplicate(df::DataFrame, k::Symbol; assert=true)
+    target = df[k]
     if !allunique(target)
         duplicate = filter(el -> el[2] > 1, countmap(target))
         msg = "$(sheetnames(jws))[:$(k)]에서 중복된 값이 발견되었습니다"
@@ -321,17 +323,24 @@ end
 # TODO: GameLocalizer로 옮길 것
 ############################################################################
 """
-    dummy_localizer!
+    dummy_localizer
 진짜 로컬라이저 만들기 전에 우선 컬럼명만 복제해서 2개로 만듬
 """
 function dummy_localizer!(jwb::JSONWorkbook)
-    for jws in jwb
-       col_names = string.(names(jws))
-       local_keys = filter(x -> startswith(x, "\$"), col_names)
-
-       for k in local_keys
-            jws[Symbol(chop(k, head=1, tail=0))] = jws[Symbol(k)]
-       end
+    for s in sheetnames(jwb)
+        jwb[s].data = dummy_localizer.(jwb[s].data)
     end
-    jwb
+end
+
+dummy_localizer(x) = x
+function dummy_localizer(x::T) where {T <: AbstractDict}
+    for k in keys(x)
+        if startswith(string(k), "\$")
+            k2 = string(chop(k, head=1, tail=0))
+            x[k2] = x[k]
+        else
+            x[k] = dummy_localizer(x[k])
+        end
+    end
+    return x
 end

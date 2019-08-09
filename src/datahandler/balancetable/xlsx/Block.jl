@@ -5,42 +5,49 @@ function validator_Block(jwb::JSONWorkbook)
         x = filter(x -> startswith(x, "  - Key:"), readlines(f))
         unique(broadcast(x -> split(x, "Key: ")[2], x))
     end
-    missing_key = setdiff(unique(jwb[1][:TemplateKey]), b)
+    missing_key = setdiff(unique(df(jwb[1])[:TemplateKey]), b)
     if !isempty(missing_key)
         @warn "Buidling의 TemplateKey가 BlockTemplateBalanceTable.asset 에 없습니다 \n $(missing_key)"
     end
 
-    subcat = unique(jwb[:Block][:SubCategory])
-    if !issubset(subcat, jwb[:SubCategory][:CategoryKey])
+    subcat = unique(df(jwb[:Block])[:SubCategory])
+    if !issubset(subcat, df(jwb[:SubCategory])[:CategoryKey])
         @warn """SubCategory에서 정의하지 않은 SubCategory가 있습니다
-        $(setdiff(subcat, jwb[:SubCategory][:CategoryKey]))"""
+        $(setdiff(subcat, df(jwb[:SubCategory])[:CategoryKey]))"""
     end
 
     # 임시로 ArtAsset이 중복되면 안됨. 추후 삭제
-    validate_duplicate(jwb[:Block], :ArtAsset; assert = false)
+    validate_duplicate(df(jwb[:Block]), :ArtAsset; assert = false)
 
     nothing
 end
 function editor_Block!(jwb)
-    function concatenate_blockset(jws)
-        NameCol = Symbol("\$Name")
+    blockset = jwb[:Set].data
 
-        # TODO: DataFrame Groupby에서 구성하도록 수정 필수!!
-        df = DataFrame(:BlockSetKey => filter(!ismissing, unique(jws[:BlockSetKey])),
-                       :Icon        => filter(!ismissing, jws[:Icon]),
-                        NameCol     => filter(!ismissing, unique(jws[NameCol])))
-        df[:Members] = Array{Any}(undef, size(df, 1))
-
-        i = 0
-        for gdf in groupby(jws[:], :BlockSetKey)
-            i += 1
-            df[i, :Members] = gdf[:Members]
+    ids = unique(broadcast(el -> el["BlockSetKey"], blockset))
+    newdata = broadcast(x -> OrderedDict{String, Any}("BlockSetKey" => x), ids)
+    for (i, id) in enumerate(ids)
+        origin = begin 
+            f = broadcast(el -> get(el, "BlockSetKey", 0) == id, blockset)
+            blockset[f]
         end
-        df
+        for (j, el) in enumerate(origin)
+            if j == 1
+                for k in ["Icon", "\$Name"]
+                    newdata[i][k] = el[k]
+                    newdata[i]["Members"] = []
+                end
+            end
+            m = get(el, "Members", missing)
+            if !ismissing(m)
+                push!(newdata[i]["Members"], m)
+            end
+        end
+  
     end
-    jwb[:Set] = concatenate_blockset(jwb[:Set])
 
-    sort!(jwb[:Block], :Key)
+    jwb[:Set].data = newdata
+    sort!(jwb[:Block], "Key")
 
     return jwb
 end

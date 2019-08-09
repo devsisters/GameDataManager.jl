@@ -4,16 +4,10 @@ using XLSXasJSON
 
 GDM = GameDataManager
 
-include("datahandler.jl")
 include("building.jl")
 
-
-@testset "loader 테스트" begin
-
-end
-
 @testset "validator 테스트" begin
-    jwb = read_gamedata("Shop.xlsx"; validate = false)
+    jwb = getgamedata("Shop"; validate = false).data
     jwb[1][:][1, :Key] = jwb[1][:][2, :Key] # 키 중복
     @test_throws AssertionError GDM.validation(jwb)
 
@@ -24,16 +18,12 @@ end
     jwb[1][:][1, :Key] = "Key\tKey"# 키에 탭
     @test_throws AssertionError GDM.validation(jwb)
 
-    jwb = read_gamedata("Quest.xlsx"; validate = false)
+    jwb = getgamedata("Quest"; validate = false)
     jwb[:Main][:][1, :QuestKey] = 1024
     @test_throws AssertionError GDM.validation(jwb)
 end
 
 @testset "history 테스트" begin
-    xl()
+    xl(true)
     @test isempty(GDM.collect_modified_xlsx())
-end
-
-@testset "XLSX to JSON" begin
-    xl("Player.xlsx")
 end

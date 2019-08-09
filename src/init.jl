@@ -36,10 +36,9 @@ function init_meta(path)
         if haskey(json_row, :kwargs)
             x = get(json_row[:kwargs], sheet, x)
         end
-        NamedTuple{(:row_oriented, :start_line, :compact_to_singleline)}((
+        NamedTuple{(:row_oriented, :start_line)}((
                     get(x, :row_oriented, true),
-                    get(x, :start_line, 2),
-                    get(x, :compact_to_singleline, false)
+                    get(x, :start_line, 2)
                     ))
     end
     function parse_metainfo(origin)
