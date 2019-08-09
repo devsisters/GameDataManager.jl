@@ -91,13 +91,14 @@ function editor_Quest!(jwb)
     for el in data
         overwrite = []
         for x in el["Trigger"]
-            push!(overwrite, collect(values(x)))
+            append!(overwrite, collect(values(x)))
         end
+        @show overwrite
         el["Trigger"] = overwrite
 
         overwrite = []
         for x in el["CompleteCondition"]
-            push!(overwrite, collect(values(x)))
+            append!(overwrite, collect(values(x)))
         end
         el["CompleteCondition"] = overwrite
     end
