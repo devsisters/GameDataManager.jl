@@ -93,7 +93,6 @@ function editor_Quest!(jwb)
         for x in el["Trigger"]
             append!(overwrite, collect(values(x)))
         end
-        @show overwrite
         el["Trigger"] = overwrite
 
         overwrite = []
