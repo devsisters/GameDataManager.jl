@@ -19,7 +19,7 @@ function validator_Block(jwb::JSONWorkbook)
     end
 
     # 임시로 ArtAsset이 중복되면 안됨. 추후 삭제
-    validate_duplicate(blocktable, :ArtAsset; assert = false)
+    validate_duplicate(jwb[:Block], :ArtAsset; assert = false)
 
     nothing
 end

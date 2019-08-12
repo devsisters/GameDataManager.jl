@@ -196,12 +196,11 @@ end
 * :Key 모든 데이터가 유니크해야 한다, 공백이나 탭 줄바꿈이 있으면 안된다.
 """
 function validate_general(jwb::JSONWorkbook)
-    validate_Key(jws::JSONWorkbook) = validate_Key(df(jws))
-    function validate_Key(data)
-        validate_duplicate(data, :Key)
+    function validate_Key(jws)
+        validate_duplicate(jws, :Key)
 
-        check = broadcast(x -> isa(x, String) ? occursin(r"(\s)|(\t)|(\n)", x) : false, data[:, :Key])
-        @assert !any(check) "Key에는 공백, 줄바꿈, 탭이 들어갈 수 없습니다 \n $(data[:, :Key][check])"
+        check = broadcast(x -> isa(x, String) ? occursin(r"(\s)|(\t)|(\n)", x) : false, jws[:, :Key])
+        @assert !any(check) "Key에는 공백, 줄바꿈, 탭이 들어갈 수 없습니다 \n $(jws[:, :Key][check])"
     end
     function validate_RewardKey(jws)
         rewardkey = getgamedata("RewardTable", 1, :RewardKey; check_modified = true)
@@ -215,17 +214,13 @@ function validate_general(jwb::JSONWorkbook)
     end
     #################
     for ws in jwb
-        hasproperty(ws, :Key) && validate_Key(ws)
-        if basename(xlsxpath(jwb)) != "RewardTable.xlsm"
-            # haskey(ws, :RewardKey) && validate_RewardKey(ws)
-        end
+        # hasproperty(ws, :Key) && validate_Key(ws)
     end
     nothing
 end
 
-validate_duplicate(jws::JSONWorksheet, k::Symbol; kwargs...) = validate_duplicate(df(jws), k; kwargs...)
-function validate_duplicate(df::DataFrame, k::Symbol; assert=true)
-    target = df[:, k]
+function validate_duplicate(jws::JSONWorksheet, k::Symbol; assert=true)
+    target = df(jws)[:, k]
     if !allunique(target)
         duplicate = filter(el -> el[2] > 1, countmap(target))
         msg = "$(sheetnames(jws))[:$(k)]에서 중복된 값이 발견되었습니다"

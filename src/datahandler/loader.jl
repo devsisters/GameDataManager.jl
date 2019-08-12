@@ -27,7 +27,7 @@ loadgamedata!가 안되어있을 경우 해당 파일을 load한다
 """
 function getgamedata(file::AbstractString, sheet, colname; kwargs...)
     jws = getgamedata(file, sheet; kwargs...)
-    return jws[colname]
+    return jws[:, colname]
 end
 function getgamedata(file::AbstractString, sheetname::AbstractString; kwargs...)
     getgamedata(file, Symbol(sheetname); kwargs...)

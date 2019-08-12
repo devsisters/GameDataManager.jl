@@ -1,10 +1,9 @@
 
 function validator_RewardTable(jwb::JSONWorkbook)
     # 시트를 합쳐둠
-    jws = jwb[1]
-    validate_duplicate(jws, :RewardKey)
+    validate_duplicate(jwb[1], :RewardKey)
     # 1백만 이상은 BlockRewardTable에서만 쓴다
-    @assert maximum(jws[:RewardKey]) < 1000000 "RewardTable의 RewardKey는 1,000,000 미만을 사용해 주세요."
+    @assert maximum(df(jwb[1])[:, :RewardKey]) < 1000000 "RewardTable의 RewardKey는 1,000,000 미만을 사용해 주세요."
 
     # 아이템이름 검색하다가 안나오면 에러 던짐
     rewards = parser_RewardTable(jwb)
@@ -14,60 +13,65 @@ function validator_RewardTable(jwb::JSONWorkbook)
     nothing
 end
 
-
-function editor_RewardTable!(jwb)
-    function get_reward(rewards)
-        rewards = filter(el -> !ismissing(el["Kind"]), rewards)
-        v = Vector{Vector{String}}(undef, length(rewards))
-        for (i, el) in enumerate(rewards)
-            weight = string(get(el, "Weight", 1))
-            v[i] = if ismissing(el["ItemKey"])
-                String[weight, el["Kind"], string(el["Amount"])]
-            else
-                String[weight, el["Kind"], string(el["ItemKey"]), string(el["Amount"])]
-            end
-        end
-        return v
-    end
-    function concatenate_rewards(jws)
-        v = DataFrame[]
-        for df in groupby(jws[:], :RewardKey)
-            d = OrderedDict(:TraceTag => df[1, :TraceTag],
-                            :Rewards => Vector{Vector{String}}[])
-
-            for col in [:r1, :r2, :r3, :r4, :r5]
-                if hasproperty(df, col)
-                    re = get_reward(df[col])
-                    if !isempty(re)
-                        push!(d[:Rewards], re)
-                    end
-                end
-            end
-            push!(v, DataFrame(RewardKey = df[1, :RewardKey], RewardScript = d))
-        end
-        vcat(v...)
+function editor_RewardTable!(jwb::JSONWorkbook)
+    for i in 1:length(jwb)
+        collect_rewardscript!(jwb[i])
     end
 
-    # 합치고 나머지 삭제
-    sheets = concatenate_rewards.(jwb)
-    jwb[1] = vcat(sheets...)
-    for i in 2:length(jwb)
-        deleteat!(jwb, 2)
-    end
-    sort!(jwb[1], :RewardKey)
+    append!(jwb[:Solo].data, jwb[:Box].data)
+    append!(jwb[:Solo].data, jwb[:DroneDelivery].data)
+    append!(jwb[:Solo].data, jwb[:SpaceDrop].data)
+    deleteat!(jwb, :Box)
+    deleteat!(jwb, :DroneDelivery)
+    deleteat!(jwb, :SpaceDrop)
+
+    sort!(jwb[:Solo], "RewardKey")
 
     return jwb
 end
 
+"""
+    collect_rewardscript!
+
+`BlockRewardTable.json`, `RewardTable.json` 생성일 위한 스크립트
+"""
+function collect_rewardscript!(jws::JSONWorksheet)
+    function pull_rewardscript(x)
+        origin = x["RewardScript"]["Rewards"]
+        result = map(el -> [get(el, "Weight", "1"), 
+                get(el, "Kind", "ERROR_CANNOTFIND_KIND"),
+                get(el, "ItemKey", missing),
+                get(el, "Amount", "ERROR_CANNOTFIND_AMOUNT")]
+                , origin)
+        map(x -> string.(filter(!ismissing, x)), result)
+    end
+    rewardkey = unique(broadcast(el -> el["RewardKey"], jws.data))
+
+    new_data = Array{OrderedDict, 1}(undef, length(rewardkey))
+    for (i, id) in enumerate(rewardkey)
+        targets = filter(el -> get(el, "RewardKey", 0) == id, jws.data)
+        rewards = []
+        for el in targets
+            push!(rewards, pull_rewardscript(el))
+        end
+
+        new_data[i] = OrderedDict(
+            "RewardKey" => targets[1]["RewardKey"],
+            "RewardScript" => OrderedDict("TraceTag" => targets[1]["RewardScript"]["TraceTag"],
+            "Rewards" => rewards))
+    end
+    jws.data = new_data
+    return jws
+end
 
 function parser_RewardTable(jwb::JSONWorkbook)
     getgamedata("ItemTable"; check_modified=true, tryparse=true)
 
-    jws = jwb[1] # 1번 시트로 하드코딩됨
+    data = df(jwb[1]) # 1번 시트로 하드코딩됨
     d = Dict{Int32, Any}()
-    for row in eachrow(jws)
-        el = row[:RewardScript]
-        d[row[:RewardKey]] = (TraceTag = el[:TraceTag], Rewards = RewardScript(el[:Rewards]))
-    end
+    # for row in eachrow(data)
+    #     el = row[:RewardScript]
+    #     d[row[:RewardKey]] = (TraceTag = el[:TraceTag], Rewards = RewardScript(el[:Rewards]))
+    # end
     return d
 end
