@@ -1,23 +1,25 @@
 function validator_Block(jwb::JSONWorkbook)
+    blocktable = df(jwb[:Block])
+    
     b = begin
         f = joinpath(GAMEENV["mars_repo"], "unity/Assets/ScriptableObjects/BalanceTable",
                                       "BlockTemplateBalanceTable.asset")
         x = filter(x -> startswith(x, "  - Key:"), readlines(f))
         unique(broadcast(x -> split(x, "Key: ")[2], x))
     end
-    missing_key = setdiff(unique(df(jwb[1])[:TemplateKey]), b)
+    missing_key = setdiff(unique(blocktable[:, :TemplateKey]), b)
     if !isempty(missing_key)
         @warn "Buidling의 TemplateKey가 BlockTemplateBalanceTable.asset 에 없습니다 \n $(missing_key)"
     end
 
-    subcat = unique(df(jwb[:Block])[:SubCategory])
-    if !issubset(subcat, df(jwb[:SubCategory])[:CategoryKey])
+    subcat = unique(blocktable[:, :SubCategory])
+    if !issubset(subcat, df(jwb[:SubCategory])[:, :CategoryKey])
         @warn """SubCategory에서 정의하지 않은 SubCategory가 있습니다
-        $(setdiff(subcat, df(jwb[:SubCategory])[:CategoryKey]))"""
+        $(setdiff(subcat, df(jwb[:SubCategory])[:, :CategoryKey]))"""
     end
 
     # 임시로 ArtAsset이 중복되면 안됨. 추후 삭제
-    validate_duplicate(df(jwb[:Block]), :ArtAsset; assert = false)
+    validate_duplicate(blocktable, :ArtAsset; assert = false)
 
     nothing
 end
