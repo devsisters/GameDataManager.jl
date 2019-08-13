@@ -199,8 +199,8 @@ function validate_general(jwb::JSONWorkbook)
     function validate_Key(jws)
         validate_duplicate(jws, :Key)
 
-        check = broadcast(x -> isa(x, String) ? occursin(r"(\s)|(\t)|(\n)", x) : false, jws[:, :Key])
-        @assert !any(check) "Key에는 공백, 줄바꿈, 탭이 들어갈 수 없습니다 \n $(jws[:, :Key][check])"
+        check = broadcast(x -> isa(x, String) ? occursin(r"(\s)|(\t)|(\n)", x) : false, jws[!, :Key])
+        @assert !any(check) "Key에는 공백, 줄바꿈, 탭이 들어갈 수 없습니다 \n $(jws[!, :Key][check])"
     end
     function validate_RewardKey(jws)
         rewardkey = getgamedata("RewardTable", 1, :RewardKey; check_modified = true)

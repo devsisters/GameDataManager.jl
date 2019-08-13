@@ -1,11 +1,11 @@
 function validator_ItemTable(jwb::JSONWorkbook)
     path = joinpath(GAMEENV["CollectionResources"], "ItemIcons")
-    validate_file(path, df(jwb[:Currency])[:, :Icon], ".png", "아이템 Icon이 존재하지 않습니다")
-    validate_file(path, df(jwb[:Normal])[:, :Icon], ".png", "아이템 Icon이 존재하지 않습니다")
-    validate_file(path, df(jwb[:BuildingSeed])[:, :Icon], ".png", "아이템 Icon이 존재하지 않습니다")
+    validate_file(path, df(jwb[:Currency])[!, :Icon], ".png", "아이템 Icon이 존재하지 않습니다")
+    validate_file(path, df(jwb[:Normal])[!, :Icon], ".png", "아이템 Icon이 존재하지 않습니다")
+    validate_file(path, df(jwb[:BuildingSeed])[!, :Icon], ".png", "아이템 Icon이 존재하지 않습니다")
 
     caching(:Building)
-    for k in df(jwb[:BuildingSeed])[:, :BuildingKey]
+    for k in df(jwb[:BuildingSeed])[!, :BuildingKey]
         @assert haskey(Building, k) "'$k'는 존재하지 않는 Building입니다"
     end
 

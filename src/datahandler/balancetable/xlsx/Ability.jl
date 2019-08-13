@@ -1,7 +1,7 @@
 function validator_Ability(jwb)
     data = df(jwb[:Level])
 
-    x = setdiff(unique(data[:, :Group]), [
+    x = setdiff(unique(data[!, :Group]), [
             "CoinStorageCap", "AddInventory", "PipoArrivalIntervalSec", "PipoMaxQueue",
             "DroneDeliverySlot",
             "ProfitCoin", "CoinCounterCap",

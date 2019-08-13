@@ -3,7 +3,7 @@ function validator_RewardTable(jwb::JSONWorkbook)
     # 시트를 합쳐둠
     validate_duplicate(jwb[1], :RewardKey)
     # 1백만 이상은 BlockRewardTable에서만 쓴다
-    @assert maximum(df(jwb[1])[:, :RewardKey]) < 1000000 "RewardTable의 RewardKey는 1,000,000 미만을 사용해 주세요."
+    @assert maximum(df(jwb[1])[!, :RewardKey]) < 1000000 "RewardTable의 RewardKey는 1,000,000 미만을 사용해 주세요."
 
     # 아이템이름 검색하다가 안나오면 에러 던짐
     rewards = parser_RewardTable(jwb)
