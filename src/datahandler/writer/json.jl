@@ -54,7 +54,11 @@ function write_json(jwb::JSONWorkbook)
         json = joinpath(dir, meta[s][1])
         newdata = JSON.json(jwb[s], 2)
         # 편집된 시트만 저장
-        if md5(read(json, String)) != md5(newdata)
+        writefile = true
+        if isfile(json)
+            writefile = !isequal(md5(read(json, String)), md5(newdata))
+        end
+        if writefile
             write(json, newdata)
             printstyled("  SAVED => \"$(json)\" \n"; color=:blue)
         else
