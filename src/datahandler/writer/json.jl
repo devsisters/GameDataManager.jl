@@ -51,19 +51,18 @@ function write_json(jwb::JSONWorkbook)
     meta = getmetadata(jwb)
 
     for s in sheetnames(jwb)
-        file = joinpath(dir, meta[s][1])
-        XLSXasJSON.write(file, jwb[s])
+        json = joinpath(dir, meta[s][1])
+        newdata = JSON.json(jwb[s], 2)
+        # 편집된 시트만 저장
+        if md5(read(json, String)) != md5(newdata)
+            write(json, newdata)
+            printstyled("  SAVED => \"$(json)\" \n"; color=:blue)
+        else
+            printstyled("  변경없음 => \"$(json)\" \n")
+        end
+    end
+end
 
-        @printf("   saved => \"%s\" \n", file)
-    end
-end
-function write_json(jgd::JSONBalanceTable, indent = 2)
-    file = jgd.filepath
-    open(file, "w") do io
-        JSON.print(io, jgd.data, indent)
-    end
-    @printf("   saved => \"%s\" \n", file)
-end
 
 """
     md5hash()
@@ -82,7 +81,7 @@ function md5hash()
             write(io, "\n")
         end
     end
-    @printf("json파일별 MD5해시가 저장되었습니다 => \"%s\" \n", result)
+    printstyled("json파일별 MD5해시가 저장되었습니다 => \"$(result)\" \n"; color=:blue)
 end
 function md5hash(f)
     bytes2hex(md5(read(joinpath_gamedata(f), String)))

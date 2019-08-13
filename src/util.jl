@@ -26,9 +26,6 @@ function help(idx = 1)
           get_buildings(): 건물Key별 사용되는 블록의 종류와 수량을 계산합니다.
           `help()`를 입력하면 도움을 드립니다!
           md5hash(): `help?>md5hash` 도움말 참조
-        # WIP
-          export_referencedata("ItemTable")
-          export_referencedata("RewardTable")
         """
     elseif idx == 2
         line_breaker = "-"^(displaysize(stdout)[2]-4)
@@ -82,7 +79,7 @@ function findblock()
     print("    ", msg_a)
     print("    ", msg_b)
     print("비교보고서: ")
-    printstyled(normpath(file); color=:light_blue) # 왜 Atom에서 클릭 안됨???
+    printstyled(normpath(file); color=:blue) # 왜 Atom에서 클릭 안됨???
 end
 
 
@@ -90,7 +87,7 @@ end
 function print_write_result(path, msg = "결과는 다음과 같습니다")
     printstyled("$(msg)\n"; color=:green)
     print("경로: ")
-    printstyled(normpath(path); color=:light_blue)
+    printstyled(normpath(path); color=:blue)
     print('\n')
 
     nothing
