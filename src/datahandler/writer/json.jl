@@ -60,9 +60,9 @@ function write_json(jwb::JSONWorkbook)
         end
         if writefile
             write(json, newdata)
-            printstyled("  SAVED => \"$(json)\" \n"; color=:blue)
+            printstyled("   SAVED => \"$(json)\" \n"; color=:blue)
         else
-            printstyled("  변경없음 => \"$(json)\" \n")
+            printstyled("NOCHANGE => \"$(json)\" \n")
         end
     end
 end
