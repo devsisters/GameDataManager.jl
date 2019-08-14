@@ -27,7 +27,6 @@ function setup_env()
     # GameDataManager paths
     env["cache"] = joinpath(env["patch_data"], ".cache")
     env["history"] = joinpath(env["cache"], "history.json")
-    # env["referencedata_history"] = joinpath(env[:cache], "referencedata_history.json")
     return env
 end
 

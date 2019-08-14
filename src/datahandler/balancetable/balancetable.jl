@@ -50,46 +50,15 @@ function XLSXBalanceTable(f::AbstractString)
 
     XLSXBalanceTable(jwb)
 end
-"""
-    ReferenceGameData
-"""
-struct ReferenceGameData <: BalanceTable
-    parent::BalanceTable
-    data::Any
-end
-function ReferenceGameData(f)
-    meta = get(MANAGERCACHE[:meta][:referencedata], f, missing)
 
-    @assert !ismissing(meta) "_Meta.json의 referencedata에 \"$(f)\"가 존재하지 않습니다."
-
-    parent = getgamedata(f; check_modified = true)
-
-    if f == "RewardTable"
-        origin = parent.data[Symbol(meta[:sheet])]
-        df = DataFrame(RewardKey = origin[:RewardKey])
-        df[:TraceTag] = ""
-        df[:Rewards] = Vector{Any}(undef, size(df, 1))
-
-        for i in 1:size(df, 1)
-            el = origin[i, :RewardScript]
-            df[i, :TraceTag] = el[:TraceTag]
-            #TODO 개별
-            df[i, :Rewards] = join(show_item.(RewardScript(el[:Rewards])))
-        end
-    else
-        df = parent.data[Symbol(meta[:sheet])][:]
-        df = df[:, Symbol.(meta[:columns])]
-    end
-    ReferenceGameData(parent, df)
-end
 
 
 """
     JSONGameData
 JSON을 쥐고 있음
 """
-struct JSONBalanceTable{T} <: BalanceTable where T
-    data::T
+struct JSONBalanceTable <: BalanceTable
+    data::Array{T, 1} where T <: AbstractDict
     filepath::AbstractString
 end
 function JSONBalanceTable(filepath::String)
@@ -112,7 +81,6 @@ end
 
 # fallback function
 Base.basename(xgd::XLSXBalanceTable) = basename(xgd.data)
-Base.basename(rgd::ReferenceGameData) = basename(rgd.parent)
 Base.basename(jwb::JSONWorkbook) = basename(xlsxpath(jwb))
 
 Base.dirname(xgd::XLSXBalanceTable) = dirname(xgd)
@@ -129,13 +97,8 @@ function Base.show(io::IO, gd::XLSXBalanceTable)
         println(io, "  :$(el[1]) => $(summary(el[2]))")
     end
 end
-function Base.show(io::IO, gd::ReferenceGameData)
-    print(io, ".parent\n ┕━")
-    summary(io, gd.parent.data)
-    println(io, ".data")
-    show(io, gd.data)
-end
-function Base.show(io::IO, gd::JSONBalanceTable{T}) where T
+
+function Base.show(io::IO, gd::JSONBalanceTable)
     println(io, "JSONGameData{$T}")
     println(io, replace(gd.filepath, GAMEENV["xlsx"]["root"] => ".."))
 
@@ -261,43 +224,6 @@ function validate_file(root, file, msg = "가 존재하지 않습니다"; assert
     end
 end
 
-
-"""
-    combine_args_sheet!(jwb::JSONWorkbook, mother_sheet, arg_sheet; key::Symbol):@
-
-주어진 jwb의 mother_sheet에 arg_sheet의 key가 일치하는 row를 합쳐준다.
-arg_sheet에 있는 모든 key는 mother_sheet에 있어야 한다
-
-"""
-function combine_args_sheet!(jwb::JSONWorkbook, mother_sheet, arg_sheet; key = :Key)
-    jws = jwb[mother_sheet]
-    args = jwb[arg_sheet]
-
-    argnames = setdiff(names(args), names(jws))
-    for (i, row) in enumerate(eachrow(args[:]))
-        jws_row = findfirst(x -> x == row[key], jws[key])
-        isa(jws_row, Nothing) && throw(KeyError("$(key): $(row[key])"))
-
-        for col in argnames
-            if i == 1
-                jws[col] = Vector{Any}(missing, size(jws, 1))
-            end
-            jws[:][jws_row, col] = row[col]
-        end
-    end
-    deleteat!(jwb, arg_sheet)
-    jwb
-end
-
-"""
-    지정된 컬럼의 null 값을 바꿔준다
-    추후 XLSXasJSON으로 이동
-"""
-# function replace_nullvalue!(jwb::JSONWorkbook, sheet, key, value)
-#     jws = jwb[sheet]
-
-# end
-
 ############################################################################
 # parse
 # Julia에서 사용하기 좋은 형태로 가공한다
@@ -305,7 +231,7 @@ end
 function Base.parse(jwb::JSONWorkbook)
     filename = basename(jwb)
     f = Symbol("parser_", split(filename, ".")[1])
-    # editor 함수명 규칙에 따라 해당 함수가 있는지 찾는다
+    # parser_(파일명) 함수가 존재하면 parse 한다
     r = missing
     if isdefined(GameDataManager, f)
         foo = getfield(GameDataManager, f)
@@ -322,13 +248,12 @@ end
     dummy_localizer
 진짜 로컬라이저 만들기 전에 우선 컬럼명만 복제해서 2개로 만듬
 """
+dummy_localizer(x) = x
 function dummy_localizer!(jwb::JSONWorkbook)
     for s in sheetnames(jwb)
         jwb[s].data = dummy_localizer.(jwb[s].data)
     end
 end
-
-dummy_localizer(x) = x
 function dummy_localizer(x::T) where {T <: AbstractDict}
     for k in keys(x)
         if startswith(string(k), "\$")

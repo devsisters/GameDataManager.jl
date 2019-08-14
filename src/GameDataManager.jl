@@ -50,7 +50,6 @@ include("datahandler/loader.jl")
 include("datahandler/writer/json.jl")
 include("datahandler/writer/autoxl.jl")
 include("datahandler/writer/history.jl")
-include("datahandler/writer/referencedata.jl")
 
 
 # include("writer/typecheck.jl")
@@ -60,9 +59,9 @@ include("util.jl")
 export GAMEENV, GAMEDATA, help,
        # datahandler
        BalanceTable, XLSXBalanceTable, JSONBalanceTable, UnityBalanceTable,
-         loadgamedata!, getgamedata, getjuliadata, parser!,
+         loadgamedata!, getgamedata, getjuliadata, 
        init_meta,
-       xl, autoxl, write_json, export_referencedata, md5hash,
+       xl, autoxl, write_json, md5hash,
 
        # 피쳐 기능
        Village,

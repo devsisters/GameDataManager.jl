@@ -79,10 +79,7 @@ function getmetadata(f::AbstractString)
         MANAGERCACHE[:meta][:manual][f]
     end
 end
-function getmetadata(rgd::ReferenceGameData)
-    f = split(basename(rgd), ".")[1]
-    MANAGERCACHE[:meta][:referencedata][f]
-end
+
 getmetadata(jwb::JSONWorkbook) =  getmetadata(basename(xlsxpath(jwb)))
 
 #################################################################################
