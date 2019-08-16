@@ -1,19 +1,18 @@
+function editor_PipoDemographic!(jwb::JSONWorkbook)
+    for s in ("Gender", "Age", "Country")
+        compress!(jwb, s)
+    end
 
+    jws = jwb["enName"]
+    new_data = OrderedDict()
+    for k in keys(jws.data[1])
+        new_data[k] = OrderedDict()
+        for k2 in keys(jws.data[1][k])
+            new_data[k][k2] = filter(!ismissing, map(el -> el[k][k2], jws.data))
+        end
+    end
+    jws.data = [new_data]
 
-function editor_PipoDemographic!(jwb)
-    data = df(jwb[:enName])
-
-    # 좀 지저분하지만 한번만 쓸테니...
-    d1 = Dict(:Unisex => broadcast(x -> x["Unisex"], values(data[1, :LastName])),
-              :UnisexWeight => broadcast(x -> x["UnisexWeight"], values(data[1, :LastName]))
-        )
-
-    d2 = Dict(:Male => filter(!ismissing, broadcast(x -> x["Male"], values(data[1, :FirstName]))),
-          :MaleWeight => filter(!ismissing, broadcast(x -> x["MaleWeight"], values(data[1, :FirstName]))),
-          :Female => filter(!ismissing, broadcast(x -> x["Female"], values(data[1, :FirstName]))),
-          :FemaleWeight => filter(!ismissing, broadcast(x -> x["FemaleWeight"], values(data[1, :FirstName])))
-        )
-    jwb[:enName] = DataFrame(LastName = d1, FirstName = d2)
-    jwb
+    return jwb
 end
 

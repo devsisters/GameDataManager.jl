@@ -1,17 +1,21 @@
 module GameDataManager
 
 using Compat
-using Printf, UUIDs, Random, Dates, Statistics
+using Printf, UUIDs, Dates, Statistics
 using Random, StatsBase, Distributions
 using XLSX, JSON, XLSXasJSON
-using DataFrames, DataStructures, CSV
+using DataFrames, DataFramesMeta, DataStructures, CSV
 using MD5
+import XLSXasJSON.Index
 # using LibGit2 Git 함수 라이브러리
 
 import Base: +, -, *, /, ==
 
 # BalanceTable
 include("datahandler/balancetable/balancetable.jl")
+for f in readdir(joinpath(@__DIR__, "datahandler/balancetable/xlsx"))
+  include("datahandler/balancetable/xlsx/$f")
+end
 include("datahandler/parser_rewardscript.jl")
 
 

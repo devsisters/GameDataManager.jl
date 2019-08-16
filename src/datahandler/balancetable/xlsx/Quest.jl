@@ -1,16 +1,16 @@
 
-function validator_Quest(jwb::JSONWorkbook)
-    data = df(jwb[:Main])
-    if maximum(data[!, :QuestKey]) > 1023 || minimum(data[!, :QuestKey]) < 0
+function validator_Quest(bt)
+    df = get(DataFrame, bt, "Main")
+    if maximum(df[!, :QuestKey]) > 1023 || minimum(df[!, :QuestKey]) < 0
         throw(AssertionError("Quest_Main.json의 QuestKey는 0~1023만 사용 가능합니다."))
     end
-    for i in 1:size(data, 1)
-        validate_questtrigger(data[i, :Trigger])
-        validate_questtrigger(data[i, :CompleteCondition])
+    for i in 1:size(df, 1)
+        validate_questtrigger(df[i, :Trigger])
+        validate_questtrigger(df[i, :CompleteCondition])
     end
     # Dialogue 파일 유무 체크
     path_dialogue = joinpath(GAMEENV["patch_data"], "Dialogue")
-    for el in data[!, :CompleteAction]
+    for el in df[!, :CompleteAction]
         f = el["QuestDialogue"]
         if !ismissing(f)
             validate_file(path_dialogue, "$(f).json", "Dialogue가 존재하지 않습니다")
@@ -86,7 +86,7 @@ function validate_questtrigger(x::Array{T, 1}) where T <: AbstractString
 end
 
 
-function editor_Quest!(jwb)
+function editor_Quest!(jwb::JSONWorkbook)
     data = jwb[:Main].data
     for el in data
         overwrite = []

@@ -1,22 +1,18 @@
 
-function editor_PipoTalent!(jwb)
-    file = GameDataManager.joinpath_gamedata("PipoTalent.xlsx")
-    @assert isfile(file) "PipoTalent 파일이 존재하지 않습니다"
-
+function editor_PipoTalent!(jwb::JSONWorkbook)
     output_path = joinpath(GAMEENV["mars_repo"], "patch-data/Dialogue/PipoTalk")
 
     intro = JSON.parsefile(joinpath(output_path, "_Introduction.json"); dicttype=OrderedDict)
     accept = JSON.parsefile(joinpath(output_path, "_Accepted.json"); dicttype=OrderedDict)
     deny = JSON.parsefile(joinpath(output_path, "_Denied.json"); dicttype=OrderedDict)
 
-
-    data = JSONWorksheet(file, "Dialogue"; start_line = 2)
+    jws = jwb["Dialogue"]
     println("$(output_path) Perk별 Dialogue가 생성됩니다")
-    for row in eachrow(data[:])
-        perk = row[:Key]
-        intro[1]["\$Text"] = row[:Introduction]
-        accept[1]["\$Text"] = row[:Accepted]
-        deny[1]["\$Text"] = row[:Denied]
+    for el in jws.data
+        perk = el["Key"]
+        intro[1]["\$Text"] = el["Introduction"]
+        accept[1]["\$Text"] = el["Accepted"]
+        deny[1]["\$Text"] = el["Denied"]
 
         open(joinpath(output_path, "$(perk)Introduction.json"), "w") do io
             JSON.print(io, intro, 2)
@@ -29,8 +25,9 @@ function editor_PipoTalent!(jwb)
         end
         print(" $(perk).../")
     end
-    printstyled(" ALL $(size(data[:], 1)) PERK DONE!\n"; color=:cyan)
+    printstyled(" ALL $(size(jws, 1)) PERK DONE!\n"; color=:cyan)
 
+    deleteat!(jwb, "Dialogue")
     jwb
 end
 

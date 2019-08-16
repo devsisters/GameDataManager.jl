@@ -20,26 +20,13 @@ function loadgamedata!(f, gamedata = GAMEDATA; kwargs...)
 end
 
 """
-    getgamedata(file, sheetname, colname)
+    getgamedata(file)
 해당하는 Excel 파일의 시트의 컬럼을 가져온다
 loadgamedata!가 안되어있을 경우 해당 파일을 load한다
-
+check_loaded
+check_modified
+tryparse
 """
-function getgamedata(file::AbstractString, sheet, colname; kwargs...)
-    jws = getgamedata(file, sheet; kwargs...)
-    return jws[:, colname]
-end
-function getgamedata(file::AbstractString, sheetname::AbstractString; kwargs...)
-    getgamedata(file, Symbol(sheetname); kwargs...)
-end
-function getgamedata(file::AbstractString, sheetname::Symbol; kwargs...)
-    jwb = getgamedata(file; kwargs...).data
-    return df(jwb[sheetname])
-end
-function getgamedata(file::AbstractString, sheet_index::Integer; kwargs...)
-    jwb = getgamedata(file; kwargs...).data
-    return df(jwb[sheet_index])
-end
 function getgamedata(file::AbstractString; check_loaded = true, check_modified = false, tryparse =  false)
     if check_loaded
         if !haskey(GAMEDATA, Symbol(file)) # 로딩 여부 체크
@@ -51,21 +38,21 @@ function getgamedata(file::AbstractString; check_loaded = true, check_modified =
             xl(file; loadgamedata = true)
         end
     end
-    gd = GAMEDATA[Symbol(file)]
+    bt = GAMEDATA[Symbol(file)]
 
     if tryparse
-        if !isparsed(gd)
-            x = parse(gd.data)
+        if !isparsed(bt)
+            x = parse(bt)
             if !ismissing(x)
-                gd.cache[:isparsed] = true
-                gd.cache[:julia] = x
+                bt.cache[:isparsed] = true
+                bt.cache[:julia] = x
             else
-                @warn "$(xlsxpath(gd.data))는 parser가 존재하지 않습니다."
+                @warn "$(xlsxpath(bt.data))는 parser가 존재하지 않습니다."
             end
         end
     end
 
-    return gd
+    return bt
 end
 
 #################################################################################

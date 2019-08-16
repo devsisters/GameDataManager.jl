@@ -1,5 +1,5 @@
-function validator_Block(jwb::JSONWorkbook)
-    blocktable = df(jwb[:Block])
+function validator_Block(bt)
+    blocktable = get(DataFrame, bt, "Block")
     
     b = begin
         f = joinpath(GAMEENV["mars_repo"], "unity/Assets/ScriptableObjects/BalanceTable",
@@ -13,17 +13,18 @@ function validator_Block(jwb::JSONWorkbook)
     end
 
     subcat = unique(blocktable[!, :SubCategory])
-    if !issubset(subcat, df(jwb[:SubCategory])[!, :CategoryKey])
+    target = get(DataFrame, bt, "SubCategory")[!, :CategoryKey]
+    if !issubset(subcat, target)
         @warn """SubCategory에서 정의하지 않은 SubCategory가 있습니다
-        $(setdiff(subcat, df(jwb[:SubCategory])[!, :CategoryKey]))"""
+        $(setdiff(subcat, target))"""
     end
 
     # 임시로 ArtAsset이 중복되면 안됨. 추후 삭제
-    validate_duplicate(jwb[:Block], :ArtAsset; assert = false)
+    validate_duplicate(get(DataFrame, bt, "Block"), :ArtAsset; assert = false)
 
     nothing
 end
-function editor_Block!(jwb)
+function editor_Block!(jwb::JSONWorkbook)
     blockset = jwb[:Set].data
 
     ids = unique(broadcast(el -> el["BlockSetKey"], blockset))
