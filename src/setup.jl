@@ -4,7 +4,7 @@ setup_env()
 프로젝트 https://github.com/devsisters/mars-prototype 로컬 위치를 찾기...
 
 """
-function setup_env()
+function setup_env!(d)
     # NOTE gitrepo인지만 확인한다. 정확히 주소까지 맞는지 볼 필요 없어 보임
     repo_candidate = normpath(joinpath(@__DIR__, "../../.."))    
     # 저기가 gitrepo가 아니면 무언가 잘못된 것...
@@ -27,7 +27,8 @@ function setup_env()
     # GameDataManager paths
     env["cache"] = joinpath(env["patch_data"], ".cache")
     env["history"] = joinpath(env["cache"], "history.json")
-    return env
+
+    merge!(d, env)
 end
 
 function setup_env_patchdata!(env)
