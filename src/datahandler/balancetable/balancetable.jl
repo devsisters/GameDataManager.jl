@@ -24,8 +24,7 @@ JSONWorkbook과 검색하기 위해 이를 DataFrame을 변환한 테이블을 �
 
 # data : JSONWOrkbook 
 # dataframe : JSONWOrkbook의 모든 JSONWorksheet를 DataFrame으로 변환한다.
-              만약 data가 수정되면 반드시 update! 하도록 관리할 것
-# index : 시트 번호와 이름 인덱싱
+              만약 data가 수정되면 반드시 construct_dataframe! 하도록 관리할 것
 # cache : 무엇 저장할지 미정
 """
 struct XLSXBalanceTable <: BalanceTable
@@ -70,6 +69,12 @@ function construct_dataframe(data)
 end
 function construct_dataframe(jwb::JSONWorkbook)
     map(i -> construct_dataframe(jwb[i].data), 1:length(jwb))
+end
+function construct_dataframe!(bt::XLSXBalanceTable)
+    for (i, jws) in enumerate(bt.data)
+        bt.dataframe[i] = construct_dataframe(jws.data)
+    end
+    return bt
 end
 
 """
@@ -121,7 +126,6 @@ end
 # function lookup(a::XLSXBalanceTable, sheet)
 
 # end
-
 
 
 function Base.show(io::IO, gd::XLSXBalanceTable)
