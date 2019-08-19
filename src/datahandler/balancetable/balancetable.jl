@@ -31,14 +31,14 @@ struct XLSXBalanceTable <: BalanceTable
     data::JSONWorkbook
     dataframe::Array{DataFrame, 1}
     # 사용할 함수들
-    cache::Dict{Symbol, Any}
+    cache::Array{Dict, 1}
 end
 function XLSXBalanceTable(jwb::JSONWorkbook; validation = true)
     editor!(jwb)
     dummy_localizer!(jwb)
 
     dataframe = construct_dataframe(jwb)
-    cache = Dict{Symbol, Any}()
+    cache = index_cache.(dataframe)
 
     x = XLSXBalanceTable(jwb, dataframe, cache)
     validation && validator(x)
@@ -76,6 +76,28 @@ function construct_dataframe!(bt::XLSXBalanceTable)
     end
     return bt
 end
+function index_cache(df::DataFrame)
+    function collect_index(k, criteria)
+        idx = collect(1:size(df, 1))
+        tf = (df[!, k] .== criteria)
+        if !isa(tf, BitArray)
+            tf = map(x -> ismissing(x) ? false : x, tf)
+        end
+        idx[tf]
+    end
+    cache = Dict{Symbol, Dict}()
+    for k in names(df)
+        # Integer나 String 타입일 경우에만 생성, 
+        # 일단 Union{String, Missing} Union{Integer, Missing}도 생성하지 않는다
+        if eltype(df[!, k]) <: AbstractString || eltype(df[!, k]) <: Integer
+            uks = unique(df[!, k])
+            cache[k] = map(x -> Pair(x, collect_index(k, x)), uks) |> Dict
+        else
+            cache[k] = Dict()
+        end
+    end
+    return cache
+end
 
 """
     JSONGameData
@@ -112,9 +134,22 @@ Base.dirname(jwb::JSONWorkbook) = dirname(xlsxpath(jwb))
 index(x::XLSXBalanceTable) = x.data.sheetindex
 cache(x::XLSXBalanceTable) = x.cache
 
+"""
+    get(Type{DataFrame}, file_sheet::Tuple)
+    get(Type{Dict}, file_sheet::Tuple)
+
+file_sheet = (파일명, 시트명)
+"""
 Base.get(::Type{Dict}, x::XLSXBalanceTable) = x.data
 Base.get(::Type{DataFrame}, x::XLSXBalanceTable) = x.dataframe
-
+function Base.get(::Type{Dict}, file_sheet::Tuple; kwargs...) 
+    ref = get(BalanceTable, file_sheet[1]; kwargs...)
+    get(Dict, ref, file_sheet[2])
+end
+function Base.get(::Type{DataFrame}, file_sheet::Tuple; kwargs...)
+    ref = get(BalanceTable, file_sheet[1]; kwargs...)
+    get(DataFrame, ref, file_sheet[2])
+end
 function Base.get(::Type{Dict}, x::XLSXBalanceTable, sheet)
     idx = getindex(index(x), sheet)
     getindex(x.data, idx)
@@ -123,6 +158,7 @@ function Base.get(::Type{DataFrame}, x::XLSXBalanceTable, sheet)
     idx = getindex(index(x), sheet)
     getindex(x.dataframe, idx)
 end
+
 # function lookup(a::XLSXBalanceTable, sheet)
 
 # end
@@ -130,13 +166,13 @@ end
 
 function Base.show(io::IO, gd::XLSXBalanceTable)
     println(io, ".data ┕━")
-    println(io, gd.data)
+    print(io, gd.data)
 
-    println(io, ".cache ┕━")
-    println(io, typeof(gd.cache), " with $(length(gd.cache)) entry")
-    for el in gd.cache
-        println(io, "  :$(el[1]) => $(summary(el[2]))")
-    end
+    # println(io, ".cache ┕━")
+    # println(io, typeof(gd.cache), " with $(length(gd.cache)) entry")
+    # for el in gd.cache
+    #     println(io, "  :$(el[1]) => $(summary(el[2]))")
+    # end
 end
 
 function Base.show(io::IO, gd::JSONBalanceTable)
@@ -153,7 +189,7 @@ end
 # 
 ############################################################################
 """
-    validator(f)
+    validator(bt::XLSXBalanceTable)
 개별 파일에 독자적으로 적용되는 규칙
 파일명, 컬럼명으로 검사한다.
 
@@ -172,14 +208,11 @@ function validator(bt::XLSXBalanceTable)
 end
 
 """
-    editor!(f)
+    editor!(jwb::JSONWorkbook)
 
 하드코딩된 기준으로 데이터를 2차가공한다
-* Block : Key로 오름차순 정렬
-* RewardTable : 시트를 합치고 여러가지 복잡한 가공
-* Quest : 여러 복잡한 가공
-* NameGenerator : null 제거
-* CashStore : key 컬럼을 기준으로 'Data'시트에 'args'시트를 합친다
+xlsx 파일명으로 된 스크립트에 가공하는 함수가 정의되어 있다
+
 """
 function editor!(jwb::JSONWorkbook)
     filename = basename(jwb)
@@ -191,25 +224,7 @@ function editor!(jwb::JSONWorkbook)
     end
     return jwb
 end
-"""
-    compress!(jwb::JSONWorkbook)
-"""
-function compress!(jwb::JSONWorkbook, sheet; kwargs...)
-    compress!(jwb[sheet]; kwargs...)
-end
-"""
-    compress!(jwb::JSONWorksheet)
-모든 데이터를 한줄로 합친다
-"""
-function compress!(jws::JSONWorksheet; dropmissing = true)
-    new_data = OrderedDict()
-    vals = collect.(values.(jws.data))
-    for k in keys(jws.data[1])
-        x = map(el -> el[k], jws.data)
-        new_data[k] = dropmissing ? filter(!ismissing, x) : x
-    end
-    jws.data = [new_data]
-end
+
 
 """
     validate_general(bt::XLSXBalanceTable)
@@ -226,18 +241,20 @@ function validate_general(bt::XLSXBalanceTable)
         @assert !any(check) "Key에는 공백, 줄바꿈, 탭이 들어갈 수 없습니다 \n $(df[!, :Key][check])"
     end
     function validate_RewardKey(df)
-        rewardkey = getgamedata("RewardTable", 1, :RewardKey; check_modified = true)
-        rewardkey = [-1; rewardkey]
-        
+        rewardkey = begin 
+            ref = get(BalanceTable, "RewardTable")
+            [-1; get(DataFrame, ref, 1)[!, :RewardKey]]
+        end
         if !issubset(df[!, :RewardKey],  rewardkey)
             x = setdiff(df[!, :RewardKey], rewardkey)
             @error "RewardKey가 RewardTable에 없습니다\n $(x)"
         end
-
     end
     #################
     for df in get(DataFrame, bt)
         hasproperty(df, :Key) && validate_Key(df)
+        # TODO BlockRewardTable 처리 필요
+        # hasproperty(df, :RewardKey) && validate_RewardKey(df)
     end
     nothing
 end
@@ -284,21 +301,26 @@ function validate_file(root, file, msg = "가 존재하지 않습니다"; assert
     end
 end
 
-############################################################################
-# parse
-# Julia에서 사용하기 좋은 형태로 가공한다
-############################################################################
-function Base.parse(bt::XLSXBalanceTable)
-    filename = basename(bt)
-    f = Symbol("parser_", split(filename, ".")[1])
-    # parser_(파일명) 함수가 존재하면 parse 한다
-    r = missing
-    if isdefined(GameDataManager, f)
-        foo = getfield(GameDataManager, f)
-        r = foo(bt)
-    end
-    return r
+"""
+    compress!(jwb::JSONWorkbook)
+"""
+function compress!(jwb::JSONWorkbook, sheet; kwargs...)
+    compress!(jwb[sheet]; kwargs...)
 end
+"""
+    compress!(jwb::JSONWorksheet)
+모든 데이터를 한줄로 합친다
+"""
+function compress!(jws::JSONWorksheet; dropmissing = true)
+    new_data = OrderedDict()
+    vals = collect.(values.(jws.data))
+    for k in keys(jws.data[1])
+        x = map(el -> el[k], jws.data)
+        new_data[k] = dropmissing ? filter(!ismissing, x) : x
+    end
+    jws.data = [new_data]
+end
+
 
 ############################################################################
 # Localizer

@@ -1,6 +1,6 @@
 
-function validator_BlockRewardTable(jwb)
-    data = get(DataFrame, jwb, "Data")
+function validator_BlockRewardTable(bt)
+    data = get(DataFrame, bt, "Data")
     validate_duplicate(data, :RewardKey)
     # 1백만 이상은 BlockRewardTable에서만 쓴다
     @assert minimum(data[!, :RewardKey]) >= 1000000 "BlockRewardTable의 RewardKey는 1,000,000 이상을 사용해 주세요."
@@ -12,7 +12,7 @@ function validator_BlockRewardTable(jwb)
             append!(blocksetkeys, getindex.(el, 3))
         end
     end
-    ref = getgamedata("Block"; check_modified=true) |> x -> get(DataFrame, x, "Set")
+    ref = get(DataFrame, ("Block", "Set"); check_modified=true)
 
     validate_subset(blocksetkeys, string.(ref[!, :BlockSetKey]), "존재하지 않는 BlockSetKey 입니다")
 

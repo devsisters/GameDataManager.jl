@@ -13,7 +13,7 @@ struct Village
 end
 function Village(category = "")
     # NOTE Category 다를 경우 추가 구현 필요
-    ref = getgamedata("ContinentGenerator", :Village)
+    ref = get(DataFrame, ("ContinentGenerator", "Village"))
     x = ref[1, :SiteLength]
     y = ref[1, :SiteWidth]
 
@@ -57,8 +57,8 @@ function assign_building!(vill::Village, key)
 end
 function get_buildingsize(key)
     d = Dict{String, Any}()
-    for typ in ("Special", "Shop", "Residence", "Sandbox")
-        ref = getgamedata(typ, :Building)
+    for file in ("Special", "Shop", "Residence", "Sandbox")
+        ref = get(DataFrame, (file, "Building"))
         for r in eachrow(ref[:])
             x = r[:Condition]
             d[r[:BuildingKey]] = (x["ChunkWidth"], x["ChunkLength"])
@@ -95,7 +95,8 @@ function create_dummyaccount(amount; )
     end
 
     v = []
-    villagenames = shuffle(getgamedata("NameGenerator", :WorldENG)[1, :Borough])
+    ref = get(BalanceTable, "NameGenerator")
+    villagenames = get(DataFrame, ref, "WorldENG")[1, :Borough]
     accountnames = shuffle(["인생이트롤", "단호박정식", "사기캐다", "사약왕드링킹",
     "엄마쟤흙먹어", "인간되기글른인간", "난폭한말광량이", "데마시아의귀감", "아프리카청춘이다",
     "벼랑위의당뇨", "돈들어손내놔", "이마로도끼까", "오뎅볶이데스까", "나름전설이다", "원할머니봐쌈", "캐리비안의해녀",

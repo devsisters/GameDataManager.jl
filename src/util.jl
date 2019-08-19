@@ -55,7 +55,7 @@ function findblock()
         end
     end
 
-    artasset_on_xls = getgamedata("Block", :Block; check_modified = true)[:ArtAsset]
+    artasset_on_xls = get(DataFrame, ("Block", "Block"); check_modified = true)[!, :ArtAsset]
 
     a = setdiff(artassets, artasset_on_xls)
     b = setdiff(artasset_on_xls, artassets)

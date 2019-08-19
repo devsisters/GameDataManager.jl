@@ -6,10 +6,7 @@ function validator_RewardTable(bt)
     # 1백만 이상은 BlockRewardTable에서만 쓴다
     @assert maximum(df[!, :RewardKey]) < 1000000 "RewardTable의 RewardKey는 1,000,000 미만을 사용해 주세요."
 
-    # 아이템이름 검색하다가 안나오면 에러 던짐
-    rewards = parser_RewardTable(bt)
-    items = broadcast(x -> x[2], values(rewards))
-    itemnames.(items)
+    # TODO 아이템Key Validatioh 필요
 
     nothing
 end
@@ -63,16 +60,4 @@ function collect_rewardscript!(jws::JSONWorksheet)
     end
     jws.data = new_data
     return jws
-end
-
-function parser_RewardTable(bt::XLSXBalanceTable)
-    getgamedata("ItemTable"; check_modified=true, tryparse=true)
-
-    data = get(DataFrame, bt, 1) # 1번 시트로 하드코딩됨
-    d = Dict{Int32, Any}()
-    # for row in eachrow(data)
-    #     el = row[:RewardScript]
-    #     d[row[:RewardKey]] = (TraceTag = el[:TraceTag], Rewards = RewardScript(el[:Rewards]))
-    # end
-    return d
 end

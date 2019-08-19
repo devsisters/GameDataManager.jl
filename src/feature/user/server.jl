@@ -25,11 +25,3 @@ end
 function add!(s::GameServer, ac::User)
     s.users[ac.uid] = ac
 end
-
-function Base.get(::Type{User}, uid; s = SERVER)
-    haskey(s.users, uid) ? s.users[uid] :
-    throw(KeyError("uid:$uid"))
-end
-function StatsBase.sample(::Type{User}, s = SERVER)
-    sample(collect(values((s.users))))
-end

@@ -4,8 +4,9 @@ validator_Special(bt) = validator_Building(bt)
 function validator_Building(bt)
     data = get(DataFrame, bt, "Building")
     leveldata = get(DataFrame, bt, "Level")
-    ref = getgamedata("Ability"; check_modified = true)
-    abilitykey = get(DataFrame, ref, "Level")[!, :AbilityKey]
+
+    abilitydata = get(BalanceTable, "Ability"; check_modified = true)
+    abilitykey = get(DataFrame, abilitydata, "Level")[!, :AbilityKey]
 
     for row in filter(!ismissing, data[!, :AbilityKey])
         check = issubset(row, unique(abilitykey))
@@ -33,28 +34,4 @@ function validator_Sandbox(bt)
     validate_file(path_thumbnails, get(DataFrame, bt, "Building")[!, :Icon], ".png", "Icon이 존재하지 않습니다")
     
     nothing
-end
-
-parser_Special(bt) = parser_Building(bt)
-parser_Shop(bt) = parser_Building(bt)
-parser_Residence(bt) = parser_Building(bt)
-parser_Sandbox(bt) = parser_Building(bt)
-function parser_Building(bt)    
-    d = OrderedDict{Symbol, Dict}()
-    for row in eachrow(get(DataFrame, bt, "Building"))
-        buildingkey = Symbol(row[:BuildingKey])
-        d[buildingkey] = Dict{Symbol, Any}()
-        for k in names(row)
-            d[buildingkey][k] = row[k]
-        end
-    end
-
-    for gdf in groupby(get(DataFrame, bt, "Level"), :BuildingKey)
-        d2 = OrderedDict{Int8, Any}()
-        for row in eachrow(gdf)
-            d2[row[:Level]] = row
-        end
-        d[Symbol(gdf[1, :BuildingKey])][:Level] = d2
-    end
-    return d
 end

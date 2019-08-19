@@ -31,8 +31,7 @@ function validate_questtrigger(arr::Array)
     validate_questtrigger.(arr)
 end
 function validate_questtrigger(x::Array{T, 1}) where T <: AbstractString
-    caching(:Building)
-    getgamedata("ItemTable"; check_modified=true, tryparse=true)
+    get(BalanceTable, "ItemTable"; check_modified=true)
 
     trigger = Dict(
         "ShopCount"                    => (:equality, :number),

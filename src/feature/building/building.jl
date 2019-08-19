@@ -17,13 +17,12 @@ let uid = UInt64(0)
     building_uid() = (uid +=1; uid)
 end
 
-buildingtype(x) = buildingtype(Symbol(x))
-function buildingtype(x::Symbol)
-    if in(x, keys(getjuliadata(:Shop)))
+function buildingtype(x)
+    if in(x, get(DataFrame, ("Shop", "Building"))[!, :BuildingKey])
         Shop
-    elseif in(x, keys(getjuliadata(:Residence)))
+    elseif in(x, get(DataFrame, ("Residence", "Building"))[!, :BuildingKey])
         Residence
-    elseif in(x, keys(getjuliadata(:Special)))
+    elseif in(x, get(DataFrame, ("Special", "Building"))[!, :BuildingKey])
         Special
     else
         throw(KeyError(x))
@@ -194,23 +193,19 @@ function abilitysum(a::Array{Ability, 1})
 end
 
 #fallback bunctions
-Base.haskey(::Type{Building}, x) = haskey(Building, Symbol(x))
-function Base.haskey(::Type{Building}, x::Symbol)
-    in(x, keys(getjuliadata(:Shop))) | in(x, keys(getjuliadata(:Residence))) | in(x, keys(getjuliadata(:Special)))
+function Base.haskey(::Type{Building}, x)
+    in(x, get(DataFrame, ("Shop", "Building"))[!, :BuildingKey]) | 
+    in(x, get(DataFrame, ("Residence", "Building"))[!, :BuildingKey]) | 
+    in(x, get(DataFrame, ("Special", "Building"))[!, :BuildingKey])
 end
-
-Base.haskey(::Type{Ability}, key) = haskey(Ability, Symbol(key))
-function Base.haskey(::Type{Ability}, key::Symbol)
-    haskey(getjuliadata(:Ability), key)
-end
-function Base.haskey(::Type{T}, k) where T <: Building
-    haskey(getjuliadata(nameof(T)), k)
+function Base.haskey(::Type{Ability}, x)
+    in(x, get(DataFrame, ("Ability", "Level"))[!, :AbilityKey])
 end
 
 function Base.size(x::T) where T <: Building
     @assert itemkey(x) != :pHome "Home은 크기가 고정되어 있지 않습니다"
-
-    ref = getjuliadata(nameof(T))[itemkey(x)]
-    (ref[:Condition]["ChunkWidth"], ref[:Condition]["ChunkLength"])
+    bdtype = nameof(T)
+    # ref = get(DataFrame, bdtype, [itemkey(x)]
+    # (ref[:Condition]["ChunkWidth"], ref[:Condition]["ChunkLength"])
 end
 Base.size(t::T, d) where T <: Building = size(t)[d]

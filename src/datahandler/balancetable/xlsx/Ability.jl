@@ -15,32 +15,3 @@ function validator_Ability(bt)
     end
     nothing
 end
-
-"""
-    parser_Ability(bt)
-
-컬럼명 하드 코딩되어있으니 변경, 추가시 반영 필요!!
-"""
-function parser_Ability(bt::XLSXBalanceTable)
-    d = OrderedDict{Symbol, Dict}()
-    df = get(DataFrame, bt, "Level")
-
-    for gdf in groupby(df, :AbilityKey)
-        key = Symbol(gdf[1, :AbilityKey])
-
-        d[key] = Dict{Symbol, Any}()
-        # single value
-        for col in (:Group, :IsValueReplace)
-            d[key][col] = begin
-                x = unique(gdf[:, col])
-                @assert length(x) == 1 "Ability $(key)에 일치하지 않는 $(col)데이터가 있습니다"
-                col == :Group ? Symbol(x[1]) : x[1]
-            end
-        end
-
-        for col in [:Level, :Value]
-            d[key][col] = gdf[:, col]
-        end
-    end
-    return d
-end

@@ -17,6 +17,7 @@ for f in readdir(joinpath(@__DIR__, "datahandler/balancetable/xlsx"))
   include("datahandler/balancetable/xlsx/$f")
 end
 include("datahandler/parser_rewardscript.jl")
+include("datahandler/query.jl")
 
 
 ############-_-_-FEATURES_-_-_#########################
@@ -63,18 +64,16 @@ include("util.jl")
 export GAMEENV, GAMEDATA, help,
        # datahandler
        BalanceTable, XLSXBalanceTable, JSONBalanceTable, UnityBalanceTable,
-         loadgamedata!, getgamedata, getjuliadata, 
        init_meta,
-       xl, autoxl, write_json, md5hash,
+       xl, autoxl, md5hash,
 
-       # 피쳐 기능
-       Village,
 
        # 유틸리티
        findblock, get_buildings, get_blocks, compress_continentDB,
        create_dummyaccount,
 
        # Features
+      @query,
       caching,
       User,
            area, pricecoin,
@@ -88,7 +87,7 @@ export GAMEENV, GAMEDATA, help,
       RewardTable, sample, expectedvalue,
       DroneDelivery, deliveryreward, deliverycost,
       #
-      Continent, City, Borough,
+      Continent, City, Borough, Village,
       AbstractSite, PrivateSite,
       #
       has, add!, remove!
