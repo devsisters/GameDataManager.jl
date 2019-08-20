@@ -87,9 +87,9 @@ version = "0.21.1"
 
 [[EzXML]]
 deps = ["BinaryProvider", "Libdl", "Printf"]
-git-tree-sha1 = "724e13b7522563a18ae4a5cc4a9792ae3b0da3e6"
+git-tree-sha1 = "aed48d722e528bc634bd36a7d0e090fa2952a3c0"
 uuid = "8f5d6c58-4d21-5cfd-889c-e3ad7ee6a615"
-version = "0.9.3"
+version = "0.9.4"
 
 [[Future]]
 deps = ["Random"]
@@ -300,10 +300,10 @@ uuid = "fdbf4ff8-1666-58a4-91e7-1b58723a45e0"
 version = "0.5.4"
 
 [[XLSXasJSON]]
-deps = ["DataFrames", "DataStructures", "JSON", "Printf", "XLSX"]
+deps = ["DataStructures", "JSON", "Printf", "XLSX"]
 path = "C:\\Users\\devsisters\\.julia\\dev\\XLSXasJSON"
 uuid = "8c9e00cc-ccf1-11e8-3de6-5b028f480d9e"
-version = "0.3.2"
+version = "0.3.3"
 
 [[ZipFile]]
 deps = ["BinaryProvider", "Libdl", "Printf"]
