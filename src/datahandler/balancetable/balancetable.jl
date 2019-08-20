@@ -10,7 +10,7 @@ function BalanceTable(file; kwargs...)
     if endswith(file, ".json")
         JSONBalanceTable(file; kwargs...)
     elseif endswith(file, ".prefab") || endswith(file, ".asset")
-        UnityBalanceTable(file; kwagrs...)
+        UnityBalanceTable(file; kwargs...)
     else #XLSX만 shortcut 있음. JSON은 확장자 기입 필요
         f = is_xlsxfile(file) ? file : MANAGERCACHE[:meta][:xlsx_shortcut][file]
         XLSXBalanceTable(f; kwargs...)
@@ -58,7 +58,7 @@ end
 
 function construct_dataframe(data)
     k = unique(keys.(data))    
-    @assert length(k) == 1 "Column names are not same within rows, $k"
+    @assert length(k) == 1 "모든 row의 column명이 일치하지 않습니다, $k"
 
     v = Array{Any, 1}(undef, length(k[1]))
     @inbounds for (i, key) in enumerate(k[1])
@@ -329,7 +329,7 @@ end
 ############################################################################
 """
     dummy_localizer
-진짜 로컬라이저 만들기 전에 우선 컬럼명만 복제해서 2개로 만듬
+진짜 로컬라이저 만들기 전에 우선 \$으로 시작하는 컬럼명만 복제해서 2개로 만듬
 """
 dummy_localizer(x) = x
 function dummy_localizer!(jwb::JSONWorkbook)
