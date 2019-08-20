@@ -3,7 +3,9 @@
     AbstractContent
 DroneDelivery
 PartTime
-Quest 등
+Quest
+RewardTable 등 Key로 묶여 있는 데이터
+
 """
 abstract type AbstractContent end
 

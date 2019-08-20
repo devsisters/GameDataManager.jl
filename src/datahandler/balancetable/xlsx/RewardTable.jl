@@ -4,7 +4,7 @@ function validator_RewardTable(bt)
     df = get(DataFrame, bt, 1)
     validate_duplicate(df, :RewardKey)
     # 1백만 이상은 BlockRewardTable에서만 쓴다
-    @assert maximum(df[!, :RewardKey]) < 1000000 "RewardTable의 RewardKey는 1,000,000 미만을 사용해 주세요."
+    @assert (rewardkey_scope(maximum(df[!, :RewardKey])) == "RewardTable") "RewardTable의 RewardKey는 1,000,000 미만을 사용해 주세요."
 
     # TODO 아이템Key Validatioh 필요
 
@@ -49,8 +49,12 @@ function collect_rewardscript!(jws::JSONWorksheet)
     for (i, id) in enumerate(rewardkey)
         targets = filter(el -> get(el, "RewardKey", 0) == id, jws.data)
         rewards = []
-        for el in targets
-            push!(rewards, pull_rewardscript(el))
+        # 돌면서 첫번째건 첫번째로, 두번째건 두번째로 
+        # 아이고...
+        items = pull_rewardscript.(targets)
+        rewards = Array{Any, 1}(undef, maximum(length.(items)))
+        for i in eachindex(rewards)
+            rewards[i] = filter(!ismissing, get.(items, i, missing))
         end
 
         new_data[i] = OrderedDict(

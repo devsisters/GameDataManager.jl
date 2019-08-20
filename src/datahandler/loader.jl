@@ -50,6 +50,10 @@ end
 get_cachedrow(file, sheet, col, matching_value) = get_cachedrow(Dict, file, sheet, col, matching_value)
 function get_cachedrow(::Type{T}, file, sheet, col, matching_value) where T
     bt = get(BalanceTable, file)
+    get_cachedrow(T, bt, sheet, col, matching_value)
+end
+get_cachedrow(bt::BalanceTable, sheet, col, matching_value) = get_cachedrow(Dict, bt, sheet, col, matching_value)
+function get_cachedrow(::Type{T}, bt::BalanceTable, sheet, col, matching_value) where T
     data = get(T, bt, sheet)
     ind = _cached_index(bt, sheet, col, matching_value)
     if T <: AbstractDict

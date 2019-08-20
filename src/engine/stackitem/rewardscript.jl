@@ -1,7 +1,37 @@
+"""
+    RewardScript
 
+https://www.notion.so/devsisters/ca4ab856f64d4b0d9ce32335f516a639 의 형식을 따른다
+* Key가 없는 아이템: [확률, 아이템종류, 수량]
+```julia
+        [100, "Coin", 1500]
+```
+* Key가 있는 아이템: [확률, 아이템종류, 아이템키, 수량]
+```julia
+        [100, "Item", 7001, 1]
+```
+서버의 RewardScript와는 다르게 Weight와 item 정보를 분리하여 저장한다.
+"""
 abstract type RewardScript end
+function RewardScript(data::Array{T, 1}) where T
+    rewards = RewardScript[]
+    @show data
+    for el in data
+        @show el
+        if length(el) > 1
+            push!(rewards, RandomReward(el))
+        else
+            push!(rewards, FixedReward(el))
+        end
+    end
+    rewards
+end
+
 struct FixedReward <: RewardScript
     item::Array{Tuple, 1}
+end
+function FixedReward(x)
+    @show x
 end
 struct RandomReward <: RewardScript
     weight::AbstractWeights
@@ -10,29 +40,25 @@ struct RandomReward <: RewardScript
         new(pweights(weight), item)
     end
 end
-
-function RewardScript(data::Array{Array{Array{T,1},1},1}) where T
-    convert(Vector{RewardScript}, RewardScript.(data))
-end
-
-function RewardScript(data::Array{Array{T,1},1}) where T
-    weights = Array{Int, 1}(undef, length(data))
-    items = Array{Tuple, 1}(undef, length(data))
-    for (i, el) in enumerate(data)
-        weights[i] = parse(Int, el[1])
-        if length(el) < 4
-            x = (el[2], parse(Int, el[3]))
-        else
-            x = (el[2], parse(Int, el[3]), parse(Int, el[4]))
-        end
+function RandomReward(items)
+    @show items
+    weights = Array{Int, 1}(undef, length(items))
+    items = Array{Tuple, 1}(undef, length(items))
+    for (i, item) in enumerate(item)
+        w, x = break_rewardscript(item)
+        weights[i] = w
         items[i] = x
     end
-
-    if length(weights) == 1
-        FixedReward(items)
+    RandomReward(weights, items)
+end
+function break_rewardscript(item)
+    weight = parse(Int, item[1])
+    if length(item) < 4
+        x = (item[2], parse(Int, item[3]))
     else
-        RandomReward(weights, items)
+        x = (item[2], parse(Int, item[3]), parse(Int, item[4]))
     end
+    return weight, x
 end
 
 StatsBase.sample(a::FixedReward) = a.item
@@ -90,31 +116,31 @@ function itemvalues(it::FixedReward)
     broadcast(x -> x[end], it.item)
 end
 
-function Base.show(io::IO, item::FixedReward)
-    for x in item.item
-        print(io, show_item(x))
-    end
-end
-function Base.show(io::IO, item::RandomReward)
-    rows = displaysize(io)[1]
-    rows < 2   && (print(io, " …"); return)
-    rows -= 1 # Subtract the summary
+# function Base.show(io::IO, item::FixedReward)
+#     for x in item.item
+#         print(io, show_item(x))
+#     end
+# end
+# function Base.show(io::IO, item::RandomReward)
+#     rows = displaysize(io)[1]
+#     rows < 2   && (print(io, " …"); return)
+#     rows -= 1 # Subtract the summary
 
-    for (i, x) in enumerate(item.item)
-        w = item.weight[i] / sum(item.weight)
-        if isa(x, Tuple{String, Int, Int})
-            print(io, show_item(x[2], x[3] * w))
-        else
-            print(io, show_item(x[1], x[2] * w))
-        end
-        println(io)
+#     for (i, x) in enumerate(item.item)
+#         w = item.weight[i] / sum(item.weight)
+#         if isa(x, Tuple{String, Int, Int})
+#             print(io, show_item(x[2], x[3] * w))
+#         else
+#             print(io, show_item(x[1], x[2] * w))
+#         end
+#         println(io)
 
-        if i >= rows
-            @printf(io, "……지면상 %i개 아이템이 생략되었음……", length(item)-rows)
-            break
-        end
-    end
-end
+#         if i >= rows
+#             @printf(io, "……지면상 %i개 아이템이 생략되었음……", length(item)-rows)
+#             break
+#         end
+#     end
+# end
 
 function show_item(item::FixedReward)
     show_item.(item.item)
@@ -153,7 +179,7 @@ function show_item(itemtype::AbstractString, val::T) where T <: Real
 end
 function show_item(itemkey::Integer, val::T;
                     remove_whitespace = true, print_on_console = true) where T <: Real
-    ref = getjuliadata("ItemTable")[itemkey]
+    ref = get_cachedrow("ItemTable", 2, :Key, itemkey)
 
     name = ref[Symbol("\$Name")]
     if remove_whitespace
@@ -174,16 +200,24 @@ end
 
 """
     RewardTable(key)
+
 """
-struct RewardTable
+struct RewardTable <: AbstractContent
     key::Int32
     reward::Array{T, 1} where T <: RewardScript
 end
 function RewardTable(key)
-     ref = getjuliadata("RewardTable")[key]
-     reward = ref.Rewards
-     # Array{RandomReward, 1} or Array{FixedReward, 1}
-     RewardTable(key, convert(Array{typeof(reward[1]), 1}, reward))
+    data = get_cachedrow(rewardkey_scope(key), 1, :RewardKey, key)
+
+    script = data[1]["RewardScript"]     
+    reward = RewardScript(script["Rewards"])
+
+     RewardTable(key, reward)
+ end
+
+ function rewardkey_scope(key)
+    # 1백만 이상은 BlockRewardTable
+    key < 1000000 ? "RewardTable" : "BlockRewardTable"
  end
 
  function StatsBase.sample(r::RewardTable, n = 1)
@@ -195,7 +229,7 @@ function RewardTable(key)
      elseif isa(r.reward, Array{RandomReward, 1})
          x = sample.(r.reward, n)
          items = broadcast(el -> GameItem.(el), x)
-         x = ItemCollection(vcat(items...))
+         x = ItemCollection(items...)
      end
      return x
  end
