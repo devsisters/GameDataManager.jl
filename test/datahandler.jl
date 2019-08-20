@@ -4,9 +4,10 @@ GDM = GameDataManager
 # loadgame
 
 a = get(BalanceTable, "ItemTable")
-@test GDM.sheetnames(a) == ["Currency", "BuildingSeed", "Normal"]
+@test sheetnames(a) == ["Currency", "BuildingSeed", "Normal"]
 
 @test get(Dict, a, "Currency") == get(Dict, a, 1)
 @test get(DataFrame, a, "Currency") == get(DataFrame, a, 1)
 
-get_cachedrow("ItemTable", "Currency", :Key, 5001)
+coin_data = get_cachedrow("ItemTable", "Currency", :Key, "Coin")
+@test length(coin_data) == 1
