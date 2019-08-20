@@ -1,5 +1,5 @@
 """
-    GameData(f::AbstractString)
+    BalanceTable(f::AbstractString)
 mars 메인 저장소의 `.../_META.json`에 명시된 파일을 읽습니다
 
 ** Arguements **
@@ -18,7 +18,7 @@ function BalanceTable(file; kwargs...)
 end
 
 """
-    XLSXGameData
+    XLSXBalanceTable
 
 JSONWorkbook과 검색하기 위해 이를 DataFrame을 변환한 테이블을 가진다 
 
@@ -31,20 +31,20 @@ struct XLSXBalanceTable <: BalanceTable
     data::JSONWorkbook
     dataframe::Array{DataFrame, 1}
     # 사용할 함수들
-    cache::Array{Dict, 1}
+    cache::Union{Missing, Array{Dict, 1}}
 end
-function XLSXBalanceTable(jwb::JSONWorkbook; validation = true)
+function XLSXBalanceTable(jwb::JSONWorkbook; caching = true, validation = true)
     editor!(jwb)
     dummy_localizer!(jwb)
 
     dataframe = construct_dataframe(jwb)
-    cache = index_cache.(dataframe)
+    cache = caching ? index_cache.(dataframe) : missing
 
     x = XLSXBalanceTable(jwb, dataframe, cache)
     validation && validator(x)
     return x
 end
-function XLSXBalanceTable(f::AbstractString)
+function XLSXBalanceTable(f::AbstractString; kwargs...)
     meta = getmetadata(f)
 
     kwargs_per_sheet = Dict()
@@ -53,7 +53,7 @@ function XLSXBalanceTable(f::AbstractString)
     end
     jwb = JSONWorkbook(joinpath_gamedata(f), keys(meta), kwargs_per_sheet)
 
-    XLSXBalanceTable(jwb)
+    XLSXBalanceTable(jwb; kwargs...)
 end
 
 function construct_dataframe(data)
@@ -133,6 +133,7 @@ Base.dirname(jwb::JSONWorkbook) = dirname(xlsxpath(jwb))
 
 index(x::XLSXBalanceTable) = x.data.sheetindex
 cache(x::XLSXBalanceTable) = x.cache
+XLSXasJSON.sheetnames(xgd::XLSXBalanceTable) = sheetnames(xgd.data)
 
 """
     get(Type{DataFrame}, file_sheet::Tuple)

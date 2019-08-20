@@ -9,6 +9,6 @@ end
 function guid(a::Currency{NAME}) where {NAME}
     guid(string("Currency_", NAME))
 end
-function guid(a::StackItem{CAT, KEY}) where {CAT,KEY}
-    guid(string("StackItem_", CAT, KEY))
+function guid(a::T) where {T <: StackItem}
+    guid(string(T, "_", a.key))
 end

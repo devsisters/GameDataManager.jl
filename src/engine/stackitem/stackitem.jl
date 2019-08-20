@@ -48,6 +48,9 @@ Currency(NAME::Symbol, val) = Currency{NAME}(val)
 # 실제 화폐와 달리 FixedDecimal을 사용할 필요가 없다
 # Monetary{NAME, I} = Currency{NAME, I}
 
+global CON = Currency{:CON}(1)
+global CRY = Currency{:CRY}(1)
+
 """
     filltype(typ) → type
 
@@ -57,39 +60,37 @@ partially-specified one.
 filltype(::Type{Currency{NAME}}) where NAME = Currency{NAME, Int}
 itemkey(::Currency{T}) where {T} = T
 itemvalue(x::Currency) = x.val
-"""
-    StackItem
-* Material
-* Box
-* Block
-"""
-struct StackItem{CATEGORY, KEY} <: GameItem
-    val::Int32 # 서버에서 Int32 쓰기에 맞춰둔다
 
-    function (::Type{StackItem{CATEGORY, KEY}})(val) where {CATEGORY, KEY}
-        # 여기서 Key 검사 할 필요가 있나?
-        new{CATEGORY, KEY}(val)
+# NOTE: ItemKey 오류 체크 필요한가??
+struct NormalItem <: StackItem
+    key::Int32
+    val::Int32
+end
+struct BuildingSeedItem <: StackItem
+    key::Int32
+    val::Int32
+end
+struct BlockItem <: StackItem
+    key::Int32
+    val::Int32 
+end
+
+function itemtype(x)
+    if in(x, get(DataFrame, ("ItemTable", "Normal"))[!, :Key])
+        NormalItem
+    elseif in(x, get(DataFrame, ("ItemTable", "BuildingSeed"))[!, :Key])
+        BuildingSeedItem
+    elseif in(x, get(DataFrame, ("Block", "Block"))[!, :Key])
+        BlockItem
+    else
+        throw(KeyError(x))
     end
 end
-function StackItem(key, val=1)
-    @assert haskey(StackItem, key) "'Key:$(key)'은 ItemTable에 존재하지 않습니다"
-    ref = getjuliadata(:ItemTable)
-    T = Symbol(ref[key][:Category])
-    StackItem{T, key}(val)
-end
 
-Base.haskey(::Type{StackItem}, key) = haskey(StackItem, parse(Int, key))
-function Base.haskey(::Type{StackItem}, key::Integer)
-    ref = getjuliadata(:ItemTable)
-    haskey(ref, key)
-end
+itemkey(x::StackItem) = x.key
+itemvalue(x::StackItem) = x.val
+issamekey(m::StackItem, n::StackItem) = itemkey(m) == itemkey(n)
 
 # RewardScript 대응
-GameItem(x::Tuple{String,Integer}) = Currency(x...)
-GameItem(x::Tuple{String, Integer, Integer}) = StackItem(x[2], x[3])
-
-
-# access to composite type information
-itemkey(::StackItem{CAT, KEY}) where {CAT, KEY} = KEY
-itemcat(::StackItem{CAT, KEY}) where {CAT, KEY} = CAT
-itemvalue(x::StackItem) = x.val
+# GameItem(x::Tuple{String,Integer}) = Currency(x...)
+# GameItem(x::Tuple{String, Integer, Integer}) = StackItem(x[2], x[3])

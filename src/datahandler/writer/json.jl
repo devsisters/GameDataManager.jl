@@ -1,6 +1,16 @@
 # 단축키
-xl(; kwargs...) = export_gamedata(; kwargs...)
-xl(x; kwargs...) = export_gamedata(x; kwargs...)
+function xl(; kwargs...) 
+    cd(GAMEENV["patch_data"])
+    run(`git checkout master`)
+    
+    export_gamedata(collect_modified_xlsx(); kwargs...)
+end
+function xl(x; kwargs...) 
+    cd(GAMEENV["patch_data"])
+    run(`git checkout master`)
+    
+    export_gamedata(x; kwargs...)
+end
 
 is_xlsxfile(f)::Bool = (endswith(f, ".xlsx") || endswith(f, ".xlsm"))
 """
@@ -25,15 +35,12 @@ function export_gamedata(file::AbstractString; kwargs...)
     file = is_xlsxfile(file) ? file : MANAGERCACHE[:meta][:xlsx_shortcut][file]
     export_gamedata([file]; kwargs...)
 end
-function export_gamedata(files::Vector; loadgamedata = false)
+function export_gamedata(files::Vector; caching = false)
     if !isempty(files)
-        cd(GAMEENV["patch_data"])
-        run(`git checkout master`)
-        
         @info "xlsx -> json 추출을 시작합니다 ⚒\n" * "-"^(displaysize(stdout)[2]-4)
         for f in files
             println("『", f, "』")
-            gd = loadgamedata ? loadgamedata!(f) : BalanceTable(f)
+            gd = caching ? cache_gamedata!(f) : BalanceTable(f; caching = caching)
             write_json(gd.data)
         end
         @info "json 추출이 완료되었습니다 ☺"

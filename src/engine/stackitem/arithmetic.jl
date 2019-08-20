@@ -85,21 +85,34 @@ end
 ## numeric operations for StackItem
 ##
 ################################################################################
-Base.zero(x::StackItem) = StackItem{itemcat(x), itemkey(x)}(0)
-Base.zero(::Type{StackItem{CAT,KEY}}) where {CAT,KEY} = StackItem{CAT,KEY}(0)
+Base.zero(x::T) where T <: StackItem = T(itemkey(x), 0)
 
 # comparisons
-==(m::StackItem{CAT, KEY}, n::StackItem{CAT,KEY}) where {CAT,KEY} = (m - n).val == 0
-Base.isless(m::StackItem{CAT, KEY}, n::StackItem{CAT,KEY}) where {CAT,KEY} = isless(m.val, n.val)
-
+function ==(m::T, n::T) where T <: StackItem 
+    @assert issamekey(m, n) "일치하지 않는 아이템 ==($(itemkey(m)), $(itemkey(n)))"
+    (m - n).val == 0
+end
+function Base.isless(m::T, n::T) where T <: StackItem 
+    @assert issamekey(m, n) "일치하지 않는 아이템 isless($(itemkey(m)), $(itemkey(n)))"
+    isless(itemvalue(m), itemvalue(n))
+end
 # unary plus/minus
 + m::StackItem = m
--(m::T) where {T<:StackItem} = T(-m.val)
+-(m::T) where {T<:StackItem} = T(itemkey(m), -itemvalue(m))
 
-# arithmetic operations on two monetary values
-+(m::StackItem{CAT,KEY}, n::StackItem{CAT,KEY}) where {CAT,KEY} = StackItem{CAT,KEY}(m.val + n.val)
--(m::StackItem{CAT,KEY}, n::StackItem{CAT,KEY}) where {CAT,KEY} = StackItem{CAT,KEY}(m.val - n.val)
-/(m::StackItem{CAT,KEY}, n::StackItem{CAT,KEY}) where {CAT,KEY} = float(m.val) / float(n.val)
+# arithmetic operations on two item
+function +(m::T, n::T) where T <: StackItem 
+    @assert issamekey(m, n) "일치하지 않는 아이템 +($(itemkey(m)), $(itemkey(n)))"
+    T(itemkey(m), m.val + n.val)
+end
+function -(m::T, n::T) where T <: StackItem 
+    @assert issamekey(m, n) "일치하지 않는 아이템 -($(itemkey(m)), $(itemkey(n)))"
+    T(itemkey(m), m.val - n.val)
+end
+function /(m::T, n::T) where T <: StackItem 
+    @assert issamekey(m, n) "일치하지 않는 아이템 /($(itemkey(m)), $(itemkey(n)))"
+    float(m.val) / float(n.val)
+end
 
 # arithmetic operations on monetary and dimensionless values
 *(m::T, i::Real) where {T<:StackItem} = T(m.val * i)

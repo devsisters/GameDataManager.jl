@@ -150,8 +150,8 @@ function itemkey(x::T) where T <: Building
     T.parameters[1]
 end
 function itemname(x::T) where T <: Building
-    ref = getjuliadata(nameof(T))[itemkey(x)]
-    ref[Symbol("\$Name")]
+    ref = get(string(nameof(T)), "Data", :Key, itemkey(x)) 
+    ref[1]["Name"]
 end
 
 function developmentpoint(x::T; cumulated=false) where T <: Building

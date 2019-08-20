@@ -24,6 +24,9 @@ end
 function ItemCollection(x::T) where T <: GameItem
     ItemCollection{UUID, T}(Dict(guid(x) => x))
 end
+function ItemCollection(args...)
+    ItemCollection([args...])
+end
 
 Base.copy(ic::ItemCollection) = ItemCollection(copy(ic.map))
 Base.length(a::ItemCollection) = length(a.map)

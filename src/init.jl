@@ -1,11 +1,9 @@
 # const GAMEENV = Dict{String, Any}()
-const GAMEDATA = Dict{Symbol, BalanceTable}()
+const GAMEDATA = Dict{String, BalanceTable}()
 const MANAGERCACHE = Dict{Symbol, Dict}()
 const GAMEENV = Dict{String, Any}()
 
 function __init__()
-    global CON = Currency{:CON}(1)
-    global CRY = Currency{:CRY}(1)
     setup_env!(GAMEENV)
 
     # cache 준비

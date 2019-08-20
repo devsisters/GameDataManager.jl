@@ -8,45 +8,70 @@ function joinpath_gamedata(file)
 end
 
 """
-    loadgamedata!(f; gamedata = GAMEDATA)
+    cache_gamedata!(f; gamedata = GAMEDATA)
 gamedata로 데이터를 불러온다
 """
-function loadgamedata!(f, gamedata = GAMEDATA; kwargs...)
-    k = Symbol(split(f, ".")[1])
-    gamedata[k] = BalanceTable(f; kwargs...)
+function cache_gamedata!(f, gamedata = GAMEDATA; kwargs...)
+    k = split(f, ".")[1]
+    get!(gamedata, k) do 
+        BalanceTable(f; kwargs...)
+    end
+    printstyled("GAMEDATA[\"$(k)\"] is cached from Excel\n"; color=:yellow)
 
-    printstyled("GAMEDATA[:$(k)] is loaded from Excel\n"; color=:yellow)
     return gamedata[k]
 end
 
-
 """
-    get(::Type{BalanceTable}, file::AbstractString; check_loaded = true, check_modified = false)
+    get(::Type{BalanceTable}, file::AbstractString; check_modified = false)
 
 엑셀 파일을 파일에서 불러와 메모리에 올린다. 메모리에 있을 경우 파일을 불러오지 않는다
 
 """
 
-function Base.get(::Type{BalanceTable}, file::AbstractString; 
-                    check_loaded = true, check_modified = false)
-    if check_loaded
-        if !haskey(GAMEDATA, Symbol(file)) # 로딩 여부 체크
-            loadgamedata!(file)
-        end
+function Base.get(::Type{BalanceTable}, file::AbstractString; check_modified = false)
+    if !haskey(GAMEDATA, file)
+        cache_gamedata!(file)
     end
     if check_modified
         if ismodified(file) # 파일 변경 여부 체크
-            xl(file; loadgamedata = true)
+            xl(file; caching = true)
         end
     end
-    bt = GAMEDATA[Symbol(file)]
+    bt = GAMEDATA[file]
 
     return bt
 end
 
-#################################################################################
+"""
+    get_cachedrow(file, sheet, col, matching_value)
+
+엑셀 sheet의 column 값이 matching_value인 row를 모두 반환합니다
+"""
+get_cachedrow(file, sheet, col, matching_value) = get_cachedrow(Dict, file, sheet, col, matching_value)
+function get_cachedrow(::Type{T}, file, sheet, col, matching_value) where T
+    bt = get(BalanceTable, file)
+    data = get(T, bt, sheet)
+    ind = _cached_index(bt, sheet, col, matching_value)
+    if T <: AbstractDict
+        data[ind]
+    else
+        data[ind, :]
+    end
+end
+function _cached_index(bt, sheet, col, value)
+    c = cache(bt)[index(bt)[sheet]]
+    @assert haskey(c, col) "`$(basename(bt))_$(sheet)`시트에 $col 컬럼은 존재하지 않습니다"
+    @assert haskey(c[col], value) "`$(basename(bt))_$(sheet)!$col`에 $(value)인 데이터는 존재하지 않습니다"
+
+    return c[col][value]
+end
+
+
+
 """
     getmetadata(file)
+
+_Meta.json 의 내용을 불러온다
 """
 function getmetadata(f::AbstractString)
     if haskey(MANAGERCACHE[:meta][:auto], f)
@@ -55,5 +80,4 @@ function getmetadata(f::AbstractString)
         MANAGERCACHE[:meta][:manual][f]
     end
 end
-
 getmetadata(jwb::JSONWorkbook) =  getmetadata(basename(xlsxpath(jwb)))

@@ -21,19 +21,14 @@ function Base.show(io::IO, m::Currency)
     print(io, digitsep(m.val), ISO4217[itemkey(m)][2])
 end
 
-function Base.show(io::IO, x::Wallet)
-    a = x.paidcrystal + x.freecrystal
-    print(io, a)
-    print(io, " / ")
-    print(io, x.coin)
-end
+function Base.show(io::IO, x::T) where T <: StackItem
+    sheet = T == BuildingSeedItem ? "BuildingSeed" :
+            T == NormalItem ? "Normal" : error("Block...")
 
-function Base.show(io::IO, x::StackItem{CAT, KEY}) where {CAT,KEY}
-    ref = GAMEDATA[:ItemTable].cache[:julia][KEY]
+    ref = get_cachedrow("ItemTable", sheet, :Key, itemkey(x))
+    name = ref[1]["Name"]
 
-    name = ref[Symbol("\$Name")] |> x -> length(x) > 8 ? chop(x, head=0, tail=length(x)-8) *"…" : x
-
-    @printf(io, "%s(%i):%-16s %-2s개", string(CAT)[1:3], KEY, name, x.val)
+    print(io, "(", itemkey(x), ")", name,  ": ", itemvalue(x))
 end
 
 function Base.show(io::IO, x::ItemCollection{T, V}) where {T,V}
@@ -63,35 +58,8 @@ function Base.print(io::IO, x::Ability{GROUP}) where GROUP
     print(io, GROUP, a, "} Lv", x.level, ": ", x.val)
 end
 
-function Base.show(io::IO, x::User)
-    @printf(io, "[%i] %s(lv=%s):\n", x.uid, x.desc, x.level)
-    print(io, x.wallet)
-end
-
-function Base.show(io::IO, x::T) where T <: AbstractSite
-    # g = parse(Int, grade(x))
-    # sz = size(x)
-    # print(io, sz[1], "x", sz[2], " $(g)급 ", T)
-    # print(Int.(x.chunks))
-    print(io, x.size)
-end
-function Base.show(io::IO, x::Borough)
-    g = parse(Int, string(x.grade))
-    println(io, "$(g)급 Borough", "-", x.id)
-    print(summary(x.child))
-end
-function Base.show(io::IO, x::City)
-    println(io, "City-", x.name)
-    print(summary(x.child))
-end
-function Base.show(io::IO, x::Continent)
-    println(io, "Contient-", x.name)
-    print(summary(x.child))
-end
-
-
 function Base.show(io::IO, x::DroneDelivery)
-    ref = getjuliadata("DroneDelivery")[x.group]
+    ref = get(DataFrame, "DroneDelivery")[x.group]
     ref[:Order][x.order]
     println(io, "{$(x.group)}:", "$(x.order) ", ref[:Order][x.order][:Desc])
 end

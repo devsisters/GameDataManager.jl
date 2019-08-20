@@ -34,6 +34,18 @@ Coin, Crystal, Block
 abstract type GameItem end
 
 """
+    StackItem
+* Normal
+* BuildingSeed
+* Block
+"""
+abstract type StackItem <: GameItem end
+function StackItem(key, val = 1)
+    T = itemtype(key)
+    T(key, val)
+end
+
+"""
     NonStackItem
 * Building
 * Pipo

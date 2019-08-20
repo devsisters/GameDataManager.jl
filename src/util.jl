@@ -40,7 +40,7 @@ end
 """
     findblock()
 
-GAMEDATA[:Block] 과 ../4_ArtAssets/GameResources/Blocks/ 하위에 있는 .prefab을 비교하여
+GAMEDATA["Block"] 과 ../4_ArtAssets/GameResources/Blocks/ 하위에 있는 .prefab을 비교하여
 상호 누락된 파일명 리스트를 '.cache'폴더에 저장합니다
 """
 function findblock()

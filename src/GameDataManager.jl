@@ -16,35 +16,27 @@ include("datahandler/balancetable/balancetable.jl")
 for f in readdir(joinpath(@__DIR__, "datahandler/balancetable/xlsx"))
   include("datahandler/balancetable/xlsx/$f")
 end
-include("datahandler/parser_rewardscript.jl")
-include("datahandler/query.jl")
+# include("datahandler/query.jl")
 
 
-############-_-_-FEATURES_-_-_#########################
+############ Simulation ENGINE #########################
 # structs
-include("feature/abstract.jl")
-include("feature/stackitem/stackitem.jl")
-include("feature/stackitem/itemcollection.jl")
-include("feature/building/building.jl")
-include("feature/user/user.jl")
-include("feature/world/world.jl")
-include("feature/world/site.jl")
-include("feature/user/server.jl")
+include("engine/abstract.jl")
+include("engine/stackitem/stackitem.jl")
+include("engine/stackitem/rewardscript.jl")
+include("engine/stackitem/itemcollection.jl")
+include("engine/stackitem/guid.jl")
+include("engine/stackitem/arithmetic.jl")
 
-include("feature/pipoparttime.jl")
-include("feature/village.jl")
-include("feature/rewardtable.jl")
-include("feature/dronedelivery.jl")
+include("engine/nonstackitem/building.jl")
 
-# functions
-include("feature/stackitem/guid.jl")
-include("feature/stackitem/arithmetic.jl")
-# include("feature/stackitem/cost.jl")
+include("engine/pipoparttime.jl")
+include("engine/village.jl")
+include("engine/dronedelivery.jl")
 
-include("feature/user/addremove.jl")
+# engine functions
 
-include("feature/show.jl")
-include("feature/query.jl")
+include("engine/show.jl")
 
 
 #############################################
@@ -64,6 +56,8 @@ include("util.jl")
 export GAMEENV, GAMEDATA, help,
        # datahandler
        BalanceTable, XLSXBalanceTable, JSONBalanceTable, UnityBalanceTable,
+       sheetnames, get_cachedrow,
+       DataFrame,
        init_meta,
        xl, autoxl, md5hash,
 
@@ -72,24 +66,19 @@ export GAMEENV, GAMEDATA, help,
        findblock, get_buildings, get_blocks, compress_continentDB,
        create_dummyaccount,
 
-       # Features
-      @query,
-      caching,
-      User,
-           area, pricecoin,
+      # engine functions
       GameItem, ItemCollection,
           Currency, CON, CRY,
-          StackItem, itemkey, itemvalue, itemcat, itemname,
+          StackItem, NormalItem,
+          BuildingSeedItem, BlockItem,
+          itemkey, itemvalue, issamekey,
           ItemCollection,
       NonStackItem, Building, Special, Residence, Shop, Ability,
       abilitysum,
 
       RewardTable, sample, expectedvalue,
-      DroneDelivery, deliveryreward, deliverycost,
-      #
-      Continent, City, Borough, Village,
-      AbstractSite, PrivateSite,
-      #
-      has, add!, remove!
+      DroneDelivery, deliveryreward, deliverycost
+
+
 
 end
