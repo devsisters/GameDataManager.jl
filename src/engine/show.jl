@@ -46,6 +46,15 @@ function Base.show(io::IO, x::ItemCollection{T, V}) where {T,V}
     end
 end
 
+function Base.show(io::IO, x::RewardTable)
+    k = x.key
+    data = get_cachedrow(rewardkey_scope(k), 1, :RewardKey, k)
+    script = data[1]["RewardScript"]     
+
+    print(io, "($k)", script["TraceTag"], ": ")
+    show(io, x.reward)
+end
+
 # 건물, 개조
 function Base.show(io::IO, x::T) where T <: Building
     print(io, T, " \"$(itemname(x))\" Lv", x.level, "\n┗ ")

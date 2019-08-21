@@ -1,4 +1,16 @@
 """
+    StackItem
+* Normal
+* BuildingSeed
+* Block
+"""
+abstract type StackItem <: GameItem end
+function StackItem(key, val = 1)
+    T = itemtype(key)
+    T(key, val)
+end
+
+"""
 https://github.com/JuliaFinance/CurrenciesBase.jl/blob/master/src/data/currencies.jl
 """
 const ISO4217 = Dict{Symbol, Tuple{Int, String, Int}}(

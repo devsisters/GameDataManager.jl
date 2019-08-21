@@ -24,10 +24,10 @@ end
 """
     get(::Type{BalanceTable}, file::AbstractString; check_modified = false)
 
-엑셀 파일을 파일에서 불러와 메모리에 올린다. 메모리에 있을 경우 파일을 불러오지 않는다
-
+EXCEL 파일을 파일에서 불러와 cache에 올린다. 
+# KEYWORDS
+* check_modified : excel 파일의 시간을 검사하여 다를 경우 cache를 업데이트한다.
 """
-
 function Base.get(::Type{BalanceTable}, file::AbstractString; check_modified = false)
     if !haskey(GAMEDATA, file)
         cache_gamedata!(file)
@@ -41,11 +41,31 @@ function Base.get(::Type{BalanceTable}, file::AbstractString; check_modified = f
 
     return bt
 end
+"""
+    get(DataFrame, file_sheet::Tuple)
+    get(Dict, (file_sheet::Tuple))
+* file_sheet = (파일명, 시트명)
 
+EXCEL 파일을 cache에 올리고, 해당 sheet의 데이터를 반환한다.
+    
+# EXAMPLE
+get(DataFrame, ("ItemTable", "Normal"))
+"""
+function Base.get(::Type{Dict}, file_sheet::Tuple) 
+    ref = get(BalanceTable, file_sheet[1])
+    get(Dict, ref, file_sheet[2])
+end
+function Base.get(::Type{DataFrame}, file_sheet::Tuple)
+    ref = get(BalanceTable, file_sheet[1])
+    get(DataFrame, ref, file_sheet[2])
+end
 """
     get_cachedrow(file, sheet, col, matching_value)
 
 엑셀 sheet의 column 값이 matching_value인 row를 모두 반환합니다
+
+# EXAMPLE
+get_cachedrow("ItemTable", "Normal", :Key, 7001)
 """
 get_cachedrow(file, sheet, col, matching_value) = get_cachedrow(Dict, file, sheet, col, matching_value)
 function get_cachedrow(::Type{T}, file, sheet, col, matching_value) where T

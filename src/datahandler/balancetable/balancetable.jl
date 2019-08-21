@@ -135,22 +135,9 @@ index(x::XLSXBalanceTable) = x.data.sheetindex
 cache(x::XLSXBalanceTable) = x.cache
 XLSXasJSON.sheetnames(xgd::XLSXBalanceTable) = sheetnames(xgd.data)
 
-"""
-    get(Type{DataFrame}, file_sheet::Tuple)
-    get(Type{Dict}, file_sheet::Tuple)
 
-file_sheet = (파일명, 시트명)
-"""
 Base.get(::Type{Dict}, x::XLSXBalanceTable) = x.data
 Base.get(::Type{DataFrame}, x::XLSXBalanceTable) = x.dataframe
-function Base.get(::Type{Dict}, file_sheet::Tuple; kwargs...) 
-    ref = get(BalanceTable, file_sheet[1]; kwargs...)
-    get(Dict, ref, file_sheet[2])
-end
-function Base.get(::Type{DataFrame}, file_sheet::Tuple; kwargs...)
-    ref = get(BalanceTable, file_sheet[1]; kwargs...)
-    get(DataFrame, ref, file_sheet[2])
-end
 function Base.get(::Type{Dict}, x::XLSXBalanceTable, sheet)
     idx = getindex(index(x), sheet)
     getindex(x.data, idx)
@@ -160,20 +147,9 @@ function Base.get(::Type{DataFrame}, x::XLSXBalanceTable, sheet)
     getindex(x.dataframe, idx)
 end
 
-# function lookup(a::XLSXBalanceTable, sheet)
-
-# end
-
-
-function Base.show(io::IO, gd::XLSXBalanceTable)
+function Base.show(io::IO, bt::XLSXBalanceTable)
     println(io, ".data ┕━")
-    print(io, gd.data)
-
-    # println(io, ".cache ┕━")
-    # println(io, typeof(gd.cache), " with $(length(gd.cache)) entry")
-    # for el in gd.cache
-    #     println(io, "  :$(el[1]) => $(summary(el[2]))")
-    # end
+    print(io, bt.data)
 end
 
 function Base.show(io::IO, gd::JSONBalanceTable)

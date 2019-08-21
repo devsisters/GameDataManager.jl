@@ -20,21 +20,19 @@ end
 
 
 ############ Simulation ENGINE #########################
-# structs
-include("engine/abstract.jl")
-include("engine/stackitem/stackitem.jl")
-include("engine/stackitem/rewardscript.jl")
-include("engine/stackitem/itemcollection.jl")
-include("engine/stackitem/guid.jl")
-include("engine/stackitem/arithmetic.jl")
+include("engine/structs.jl")
+include("engine/gameitem/stackitem.jl")
+include("engine/gameitem/rewardscript.jl")
+include("engine/gameitem/itemcollection.jl")
+include("engine/gameitem/guid.jl")
+include("engine/gameitem/arithmetic.jl")
+include("engine/gameitem/building.jl")
 
-include("engine/nonstackitem/building.jl")
+include("engine/site/site.jl")
+include("engine/village/village.jl")
 
-include("engine/pipoparttime.jl")
-include("engine/village.jl")
-include("engine/dronedelivery.jl")
-
-# engine functions
+include("engine/content/pipoparttime.jl")
+include("engine/content/dronedelivery.jl")
 
 include("engine/show.jl")
 
@@ -67,6 +65,8 @@ export GAMEENV, GAMEDATA, help,
        create_dummyaccount,
 
       # engine functions
+      Village, VillageLayout,
+      PrivateSite, Site,
       GameItem, ItemCollection,
           Currency, CON, CRY,
           StackItem, NormalItem,

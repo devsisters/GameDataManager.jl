@@ -1,72 +1,70 @@
+"""
+    VillageLayout
 
+https://github.com/devsisters/mars-patch-data/tree/master/VillageLayout/Output
+의 .json 파일과 1:1 대응된다.
+왜 그냥 JSON 파싱한 딕셔너리 그대로 불러 써도 되는데 struct로 만든 이유는
+JSON 파일 안열고 구조 파악할 수 있도록... 
+"""
+struct VillageLayout
+    name::String
+    width::Int16
+    height::Int16
+    homesite::Int16
+    initial_sites::Array{Int16, 1}
+    sites::Array{Site, 1}
+    # edges
+    # nodes
+    edge_relations::Dict
+    # noderelations
+end
+function VillageLayout(file = rand(VillageLayout))
+    data = JSON.parsefile(file)
+
+    sites = PrivateSite.(data["Sites"])
+
+    # SiteIndex별 연결된 EdgeIndex  
+    # EdgeIndex별 연결된 SiteIndex 
+    edge_relations = Dict("SiteIndex" => Dict{Int16, Array{Int16, 1}}(),
+                          "EdgeIndex" => Dict{Int16, Array{Int16, 1}}())
+    for el in data["EdgeRelations"]
+        edgeindex = get!(edge_relations["EdgeIndex"], el["EdgeIndex"], Int[])
+        siteindex = get!(edge_relations["SiteIndex"], el["SiteIndex"], Int[])
+
+        push!(edgeindex, el["SiteIndex"])
+        push!(siteindex, el["EdgeIndex"])
+    end
+
+    VillageLayout(data["LayoutName"], data["LayoutWidth"], data["LayoutLength"], 
+                  data["HomeSite"], data["InitialSites"], 
+                  sites, edge_relations)
+end
+
+function Base.rand(::Type{VillageLayout})
+    p = joinpath(GAMEENV["patch_data"], "VillageLayout/output")
+    layouts = readdir(p; extension = ".json")
+    rand(joinpath.(p, layouts))
+end
 """
     Village
 
 빌리지의 사이트 구성과 크기, 그리고 사이트별 건물 정보를 저장
 # TODO 추후 MarsSimulator로 옮길 것
 """
-struct Village
-    category::String
-    home::Tuple{Int, Int}
-    site_size::Array{Tuple{Int, Int}, 2}
-    site_segment::Array{Any, 2} # 빌딩키
+struct Village <: AbstractVillage
+    id::UInt64
+    # name
+    # owner
+    layout::VillageLayout
 end
-function Village(category = "")
-    # NOTE Category 다를 경우 추가 구현 필요
-    ref = get(DataFrame, ("ContinentGenerator", "Village"))
-    x = ref[1, :SiteLength]
-    y = ref[1, :SiteWidth]
+function Village(layout)
 
-    site_size = Array{Tuple{Int, Int}}(undef, length(x), length(y))
-    for (i, sz_x) = enumerate(x), (j, sz_y) = enumerate(y)
-        site_size[i, j] = (sz_x, sz_y)
-    end
-
-    site_segment = Array{Union{Vector, Missing}}(missing, size(site_size))
-    home = Tuple(ref[1, :AllocateSite_Home])
-    site_segment[home[2]+1, home[1]+1] = ["Home"]
-
-    Village("", home, site_size, site_segment)
 end
 
 Base.size(x::Village) = size(x.site_size)
 Base.size(x::Village, dim) = size(x.site_size, dim)
 
-function assign_building!(vill::Village, key)
-    # TODO 한사이트에 빌딩 여러개 넣는법 연구
-    bd_size = get_buildingsize(key)
 
-    # 소용돌이 만들기 귀찮다.. 우선 랜덤으로 처리
-    assigned_site = [-1, -1]
-    for i = shuffle(1:size(vill, 1)), j = shuffle(1:size(vill, 2))
-        x = vill.site_segment[i, j]
-        if ismissing(x)
-            site_size = vill.site_size[i, j]
-            if (site_size[1] >= bd_size[1] & site_size[2] >= bd_size[2]) | (site_size[2] >= bd_size[1] & site_size[1] >= bd_size[2])
-                vill.site_segment[i, j] = [key]
-                assigned_site = [i, j]
-                b = true
-                break
-            end
-        end
-    end
-    if assigned_site == [-1, -1]
-        println("$(key)를 아무대도 배정 못하였습니다")
-    end
-    return assigned_site
-end
-function get_buildingsize(key)
-    d = Dict{String, Any}()
-    for file in ("Special", "Shop", "Residence", "Sandbox")
-        ref = get(DataFrame, (file, "Building"))
-        for r in eachrow(ref[:])
-            x = r[:Condition]
-            d[r[:BuildingKey]] = (x["ChunkWidth"], x["ChunkLength"])
-        end
-    end
-
-    return d[key]
-end
 
 
 """
@@ -148,4 +146,41 @@ function create_dummyaccount(amount; )
         write(io, JSON.json(v, 2))
      end
      println("  $(output) 에 $(amount)개 저장하였습니다!")
+end
+
+
+function assign_building!(vill::Village, key)
+    # TODO 한사이트에 빌딩 여러개 넣는법 연구
+    bd_size = get_buildingsize(key)
+
+    # 소용돌이 만들기 귀찮다.. 우선 랜덤으로 처리
+    assigned_site = [-1, -1]
+    for i = shuffle(1:size(vill, 1)), j = shuffle(1:size(vill, 2))
+        x = vill.site_segment[i, j]
+        if ismissing(x)
+            site_size = vill.site_size[i, j]
+            if (site_size[1] >= bd_size[1] & site_size[2] >= bd_size[2]) | (site_size[2] >= bd_size[1] & site_size[1] >= bd_size[2])
+                vill.site_segment[i, j] = [key]
+                assigned_site = [i, j]
+                b = true
+                break
+            end
+        end
+    end
+    if assigned_site == [-1, -1]
+        println("$(key)를 아무대도 배정 못하였습니다")
+    end
+    return assigned_site
+end
+function get_buildingsize(key)
+    d = Dict{String, Any}()
+    for file in ("Special", "Shop", "Residence", "Sandbox")
+        ref = get(DataFrame, (file, "Building"))
+        for r in eachrow(ref[:])
+            x = r[:Condition]
+            d[r[:BuildingKey]] = (x["ChunkWidth"], x["ChunkLength"])
+        end
+    end
+
+    return d[key]
 end

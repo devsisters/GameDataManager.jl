@@ -15,9 +15,7 @@ https://www.notion.so/devsisters/ca4ab856f64d4b0d9ce32335f516a639 의 형식을 
 abstract type RewardScript end
 function RewardScript(data::Array{T, 1}) where T
     rewards = RewardScript[]
-    @show data
-    for el in data
-        @show el
+    for (i, el) in enumerate(data)
         if length(el) > 1
             push!(rewards, RandomReward(el))
         else
@@ -29,9 +27,15 @@ end
 
 struct FixedReward <: RewardScript
     item::Array{Tuple, 1}
-end
-function FixedReward(x)
-    @show x
+
+    function FixedReward(items)
+        pieces = Array{Tuple, 1}(undef, length(items))
+        for (i, item) in enumerate(items)
+            w, x = break_rewardscript(item)
+            pieces[i] = x
+        end
+        new(pieces)
+    end
 end
 struct RandomReward <: RewardScript
     weight::AbstractWeights
@@ -41,15 +45,14 @@ struct RandomReward <: RewardScript
     end
 end
 function RandomReward(items)
-    @show items
     weights = Array{Int, 1}(undef, length(items))
-    items = Array{Tuple, 1}(undef, length(items))
-    for (i, item) in enumerate(item)
+    pieces = Array{Tuple, 1}(undef, length(items))
+    for (i, item) in enumerate(items)
         w, x = break_rewardscript(item)
         weights[i] = w
-        items[i] = x
+        pieces[i] = x
     end
-    RandomReward(weights, items)
+    RandomReward(weights, pieces)
 end
 function break_rewardscript(item)
     weight = parse(Int, item[1])
@@ -58,7 +61,7 @@ function break_rewardscript(item)
     else
         x = (item[2], parse(Int, item[3]), parse(Int, item[4]))
     end
-    return weight, x
+    return weight, Tuple(x)
 end
 
 StatsBase.sample(a::FixedReward) = a.item
@@ -212,7 +215,7 @@ function RewardTable(key)
     script = data[1]["RewardScript"]     
     reward = RewardScript(script["Rewards"])
 
-     RewardTable(key, reward)
+    RewardTable(key, reward)
  end
 
  function rewardkey_scope(key)
@@ -221,18 +224,18 @@ function RewardTable(key)
  end
 
  function StatsBase.sample(r::RewardTable, n = 1)
-     if isa(r.reward, Array{FixedReward, 1})
-         x = ItemCollection(GameItem.(sample.(r.reward)))
-         if n > 1
-             x = x * n
-         end
-     elseif isa(r.reward, Array{RandomReward, 1})
-         x = sample.(r.reward, n)
-         items = broadcast(el -> GameItem.(el), x)
-         x = ItemCollection(items...)
-     end
-     return x
- end
+    result = []
+    for el in r.reward
+        if isa(el, FixedReward)
+            x = GameItem.(sample(el))
+            x = x .* n
+        else
+            x = GameItem.(sample(el, n))
+        end
+        push!(result, x)
+    end
+    return ItemCollection(result...)
+end
 
  """
  expectedvalue
