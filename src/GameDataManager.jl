@@ -61,7 +61,7 @@ export GAMEENV, GAMEDATA, help,
 
 
        # 유틸리티
-       findblock, get_buildings, get_blocks, compress_continentDB,
+       findblock, get_buildings, get_blocks,
        create_dummyaccount,
 
       # engine functions

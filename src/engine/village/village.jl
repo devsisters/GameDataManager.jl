@@ -21,7 +21,15 @@ end
 function VillageLayout(file = rand(VillageLayout))
     data = JSON.parsefile(file)
 
-    sites = PrivateSite.(data["Sites"])
+    # site handling
+    homesite = data["HomeSite"]
+    initial_sites = data["InitialSites"]
+    sites = sort(data["Sites"]; by = el -> get(el, :a, 0)) .|> PrivateSite
+
+    clean!(sites, homesite)
+    for i in initial_sites
+        clean!(sites, i)
+    end
 
     # SiteIndex별 연결된 EdgeIndex  
     # EdgeIndex별 연결된 SiteIndex 
@@ -36,8 +44,7 @@ function VillageLayout(file = rand(VillageLayout))
     end
 
     VillageLayout(data["LayoutName"], data["LayoutWidth"], data["LayoutLength"], 
-                  data["HomeSite"], data["InitialSites"], 
-                  sites, edge_relations)
+        homesite, initial_sites, sites, edge_relations)
 end
 
 function Base.rand(::Type{VillageLayout})
@@ -46,7 +53,13 @@ function Base.rand(::Type{VillageLayout})
     rand(joinpath.(p, layouts))
 end
 """
-    Village
+    Village()
+
+"../VillageLayout/output" 경로의 layout 중 1개를 무작위 선택
+    
+    
+    Village(file_layout::AbstractString)
+file_layout의 필리지 생성
 
 빌리지의 사이트 구성과 크기, 그리고 사이트별 건물 정보를 저장
 # TODO 추후 MarsSimulator로 옮길 것
@@ -57,16 +70,33 @@ struct Village <: AbstractVillage
     # owner
     layout::VillageLayout
 end
-function Village(layout)
-
+function Village(layout::VillageLayout)
+    id = village_uid()
+    Village(id, layout)
 end
+function Village(f::AbstractString)
+    p = joinpath(GAMEENV["patch_data"], "VillageLayout/output", f)
+    layout = VillageLayout(p)
+    Village(layout)
+end
+function Village()
+    Village(VillageLayout())
+end
+# functions
+Base.size(x::VillageLayout) = (x.width, x.height)
+function Base.size(x::VillageLayout, dim) 
+    dim == 1 ? x.width : 
+    dim == 2 ? x.height :
+    1
+end
+Base.size(v::Village) = size(v.layout)
+Base.size(v::Village, dim) = size(v.layout, dim)
 
-Base.size(x::Village) = size(x.site_size)
-Base.size(x::Village, dim) = size(x.site_size, dim)
 
 
-
-
+######################################################################
+# deprecated
+######################################################################
 """
     create_dummyaccount
 
