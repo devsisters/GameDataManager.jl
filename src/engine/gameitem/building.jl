@@ -35,7 +35,7 @@ end
 개조 항목
 """
 mutable struct Ability{GROUP}
-    key::Symbol
+    key::AbstractString
     level::Int8
     val::Int32
 
@@ -43,78 +43,73 @@ mutable struct Ability{GROUP}
         new{GROUP}(key, level, val)
     end
 end
-Ability(key::AbstractString, level = 1) = Ability(Symbol(key), level)
-function Ability(key::Symbol, level = 1)
+function Ability(key, level = 1)
     @assert haskey(Ability, key) "'Key:$(key)'은 Ability에 존재하지 않습니다"
 
-    ref = getjuliadata(:Ability)[key]
-    val = ref[:IsValueReplace] ? ref[:Value][level] : sum(ref[:Value][1:level])
-
-    Ability{ref[:Group]}(key, level, val)
+    ref = get_cachedrow("Ability", "Level", :AbilityKey, key)
+    val = ref[level]["IsValueReplace"] ? ref[level]["Value"] : sum(el -> el["Value"], ref[1:level])
+    GROUP = ref[level]["Group"] |> Symbol
+    
+    Ability{GROUP}(key, level, val)
 end
 Ability(key::Missing) = missing
+
 """
     Special(key, level)
 """
-mutable struct Special{KEY} <: Building
+mutable struct Special <: Building
     uid::UInt64
-    owner::Union{AbstractSite, Missing}
+    key::String
     level::Int8
     abilities::Union{Array{Ability, 1}, Missing}
     # blueprint  건물 도면
 
-    function (::Type{Special{KEY}})(level) where KEY
-        ref = getjuliadata(:Special)[KEY]
-        # abs = Ability.(ref[:AbilityKey])
-        new{KEY}(building_uid(), missing, level, Ability.(ref[:AbilityKey]))
-    end
 end
-Special(key::AbstractString, level = 1) = Special(Symbol(key), level)
-function Special(key::Symbol, level = 1)
-    if haskey(Special, key)
-        Special{key}(level)
-    else
+function Special(key, level = 1)
+    if !haskey(Special, key)
         throw(KeyError("$(key)는 Special 건물이 아닙니다"))
     end
+
+    ref = get_cachedrow("Special", "Building", :BuildingKey, key)
+    abilities = Ability.(ref[1]["AbilityKey"])
+    Special(building_uid(), key, level, abilities)
 end
+
 """
     Residence(key, level)
 """
-mutable struct Residence{KEY} <: Building
+mutable struct Residence <: Building
     uid::UInt64
-    owner::Union{AbstractSite, Missing}
+    key::String
     level::Int8
     abilities::Array{Ability, 1}
     # blueprint  건물 도면
     # occupant::Vector # 피포 거주자
-
-    function (::Type{Residence{KEY}})(level) where KEY
-        ref = getjuliadata(:Residence)[KEY]
-        new{KEY}(building_uid(), missing, level, Ability.(ref[:AbilityKey]))
-    end
 end
-Residence(key::AbstractString, level = 1) = Residence(Symbol(key), level)
-function Residence(key::Symbol, level = 1)
-    if haskey(Residence, key)
-        Residence{key}(level)
-    else
+function Residence(key, level = 1)
+    if !haskey(Residence, key)
         throw(KeyError("$(key)는 Residence 건물이 아닙니다"))
     end
+
+    ref = get_cachedrow("Residence", "Building", :BuildingKey, key)
+    abilities = Ability.(ref[1]["AbilityKey"])
+    Residence(building_uid(), key, level, abilities)
 end
+
 """
     Shop(key, level)
 
 Shop.xlsx에 정의된 가게
 """
-mutable struct Shop{Key} <: Building
+mutable struct Shop <: Building
     uid::UInt64
-    owner::Union{AbstractSite, Missing}
+    key::String
     level::Int8
     abilities::Array{Ability, 1}
     # blueprint  건물 도면
 
-    function (::Type{Shop{KEY}})(level) where KEY
-        ref = getjuliadata(:Shop)[KEY]
+    function (::Type{Shop})(level) where KEY
+        ref = get_cachedrow("Shop", "Building", :BuildingKey, key)
         abilities = Ability.(ref[:AbilityKey])
         # TODO: 이거 무식함...... levelup! 함수 정의 필요
         if level > 1
@@ -130,13 +125,14 @@ mutable struct Shop{Key} <: Building
             end
         end
 
-        new{KEY}(building_uid(), missing, level, abilities)
+        new(building_uid(), missing, level, abilities)
     end
 end
-Shop(key::AbstractString, level = 1) = Shop(Symbol(key), level)
-function Shop(key::Symbol, level = 1)
+
+
+function Shop(key, level = 1)
     if haskey(Shop, key)
-        Shop{key}(level)
+        Shop(level)
     else
         throw(KeyError("$(key)는 Shop 건물이 아닙니다"))
     end
@@ -145,12 +141,10 @@ end
 # Functions
 itemkey(x::Ability) = x.key
 groupkey(x::Ability) = typeof(x).parameters[1]
-itemkey(::Type{T}) where T <: Building = T.parameters[1]
-function itemkey(x::T) where T <: Building
-    T.parameters[1]
-end
+itemkey(x::T) where T <: Building = x.key
+
 function itemname(x::T) where T <: Building
-    ref = get(string(nameof(T)), "Data", :Key, itemkey(x)) 
+    ref = get_cachedrow(string(T), "Building", :BuildingKey, itemkey(x)) 
     ref[1]["Name"]
 end
 
@@ -194,10 +188,12 @@ end
 
 #fallback bunctions
 function Base.haskey(::Type{Building}, x)
-    in(x, get(DataFrame, ("Shop", "Building"))[!, :BuildingKey]) | 
-    in(x, get(DataFrame, ("Residence", "Building"))[!, :BuildingKey]) | 
-    in(x, get(DataFrame, ("Special", "Building"))[!, :BuildingKey])
+    haskey(Shop, x) | haskey(Residence, x) | haskey(Special, x)
 end
+function Base.haskey(::Type{T}, x) where T <: Building
+    in(x, get(DataFrame, (string(T), "Building"))[!, :BuildingKey])
+end
+
 function Base.haskey(::Type{Ability}, x)
     in(x, get(DataFrame, ("Ability", "Level"))[!, :AbilityKey])
 end

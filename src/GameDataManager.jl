@@ -31,9 +31,11 @@ include("engine/gameitem/building.jl")
 include("engine/site/site.jl")
 include("engine/village/village.jl")
 include("engine/village/bot.jl")
+include("engine/user/user.jl")
 
 include("engine/content/pipoparttime.jl")
 include("engine/content/dronedelivery.jl")
+
 
 include("engine/show.jl")
 
@@ -55,17 +57,16 @@ include("util.jl")
 export GAMEENV, GAMEDATA, help,
        # datahandler
        BalanceTable, XLSXBalanceTable, JSONBalanceTable, UnityBalanceTable,
-       sheetnames, get_cachedrow,
+       sheetnames, get_cachedrow, update_gamedata!,
        DataFrame,
-       init_meta,
        xl, autoxl, md5hash,
 
 
        # 유틸리티
        findblock, get_buildings, get_blocks,
-       create_dummyaccount,
 
       # engine functions
+      User,
       Village, VillageLayout, create_bot,
       PrivateSite, Site,
       GameItem, ItemCollection,
@@ -74,6 +75,7 @@ export GAMEENV, GAMEDATA, help,
           BuildingSeedItem, BlockItem,
           itemkey, itemvalue, issamekey,
           ItemCollection,
+          add!, remove!,
       NonStackItem, Building, Special, Residence, Shop, Ability,
       abilitysum,
 
