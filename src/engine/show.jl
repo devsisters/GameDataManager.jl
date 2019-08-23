@@ -36,12 +36,10 @@ function Base.show(io::IO, x::ItemCollection{T, V}) where {T,V}
     # line_limit = displaysize(io)[2]
     println(io, "ItemCollection with ", length(x), " entries:")
     if !isempty(x)
-        n = 0
         for pair in x.map
             print(io, "  ", string(pair[1])[1:4], "… => ")
             print(io, pair[2])
-            n +=1
-            n != length(x.map) && print(io, "\n")
+            print(io, "\n")
         end
     end
 end

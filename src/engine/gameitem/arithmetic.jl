@@ -135,11 +135,10 @@ end
 function -(m::ItemCollection, n::T) where T<:GameItem
     m + ItemCollection(get(m, guid(n), zero(n)) - n)
 end
-#버그로 일단 젝
+#버그로 일단 제거
 # function -(m::T, n::ItemCollection) where T<:GameItem
 #     n + ItemCollection(m - get(n, guid(m), zero(m)))
 # end
-
 function *(m::ItemCollection, i::Real)
     ItemCollection(map(el -> el[2] * i, m))
 end
