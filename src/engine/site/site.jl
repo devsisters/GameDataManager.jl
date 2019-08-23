@@ -21,3 +21,11 @@ clean!(x::AbstractSite) = x.cleaned = true
 function clean!(xs::Array{T, 1}, i) where T <: AbstractSite 
     clean!(xs[i])
 end
+iscleaned(x::AbstractSite) = x.cleaned 
+
+Base.size(x::AbstractSite) = (x.chunksizeX, x.chunksizeZ)
+function Base.size(x::AbstractSite, dim) 
+    dim == 1 ? x.chunksizeX : 
+    dim == 2 ? x.chunksizeZ :
+    1
+end

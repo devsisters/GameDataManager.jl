@@ -30,6 +30,7 @@ include("engine/gameitem/building.jl")
 
 include("engine/site/site.jl")
 include("engine/village/village.jl")
+include("engine/village/bot.jl")
 
 include("engine/content/pipoparttime.jl")
 include("engine/content/dronedelivery.jl")
@@ -65,7 +66,7 @@ export GAMEENV, GAMEDATA, help,
        create_dummyaccount,
 
       # engine functions
-      Village, VillageLayout,
+      Village, VillageLayout, create_bot,
       PrivateSite, Site,
       GameItem, ItemCollection,
           Currency, CON, CRY,
