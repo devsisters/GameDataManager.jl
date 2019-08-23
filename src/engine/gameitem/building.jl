@@ -67,7 +67,7 @@ mutable struct Special <: Building
 end
 function Special(key, level = 1)
     if !haskey(Special, key)
-        throw(KeyError("$(key)는 Special 건물이 아닙니다"))
+        throw(KeyError("$(key)는 Special이 아닙니다"))
     end
 
     ref = get_cachedrow("Special", "Building", :BuildingKey, key)
@@ -88,7 +88,7 @@ mutable struct Residence <: Building
 end
 function Residence(key, level = 1)
     if !haskey(Residence, key)
-        throw(KeyError("$(key)는 Residence 건물이 아닙니다"))
+        throw(KeyError("$(key)는 Residence가 아닙니다"))
     end
 
     ref = get_cachedrow("Residence", "Building", :BuildingKey, key)
@@ -107,35 +107,19 @@ mutable struct Shop <: Building
     level::Int8
     abilities::Array{Ability, 1}
     # blueprint  건물 도면
-
-    function (::Type{Shop})(level) where KEY
-        ref = get_cachedrow("Shop", "Building", :BuildingKey, key)
-        abilities = Ability.(ref[:AbilityKey])
-        # TODO: 이거 무식함...... levelup! 함수 정의 필요
-        if level > 1
-            for lv in 2:level
-                target = ref[:Level][lv - 1][:Abilityup]
-                ability_groups = groupkey.(abilities)
-
-                for el in target
-                    idx = findfirst(x -> x == Symbol(el["Group"]), ability_groups)
-                    x = abilities[idx]
-                    abilities[idx] = Ability(itemkey(x), el["Level"])
-                end
-            end
-        end
-
-        new(building_uid(), missing, level, abilities)
-    end
 end
-
-
 function Shop(key, level = 1)
-    if haskey(Shop, key)
-        Shop(level)
-    else
-        throw(KeyError("$(key)는 Shop 건물이 아닙니다"))
+    if !haskey(Shop, key)
+        throw(KeyError("$(key)는 Shop이 아닙니다"))
     end
+
+    ref = get_cachedrow("Shop", "Building", :BuildingKey, key)
+    abilities = Ability.(ref[1]["AbilityKey"])
+    # TODO: 이거 무식함...... levelup! 함수 정의 필요
+    if level > 1
+        @error "다시 만들어야지!!"
+    end
+    Shop(building_uid(), key, level, abilities)
 end
 
 # Functions
