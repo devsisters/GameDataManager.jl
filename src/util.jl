@@ -55,7 +55,7 @@ function findblock()
         end
     end
 
-    artasset_on_xls = get(DataFrame, ("Block", "Block"); check_modified = true)[!, :ArtAsset]
+    artasset_on_xls = get(DataFrame, ("Block", "Block"))[!, :ArtAsset]
 
     a = setdiff(artassets, artasset_on_xls)
     b = setdiff(artasset_on_xls, artassets)
@@ -100,11 +100,9 @@ end
 
 """
 function get_buildings(;kwargs...)
-    caching(:Building)
-
     bdkeys = []
-    for T in (:Shop, :Residence, :Special)
-        append!(bdkeys, keys(getjuliadata(T)))
+    for t in ("Shop", "Residence", "Special")
+        append!(bdkeys, get(DataFrame, (t, "Building"))[!, :BuildingKey])
     end
 
     file = joinpath(GAMEENV["cache"], "get_buildings.tsv")
@@ -123,13 +121,11 @@ end
 
 building_key 건물에 사용된 Block의 종류와 수량을 확인합니다
 """
-get_buildings(building_key::AbstractString, savetsv = true; kwargs...) = get_buildings(Symbol(building_key), savetsv; kwargs...)
-function get_buildings(key::Symbol, savetsv = true; delim = '\t')
-    caching(:Building)
-
+function get_buildings(key, savetsv = true; delim = '\t')
     templates = begin 
-        ref = getjuliadata(buildingtype(key))[key]
-        x = map(el -> el[:BuildingTemplate], values(ref[:Level]))
+        t = string(buildingtype(key))
+        ref = get_cachedrow(DataFrame, t, "Level", :BuildingKey, key)
+        x = unique(ref[!, :BuildingTemplate])
         convert(Vector{String}, filter(!ismissing, x))
     end
 
