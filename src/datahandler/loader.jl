@@ -20,6 +20,15 @@ function cache_gamedata!(f, gamedata = GAMEDATA; kwargs...)
 
     return gamedata[k]
 end
+"""
+    update_gamedata!()
+GAMEDATA 에 캐시되어있는 모든 엑셀 파일을 업데이트
+"""
+function update_gamedata!()
+    for k in keys(GAMEDATA)
+        get(BalanceTable, k;check_modified = true)
+    end
+end
 
 """
     get(::Type{BalanceTable}, file::AbstractString; check_modified = false)
@@ -51,12 +60,12 @@ EXCEL 파일을 cache에 올리고, 해당 sheet의 데이터를 반환한다.
 # EXAMPLE
 get(DataFrame, ("ItemTable", "Normal"))
 """
-function Base.get(::Type{Dict}, file_sheet::Tuple) 
-    ref = get(BalanceTable, file_sheet[1])
+function Base.get(::Type{Dict}, file_sheet::Tuple; kwargs...) 
+    ref = get(BalanceTable, file_sheet[1]; kwargs...)
     get(Dict, ref, file_sheet[2])
 end
-function Base.get(::Type{DataFrame}, file_sheet::Tuple)
-    ref = get(BalanceTable, file_sheet[1])
+function Base.get(::Type{DataFrame}, file_sheet::Tuple; kwargs...)
+    ref = get(BalanceTable, file_sheet[1]; kwargs...)
     get(DataFrame, ref, file_sheet[2])
 end
 """
