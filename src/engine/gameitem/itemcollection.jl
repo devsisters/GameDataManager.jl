@@ -1,6 +1,6 @@
 """
     ItemCollection
-*
+* arithmetic 연산을 위해 GameItem을 담아돈댜
 """
 struct ItemCollection{UUID,V <: GameItem}
     map::Dict{UUID,V}
@@ -72,36 +72,49 @@ function add!(ic::ItemCollection{UUID, T}, x::T) where T <: GameItem
 end
 
 """
-    DefaultAccountItem
+    GameItemStorage
 
-MarsServer에서 사용하는 네이밍을 동일하게 적용
+MarsServer에서는 DefaultAccountItem
 """
-struct DefaultAccountItem
-    mid::UInt64
-    # StackItem
+struct UserItemStorage <: AbstractItemStorage
+    ownermid::UInt64
     currency::ItemCollection
     normal::ItemCollection
     buildingseed::ItemCollection
     # NonStackItem
-    # building
 end
-function DefaultAccountItem(mid)
-    DefaultAccountItem(
-        mid, 
-        ItemCollection(Currency),
-        ItemCollection(NormalItem),
-        ItemCollection(BuildingSeedItem))
+function UserItemStorage(ownermid)
+    ref = get(Dict, ("GeneralSetting", "AddOnAccountCreation"))[1]
+
+    currency = ItemCollection(ref["AddCoin"]*CON, ref["AddCrystal"]*CON)
+    normal = ItemCollection(StackItem.(ref["AddItem"]))
+    buildingseed = ItemCollection(StackItem.(ref["AddBuildingSeed"]))
+
+    # DefaultAccountItem(
+    #     mid, ItemCollection(Currency), ItemCollection(NormalItem), ItemCollection(BuildingSeedItem))
+
+    UserItemStorage(ownermid, currency, normal,buildingseed)
 end
 
-add!(d::DefaultAccountItem, x::Currency) = add!(d.currency, x)
-add!(d::DefaultAccountItem, x::BuildingSeedItem) = add!(d.buildingseed, x)
-function add!(d::DefaultAccountItem, x::NormalItem) 
+add!(d::UserItemStorage, x::Currency) = add!(d.AccountItemWallet, x)
+add!(d::UserItemStorage, x::BuildingSeedItem) = add!(d.AccountItemWallet, x)
+function add!(d::UserItemStorage, x::NormalItem) 
     #TODO 인벤토리 사이즈 검사 추가
-    add!(d.normal, x)
+    add!(d.AccountItemWallet, x)
 end
 
 # TODO 남은 재화량 검사 추가
-remove!(d::DefaultAccountItem, x::Currency) = remove!(d.currency, x)
-remove!(d::DefaultAccountItem, x::BuildingSeedItem) = remove!(d.buildingseed, x)
-remove!(d::DefaultAccountItem, x::NormalItem) = remove!(d.normal, x)
+remove!(d::UserItemStorage, x::Currency) = remove!(d.AccountItemWallet, x)
+remove!(d::UserItemStorage, x::BuildingSeedItem) = remove!(d.AccountItemWallet, x)
+remove!(d::UserItemStorage, x::NormalItem) = remove!(d.AccountItemWallet, x)
 
+struct VillageTokenStorage <: AbstractItemStorage
+    ownermid::UInt64
+    tokens::Dict{UInt64, ItemCollection}
+end
+function VillageTokenStorage(mid::UInt64, x::AbstractVillage)
+    ref = get(DataFrame, ("VillageTokenTable", "Data"))
+    tokens = Dict(x.id => ItemCollection(VillageToken.(x.id, ref[!, :TokenId], 0)))
+    
+    VillageTokenStorage(mid, tokens)
+end

@@ -107,13 +107,21 @@ struct JSONBalanceTable <: BalanceTable
     data::Array{T, 1} where T <: AbstractDict
     filepath::AbstractString
 end
-function JSONBalanceTable(filepath::String)
-    data = JSON.parsefile(filepath; dicttype=OrderedDict)
+function JSONBalanceTable(file::String)
+    @assert endswith(file, ".json") "$file 파일의 확장자가 `.json`이어야 합니다."
+
+    file = joinpath_gamedata(file)
+    data = JSON.parsefile(file; dicttype=OrderedDict)
     if isa(data, Array)
         data = convert(Vector{OrderedDict}, data)
+    else
+        data = Dict[data]
     end
-    JSONBalanceTable(data, filepath)
+    JSONBalanceTable(data, file)
 end
+Base.getindex(bt::JSONBalanceTable, i) = getindex(bt.data, i)
+Base.basename(bt::JSONBalanceTable) = basename(bt.filepath)
+Base.dirname(bt::JSONBalanceTable) = dirname(bt.filepath)
 
 """
     UnityGameData
@@ -135,7 +143,6 @@ index(x::XLSXBalanceTable) = x.data.sheetindex
 cache(x::XLSXBalanceTable) = x.cache
 XLSXasJSON.sheetnames(xgd::XLSXBalanceTable) = sheetnames(xgd.data)
 
-
 Base.get(::Type{Dict}, x::XLSXBalanceTable) = x.data
 Base.get(::Type{DataFrame}, x::XLSXBalanceTable) = x.dataframe
 function Base.get(::Type{Dict}, x::XLSXBalanceTable, sheet)
@@ -152,12 +159,18 @@ function Base.show(io::IO, bt::XLSXBalanceTable)
     print(io, bt.data)
 end
 
-function Base.show(io::IO, gd::JSONBalanceTable)
-    println(io, "JSONGameData{$T}")
-    println(io, replace(gd.filepath, GAMEENV["xlsx"]["root"] => ".."))
+function Base.show(io::IO, bt::JSONBalanceTable)
+    print(io, "JSONBalanceTable: ")
+    println(io, replace(bt.filepath, GAMEENV["xlsx"]["root"] => ".."))
 
-    k = vcat(collect.(keys.(gd.data))...) |> unique
-    print(io, "    keys: ", k)
+    data = bt.data
+    print(io, "row 1 => ")
+    print(io, data[1])
+    if length(data) > 1
+        print("...")
+        print(io, "row $(length(data)) => ")
+        print(io, JSON.json(data[end]))
+    end
 end
 
 

@@ -53,3 +53,17 @@ end
 * Pipo
 """
 abstract type NonStackItem <: GameItem end
+
+"""
+    AbstractMonetary
+* Currency
+* VillageToekn
+"""
+abstract type AbstractMonetary <: GameItem end
+
+"""
+AbstractItemStorage
+* GameItemBag
+* VillageTokenBag
+"""
+abstract type AbstractItemStorage end

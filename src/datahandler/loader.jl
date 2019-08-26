@@ -8,25 +8,37 @@ function joinpath_gamedata(file)
 end
 
 """
-    cache_gamedata!(f; gamedata = GAMEDATA)
+    cache_gamedata!(f; kwargs...)
 gamedata로 데이터를 불러온다
 """
-function cache_gamedata!(f, gamedata = GAMEDATA; kwargs...)
+function cache_gamedata!(::Type{XLSXBalanceTable}, f; kwargs...)
     k = split(f, ".")[1]
-    get!(gamedata, k) do 
+    # TODO: XLSX 파일이 ismodified가 안되어 있으면 JSON을 caching하면 훨씬 빠를 것임!!
+    get!(GAMEDATA, k) do 
         BalanceTable(f; kwargs...)
     end
     printstyled("GAMEDATA[\"$(k)\"] is cached from Excel\n"; color=:yellow)
 
-    return gamedata[k]
+    return GAMEDATA[k]
 end
+function cache_gamedata!(::Type{JSONBalanceTable}, f; kwargs...)
+    get!(GAMEDATA, f) do 
+        JSONBalanceTable(f; kwargs...)
+    end
+    printstyled("GAMEDATA[\"$(f)\"] is cached from Json\n"; color=:yellow)
+
+    return GAMEDATA[f]
+end
+
+
 """
     update_gamedata!()
 GAMEDATA 에 캐시되어있는 모든 엑셀 파일을 업데이트
 """
 function update_gamedata!()
     for k in keys(GAMEDATA)
-        get(BalanceTable, k;check_modified = true)
+        T = endswith(k, ".json") ? JSONBalanceTable : BalanceTable
+        get(T, k;check_modified = true)
     end
 end
 
@@ -39,7 +51,7 @@ EXCEL 파일을 파일에서 불러와 cache에 올린다.
 """
 function Base.get(::Type{BalanceTable}, file::AbstractString; check_modified = false)
     if !haskey(GAMEDATA, file)
-        cache_gamedata!(file)
+        cache_gamedata!(XLSXBalanceTable, file)
     end
     if check_modified
         if ismodified(file) # 파일 변경 여부 체크
@@ -49,6 +61,15 @@ function Base.get(::Type{BalanceTable}, file::AbstractString; check_modified = f
     bt = GAMEDATA[file]
 
     return bt
+end
+function Base.get(::Type{JSONBalanceTable}, file::AbstractString; check_modified = true)
+    f = endswith(file, ".json") ? file : file * ".json"
+    if !haskey(GAMEDATA, f)
+        cache_gamedata!(JSONBalanceTable, f)
+    end
+    #TODO if check_modified
+    # end
+    return GAMEDATA[file]
 end
 """
     get(DataFrame, file_sheet::Tuple)
@@ -98,8 +119,6 @@ function _cached_index(bt, sheet, col, value)
 
     return c[col][value]
 end
-
-
 
 """
     getmetadata(file)

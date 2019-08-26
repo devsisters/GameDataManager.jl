@@ -9,6 +9,9 @@ end
 function guid(a::Currency{NAME}) where {NAME}
     guid(string("Currency_", NAME))
 end
+function guid(a::VillageToken{ID}) where {ID}
+    guid(string("VillageToken_", ID, "/ villageid", a.villageid))
+end
 function guid(a::T) where {T <: StackItem}
     guid(string(T, "_", a.key))
 end

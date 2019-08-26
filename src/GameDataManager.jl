@@ -21,6 +21,7 @@ end
 
 ############ Simulation ENGINE #########################
 include("engine/structs.jl")
+include("engine/gameitem/monetary.jl")
 include("engine/gameitem/stackitem.jl")
 include("engine/gameitem/rewardscript.jl")
 include("engine/gameitem/itemcollection.jl")
@@ -61,7 +62,6 @@ export GAMEENV, GAMEDATA, help,
        DataFrame,
        xl, autoxl, md5hash,
 
-
        # 유틸리티
        findblock, get_buildings, get_blocks,
 
@@ -70,7 +70,7 @@ export GAMEENV, GAMEDATA, help,
       Village, VillageLayout, create_bot,
       PrivateSite, Site,
       GameItem, ItemCollection,
-          Currency, CON, CRY,
+          Currency, CON, CRY, VillageToken,
           StackItem, NormalItem,
           BuildingSeedItem, BlockItem,
           itemkey, itemvalue, issamekey,
@@ -81,7 +81,6 @@ export GAMEENV, GAMEDATA, help,
 
       RewardTable, sample, expectedvalue,
       DroneDelivery, deliveryreward, deliverycost
-
 
 
 end

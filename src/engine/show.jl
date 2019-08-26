@@ -20,6 +20,11 @@ end
 function Base.show(io::IO, m::Currency)
     print(io, digitsep(m.val), ISO4217[itemkey(m)][2])
 end
+function Base.show(io::IO, m::VillageToken)
+    ref = get_cachedrow("VillageTokenTable", "Data", :TokenId, itemkey(m))[1]
+    n = replace(ref["\$Name"], " " => "")
+    print(io, digitsep(m.val), n)
+end
 
 function Base.show(io::IO, x::T) where T <: StackItem
     sheet = T == BuildingSeedItem ? "BuildingSeed" :
