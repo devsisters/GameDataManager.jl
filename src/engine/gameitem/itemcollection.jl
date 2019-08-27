@@ -2,8 +2,8 @@
     ItemCollection
 * arithmetic 연산을 위해 GameItem을 담아돈댜
 """
-struct ItemCollection{UUID,V <: GameItem}
-    map::Dict{UUID,V}
+struct ItemCollection{UUID,T <: GameItem}
+    map::Dict{UUID,T}
 
     (::Type{ItemCollection{UUID,T}})(val) where T = new{UUID,T}(val)
     (::Type{ItemCollection{UUID,T}})() where T = new{UUID,T}(Dict{UUID,T}())
@@ -55,10 +55,9 @@ Base.values(ic::ItemCollection) = values(ic.map)
 ## iteration
 Base.iterate(ic::ItemCollection, s...) = iterate(ic.map, s...)
 
-function remove!(ic::ItemCollection{UUID, T}, x::T) where T <: GameItem
-    id = guid(x)
-    val = get(ic, id, zero(x)) - x
-    if val >= zero(x)
+function remove!(ic::ItemCollection{UUID, T}, x::T2) where {T, T2 <: GameItem}
+    if has(ic, x)
+        id = guid(x)
         ic[id] = get(ic, id, zero(x)) - x
         return true
     else
@@ -68,7 +67,17 @@ end
 function add!(ic::ItemCollection{UUID, T}, x::T) where T <: GameItem
     id = guid(x)
     ic[id] = x + get(ic, id, zero(x))
-    return ic
+    return true
+end
+function has(ic::ItemCollection{UUID,T}, x::V)::Bool where {UUID, T, V <: GameItem}
+    b = false
+    if V <: T
+        id = guid(x)
+        if haskey(ic, id)
+            b = ic[id] >= x
+        end
+    end
+    return b
 end
 
 """
@@ -86,27 +95,47 @@ end
 function UserItemStorage(ownermid)
     ref = get(Dict, ("GeneralSetting", "AddOnAccountCreation"))[1]
 
-    currency = ItemCollection(ref["AddCoin"]*CON, ref["AddCrystal"]*CON)
+    currency = ItemCollection(Currency[ref["AddCoin"]*CON, ref["AddCrystal"]*CRY])
     normal = ItemCollection(StackItem.(ref["AddItem"]))
     buildingseed = ItemCollection(StackItem.(ref["AddBuildingSeed"]))
-
-    # DefaultAccountItem(
-    #     mid, ItemCollection(Currency), ItemCollection(NormalItem), ItemCollection(BuildingSeedItem))
 
     UserItemStorage(ownermid, currency, normal,buildingseed)
 end
 
-add!(d::UserItemStorage, x::Currency) = add!(d.AccountItemWallet, x)
-add!(d::UserItemStorage, x::BuildingSeedItem) = add!(d.AccountItemWallet, x)
-function add!(d::UserItemStorage, x::NormalItem) 
+function add!(s::UserItemStorage, x::Currency) 
+    add!(s.currency, x)
+    return true
+end
+function add!(s::UserItemStorage, x::BuildingSeedItem) 
+    add!(s.buildingseed, x)
+    return true
+end
+function add!(s::UserItemStorage, x::NormalItem) 
     #TODO 인벤토리 사이즈 검사 추가
-    add!(d.AccountItemWallet, x)
+    add!(s.normal, x)
+    return true
 end
 
 # TODO 남은 재화량 검사 추가
-remove!(d::UserItemStorage, x::Currency) = remove!(d.AccountItemWallet, x)
-remove!(d::UserItemStorage, x::BuildingSeedItem) = remove!(d.AccountItemWallet, x)
-remove!(d::UserItemStorage, x::NormalItem) = remove!(d.AccountItemWallet, x)
+function remove!(d::UserItemStorage, x::Currency) 
+    remove!(d.currency, x)
+end
+function remove!(d::UserItemStorage, x::BuildingSeedItem) 
+    remove!(d.buildingseed, x)
+end
+function remove!(d::UserItemStorage, x::NormalItem) 
+    remove!(d.normal, x)
+end
+
+function has(s::UserItemStorage, x::BuildingSeedItem)
+    has(s.buildingseed, x)
+end
+function has(s::UserItemStorage, x::NormalItem)
+    has(s.normal, x)
+end
+function has(s::UserItemStorage, x::Currency)
+    has(s.currency, x)
+end
 
 struct VillageTokenStorage <: AbstractItemStorage
     ownermid::UInt64

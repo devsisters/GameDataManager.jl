@@ -2,7 +2,7 @@
 ## numeric operations for Currency
 ## from https://github.com/JuliaFinance/CurrenciesBase.jl/blob/master/src/arithmetic.jl
 ################################################################################
-Base.zero(::Type{Currency{NAME, T}}) where {NAME, T} = Currency{NAME, T}(0)
+Base.zero(::Type{Currency{NAME, T}}) where {NAME, T} = Currency{NAME, T}(T(0))
 Base.zero(::Type{T}) where {T<:Currency} = zero(filltype(T))
 
 # NB: one returns multiplicative identity, which does not have units
@@ -22,7 +22,7 @@ Base.one(::T) where {T<:AbstractMonetary} = one(T)
 ==(m::T, n::T) where {T<:Currency} = m.val == n.val
 ==(m::Currency{NAME}, n::Currency{NAME}) where {NAME} = (m - n).val == 0
 m::Currency == n::Currency = m.val == n.val == 0
-Base.isless(m::Currency{NAME,T}, n::Currency{NAME,T}) where {NAME,T} = isless(m.val, n.val)
+Base.isless(m::Currency{NAME,T}, n::Currency{NAME,T2}) where {NAME,T,T2} = isless(m.val, n.val)
 
 # unary plus/minus
 + m::AbstractMonetary = m
@@ -54,25 +54,6 @@ for (dv, rm, dvrm) in DIVS
     @eval Base.$(rm)(m::Currency{NAME,T}, n::Currency{NAME,T}) where {NAME,T} =
         Currency{NAME,T}($(rm)(m.val, n.val))
 end
-
-
-# Mixed precision monetary arithmetic
-# Promote to larger type if precision same
-function Base.promote_rule(
-        ::Type{Currency{NAME,T}},
-        ::Type{Currency{NAME,T2}}) where {NAME,T,T2}
-    Currency{NAME, promote_type(T, T2)}
-end
-
-# Convert with same kind of currency
-function Base.convert(::Type{Currency{NAME,T}}, m::Currency{NAME,T2}) where {NAME,T,T2}
-    Currency{NAME,T}(promote_type(T, T2)(m.val))
-end
-
-Base.isless(m::Currency{T}, n::Currency{T}) where {T} = isless(promote(m, n)...)
-+(m::Currency{T}, n::Currency{T}) where {T} = +(promote(m, n)...)
-/(m::Currency{T}, n::Currency{T}) where {T} = /(promote(m, n)...)
-
 for fns in DIVS
     for fn in fns
         @eval function Base.$(fn)(m::Currency{T}, n::Currency{T}) where T
@@ -80,6 +61,27 @@ for fns in DIVS
         end
     end
 end
+# Mixed precision monetary arithmetic
+# Promote to larger type if precision same
+function Base.promote_rule(
+        ::Type{Currency{NAME,T}}, ::Type{Currency{NAME,T2}}) where {NAME,T,T2}
+    Currency{NAME, promote_type(T, T2)}
+end
+function Base.promote_rule(::Type{Currency{NAME,T}},::Type{T2}) where {NAME,T,T2<:Integer}
+    Currency{NAME, promote_type(T, T2)}
+end
+function Base.promote_rule(::Type{T2},::Type{Currency{NAME,T}}) where {NAME,T,T2<:Integer}
+    Currency{NAME, promote_type(T, T2)}
+end
+# Convert with same kind of currency
+function Base.convert(::Type{Currency{NAME,T}}, m::Currency{NAME,T2}) where {NAME,T,T2}
+    Currency{NAME,T}(promote_type(T, T2)(m.val))
+end
+
+Base.isless(m::Currency{NAME}, n::Currency{NAME}) where {NAME} = isless(promote(m, n)...)
++(m::Currency{NAME}, n::Currency{NAME}) where {NAME} = +(promote(m, n)...)
+/(m::Currency{T}, n::Currency{T}) where {T} = /(promote(m, n)...)
+
 
 ################################################################################
 ## numeric operations for StackItem

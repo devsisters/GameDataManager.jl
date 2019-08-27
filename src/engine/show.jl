@@ -75,3 +75,11 @@ function Base.show(io::IO, x::DroneDelivery)
     ref[:Order][x.order]
     println(io, "{$(x.group)}:", "$(x.order) ", ref[:Order][x.order][:Desc])
 end
+
+function Base.show(io::IO, x::User)
+    println(io, "(mid:", x.mid, ")", x.name)
+    println(io, x.item_storage)
+    # println(io, x.villages)
+    print(io, x.token_storage)
+
+end

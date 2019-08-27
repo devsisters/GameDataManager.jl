@@ -1,5 +1,6 @@
 """
 https://github.com/JuliaFinance/CurrenciesBase.jl/blob/master/src/data/currencies.jl
+이거 ItemTable_Currency에서 동적을 로딩하는것도 고려...
 """
 const ISO4217 = Dict{Symbol, Tuple{Int, String, Int}}(
     :JPY => (0,"엔",392),
@@ -7,7 +8,12 @@ const ISO4217 = Dict{Symbol, Tuple{Int, String, Int}}(
     :USD => (2,"미달러",840),
     #MARS PROJECT
     :CRY => (0, "크리스탈", 0),
-    :CON => (0, "코인", 0))
+    :CON => (0, "코인", 0), 
+    :DEVELIPMENTPOINT  => (0, "개척점수", 0),
+    :TOTALDEVELIPMENTPOINT => (0, "총개척점수", 0),
+    :ENERGYMIX  => (0, "에너지믹스", 0),
+    :SPACEDROPTICKET => (0, "건물뽑기", 0),
+    :SITECLEANER  => (0, "사이트청소", 0))
     
     """
     https://github.com/JuliaFinance/CurrenciesBase.jl/blob/master/src/monetary.jl
@@ -25,6 +31,9 @@ const ISO4217 = Dict{Symbol, Tuple{Int, String, Int}}(
         val::T
         
     (::Type{Currency{NAME}})(x::T) where {NAME,T} = new{NAME,T}(x)
+    function (::Type{Currency{NAME,T}})(x::T2) where {NAME,T,T2<:Integer}
+        new{NAME, promote_type(T, T2)}(x)
+    end
     function (::Type{Currency{NAME,T}})(x::T) where {NAME,T}
         if haskey(ISO4217, NAME)
             new{NAME,T}(x)
@@ -33,20 +42,11 @@ const ISO4217 = Dict{Symbol, Tuple{Int, String, Int}}(
         end
     end
 end
-function Currency(name::String, val)
-    if name == "Coin"
-        Currency(:CON, val)
-    elseif name == "Crystal" || name == "FreeCrystal"
-        Currency(:CRY, val)
-    end
-end
 Currency(NAME::Symbol; storage::DataType = Int) = Currency{NAME}(storage(1))
 Currency(NAME::Symbol, val) = Currency{NAME}(val)
+
 # 실제 화폐와 달리 FixedDecimal을 사용할 필요가 없다
 # Monetary{NAME, I} = Currency{NAME, I}
-
-global CON = Currency{:CON}(1)
-global CRY = Currency{:CRY}(1)
 
 """
     VillageToken

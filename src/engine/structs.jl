@@ -62,8 +62,18 @@ abstract type NonStackItem <: GameItem end
 abstract type AbstractMonetary <: GameItem end
 
 """
-AbstractItemStorage
+    AbstractItemStorage
+
+유저 
 * GameItemBag
 * VillageTokenBag
 """
 abstract type AbstractItemStorage end
+
+"""
+AbstractUserRecord
+
+* BuyCount
+* QuestComplete
+"""
+abstract type AbstractUserRecord end

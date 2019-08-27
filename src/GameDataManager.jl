@@ -36,6 +36,7 @@ include("engine/user/user.jl")
 
 include("engine/content/pipoparttime.jl")
 include("engine/content/dronedelivery.jl")
+include("engine/content/buying.jl")
 
 
 include("engine/show.jl")
@@ -70,14 +71,17 @@ export GAMEENV, GAMEDATA, help,
       Village, VillageLayout, create_bot,
       PrivateSite, Site,
       GameItem, ItemCollection,
-          Currency, CON, CRY, VillageToken,
+          Currency, CON, CRY, ENERGYMIX,SITECLEANER,
+                    SPACEDROPTICKET, DEVELIPMENTPOINT, TOTALDEVELIPMENTPOINT,
+          VillageToken,
           StackItem, NormalItem,
           BuildingSeedItem, BlockItem,
           itemkey, itemvalue, issamekey,
           ItemCollection,
-          add!, remove!,
+          add!, remove!, has,
       NonStackItem, Building, Special, Residence, Shop, Ability,
       abilitysum,
+      buy!, price,
 
       RewardTable, sample, expectedvalue,
       DroneDelivery, deliveryreward, deliverycost

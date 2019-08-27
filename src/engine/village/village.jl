@@ -57,12 +57,10 @@ end
 
 "../VillageLayout/output" 경로의 layout 중 1개를 무작위 선택
     
-    
     Village(file_layout::AbstractString)
 file_layout의 필리지 생성
 
 빌리지의 사이트 구성과 크기, 그리고 사이트별 건물 정보를 저장
-# TODO 추후 MarsSimulator로 옮길 것
 """
 struct Village <: AbstractVillage
     id::UInt64
