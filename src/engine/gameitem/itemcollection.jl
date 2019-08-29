@@ -69,7 +69,7 @@ function remove!(ic::ItemCollection{UUID, T}, x::T2) where {T, T2 <: GameItem}
         return false
     end
 end
-function remove!(m::ItemCollection{UUID, T}, n::ItemCollection{UUID, T}) where T
+function remove!(m::ItemCollection, n::ItemCollection)
     if has(m, n)
         merge!(-, m, n)
         return true
@@ -85,7 +85,7 @@ function add!(ic::ItemCollection{UUID, T}, x::T) where T <: GameItem
     return true
 
 end
-function add!(m::ItemCollection{UUID, T}, n::ItemCollection{UUID, T}) where T <: GameItem
+function add!(m::ItemCollection, n::ItemCollection)
     merge!(+, m, n)
     return true
 end
@@ -121,7 +121,7 @@ end
 function UserItemStorage(ownermid)
     ref = get(Dict, ("GeneralSetting", "AddOnAccountCreation"))[1]
 
-    a = ItemCollection(Currency[ref["AddCoin"]*CON, ref["AddCrystal"]*CRY])
+    a = ItemCollection(Currency[ref["AddCoin"]*COIN, ref["AddCrystal"]*CRY])
     b = ItemCollection(StackItem.(ref["AddItem"]))
     c = ItemCollection(StackItem.(ref["AddBuildingSeed"]))
 
@@ -152,6 +152,9 @@ end
 
 function getitem(s::UserItemStorage, x::StackItem)
     get(s.storage, guid(x), zero(x))
+end
+function getitem(s::UserItemStorage, ::Type{T}) where T <: Currency
+    get(s.storage, guid(T), zero(T))
 end
 
 struct VillageTokenStorage <: AbstractItemStorage

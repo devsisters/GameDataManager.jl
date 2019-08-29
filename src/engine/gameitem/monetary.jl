@@ -8,26 +8,25 @@ const ISO4217 = Dict{Symbol, Tuple{Int, String, Int}}(
     :USD => (2,"미달러",840),
     #MARS PROJECT
     :CRY => (0, "크리스탈", 0),
-    :CON => (0, "코인", 0), 
+    :COIN => (0, "코인", 0), 
     :DEVELIPMENTPOINT  => (0, "개척점수", 0),
     :TOTALDEVELIPMENTPOINT => (0, "총개척점수", 0),
     :ENERGYMIX  => (0, "에너지믹스", 0),
     :SPACEDROPTICKET => (0, "건물뽑기", 0),
     :SITECLEANER  => (0, "사이트청소", 0))
     
-    """
-    https://github.com/JuliaFinance/CurrenciesBase.jl/blob/master/src/monetary.jl
+"""
     Currency
-    
-    현금을 포함한 재화를 표현하는 구조체
-    ## 사용법
-    * Currency(:CON, 1) = CON
-    * Currency(:CRY, 1) = CRY
-    * Currency(:KRW, 1)
-    * Currency(:USD, 1)
-    
-    """
-    struct Currency{NAME, T} <: AbstractMonetary
+https://github.com/JuliaFinance/CurrenciesBase.jl/blob/master/src/monetary.jl
+
+현금을 포함한 재화를 표현하는 구조체
+## 사용법
+* Currency(:COIN, 1) = COIN
+* Currency(:CRY, 1) = CRY
+* Currency(:KRW, 1)
+* Currency(:USD, 1)
+"""
+struct Currency{NAME, T} <: AbstractMonetary
         val::T
         
     (::Type{Currency{NAME}})(x::T) where {NAME,T} = new{NAME,T}(x)
@@ -74,7 +73,7 @@ Fill in default type parameters to get a fully-specified concrete type from a
 partially-specified one.
 """
 filltype(::Type{Currency{NAME}}) where NAME = Currency{NAME, Int}
-itemkey(::Currency{NAME}) where {NAME} = NAME
+itemkey(x::Currency{NAME, T}) where {NAME, T} = NAME
 itemvalue(x::Currency) = x.val
 
 itemkey(::VillageToken{ID}) where {ID} = ID

@@ -4,6 +4,7 @@
 ################################################################################
 Base.zero(::Type{Currency{NAME, T}}) where {NAME, T} = Currency{NAME, T}(T(0))
 Base.zero(::Type{T}) where {T<:Currency} = zero(filltype(T))
+# Base.zero(x::T) where T <: Currency = T(0)
 
 # NB: one returns multiplicative identity, which does not have units
 Base.one(::Type{Currency{NAME,T}}) where {NAME,T} = one(T)
@@ -36,6 +37,9 @@ Base.isless(m::Currency{NAME,T}, n::Currency{NAME,T2}) where {NAME,T,T2} = isles
 # arithmetic operations on monetary and dimensionless values
 *(m::T, i::Real) where {T<:Currency} = T(m.val * i)
 *(i::Real, m::T) where {T<:Currency} = T(i * m.val)
+*(m::Real, ::Type{T}) where {T<:Currency} = T(m * 1)
+*(::Type{T}, m::Real) where {T<:Currency} = T(m * 1)
+
 m::Currency / f::Real = m * inv(f)
 
 # TODO: 나누어 떨어지지 않는 값은 버리기 때문에
@@ -88,6 +92,7 @@ end
 ##
 ################################################################################
 Base.zero(x::T) where T <: StackItem = T(itemkey(x), 0)
+
 
 # comparisons
 function ==(m::T, n::T) where T <: StackItem 

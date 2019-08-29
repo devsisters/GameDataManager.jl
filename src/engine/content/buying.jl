@@ -1,13 +1,19 @@
-function buy!(u::User, ::Type{Currency{:CON}})
+function buy!(u::User, ::Type{Currency{:COIN}})
 
 end
 function buy!(u::User, ::Type{Currency{:SITECLEANER}}) #사이트 클리너
-
+    cost = price(u, Currency{:SITECLEANER})
+    if remove!(u, cost)
+        add!(u, 1SITECLEANER)
+        buycount(u)[:sitecleaner] = buycount(u)[:sitecleaner] + 1
+        return true
+    end
+    return false
 end
 function buy!(u::User, ::Type{Currency{:ENERGYMIX}}) #에너지 믹스
-    cost = price(u, ENERGYMIX)
+    cost = price(u, Currency{:ENERGYMIX})
     if remove!(u, cost)
-        add!(u, ENERGYMIX)
+        add!(u, 1ENERGYMIX)
         buycount(u)[:energymix] = buycount(u)[:energymix] + 1
         return true
     end
@@ -15,26 +21,36 @@ function buy!(u::User, ::Type{Currency{:ENERGYMIX}}) #에너지 믹스
 end
 
 
-function price(u::User, ::Type{Currency{:CON}})
-    @show "CON"
+function price(u::User, ::Type{Currency{:COIN}})
+    error("뭐???")
 end
-function price(u::User, ::Type{Currency{:SITECLEANER}})
-    @show "SC"
-end
-
-function price(u::User, x::Currency{:ENERGYMIX})
-    # get_cachedrow("EnergyMix", "Price", :AccumulatedPurchase, 0)
+@inline function price(u::User, ::Type{Currency{:SITECLEANER}})
     ref = begin
         # 우선 느리지만 DataFramesMeta로    
+        x = get(DataFrame, ("SpaceDrop", "SiteCleaner"))
+        bc = buycount(u)[:sitecleaner]
+
+        i = findlast(x[!, :AccumulatedPurchase] .<= bc)
+        x[i, :]
+    end
+    coin = ref[:PriceCoin]*COIN
+
+    return coin
+end
+
+@inline function price(u::User, ::Type{Currency{:ENERGYMIX}})
+    ref = begin
         x = get(DataFrame, ("EnergyMix", "Price"))
-        accumulatedbuycount = buycount(u)[:energymix]
-        @where(x, :AccumulatedPurchase .>= accumulatedbuycount)
+        bc = buycount(u)[:energymix]
+
+        i = findlast(x[!, :AccumulatedPurchase] .<= bc)
+        x[i, :]
     end
     totalcost = begin 
-        coin = ref[1, :PriceCoin]*CON
-        item = ref[1, :PriceItem]
+        coin = ref[:PriceCoin]*COIN
+        item = ref[:PriceItem]
         isempty(item) ? coin : [coin; StackItem.(item)]
     end
         
-    ItemCollection(totalcost)
+    return ItemCollection(totalcost)
 end

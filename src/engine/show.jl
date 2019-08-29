@@ -36,15 +36,19 @@ function Base.show(io::IO, x::T) where T <: StackItem
     print(io, "(", itemkey(x), ")", name,  ": ", itemvalue(x))
 end
 
-function Base.show(io::IO, x::ItemCollection{T, V}) where {T,V}
+function Base.show(io::IO, x::ItemCollection{T,V}) where {T,V}
     # TODO: 아이템 ID 순서대로 보여줄까?
     # line_limit = displaysize(io)[2]
-    println(io, "ItemCollection with ", length(x), " entries:")
+    println(io, "ItemCollection{$V} with ", length(x), " entries:")
     if !isempty(x)
-        for pair in x.map
+        m = x.map
+        if V <: StackItem 
+            m = sort(x.map, byvalue = true, by=_sortindex)
+        end
+        for (i, pair) in enumerate(m)
             print(io, "  ", string(pair[1])[1:4], "… => ")
             print(io, pair[2])
-            print(io, "\n")
+            i != length(m) && print(io, "\n")
         end
     end
 end
@@ -79,7 +83,8 @@ end
 function Base.show(io::IO, x::User)
     println(io, "(mid:", x.mid, ")", x.name)
     println(io, x.item_storage)
+    println(io, x.buycount)
     # println(io, x.villages)
-    print(io, x.token_storage)
+    # print(io, x.token_storage)
 
 end

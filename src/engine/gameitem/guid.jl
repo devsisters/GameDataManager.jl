@@ -6,9 +6,13 @@
     return uuid5(_uuid4, x)
 end
 
-function guid(a::Currency{NAME}) where {NAME}
-    guid(string("Currency_", NAME))
+function guid(a::Currency{NAME}) where NAME
+    guid("Currency{$NAME}")
 end
+function guid(::Type{T}) where T <: Currency
+    guid(zero(T))
+end
+
 function guid(a::VillageToken{ID}) where {ID}
     guid(string("VillageToken_", ID, "/ villageid", a.villageid))
 end

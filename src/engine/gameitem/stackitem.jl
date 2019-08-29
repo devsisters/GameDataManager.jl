@@ -1,5 +1,3 @@
-
-
 # NOTE: ItemKey 오류 체크 필요한가??
 struct NormalItem <: StackItem
     key::Int32
@@ -33,3 +31,22 @@ issamekey(m::StackItem, n::StackItem) = itemkey(m) == itemkey(n)
 # RewardScript 대응
 # GameItem(x::Tuple{String,Integer}) = Currency(x...)
 # GameItem(x::Tuple{String, Integer, Integer}) = StackItem(x[2], x[3])
+
+
+
+# Sort를 위한 번호 배정
+function _sortindex(x::Currency{KEY}) where KEY
+    KEY == :CRY ? 1 :
+    KEY == :COIN ? 2 : 
+    KEY == :DEVELIPMENTPOINT ? 3 :
+    KEY == :ENERGYMIX ? 4 :
+    KEY == :SITECLEANER ? 5 :
+    KEY == :SPACEDROPTICKET ? 6 : 7
+end
+
+function _sortindex(x::BuildingSeedItem)
+    itemkey(x)
+end
+function _sortindex(x::NormalItem)
+    10000 + itemkey(x)
+end

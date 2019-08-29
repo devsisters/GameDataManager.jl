@@ -149,7 +149,7 @@ function levelupcost(key::Symbol, lv)
     ref = getjuliadata(nameof(T))[key]
     ref = ref[:Level][lv]
 
-    ItemCollection([Currency(:CON, ref[:LevelupCost]["PriceCoin"]),
+    ItemCollection([Currency(:COIN, ref[:LevelupCost]["PriceCoin"]),
                     broadcast(el -> StackItem(el["Key"], el["Amount"]),
                                         values(ref[:LevelupCostItem]))...])
 end

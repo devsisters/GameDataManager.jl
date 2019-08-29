@@ -91,7 +91,7 @@ function itemnames(x::Array{T, 1}) where T <: RewardScript
 end
 itemnames(x::RewardScript) = itemnames.(x.item)
 function itemnames(x::Tuple{String, Int})
-    name = x[1] == "Coin" ? "CON" :
+    name = x[1] == "Coin" ? "COIN" :
            x[1] == "PaidCrystal" ? "CRY" :
            x[1] == "FreeCrystal" ? "CRY" : error("정의되지 않은 아이템 / ", x[1])
 end
@@ -170,7 +170,7 @@ function show_item(x::Tuple{String, Int, Int})
 end
 
 function show_item(itemtype::AbstractString, val::T) where T <: Real
-    name = itemtype == "Coin" ? "CON" :
+    name = itemtype == "Coin" ? "COIN" :
            itemtype == "PaidCrystal" ? "CRY" :
            itemtype == "FreeCrystal" ? "CRY" : itemtype
 
