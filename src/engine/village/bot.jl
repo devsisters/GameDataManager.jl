@@ -111,7 +111,7 @@ function get_buildingsize(key)
     d = Dict{String, Any}()
     for file in ("Special", "Shop", "Residence", "Sandbox")
         ref = get(DataFrame, (file, "Building"))
-        for r in eachrow(ref[:])
+        for r in eachrow(ref[!, :])
             x = r[:Condition]
             d[r[:BuildingKey]] = (x["ChunkWidth"], x["ChunkLength"])
         end

@@ -78,7 +78,7 @@ function Base.convert(::Type{Currency{NAME,T}}, m::Currency{NAME,T2}) where {NAM
     Currency{NAME,T}(promote_type(T, T2)(m.val))
 end
 
-Base.isless(m::Currency{NAME}, n::Currency{NAME}) where {NAME} = isless(promote(m, n)...)
+# Base.isless(m::Currency{NAME}, n::Currency{NAME}) where {NAME} = isless(promote(m, n)...)
 +(m::Currency{NAME}, n::Currency{NAME}) where {NAME} = +(promote(m, n)...)
 /(m::Currency{T}, n::Currency{T}) where {T} = /(promote(m, n)...)
 

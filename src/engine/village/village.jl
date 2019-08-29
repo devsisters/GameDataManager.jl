@@ -8,14 +8,12 @@ JSON 파일 안열고 구조 파악할 수 있도록...
 """
 struct VillageLayout
     name::String
-    width::Int16
-    height::Int16
+    size::Tuple
     homesite::Int16
     initial_sites::Array{Int16, 1}
     sites::Array{Site, 1}
-    # edges
-    # nodes
-    edge_relations::Dict
+    roadnodes
+    roadedges
     # noderelations
 end
 function VillageLayout(file = rand(VillageLayout))
@@ -24,27 +22,17 @@ function VillageLayout(file = rand(VillageLayout))
     # site handling
     homesite = data["HomeSite"]
     initial_sites = data["InitialSites"]
-    sites = sort(data["Sites"]; by = el -> get(el, :a, 0)) .|> PrivateSite
-
+    sites = PrivateSite[]
+    for (i, el) in enumerate(data["Sites"])
+        push!(sites, PrivateSite(i, el["Position"], el["Size"]))
+    end
     clean!(sites, homesite)
     for i in initial_sites
         clean!(sites, i)
     end
 
-    # SiteIndex별 연결된 EdgeIndex  
-    # EdgeIndex별 연결된 SiteIndex 
-    edge_relations = Dict("SiteIndex" => Dict{Int16, Array{Int16, 1}}(),
-                          "EdgeIndex" => Dict{Int16, Array{Int16, 1}}())
-    for el in data["EdgeRelations"]
-        edgeindex = get!(edge_relations["EdgeIndex"], el["EdgeIndex"], Int[])
-        siteindex = get!(edge_relations["SiteIndex"], el["SiteIndex"], Int[])
-
-        push!(edgeindex, el["SiteIndex"])
-        push!(siteindex, el["EdgeIndex"])
-    end
-
-    VillageLayout(data["LayoutName"], data["LayoutWidth"], data["LayoutLength"], 
-        homesite, initial_sites, sites, edge_relations)
+    VillageLayout(data["LayoutName"], tuple(data["LayoutSize"]...), 
+        homesite, initial_sites, sites, data["RoadNodes"], data["RoadEdges"])
 end
 
 function Base.rand(::Type{VillageLayout})
@@ -81,10 +69,10 @@ function Village()
     Village(VillageLayout())
 end
 # functions
-Base.size(x::VillageLayout) = (x.width, x.height)
+Base.size(x::VillageLayout) = x.size
 function Base.size(x::VillageLayout, dim) 
-    dim == 1 ? x.width : 
-    dim == 2 ? x.height :
+    dim == 1 ? x.size[1] : 
+    dim == 2 ? x.size[2] :
     1
 end
 Base.size(v::Village) = size(v.layout)

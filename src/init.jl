@@ -4,13 +4,13 @@ const MANAGERCACHE = Dict{Symbol, Dict}()
 const GAMEENV = Dict{String, Any}()
 
 # Currencies
-const CON         = Currency{:CON}(Int(1))
-const CRY         = Currency{:CRY}(Int(1))
-const ENERGYMIX   = Currency{:ENERGYMIX}(Int32(1))
-const SITECLEANER = Currency{:SITECLEANER}(Int32(1))
-const SPACEDROPTICKET       = Currency{:SPACEDROPTICKET}(Int32(1))
-const DEVELIPMENTPOINT      = Currency{:DEVELIPMENTPOINT}(Int32(1))
-const TOTALDEVELIPMENTPOINT = Currency{:TOTALDEVELIPMENTPOINT}(Int32(1))
+const CON         = Currency{:CON}(1)
+const CRY         = Currency{:CRY}(1)
+const ENERGYMIX   = Currency{:ENERGYMIX}(1)
+const SITECLEANER = Currency{:SITECLEANER}(1)
+const SPACEDROPTICKET       = Currency{:SPACEDROPTICKET}(1)
+const DEVELIPMENTPOINT      = Currency{:DEVELIPMENTPOINT}(1)
+const TOTALDEVELIPMENTPOINT = Currency{:TOTALDEVELIPMENTPOINT}(1)
 
 
 function __init__()

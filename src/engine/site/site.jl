@@ -3,18 +3,17 @@ mutable struct PrivateSite <: AbstractSite
     index::Int16
     # ChunkMinX
     # ChunkMinZ
-    chunksizeX::Int16
-    chunksizeZ::Int16
+    position::Tuple{Int16, Int16}
+    size::Tuple{Int16, Int16}
     cleaned::Bool
 end
 const Site = PrivateSite
 
-function PrivateSite(data::AbstractDict)
-    index = data["SiteIndex"]
-    x = data["ChunkSizeX"]
-    z = data["ChunkSizeZ"]
+function PrivateSite(index, position::Vector, sz::Vector)
+    p = tuple(Int16.(position)...)
+    s = tuple(Int16.(sz)...)
 
-    PrivateSite(index, x, z, false)
+    PrivateSite(index, p, s, false)
 end
 
 clean!(x::AbstractSite) = x.cleaned = true
@@ -23,9 +22,9 @@ function clean!(xs::Array{T, 1}, i) where T <: AbstractSite
 end
 iscleaned(x::AbstractSite) = x.cleaned 
 
-Base.size(x::AbstractSite) = (x.chunksizeX, x.chunksizeZ)
+Base.size(x::AbstractSite) = x.size
 function Base.size(x::AbstractSite, dim) 
-    dim == 1 ? x.chunksizeX : 
-    dim == 2 ? x.chunksizeZ :
+    dim == 1 ? x.size[1] : 
+    dim == 2 ? x.size[2] :
     1
 end

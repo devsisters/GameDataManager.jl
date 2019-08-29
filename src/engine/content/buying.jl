@@ -5,7 +5,13 @@ function buy!(u::User, ::Type{Currency{:SITECLEANER}}) #사이트 클리너
 
 end
 function buy!(u::User, ::Type{Currency{:ENERGYMIX}}) #에너지 믹스
-
+    cost = price(u, ENERGYMIX)
+    if remove!(u, cost)
+        add!(u, ENERGYMIX)
+        buycount(u)[:energymix] = buycount(u)[:energymix] + 1
+        return true
+    end
+    return false
 end
 
 
