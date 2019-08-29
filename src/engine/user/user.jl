@@ -44,17 +44,17 @@ buycount(u::User) = u.buycount
 Base.getindex(x::AbstractUserRecord, name) = getfield(x, name) 
 Base.setindex!(x::AbstractUserRecord, value::Integer, name) = setfield!(x, name, Int32(value))
 
-add!(u::User, item::GameItem) = add!(u.item_storage, item)
+add!(u::User, item::StackItem) = add!(u.item_storage, item)
 add!(u::User, items::ItemCollection) = add!(u.item_storage, items)
-remove!(u::User, item::GameItem) = remove!(u.item_storage, item)
+remove!(u::User, item::StackItem) = remove!(u.item_storage, item)
 remove!(u::User, items::ItemCollection) = remove!(u.item_storage, items)
 
-has(u::User, item::GameItem) = has(u.item_storage, item)
+has(u::User, item::StackItem) = has(u.item_storage, item)
 function has(u::User, items::ItemCollection)
     has(u.item_storage, items)
 end
 # 보유한 재화 확인
-getitem(u::User, item::GameItem)  = getitem(u.item_storage, item)
+getitem(u::User, item::StackItem)  = getitem(u.item_storage, item)
 
 
 # 토큰은 빌리지 ID 필요

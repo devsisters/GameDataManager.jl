@@ -116,131 +116,43 @@ TODO: BlockItem 처리!!
 """
 struct UserItemStorage <: AbstractItemStorage
     ownermid::UInt64
-    currency::ItemCollection
-    normal::ItemCollection
-    buildingseed::ItemCollection
-    # block
-    # NonStackItem
+    storage::ItemCollection{UUID, StackItem}
 end
 function UserItemStorage(ownermid)
     ref = get(Dict, ("GeneralSetting", "AddOnAccountCreation"))[1]
 
-    currency = ItemCollection(Currency[ref["AddCoin"]*CON, ref["AddCrystal"]*CRY])
-    normal = ItemCollection(StackItem.(ref["AddItem"]))
-    buildingseed = ItemCollection(StackItem.(ref["AddBuildingSeed"]))
+    a = ItemCollection(Currency[ref["AddCoin"]*CON, ref["AddCrystal"]*CRY])
+    b = ItemCollection(StackItem.(ref["AddItem"]))
+    c = ItemCollection(StackItem.(ref["AddBuildingSeed"]))
 
-    UserItemStorage(ownermid, currency, normal,buildingseed)
+    UserItemStorage(ownermid, a+b+c)
 end
 
-function add!(s::UserItemStorage, x::Currency) 
-    add!(s.currency, x)
-    return true
-end
-function add!(s::UserItemStorage, x::BuildingSeedItem) 
-    add!(s.buildingseed, x)
-    return true
-end
-function add!(s::UserItemStorage, x::NormalItem) 
+function add!(s::UserItemStorage, x::StackItem) 
     #TODO 인벤토리 사이즈 검사 추가
-    add!(s.normal, x)
-    return true
+    add!(s.storage, x)
 end
-function add!(s::UserItemStorage, items::ItemCollection{UUID, Currency})
-    add!(s.currency, items)
-end
-function add!(s::UserItemStorage, items::ItemCollection{UUID, NormalItem})
+
+function add!(s::UserItemStorage, items::ItemCollection{UUID, T}) where T <: StackItem
     #TODO 인벤토리 사이즈 검사 추가
-    add!(s.normal, items)
-end
-function add!(s::UserItemStorage, items::ItemCollection{UUID, BuildingSeedItem})
-    add!(s.buildingseed, items)
-end
-function add!(s::UserItemStorage, items::ItemCollection{UUID, T}) where T <: GameItem
-    # filter by types
-    currency = filter(el -> isa(el[2], Currency), items)
-    normal = filter(el -> isa(el[2], NormalItem), items)
-    buildingseed = filter(el -> isa(el[2], BuildingSeedItem), items)
-    if length(currency) + length(normal) + length(buildingseed) != length(items)
-        throw(ArgumentError("User에게 add! 불가능한 아이템 타입이 있습니다"))
-    end
-    !isempty(currency) && add!(s, currency)
-    !isempty(normal) && add!(s, normal)
-    !isempty(buildingseed) && add!(s, buildingseed)
+    add!(s.storage, items)
 end
 
-remove!(d::UserItemStorage, x::Currency) = remove!(d.currency, x)
-remove!(d::UserItemStorage, x::NormalItem) = remove!(d.normal, x)
-remove!(d::UserItemStorage, x::BuildingSeedItem) = remove!(d.buildingseed, x)
-function remove!(s::UserItemStorage, items::ItemCollection{UUID, Currency})
-    remove!(s.currency, items)
-end
-function remove!(s::UserItemStorage, items::ItemCollection{UUID, NormalItem})
-    #TODO 인벤토리 사이즈 검사 추가
-    remove!(s.normal, items)
-end
-function remove!(s::UserItemStorage, items::ItemCollection{UUID, BuildingSeedItem})
-    remove!(s.buildingseed, items)
-end
-function remove!(s::UserItemStorage, items::ItemCollection{UUID, T}) where T <: GameItem
-    # filter by types
-    currency = filter(el -> isa(el[2], Currency), items)
-    normal = filter(el -> isa(el[2], NormalItem), items)
-    buildingseed = filter(el -> isa(el[2], BuildingSeedItem), items)
-    if length(currency) + length(normal) + length(buildingseed) != length(items)
-        throw(ArgumentError("User에게 remove! 불가능한 아이템 타입이 있습니다"))
-    end
-    !isempty(currency) && remove!(s, currency)
-    !isempty(normal) && remove!(s, normal)
-    !isempty(buildingseed) && remove!(s, buildingseed)
+remove!(d::UserItemStorage, x::StackItem) = remove!(d.storage, x)
+function remove!(s::UserItemStorage, items::ItemCollection{UUID, T}) where T <: StackItem
+    remove!(s.storage, items)
 end
 
-
-function has(s::UserItemStorage, x::Currency)
-    has(s.currency, x)
+function has(s::UserItemStorage, x::StackItem)
+    has(s.storage, x)
 end
-function has(s::UserItemStorage, x::NormalItem)
-    has(s.normal, x)
-end
-function has(s::UserItemStorage, x::BuildingSeedItem)
-    has(s.buildingseed, x)
-end
-function has(s::UserItemStorage, items::ItemCollection{UUID, Currency})
-    has(s.currency, items)
-end
-function has(s::UserItemStorage, items::ItemCollection{UUID, NormalItem})
-    #TODO 인벤토리 사이즈 검사 추가
-    has(s.normal, items)
-end
-function has(s::UserItemStorage, items::ItemCollection{UUID, BuildingSeedItem})
-    has(s.buildingseed, items)
-end
-function has(s::UserItemStorage, items::ItemCollection{UUID, T}) where T <: GameItem
-    # filter by types
-    currency = filter(el -> isa(el[2], Currency), items)
-    normal = filter(el -> isa(el[2], NormalItem), items)
-    buildingseed = filter(el -> isa(el[2], BuildingSeedItem), items)
-    if length(currency) + length(normal) + length(buildingseed) != length(items)
-        throw(ArgumentError("User에게 has 검사 불가능한 아이템 타입이 있습니다"))
-    end
-    
-    check = [!isempty(currency) ? has(s, currency) : [true]
-    !isempty(normal) ? has(s, normal) : [true]
-    !isempty(buildingseed) ? has(s, buildingseed) : [true]]
-
-    return all(all.(check))
+function has(s::UserItemStorage, items::ItemCollection{UUID, T}) where T <: StackItem
+    has(s.storage, items)
 end
 
-
-function getitem(s::UserItemStorage, x::NormalItem)
-    get(s.normal, guid(x), zero(x))
+function getitem(s::UserItemStorage, x::StackItem)
+    get(s.storage, guid(x), zero(x))
 end
-function getitem(s::UserItemStorage, x::Currency)
-    get(s.currency, guid(x), zero(x))
-end
-function getitem(s::UserItemStorage, x::BuildingSeedItem)
-    get(s.buildingseed, guid(x), zero(x))
-end
-
 
 struct VillageTokenStorage <: AbstractItemStorage
     ownermid::UInt64
