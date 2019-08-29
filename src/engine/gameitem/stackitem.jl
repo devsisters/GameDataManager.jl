@@ -2,14 +2,35 @@
 struct NormalItem <: StackItem
     key::Int32
     val::Int32
+    
+    function NormalItem(key, val)
+        if !in(key, get(DataFrame, ("ItemTable", "Normal"))[!, :Key])
+            throw(KeyError(key))
+        end
+        new(key, val)
+    end
 end
 struct BuildingSeedItem <: StackItem
     key::Int32
     val::Int32
+
+    function BuildingSeedItem(key, val)
+        if !in(key, get(DataFrame, ("ItemTable", "BuildingSeed"))[!, :Key])
+            throw(KeyError(key))
+        end
+        new(key, val)
+    end
 end
 struct BlockItem <: StackItem
     key::Int32
     val::Int32 
+
+    function BlockItem(key, val)
+        if !in(key, get(DataFrame, ("Block", "Block"))[!, :Key])
+            throw(KeyError(key))
+        end
+        new(key, val)
+    end
 end
 
 function itemtype(x)

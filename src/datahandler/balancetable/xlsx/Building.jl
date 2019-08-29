@@ -16,6 +16,10 @@ function validator_Building(bt)
     buildgkey_level = broadcast(row -> (row[:BuildingKey], row[:Level]), eachrow(leveldata))
     @assert allunique(buildgkey_level) "$(basename(bt))'Level' 시트에 중복된 Level이 있습니다"
 
+    for el in data[!, :BuildCost]
+        BuildingSeedItem(el["NeedItemKey"], el["NeedItemCount"])
+    end
+
     path_template = joinpath(GAMEENV["patch_data"], "BuildTemplate/Buildings")
     path_thumbnails = joinpath(GAMEENV["CollectionResources"], "BusinessBuildingThumbnails")
 

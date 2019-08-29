@@ -147,7 +147,7 @@ Base.get(::Type{Dict}, x::XLSXBalanceTable) = x.data
 Base.get(::Type{DataFrame}, x::XLSXBalanceTable) = x.dataframe
 function Base.get(::Type{Dict}, x::XLSXBalanceTable, sheet)
     idx = getindex(index(x), sheet)
-    getindex(x.data, idx)
+    getindex(x.data, idx).data
 end
 function Base.get(::Type{DataFrame}, x::XLSXBalanceTable, sheet)
     idx = getindex(index(x), sheet)

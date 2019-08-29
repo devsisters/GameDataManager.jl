@@ -1,12 +1,14 @@
 
-function validator_RewardTable(bt)
+function validator_RewardTable(bt::XLSXBalanceTable)
     # 시트를 합쳐둠
     df = get(DataFrame, bt, 1)
     validate_duplicate(df, :RewardKey)
     # 1백만 이상은 BlockRewardTable에서만 쓴다
     @assert (rewardkey_scope(maximum(df[!, :RewardKey])) == "RewardTable") "RewardTable의 RewardKey는 1,000,000 미만을 사용해 주세요."
 
-    # TODO 아이템Key Validatioh 필요
+    # ItemKey 확인
+    d = get(Dict, bt, 1)
+    map(el -> RewardTable(el["RewardKey"]), d)
 
     nothing
 end
