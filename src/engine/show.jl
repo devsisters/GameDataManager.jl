@@ -24,6 +24,9 @@ function Base.show(io::IO, m::VillageToken)
     ref = get_cachedrow("VillageTokenTable", "Data", :TokenId, itemkey(m))[1]
     n = replace(ref["\$Name"], " " => "")
     print(io, digitsep(m.val), n)
+    if !ismissing(m.villageid)
+        print(io, "[VillageId: ", m.villageid, "]")
+    end
 end
 
 function Base.show(io::IO, x::T) where T <: StackItem
@@ -48,7 +51,7 @@ function Base.show(io::IO, x::ItemCollection{T,V}) where {T,V}
         for (i, pair) in enumerate(m)
             print(io, "  ", string(pair[1])[1:4], "… => ")
             print(io, pair[2])
-            i != length(m) && print(io, "\n")
+            print(io, "\n")
         end
     end
 end
@@ -81,10 +84,24 @@ function Base.show(io::IO, x::DroneDelivery)
 end
 
 function Base.show(io::IO, x::User)
-    println(io, "(mid:", x.mid, ")", x.name)
+    println(io, "(mid:", usermid(x), ")", username(x))
     println(io, x.item_storage)
     println(io, x.buycount)
-    # println(io, x.villages)
+    print(io, x.villages)
     # print(io, x.token_storage)
-
 end
+
+function Base.show(io::IO, x::Village)
+    println(io, "Village(mid:", x.id, ")")
+    print(io, "\t")
+    print(io, x.layout)
+end
+
+function Base.show(io::IO, x::VillageLayout)
+    print(io,  "VillageLayout{\"x.name\"}")
+    print(io, " with ", summary(x.sites))
+end
+
+# function Base.summary(io::IO, x::VillageLayout)
+
+# end
