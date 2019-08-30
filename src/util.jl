@@ -37,6 +37,15 @@ function help(idx = 1)
     nothing
 end
 
+function print_write_result(path, msg = "결과는 다음과 같습니다")
+    printstyled("$(msg)\n"; color=:green)
+    print("   SAVED => ")
+    printstyled(normpath(path); color=:blue)
+    print('\n')
+
+    nothing
+end
+
 """
     findblock()
 
@@ -82,17 +91,6 @@ function findblock()
     printstyled(normpath(file); color=:blue) # 왜 Atom에서 클릭 안됨???
 end
 
-
-
-function print_write_result(path, msg = "결과는 다음과 같습니다")
-    printstyled("$(msg)\n"; color=:green)
-    print("   SAVED => ")
-    printstyled(normpath(path); color=:blue)
-    print('\n')
-
-    nothing
-end
-
 """
     get_buildings()
 
@@ -116,6 +114,7 @@ function get_buildings(;kwargs...)
     end
     print_write_result(file, "각 건물에 사용된 Block들은 다음과 같습니다")
 end
+
 """
     get_buildings(building_key)
 
