@@ -5,7 +5,7 @@
 struct ItemCollection{UUID,T <: GameItem}
     map::Dict{UUID,T}
 
-    (::Type{ItemCollection{UUID,T}})(map) where T = new{UUID,T}(map)
+    (::Type{ItemCollection{UUID,T}})(map::AbstractDict) where T = new{UUID,T}(map)
     (::Type{ItemCollection{UUID,T}})() where T = new{UUID,T}(Dict{UUID,T}())
 end
 function ItemCollection(map::Dict{UUID,T}) where T <: GameItem
@@ -114,7 +114,7 @@ end
 MarsServer에서는 DefaultAccountItem
 TODO: BlockItem 처리!!
 """
-struct UserItemStorage <: AbstractItemStorage
+struct UserItemStorage <: AbstractGameItemStorage
     ownermid::UInt64
     storage::ItemCollection{UUID, StackItem}
 end
@@ -157,7 +157,11 @@ function getitem(s::UserItemStorage, ::Type{T}) where T <: Currency
     get(s.storage, guid(T), zero(T))
 end
 
-struct VillageTokenStorage <: AbstractItemStorage
+"""
+    VillageTokenStorage
+Village id별로 token
+"""
+struct VillageTokenStorage <: AbstractGameItemStorage
     ownermid::UInt64
     tokens::Dict{UInt64, ItemCollection}
 end
@@ -166,4 +170,16 @@ function VillageTokenStorage(mid::UInt64, x::AbstractVillage)
     tokens = Dict(x.id => ItemCollection(VillageToken.(x.id, ref[!, :TokenId], 0)))
     
     VillageTokenStorage(mid, tokens)
+end
+
+
+struct BuildingStorage <: AbstractGameItemStorage
+    ownermid::UInt64
+    shop::Array{SegmentItem, 1}
+    residence::Array{SegmentItem, 1}
+    special::Array{SegmentItem, 1}
+    sandbox::Array{SegmentItem, 1}
+end
+function BuildingStorage(mid)
+    BuildingStorage(mid, SegmentItem[], SegmentItem[], SegmentItem[], SegmentItem[])
 end

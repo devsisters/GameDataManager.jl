@@ -11,28 +11,42 @@ Base.one(::Type{Currency{NAME,T}}) where {NAME,T} = one(T)
 # mathematical number-like operations
 Base.abs(m::T) where {T<:Currency} = T(abs(m.val))
 
-# a note on this one: a sign does NOT include the unit
-# quantity = sign * magnitude * unit
-Base.sign(m::Currency) = sign(m.val)
-
 # on types
 Base.zero(::T) where {T<:AbstractMonetary} = zero(T)
 Base.one(::T) where {T<:AbstractMonetary} = one(T)
 
 # comparisons
+m::Currency == n::Currency = m.val == n.val == 0
 ==(m::T, n::T) where {T<:Currency} = m.val == n.val
 ==(m::Currency{NAME}, n::Currency{NAME}) where {NAME} = (m - n).val == 0
-m::Currency == n::Currency = m.val == n.val == 0
 Base.isless(m::Currency{NAME,T}, n::Currency{NAME,T2}) where {NAME,T,T2} = isless(m.val, n.val)
 
-# unary plus/minus
-+ m::AbstractMonetary = m
--(m::T) where {T<:Currency} = T(-m.val)
-
-# arithmetic operations on two monetary values
+# unary plus/minus arithmetic operations on two monetary values
++(m::AbstractMonetary) = m
 +(m::Currency{NAME,T}, n::Currency{NAME,T}) where {NAME,T} = Currency{NAME,T}(m.val + n.val)
++(m::Currency{NAME}, n::Currency{NAME}) where {NAME} = +(promote(m, n)...)
+
+-(m::T) where {T<:Currency} = T(-m.val)
 -(m::Currency{NAME,T}, n::Currency{NAME,T}) where {NAME,T} = Currency{NAME,T}(m.val - n.val)
-/(m::Currency{NAME,T}, n::Currency{NAME,T}) where {NAME,T} = float(m.val) / float(n.val)
+-(m::Currency{NAME}, n::Currency{NAME}) where {NAME} = -(promote(m, n)...)
+
+# VillageToken
+Base.zero(x::T) where T<:VillageToken = T(x.villageid, 0)
+function +(m::VillageToken{ID}, n::VillageToken{ID}) where ID
+    if m.villageid == n.villageid
+        VillageToken{ID}(itemkey(m), m.val + n.val)
+    else
+        throw(ArgumentError("빌리지 id가 다르면 연산할 수 없습니다"))
+    end
+end
+function -(m::VillageToken{ID}, n::VillageToken{ID}) where ID
+    if m.villageid == n.villageid
+        VillageToken{ID}(itemkey(m), m.val - n.val)
+    else
+        throw(ArgumentError("빌리지 id가 다르면 연산할 수 없습니다"))
+    end
+end
+
 
 # arithmetic operations on monetary and dimensionless values
 *(m::T, i::Real) where {T<:Currency} = T(m.val * i)
@@ -40,7 +54,10 @@ Base.isless(m::Currency{NAME,T}, n::Currency{NAME,T2}) where {NAME,T,T2} = isles
 *(m::Real, ::Type{T}) where {T<:Currency} = T(m * 1)
 *(::Type{T}, m::Real) where {T<:Currency} = T(m * 1)
 
-m::Currency / f::Real = m * inv(f)
+/(m::Currency{NAME,T}, n::Currency{NAME,T}) where {NAME,T} = float(m.val) / float(n.val)
+/(m::Currency{NAME}, n::Currency{NAME}) where {NAME} = /(promote(m, n)...)
+/(m::Currency, f::Real) = m * inv(f)
+
 
 # TODO: 나누어 떨어지지 않는 값은 버리기 때문에
 # 이부분 문제 안 생길지 검토필요
@@ -82,9 +99,6 @@ function Base.convert(::Type{Currency{NAME,T}}, m::Currency{NAME,T2}) where {NAM
     Currency{NAME,T}(promote_type(T, T2)(m.val))
 end
 
-# Base.isless(m::Currency{NAME}, n::Currency{NAME}) where {NAME} = isless(promote(m, n)...)
-+(m::Currency{NAME}, n::Currency{NAME}) where {NAME} = +(promote(m, n)...)
-/(m::Currency{T}, n::Currency{T}) where {T} = /(promote(m, n)...)
 
 
 ################################################################################

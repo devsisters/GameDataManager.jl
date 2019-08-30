@@ -80,13 +80,13 @@ end
 abstract type AbstractMonetary <: StackItem end
 
 """
-    AbstractItemStorage
+AbstractGameItemStorage
 
 유저 
 * GameItemBag
 * VillageTokenBag
 """
-abstract type AbstractItemStorage end
+abstract type AbstractGameItemStorage end
 
 """
 AbstractUserRecord

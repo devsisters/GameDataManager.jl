@@ -1,9 +1,7 @@
 # using Test
 # using GameDataManager
-import GameDataManager.levelupcost
+import GameDataManager
 
-# 우선 주요 데이터 캐싱
-caching()
 
 
 # 빌딩 생성 테스트

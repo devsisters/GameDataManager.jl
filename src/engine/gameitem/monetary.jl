@@ -49,22 +49,30 @@ Currency(NAME::Symbol, val) = Currency{NAME}(val)
 
 """
     VillageToken
+
+* villageid: 연결된 Village가 없으면 missing으로 한다
 """
 struct VillageToken{ID, T} <: AbstractMonetary
-    # ownermid::UInt64
-    villageid::UInt64
+    villageid::Union{Missing, UInt64}
     val::T
 
     function (::Type{VillageToken{ID}})(villageid, val::T) where {ID, T}
         ref = get(DataFrame, ("VillageTokenTable", "Data"))
         @assert in(ID, ref[!, :TokenId]) "$(ID)는 존재하지 않는 토큰ID 입니다"
 
-        new{ID,T}(villageid, val)
+        new{ID,Int16}(villageid, Int16(val))
+    end
+    function (::Type{VillageToken{ID, T}})(villageid, val::T) where {ID, T}
+        ref = get(DataFrame, ("VillageTokenTable", "Data"))
+        @assert in(ID, ref[!, :TokenId]) "$(ID)는 존재하지 않는 토큰ID 입니다"
+
+        new{ID,Int16}(villageid, Int16(val))
     end
 end
-function VillageToken(villageid, id, val)
-    VillageToken{id}(villageid, val)
+function VillageToken(villageid::UInt64, tokenid, val)
+    VillageToken{tokenid}(villageid, val)
 end
+
 
 """
     filltype(typ) → type

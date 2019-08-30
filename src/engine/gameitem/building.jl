@@ -2,9 +2,12 @@
 """
 Building
 
+TODO Ability 빼기 -레벨별 동일하니 Building에 있을 필요 없다
+
 * Special - 특수 건물
 * Residence- 피포 보관
 * Shop-업종
+* Sandbox
 """
 abstract type Building <: NonStackItem end
 function Building(x, lv = 1)
@@ -16,19 +19,6 @@ let uid = UInt64(0)
     global building_uid
     building_uid() = (uid +=1; uid)
 end
-
-function buildingtype(x)
-    if in(x, get(DataFrame, ("Shop", "Building"))[!, :BuildingKey])
-        Shop
-    elseif in(x, get(DataFrame, ("Residence", "Building"))[!, :BuildingKey])
-        Residence
-    elseif in(x, get(DataFrame, ("Special", "Building"))[!, :BuildingKey])
-        Special
-    else
-        throw(KeyError(x))
-    end
-end
-
 
 """
     Ability
@@ -66,10 +56,6 @@ mutable struct Special <: Building
 
 end
 function Special(key, level = 1)
-    if !haskey(Special, key)
-        throw(KeyError("$(key)는 Special이 아닙니다"))
-    end
-
     ref = get_cachedrow("Special", "Building", :BuildingKey, key)
     abilities = Ability.(ref[1]["AbilityKey"])
     Special(building_uid(), key, level, abilities)
@@ -87,10 +73,6 @@ mutable struct Residence <: Building
     # occupant::Vector # 피포 거주자
 end
 function Residence(key, level = 1)
-    if !haskey(Residence, key)
-        throw(KeyError("$(key)는 Residence가 아닙니다"))
-    end
-
     ref = get_cachedrow("Residence", "Building", :BuildingKey, key)
     abilities = Ability.(ref[1]["AbilityKey"])
     Residence(building_uid(), key, level, abilities)
@@ -109,10 +91,6 @@ mutable struct Shop <: Building
     # blueprint  건물 도면
 end
 function Shop(key, level = 1)
-    if !haskey(Shop, key)
-        throw(KeyError("$(key)는 Shop이 아닙니다"))
-    end
-
     ref = get_cachedrow("Shop", "Building", :BuildingKey, key)
     abilities = Ability.(ref[1]["AbilityKey"])
     # TODO: 이거 무식함...... levelup! 함수 정의 필요
@@ -132,28 +110,6 @@ function itemname(x::T) where T <: Building
     ref[1]["Name"]
 end
 
-function developmentpoint(x::T; cumulated=false) where T <: Building
-    ref = getjuliadata(nameof(T))[itemkey(x)]
-    if cumulated
-        sum(lv -> ref[:Level][lv][:Reward]["DevelopmentPoint"], 1:x.level)
-    else
-        lv = x.level
-        ref[:Level][lv][:Reward]["DevelopmentPoint"]
-    end
-end
-function levelupcost(x::T) where T <: Building
-    levelupcost(itemkey(x), x.level)
-end
-function levelupcost(key::Symbol, lv)
-    T = buildingtype(key)
-    ref = getjuliadata(nameof(T))[key]
-    ref = ref[:Level][lv]
-
-    ItemCollection([Currency(:COIN, ref[:LevelupCost]["PriceCoin"]),
-                    broadcast(el -> StackItem(el["Key"], el["Amount"]),
-                                        values(ref[:LevelupCostItem]))...])
-end
-
 abilitysum(x::T) where T <: Building = abilitysum(x.abilities)
 function abilitysum(a::Array{T, 1}) where T <: Building
     x = abilitysum.(a)
@@ -170,7 +126,12 @@ function abilitysum(a::Array{Ability, 1})
     return d
 end
 
-#fallback bunctions
+function buildingtype(key)
+    haskey(Shop, key)      ? Shop :
+    haskey(Residence, key) ? Residence :
+    haskey(Special, key)   ? Special :
+    throw(KeyError(key))
+end
 function Base.haskey(::Type{Building}, x)
     haskey(Shop, x) | haskey(Residence, x) | haskey(Special, x)
 end
@@ -189,3 +150,19 @@ function Base.size(x::T) where T <: Building
     # (ref[:Condition]["ChunkWidth"], ref[:Condition]["ChunkLength"])
 end
 Base.size(t::T, d) where T <: Building = size(t)[d]
+
+
+struct SegmentItem
+    villageid::UInt64
+    siteindex::Int8
+    building::Building
+    #sitecoord 좌표
+
+    function SegmentItem(::Type{T}, villageid, siteindex, key::AbstractString) where T <: Building
+        new(villageid, siteindex, T(key))
+    end
+end
+
+function SegmentItem(villageid, siteindex, key::AbstractString)
+    SegmentItem(buildingtype(key), villageid, siteindex, key)
+end

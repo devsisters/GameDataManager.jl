@@ -23,11 +23,11 @@ end
 include("engine/structs.jl")
 include("engine/gameitem/monetary.jl")
 include("engine/gameitem/stackitem.jl")
+include("engine/gameitem/building.jl") # NonStackItem
 include("engine/gameitem/rewardscript.jl")
 include("engine/gameitem/itemcollection.jl")
 include("engine/gameitem/guid.jl")
 include("engine/gameitem/arithmetic.jl")
-include("engine/gameitem/building.jl")
 
 include("engine/site/site.jl")
 include("engine/village/village.jl")
@@ -37,6 +37,7 @@ include("engine/user/user.jl")
 include("engine/content/pipoparttime.jl")
 include("engine/content/dronedelivery.jl")
 include("engine/content/buying.jl")
+include("engine/content/build.jl")
 
 
 include("engine/show.jl")
@@ -68,7 +69,7 @@ export GAMEENV, GAMEDATA, help,
 
       # engine functions
       User,
-      Village, VillageLayout, create_bot,
+      Village, create_bot,
       PrivateSite, Site,
       GameItem, ItemCollection,
           Currency, COIN, CRY, ENERGYMIX,SITECLEANER,
@@ -81,7 +82,7 @@ export GAMEENV, GAMEDATA, help,
           add!, remove!, has, getitem,
       NonStackItem, Building, Special, Residence, Shop, Ability,
       abilitysum,
-      buy!, price,
+      buy!, price, build!, buildingprice,
 
       RewardTable, sample, expectedvalue,
       DroneDelivery, deliveryreward, deliverycost

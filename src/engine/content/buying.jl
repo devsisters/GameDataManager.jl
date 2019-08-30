@@ -1,5 +1,5 @@
 function buy!(u::User, ::Type{Currency{:COIN}})
-
+    error("TODO 코인 구매")
 end
 function buy!(u::User, ::Type{Currency{:SITECLEANER}}) #사이트 클리너
     cost = price(u, Currency{:SITECLEANER})
@@ -20,9 +20,8 @@ function buy!(u::User, ::Type{Currency{:ENERGYMIX}}) #에너지 믹스
     return false
 end
 
-
 function price(u::User, ::Type{Currency{:COIN}})
-    error("뭐???")
+    error("TODO 코인 구매")
 end
 @inline function price(u::User, ::Type{Currency{:SITECLEANER}})
     ref = begin

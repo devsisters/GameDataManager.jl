@@ -4,9 +4,7 @@ struct NormalItem <: StackItem
     val::Int32
     
     function NormalItem(key, val)
-        if !in(key, get(DataFrame, ("ItemTable", "Normal"))[!, :Key])
-            throw(KeyError(key))
-        end
+        !haskey(NormalItem, key) && throw(KeyError(key))
         new(key, val)
     end
 end
@@ -15,9 +13,7 @@ struct BuildingSeedItem <: StackItem
     val::Int32
 
     function BuildingSeedItem(key, val)
-        if !in(key, get(DataFrame, ("ItemTable", "BuildingSeed"))[!, :Key])
-            throw(KeyError(key))
-        end
+        !haskey(BuildingSeedItem, key) && throw(KeyError(key))
         new(key, val)
     end
 end
@@ -26,36 +22,33 @@ struct BlockItem <: StackItem
     val::Int32 
 
     function BlockItem(key, val)
-        if !in(key, get(DataFrame, ("Block", "Block"))[!, :Key])
-            throw(KeyError(key))
-        end
+        !haskey(BlockItem, key) && throw(KeyError(key))
         new(key, val)
     end
 end
 
-function itemtype(x)
-    if in(x, get(DataFrame, ("ItemTable", "Normal"))[!, :Key])
-        NormalItem
-    elseif in(x, get(DataFrame, ("ItemTable", "BuildingSeed"))[!, :Key])
-        BuildingSeedItem
-    elseif in(x, get(DataFrame, ("Block", "Block"))[!, :Key])
-        BlockItem
-    else
-        throw(KeyError(x))
-    end
+function itemtype(key)
+    haskey(NormalItem, key) ? NormalItem :
+    haskey(BuildingSeedItem, key) ? BuildingSeedItem :
+    haskey(BlockItem, key) ? BlockItem :
+    throw(KeyError(key))
 end
 
 itemkey(x::StackItem) = x.key
 itemvalue(x::StackItem) = x.val
 issamekey(m::StackItem, n::StackItem) = itemkey(m) == itemkey(n)
 
-# RewardScript 대응
-# GameItem(x::Tuple{String,Integer}) = Currency(x...)
-# GameItem(x::Tuple{String, Integer, Integer}) = StackItem(x[2], x[3])
+function Base.haskey(::Type{NormalItem}, key)
+    in(key, get(DataFrame, ("ItemTable", "Normal"))[!, :Key])
+end
+function Base.haskey(::Type{BuildingSeedItem}, key)
+    in(key, get(DataFrame, ("ItemTable", "BuildingSeed"))[!, :Key])
+end
+function Base.haskey(::Type{BlockItem}, key)
+    in(key, get(DataFrame, ("Block", "Block"))[!, :Key])
+end
 
-
-
-# Sort를 위한 번호 배정
+# StackItemSort를 위한 번호 배정
 function _sortindex(x::Currency{KEY}) where KEY
     KEY == :CRY ? 1 :
     KEY == :COIN ? 2 : 
@@ -64,9 +57,11 @@ function _sortindex(x::Currency{KEY}) where KEY
     KEY == :SITECLEANER ? 5 :
     KEY == :SPACEDROPTICKET ? 6 : 7
 end
-
-function _sortindex(x::BuildingSeedItem)
+function _sortindex(x::VillageToken)
     itemkey(x)
+end
+function _sortindex(x::BuildingSeedItem)
+    100 + itemkey(x)
 end
 function _sortindex(x::NormalItem)
     10000 + itemkey(x)

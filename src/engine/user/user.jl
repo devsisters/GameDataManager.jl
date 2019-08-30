@@ -1,8 +1,24 @@
 mutable struct BuyCount <: AbstractUserRecord
-    sitecleaner::Int32
+    coin::Int32 #날짜도 기록?
     energymix::Int32
+    sitecleaner::Int32
 
-    BuyCount() = new(0, 0)
+    BuyCount() = new(0, 0, 0)
+end
+
+"""
+    UserInfo
+mutable 정보를 분리
+
+"""
+mutable struct UserInfo
+    mid::UInt64
+    name::AbstractString
+    level::Int16
+    total_devpoint::Int
+end
+function UserInfo(mid, name)
+    UserInfo(mid, name, 0, 0)
 end
 
 """
@@ -10,8 +26,9 @@ end
 """
 struct User
     mid::UInt64
-    name::AbstractString
+    info::UserInfo
     villages::Array{Village, 1}
+    buildings::BuildingStorage
     item_storage::UserItemStorage
     token_storage::VillageTokenStorage
     buycount::BuyCount
@@ -19,11 +36,15 @@ struct User
     let mid = UInt64(0)
         function User(name::AbstractString)
             mid += 1
-            item_storage = UserItemStorage(mid)
+
             init_village = Village()
+            info = UserInfo(mid, name)
+            buildings = BuildingStorage(mid)
+            item_storage = UserItemStorage(mid)
             token_storage = VillageTokenStorage(mid, init_village)
             # construct 
-            user = new(mid, name, [init_village],
+            user = new(mid, info, 
+                       [init_village], buildings,
                        item_storage, token_storage, 
                        BuyCount())
             USERLIST[mid] = user
@@ -63,3 +84,8 @@ getitem(u::User, ::Type{T}) where T <: Currency = getitem(u.item_storage, T)
 # remove!(u::User, t::VillageToken) = remove!(u.item_storage, t)
 # has(u::User, t::VillageToken) = has(u.token_storage, t)
 # getitem(u::User, t::VillageToken) = getitem(u.token_storage, t)
+
+username(u::User) = username(u.info)
+usermid(u::User) = u.mid
+username(i::UserInfo) = i.name
+usermid(i::UserInfo) = i.mid
