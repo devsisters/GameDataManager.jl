@@ -226,6 +226,8 @@ end
 function validate_general(bt::XLSXBalanceTable)
     function validate_Key(df)
         validate_duplicate(df, :Key)
+        # TODO 그래서 어디서 틀린건지 위치 찍어주기
+        @assert !isa(eltype(df[!, :Key]), Union) "DataType이 틀린 Key가 존재합니다"
 
         check = broadcast(x -> isa(x, String) ? occursin(r"(\s)|(\t)|(\n)", x) : false, df[!, :Key])
         @assert !any(check) "Key에는 공백, 줄바꿈, 탭이 들어갈 수 없습니다 \n $(df[!, :Key][check])"
