@@ -59,8 +59,8 @@ function findblock()
 
     a = setdiff(artassets, artasset_on_xls)
     b = setdiff(artasset_on_xls, artassets)
-    msg_a = "## ArtAsset은 있지만 Block는 없는 $(length(a))개\n"
-    msg_b = "## Block데이터는 있지만 ArtAsset은 없는 $(length(b))개\n"
+    msg_a = "## ArtAsset은 있지만 BlockData는 없는 $(length(a))개\n"
+    msg_b = "## BlockData는 있지만 ArtAsset은 없는 $(length(b))개\n"
 
     file = joinpath(GAMEENV["cache"], "findblock.txt")
     open(file, "w") do io
@@ -78,7 +78,7 @@ function findblock()
     printstyled("'$x'폴더와 Block데이터를 비교하여 다음 파일에 저장했습니다\n"; color=:green)
     print("    ", msg_a)
     print("    ", msg_b)
-    print("비교보고서: ")
+    print("   SAVED => ")
     printstyled(normpath(file); color=:blue) # 왜 Atom에서 클릭 안됨???
 end
 
@@ -86,7 +86,7 @@ end
 
 function print_write_result(path, msg = "결과는 다음과 같습니다")
     printstyled("$(msg)\n"; color=:green)
-    print("경로: ")
+    print("   SAVED => ")
     printstyled(normpath(path); color=:blue)
     print('\n')
 
