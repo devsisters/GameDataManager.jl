@@ -31,7 +31,7 @@ Base.isless(m::Currency{NAME,T}, n::Currency{NAME,T2}) where {NAME,T,T2} = isles
 -(m::Currency{NAME}, n::Currency{NAME}) where {NAME} = -(promote(m, n)...)
 
 # VillageToken
-Base.zero(x::T) where T<:VillageToken = T(x.villageid, 0)
+Base.zero(x::VillageToken{ID, T}) where {ID,T} = VillageToken{ID}(x.villageid, zero(T))
 function +(m::VillageToken{ID}, n::VillageToken{ID}) where ID
     if m.villageid == n.villageid
         VillageToken{ID}(itemkey(m), m.val + n.val)
@@ -138,6 +138,9 @@ end
 # arithmetic operations on monetary and dimensionless values
 *(m::T, i::Real) where {T<:StackItem} = T(m.val * i)
 *(i::Real, m::T) where {T<:StackItem} = T(i * m.val)
+
+*(m::VillageToken{ID}, i::Real) where ID = VillageToken{ID}(m.villageid, m.val * i)
+*(i::Real, m::VillageToken{ID}) where ID = VillageToken{ID}(m.villageid, i * m.val)
 m::StackItem / f::Real = m * inv(f)
 
 ################################################################################

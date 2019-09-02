@@ -69,7 +69,7 @@ export GAMEENV, GAMEDATA, help,
 
       # engine functions
       User,
-      Village, create_bot,
+      Village, create_bot, area,
       PrivateSite, Site,
       GameItem, ItemCollection,
           Currency, COIN, CRY, ENERGYMIX,SITECLEANER,
@@ -82,7 +82,7 @@ export GAMEENV, GAMEDATA, help,
           add!, remove!, has, getitem,
       NonStackItem, Building, Special, Residence, Shop, Ability,
       abilitysum,
-      buy!, price, build!, buildingprice,
+      price, buy!, build!, spend!,
 
       RewardTable, sample, expectedvalue,
       DroneDelivery, deliveryreward, deliverycost

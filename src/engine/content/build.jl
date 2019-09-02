@@ -1,7 +1,7 @@
 
 function build!(u::User, v::Village, key)
     # TODO Time 처리
-    cost = buildingprice(key, v.id)[1]
+    cost = price(key, v.id)[1]
     # site = findsite(v)
     if remove!(u, cost)
         
@@ -9,8 +9,12 @@ function build!(u::User, v::Village, key)
     
 end
 
-function buildingprice(key, villageid= missing)
-    T = buildingtype(key)
+"""
+    price(key::AbstractString, villageid = missing, ::Type{T})
+
+* key 건물 가격
+"""
+function price(key::AbstractString, villageid = missing, ::Type{T} = buildingtype(key)) where T <: Building
     ref = get_cachedrow(string(T), "Building", :BuildingKey, key)
     parse_buildcost(ref[1]["BuildCost"], villageid)
 end

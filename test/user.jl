@@ -45,6 +45,13 @@ end
     end
 end
 
+@testset "VillageToken 지급 삭제" begin
+    u = User()
+    
+
+end
+
+
 @testset "ItemCollection 추가 삭제" begin
     normal = get(DataFrame, itemtable, "Normal")
     seed = get(DataFrame, itemtable, "BuildingSeed")
@@ -95,3 +102,4 @@ end
     end
 
 end
+

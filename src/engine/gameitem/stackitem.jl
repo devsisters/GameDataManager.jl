@@ -58,10 +58,10 @@ function _sortindex(x::Currency{KEY}) where KEY
     KEY == :SPACEDROPTICKET ? 6 : 7
 end
 function _sortindex(x::VillageToken)
-    itemkey(x)
+    100 + itemkey(x)
 end
 function _sortindex(x::BuildingSeedItem)
-    100 + itemkey(x)
+    500 + itemkey(x)
 end
 function _sortindex(x::NormalItem)
     10000 + itemkey(x)

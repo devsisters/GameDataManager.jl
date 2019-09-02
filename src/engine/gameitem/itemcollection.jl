@@ -57,9 +57,10 @@ Base.keys(ic::ItemCollection) = keys(ic.map)
 Base.values(ic::ItemCollection) = values(ic.map)
 
 Base.merge!(f, m::ItemCollection, n::ItemCollection) = merge!(f, m.map, n.map)
-
-## iteration
 Base.iterate(ic::ItemCollection, s...) = iterate(ic.map, s...)
+
+getitem(ic::ItemCollection, x::StackItem) = get(ic, guid(x), zero(x))
+
 
 function remove!(ic::ItemCollection{UUID, T}, x::T2) where {T, T2 <: GameItem}
     if has(ic, x)

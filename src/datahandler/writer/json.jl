@@ -82,8 +82,13 @@ end
 http://marspot.devscake.com:25078/develop/balancescriptlist
 
 의 MD5해시와 비교하여 파일이 일치하는지 확인 가능
+TODO: 주소받으면 다운받아서 비교
 """
 function md5hash()
+
+    url = "http://marspot.devscake.com:25078/develop/balancescriptlist"
+    download(url, joinpath(GAMEENV["cache"], "temp.txt"))
+
     jsons = readdir(GAMEENV["json"]["root"]; extension = ".json")
 
     result = joinpath(GAMEENV["cache"], "md5hash.tsv")

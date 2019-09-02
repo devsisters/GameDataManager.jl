@@ -92,7 +92,8 @@ function Base.show(io::IO, x::User)
 end
 
 function Base.show(io::IO, x::Village)
-    println(io, "Village(mid:", x.id, ")")
+    print(io, "Village(mid:", x.id, ") / ")
+    print(io, x.storage)
     print(io, "\t")
     print(io, x.layout)
 end
@@ -102,6 +103,24 @@ function Base.show(io::IO, x::VillageLayout)
     print(io, " with ", summary(x.sites))
 end
 
-# function Base.summary(io::IO, x::VillageLayout)
+function Base.show(io::IO, x::AbstractSite)
+    print(io, "[", x.position[1], ",", x.position[2], "]", " idx:", x.index, "\n")
+    s = size(x)
+    # 상자 아래에 기입
+    sz = string(s[1], "x", s[2])
 
-# end
+    
+    print(io, '┌', "─╶"^(size(x, 1)-2), '┐', '\n')
+    for i in 1:(size(x, 2)-2)
+        print(io, '│', "  "^(size(x, 1)-2), '│')
+        print(io, '\n')
+    end
+
+    print(io, '└')
+    print(io, sz, " "^length(sz))
+    if (s[1]-2) > length(sz)
+        print(io, "─╶"^(s[1]- 2 - length(sz)))
+    end
+    print(io, '┘')
+    
+end

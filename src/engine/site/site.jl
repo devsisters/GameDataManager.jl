@@ -28,3 +28,4 @@ function Base.size(x::AbstractSite, dim)
     dim == 2 ? x.size[2] :
     1
 end
+area(x::AbstractSite) = *(size(x,1), size(x, 2))
