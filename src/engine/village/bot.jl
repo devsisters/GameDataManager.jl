@@ -52,7 +52,8 @@ function siteinfo(vill::Village)
 
     minAmountOfSite = 15 #봇 빌리지 내 건물로 채워질 최소 사이트 개수
     maxAmountOfSite = 50 #봇 빌리지의 최대 사이트 개수
-    BluePrintRate = 30 #지어진 건물들 중 청사진을 생성할 건물의 비율
+    BluePrintRate = 5 #지어진 건물들 중 청사진을 생성할 건물의 비율 5는 5%를 의미.
+    BuildingMaxLevel = get(Dict, ("GeneralSetting", 1))[1]["BuildModeEnableLevel"]
 
     #빌리지 레이아웃 모양에 따라 어떤 사이트부터 건물이 지어질지를 결정하는 array. 수동으로 입력한다. 좌측부터 건물이 채워진다.
     if vill.layout.name == "72x62_1"
@@ -79,19 +80,22 @@ function siteinfo(vill::Village)
             building = OrderedDict()
             PickedBuilding = get_suitablebuilding(site_size) #사이트 내 남은 공간에 들어갈 수 있는 건물 지정
 
-            building["BuildingKey"] = PickedBuilding[1]
-            building["Level"] = PickedBuilding[2]
-            building["Direction"] = PickedBuilding[3]
+            building["BuildingKey"] = PickedBuilding[2]
+            building["Level"] = PickedBuilding[3]
+            building["Rotation"] = PickedBuilding[4]
 
-            #BluePrintRate 의 확률로 청사진 생성 건물 결정. 청사진을 생성하는 건물인 경우, 아티스트 프리셋 외형 적용.
+            #BluePrintRate 의 확률로 청사진 생성 건물 결정. 청사진을 생성하는 건물인 경우, 아티스트 프리셋 외형 적용 및 건물 최고레벨 설정
             if rand(1:100) < BluePrintRate
+                if PickedBuilding[1] != "Special"
+                    building["Level"] = BuildingMaxLevel[PickedBuilding[1]]
+                end
                 building["BluePrint"] = true
                 building["CustomShape"] = building["BuildingKey"]*"_$(rand(1:10)).json" #아티스트 프리셋 파일 이름은 [빌딩 키 + "_숫자.json"] 으로 설정.
             end
             push!(buildinglist, building)
 
             #건물을 배치하고 사이트 내 남은 공간 연산
-            site_size = cutthesite(site_size, get_buildingsize2(PickedBuilding[1]))
+            site_size = cutthesite(site_size, get_buildingsize2(PickedBuilding[2]))
 
             #사이트 내 남은 공간이 없다면 종료.
             if site_size[1]*site_size[2] <= 0
@@ -122,64 +126,61 @@ function get_suitablebuilding(site_size)
     residence = get(DataFrame, ("Residence", "Building"))
     sandbox = get(DataFrame, ("Sandbox", "Building"))
 
-    #건물 카테고리 랜덤 선택.
-    BuildingCategory = rand(("Shop", "Special", "Residence", "Sandbox"))
-    #건물 방향 랜덤선택
-    BuildingFront = rand(("North", "South", "East", "West"))
-    BuildingInfo = ["BuildingKey", 1, "direction"]  #[BuildingKey, Level, 건물 방향]
+    BuildingMaxLevel = get(Dict, ("GeneralSetting", 1))[1]["BuildModeEnableLevel"]
+
+    #[Building Category, BuildingKey, Level, 건물 방향] 1이 남쪽, 2가 동쪽, 3이 북쪽, 4가 서쪽을 의미한다.
+    BuildingInfo = [rand(("Shop", "Special", "Residence", "Sandbox")), "BuildingKey", 1, rand(1:4)]
 
     #임의로 선정된 건물 카테고리 중 임의의 건물 선정.
-    if BuildingCategory == "Shop"
-        BuildingInfo[1] = rand(shop.BuildingKey)
-        BuildingInfo[2] = rand(1:8)
-    elseif BuildingCategory == "Special"
-        BuildingInfo[1] = rand(special.BuildingKey)
-        BuildingInfo[2] = 1
-    elseif BuildingCategory == "Residence"
-        BuildingInfo[1] = rand(residence.BuildingKey)
-        BuildingInfo[2] = rand(1:8)
+    if BuildingInfo[1] == "Shop"
+        BuildingInfo[2] = rand(shop.BuildingKey)
+        BuildingInfo[3] = rand(1:BuildingMaxLevel["Shop"])
+    elseif BuildingInfo[1] == "Special"
+        BuildingInfo[2] = rand(special.BuildingKey)
+        BuildingInfo[3] = 1
+    elseif BuildingInfo[1] == "Residence"
+        BuildingInfo[2] = rand(residence.BuildingKey)
+        BuildingInfo[3] = rand(1:BuildingMaxLevel["Residence"])
     else
-        BuildingInfo[1] = rand(sandbox.BuildingKey)
-        BuildingInfo[2] = 1
+        BuildingInfo[2] = rand(sandbox.BuildingKey)
+        BuildingInfo[3] = rand(1:BuildingMaxLevel["Sandbox"])
     end
 
-    Building_size = get_buildingsize2(BuildingInfo[1])
+    Building_size = get_buildingsize2(BuildingInfo[2])
 
     #건물 방향이 동/서 이면 기준 건물 사이즈 x, z 값 변경.
-    BuildingInfo[3] = "North or South"
-    if (BuildingFront == "East" || BuildingFront == "West")
+    if (BuildingInfo[4] == 2 || BuildingInfo[4] == 4)
         swap = Building_size[1]
         Building_size[1] = Building_size[2]
         Building_size[2] = swap
-        BuildingInfo[3] = "East or West"
     end
 
     #건물 사이즈가 맞지 않다면 맞을 때 까지 다시 뽑기.
     while (!check_buildingsize(site_size, Building_size))
-        BuildingCategory = rand(("Shop", "Special", "Residence", "Sandbox"))
-        BuildingFront = rand(("North", "South", "East", "West"))
+        BuildingInfo = [rand(("Shop", "Special", "Residence", "Sandbox")), "BuildingKey", 1, rand(1:4)]
 
-        if BuildingCategory == "Shop"
-            BuildingInfo[1] = rand(shop.BuildingKey)
-            BuildingInfo[2] = rand(1:8)
-        elseif BuildingCategory == "Special"
-            BuildingInfo[1] = rand(special.BuildingKey)
-            BuildingInfo[2] = 1
-        elseif BuildingCategory == "Residence"
-            BuildingInfo[1] = rand(residence.BuildingKey)
-            BuildingInfo[2] = rand(1:8)
+        #임의로 선정된 건물 카테고리 중 임의의 건물 선정.
+        if BuildingInfo[1] == "Shop"
+            BuildingInfo[2] = rand(shop.BuildingKey)
+            BuildingInfo[3] = rand(1:BuildingMaxLevel["Shop"])
+        elseif BuildingInfo[1] == "Special"
+            BuildingInfo[2] = rand(special.BuildingKey)
+            BuildingInfo[3] = 1
+        elseif BuildingInfo[1] == "Residence"
+            BuildingInfo[2] = rand(residence.BuildingKey)
+            BuildingInfo[3] = rand(1:BuildingMaxLevel["Residence"])
         else
-            BuildingInfo[1] = rand(sandbox.BuildingKey)
-            BuildingInfo[2] = 1
+            BuildingInfo[2] = rand(sandbox.BuildingKey)
+            BuildingInfo[3] = rand(1:BuildingMaxLevel["Sandbox"])
         end
 
-        Building_size = get_buildingsize2(BuildingInfo[1])
-        BuildingInfo[3] = "North or South"
-        if (BuildingFront == "East" || BuildingFront == "West")
+        Building_size = get_buildingsize2(BuildingInfo[2])
+
+        #건물 방향이 동/서 이면 기준 건물 사이즈 x, z 값 변경.
+        if (BuildingInfo[4] == 2 || BuildingInfo[4] == 4)
             swap = Building_size[1]
             Building_size[1] = Building_size[2]
             Building_size[2] = swap
-            BuildingInfo[3] = "East or West"
         end
     end
 
