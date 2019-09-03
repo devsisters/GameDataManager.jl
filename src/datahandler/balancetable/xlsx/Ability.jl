@@ -15,3 +15,54 @@ function validator_Ability(bt)
     end
     nothing
 end
+
+function editor_Ability!(jwb::JSONWorkbook)
+    jws = jwb["Level"]
+
+    newdata = []
+    # NOTE: Shop을 참조할 수도 있는데 우선 하드코딩
+    area_per_grade = [[1, 2, 4, 6, 9],
+                      [4, 6, 9, 12, 16],
+                      [16, 20, 25, 30],
+                      [20, 25, 30, 36],
+                      [36, 42, 49, 64]]
+
+    for grade in 1:5
+        for a in area_per_grade[grade] # 건물 면적
+            for lv in 1:8
+                # (grade + level - 1) * area * 60(1시간)
+                profit = _profitcoin_value(grade, lv, a)
+                coincounter = _coincounter_value(profit, grade, lv)
+                push!(newdata, 
+                    OrderedDict(
+                    "Group" => "ProfitCoin", "AbilityKey" => "ProfitCoin_G$(grade)_$(a)",
+                    "Level" => lv, "Value" => profit, "IsValueReplace" => true))
+
+                push!(newdata, 
+                    OrderedDict(
+                    "Group" => "CoinCounterCap", "AbilityKey" => "CoinCounterCap_G$(grade)_$(a)",
+                    "Level" => lv, "Value" => coincounter, "IsValueReplace" => true))
+            end
+        end
+    end
+    @assert keys(jws.data[1]) == keys(newdata[1]) "Column명이 일치하지 않습니다"
+    
+    append!(jwb["Level"].data, newdata)
+    return jwb
+end
+
+function _profitcoin_value(grade, level, _area)
+    # (grade + level - 1) * area * 60(1시간)
+    profit = (grade + level -1) * _area * 60
+end
+
+function _coincounter_value(profit, grade, level)
+    base = begin 
+        grade == 1 ? 3/60 : 
+        grade == 2 ? 8/60 : 
+        grade == 3 ? 15/60 : 
+        grade == 4 ? 30/60 : 
+        grade == 5 ? 60/60 : error("Shop Grade5 이상은 기준이 없습니다") 
+    end
+    coincounter = round(Int, base * level * profit)
+end
