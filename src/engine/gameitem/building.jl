@@ -44,39 +44,6 @@ function Ability(key, level = 1)
 end
 Ability(key::Missing) = missing
 
-"""
-    Special(key, level)
-"""
-mutable struct Special <: Building
-    uid::UInt64
-    key::String
-    level::Int8
-    abilities::Union{Array{Ability, 1}, Missing}
-    # blueprint  건물 도면
-
-end
-function Special(key, level = 1)
-    ref = get_cachedrow("Special", "Building", :BuildingKey, key)
-    abilities = Ability.(ref[1]["AbilityKey"])
-    Special(building_uid(), key, level, abilities)
-end
-
-"""
-    Residence(key, level)
-"""
-mutable struct Residence <: Building
-    uid::UInt64
-    key::String
-    level::Int8
-    abilities::Array{Ability, 1}
-    # blueprint  건물 도면
-    # occupant::Vector # 피포 거주자
-end
-function Residence(key, level = 1)
-    ref = get_cachedrow("Residence", "Building", :BuildingKey, key)
-    abilities = Ability.(ref[1]["AbilityKey"])
-    Residence(building_uid(), key, level, abilities)
-end
 
 """
     Shop(key, level)
@@ -100,13 +67,63 @@ function Shop(key, level = 1)
     Shop(building_uid(), key, level, abilities)
 end
 
+"""
+    Residence(key, level)
+"""
+mutable struct Residence <: Building
+    uid::UInt64
+    key::String
+    level::Int8
+    abilities::Array{Ability, 1}
+    # blueprint  건물 도면
+    # occupant::Vector # 피포 거주자
+end
+function Residence(key, level = 1)
+    ref = get_cachedrow("Residence", "Building", :BuildingKey, key)
+    abilities = Ability.(ref[1]["AbilityKey"])
+    Residence(building_uid(), key, level, abilities)
+end
+
+"""
+    Special(key, level)
+"""
+mutable struct Special <: Building
+    uid::UInt64
+    key::String
+    level::Int8
+    abilities::Union{Array{Ability, 1}, Missing}
+    # blueprint  건물 도면
+
+end
+function Special(key, level = 1)
+    ref = get_cachedrow("Special", "Building", :BuildingKey, key)
+    abilities = Ability.(ref[1]["AbilityKey"])
+    Special(building_uid(), key, level, abilities)
+end
+
+"""
+    Sandbox(key, level)
+"""
+mutable struct Sandbox <: Building
+    uid::UInt64
+    key::String
+    level::Int8
+    # blueprint  건물 도면
+
+end
+function Sandbox(key, level = 1)
+    ref = get_cachedrow("Sandbox", "Building", :BuildingKey, key)
+    Sandbox(building_uid(), key, level)
+end
+
 # Functions
 itemkey(x::Ability) = x.key
 groupkey(x::Ability) = typeof(x).parameters[1]
 itemkey(x::T) where T <: Building = x.key
 
 function itemname(x::T) where T <: Building
-    ref = get_cachedrow(string(T), "Building", :BuildingKey, itemkey(x)) 
+    file = replace(string(T), "GameDataManager." => "")
+    ref = get_cachedrow(file, "Building", :BuildingKey, itemkey(x)) 
     ref[1]["Name"]
 end
 
@@ -127,9 +144,11 @@ function abilitysum(a::Array{Ability, 1})
 end
 
 function buildingtype(key)
-    haskey(Shop, key)      ? Shop :
-    haskey(Residence, key) ? Residence :
-    haskey(Special, key)   ? Special :
+    startswith(key, "s") ? Shop :
+    startswith(key, "r") ? Residence :
+    startswith(key, "b") ? Sandbox :
+    startswith(key, "p") ? Special : 
+    key == "Home" ? Special :
     throw(KeyError(key))
 end
 function Base.haskey(::Type{Building}, x)

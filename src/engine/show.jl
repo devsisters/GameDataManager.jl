@@ -67,10 +67,13 @@ end
 
 # 건물, 개조
 function Base.show(io::IO, x::T) where T <: Building
-    print(io, T, " \"$(itemname(x))\" Lv", x.level, "\n┗ ")
+    print(io, string(T), " \"$(itemname(x))\" Lv", x.level, "\n┗ ")
     for a in x.abilities
         print(io, a, "; ")
     end
+end
+function Base.show(io::IO, x::Sandbox)
+    print(io, "Sandbox", " \"$(itemname(x))\" Lv", x.level)
 end
 function Base.print(io::IO, x::Ability{GROUP}) where GROUP
     a = replace(string(itemkey(x)), string(GROUP) => "{‥")
