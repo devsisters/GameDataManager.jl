@@ -19,7 +19,7 @@ end
 function editor_Ability!(jwb::JSONWorkbook)
     jws = jwb["Level"]
 
-    newdata = []
+    shop_ability = []
     # NOTE: Shop을 참조할 수도 있는데 우선 하드코딩
     area_per_grade = [[1, 2, 4, 6, 9],
                       [4, 6, 9, 12, 16],
@@ -33,21 +33,39 @@ function editor_Ability!(jwb::JSONWorkbook)
                 # (grade + level - 1) * area * 60(1시간)
                 profit = _profitcoin_value(grade, lv, a)
                 coincounter = _coincounter_value(profit, grade, lv)
-                push!(newdata, 
+                push!(shop_ability, 
                     OrderedDict(
                     "Group" => "ProfitCoin", "AbilityKey" => "ProfitCoin_G$(grade)_$(a)",
                     "Level" => lv, "Value" => profit, "IsValueReplace" => true))
 
-                push!(newdata, 
+                push!(shop_ability, 
                     OrderedDict(
                     "Group" => "CoinCounterCap", "AbilityKey" => "CoinCounterCap_G$(grade)_$(a)",
                     "Level" => lv, "Value" => coincounter, "IsValueReplace" => true))
             end
         end
     end
-    @assert keys(jws.data[1]) == keys(newdata[1]) "Column명이 일치하지 않습니다"
+    @assert keys(jws.data[1]) == keys(shop_ability[1]) "Column명이 일치하지 않습니다"
     
-    append!(jwb["Level"].data, newdata)
+    residence_ability = []
+    area_per_grade = [[1,4,6,12], [6,9,12], [12,16,20], [14,16,20], [20,25]]
+    for grade in 1:5
+        for a in area_per_grade[grade] # 건물 면적
+            for lv in 1:5
+                # (grade + level - 1) * area * 60(1시간)
+                rent = _rentcoin_value(grade, lv, a)
+                push!(residence_ability, 
+                    OrderedDict(
+                    "Group" => "RentCoin", "AbilityKey" => "RentCoin_G$(grade)_$(a)",
+                    "Level" => lv, "Value" => rent, "IsValueReplace" => true))
+            end
+        end
+    end
+    @assert keys(jws.data[1]) == keys(residence_ability[1]) "Column명이 일치하지 않습니다"
+
+    append!(jwb["Level"].data, shop_ability)
+    append!(jwb["Level"].data, residence_ability)
+
     return jwb
 end
 
@@ -65,4 +83,10 @@ function _coincounter_value(profit, grade, level)
         grade == 5 ? 60/60 : error("Shop Grade5 이상은 기준이 없습니다") 
     end
     coincounter = round(Int, base * level * profit)
+end
+
+function _rentcoin_value(grade, level, _area)
+    profit = _profitcoin_value(grade, level, _area)
+    # level +1 시간 분량
+    rentcoin = profit * (level + 1)
 end
