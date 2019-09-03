@@ -92,7 +92,7 @@ function Base.show(io::IO, x::User)
 end
 
 function Base.show(io::IO, x::Village)
-    print(io, "Village(mid:", x.id, ") / ")
+    print(io, "Village(id:", x.id, ") / ")
     print(io, x.storage)
     print(io, "\t")
     print(io, x.layout)
