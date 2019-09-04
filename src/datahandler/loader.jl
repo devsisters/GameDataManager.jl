@@ -32,11 +32,12 @@ end
 
 
 """
-    update_gamedata!()
+    reload!()
 GAMEDATA 에 캐시되어있는 모든 엑셀 파일을 업데이트
 """
-function update_gamedata!()
-    for k in keys(GAMEDATA)
+function reload!(gd)
+    # TODO 뭘 리로드했는지 아니면 아무것도 안했는지 로그좀...
+    for k in keys(gd)
         T = endswith(k, ".json") ? JSONBalanceTable : BalanceTable
         get(T, k;check_modified = true)
     end
@@ -55,7 +56,8 @@ function Base.get(::Type{BalanceTable}, file::AbstractString; check_modified = f
     end
     if check_modified
         if ismodified(file) # 파일 변경 여부 체크
-            xl(file; caching = true)
+            cache_gamedata!(XLSXBalanceTable, file)
+            # xl(file; caching = true)
         end
     end
     bt = GAMEDATA[file]

@@ -60,7 +60,7 @@ include("util.jl")
 export GAMEENV, GAMEDATA, help,
        # datahandler
        BalanceTable, XLSXBalanceTable, JSONBalanceTable, UnityBalanceTable,
-       sheetnames, get_cachedrow, update_gamedata!,
+       sheetnames, get_cachedrow, reload!,
        DataFrame,
        xl, autoxl, md5hash,
 
