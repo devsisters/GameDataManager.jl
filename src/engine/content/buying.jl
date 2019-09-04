@@ -39,29 +39,31 @@ end
 * SITECLEANER 1개 가격
 """
 @inline function price(u::User, ::Type{Currency{:SITECLEANER}})
+    bc = buycount(u)[:sitecleaner]
+    price(bc, SITECLEANER)
+end
+@inline function price(buycount::Integer, ::Type{Currency{:SITECLEANER}})
     ref = begin
-        # 우선 느리지만 DataFramesMeta로    
         x = get(DataFrame, ("SpaceDrop", "SiteCleaner"))
-        bc = buycount(u)[:sitecleaner]
-
-        i = findlast(x[!, :AccumulatedPurchase] .<= bc)
+        i = findlast(x[!, :AccumulatedPurchase] .<= buycount)
         x[i, :]
     end
-    coin = ref[:PriceCoin]*COIN
-
-    return coin
+    return ref[:PriceCoin]*COIN
 end
+
 """
     price(u::User, ENERGYMIX)
 
 * ENERGYMIX 1개 가격
 """
 @inline function price(u::User, ::Type{Currency{:ENERGYMIX}})
+    bc = buycount(u)[:energymix]
+    price(bc, ENERGYMIX)
+end
+@inline function price(buycount::Integer, ::Type{Currency{:ENERGYMIX}})
     ref = begin
         x = get(DataFrame, ("EnergyMix", "Price"))
-        bc = buycount(u)[:energymix]
-
-        i = findlast(x[!, :AccumulatedPurchase] .<= bc)
+        i = findlast(x[!, :AccumulatedPurchase] .<= buycount)
         x[i, :]
     end
     totalcost = begin 
@@ -69,7 +71,6 @@ end
         item = ref[:PriceItem]
         isempty(item) ? coin : [coin; StackItem.(item)]
     end
-        
     return ItemCollection(totalcost)
 end
 """

@@ -29,3 +29,13 @@ function Base.size(x::AbstractSite, dim)
     1
 end
 area(x::AbstractSite) = *(size(x,1), size(x, 2))
+
+"""
+    price(x::PrivateSite)
+
+x 사이트를 청소하는데 필요한 사이트 클리너 수량
+"""
+function price(x::PrivateSite) 
+    ref = get_cachedrow("Village", "SiteCleanerPrice", :Area, area(x))[1]
+    return ref["Cost"]*SITECLEANER
+end
