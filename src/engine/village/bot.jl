@@ -57,21 +57,21 @@ function siteinfo(vill::Village)
 
     #빌리지 레이아웃 모양에 따라 어떤 사이트부터 건물이 지어질지를 결정하는 array. 수동으로 입력한다. 좌측부터 건물이 채워진다.
     if vill.layout.name == "72x62_1"
-        BuildOrder = [24 23 15 16 17 25 30 29 28 22 14 6 7 8 9 11 18 32 38 37 36 35 34 31 21 13 5 0 4 1 2 3 10 12 19 20 26 27 33 39 44 43 42 41 40 45 46 47 48 49]
+        BuildOrder = [25 24 16 17 18 26 31 30 29 23 15 7 8 9 10 12 19 33 39 38 37 36 35 32 22 14 6 1 5 2 3 4 11 13 20 21 27 28 34 40 45 44 43 42 41 46 47 48 49 50]
     elseif vill.layout.name == "72x62_2"
-        BuildOrder = [24 23 15 16 17 25 30 29 28 22 14 6 7 8 9 11 18 32 38 37 36 35 34 31 21 13 5 0 4 1 2 3 10 12 19 20 26 27 33 39 44 43 42 41 40 45 46 47 48 49]
+        BuildOrder = [25 24 16 17 18 26 31 30 29 23 15 7 8 9 10 12 19 33 39 38 37 36 35 32 22 14 6 1 5 2 3 4 11 13 20 21 27 28 34 40 45 44 43 42 41 46 47 48 49 50]
     else
-        BuildOrder = [24 23 15 16 17 25 30 29 28 22 14 6 7 8 9 11 18 32 38 37 36 35 34 31 21 13 5 0 4 1 2 3 10 12 19 20 26 27 33 39 44 43 42 41 40 45 46 47 48 49]
+        BuildOrder = [25 24 16 17 18 26 31 30 29 23 15 7 8 9 10 12 19 33 39 38 37 36 35 32 22 14 6 1 5 2 3 4 11 13 20 21 27 28 34 40 45 44 43 42 41 46 47 48 49 50]
     end
 
     #봇 빌리지 내 건물로 채워질 최소 사이트 개수~최대 사이트 개수 범위에서 랜덤하게 건물이 채워질 사이트들 개수가 결정된다.
-    for i in 1:rand(minAmountOfSite:maxAmountOfSite)
+    for i in 2:rand(minAmountOfSite:maxAmountOfSite)
         d = OrderedDict()
 
         site_size = [0, 0]
         #사이트 크기 저장. tuple 로 반환되므로 변수 자체를 array로 강제 설정.
-        site_size[1] = vill.layout.sites[i].size[1]
-        site_size[2] = vill.layout.sites[i].size[2]
+        site_size[1] = vill.layout.sites[BuildOrder[i]].size[1]
+        site_size[2] = vill.layout.sites[BuildOrder[i]].size[2]
         d["SiteIndex"] = BuildOrder[i]
 
         buildinglist = []
@@ -129,7 +129,7 @@ function get_suitablebuilding(site_size)
     BuildingMaxLevel = get(Dict, ("GeneralSetting", 1))[1]["BuildModeEnableLevel"]
 
     #[Building Category, BuildingKey, Level, 건물 방향] 1이 남쪽, 2가 동쪽, 3이 북쪽, 4가 서쪽을 의미한다.
-    BuildingInfo = [rand(("Shop", "Special", "Residence", "Sandbox")), "BuildingKey", 1, rand(1:4)]
+    BuildingInfo = [rand(("Shop", "Special", "Residence", "Sandbox")), "BuildingKey", 1, rand(0:3)]
 
     #임의로 선정된 건물 카테고리 중 임의의 건물 선정.
     if BuildingInfo[1] == "Shop"
@@ -137,6 +137,9 @@ function get_suitablebuilding(site_size)
         BuildingInfo[3] = rand(1:BuildingMaxLevel["Shop"])
     elseif BuildingInfo[1] == "Special"
         BuildingInfo[2] = rand(special.BuildingKey)
+            while BuildingInfo[2]==special.BuildingKey[1]
+                BuildingInfo[2] = rand(special.BuildingKey)
+            end
         BuildingInfo[3] = 1
     elseif BuildingInfo[1] == "Residence"
         BuildingInfo[2] = rand(residence.BuildingKey)
@@ -145,11 +148,10 @@ function get_suitablebuilding(site_size)
         BuildingInfo[2] = rand(sandbox.BuildingKey)
         BuildingInfo[3] = rand(1:BuildingMaxLevel["Sandbox"])
     end
-
     Building_size = get_buildingsize2(BuildingInfo[2])
 
     #건물 방향이 동/서 이면 기준 건물 사이즈 x, z 값 변경.
-    if (BuildingInfo[4] == 2 || BuildingInfo[4] == 4)
+    if (BuildingInfo[4] == 1 || BuildingInfo[4] == 3)
         swap = Building_size[1]
         Building_size[1] = Building_size[2]
         Building_size[2] = swap
@@ -165,6 +167,9 @@ function get_suitablebuilding(site_size)
             BuildingInfo[3] = rand(1:BuildingMaxLevel["Shop"])
         elseif BuildingInfo[1] == "Special"
             BuildingInfo[2] = rand(special.BuildingKey)
+            while BuildingInfo[2]==special.BuildingKey[1]
+                BuildingInfo[2] = rand(special.BuildingKey)
+            end
             BuildingInfo[3] = 1
         elseif BuildingInfo[1] == "Residence"
             BuildingInfo[2] = rand(residence.BuildingKey)
