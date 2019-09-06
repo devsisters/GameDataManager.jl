@@ -54,12 +54,11 @@ function editor_Building!(type, jwb::JSONWorkbook)
         ar = info[bd]["ChunkWidth"] * info[bd]["ChunkLength"]
 
         levelupcost = Dict("NeedTime" => _building_costtime(type, grade, lv, ar),
-                           "PriceCoin" => _building_costcoin(type, grade, lv, ar).val)
+                           "PriceCoin" => _building_costcoin(type, grade, lv, ar))
         row["LevelupCost"] = levelupcost
 
         # TODO, StackItem 오브젝트를 serialize 하면 map 함수 필요 없음
-        levelupcostitem = _building_costitem(type, grade, lv, ar)
-        row["LevelupCostItem"] = map(el -> (Key = el.key, Amount = el.val), levelupcostitem)
+        row["LevelupCostItem"] = _building_costitem(type, grade, lv, ar)
         
         row["Reward"] = convert(OrderedDict{String, Any}, row["Reward"])
         row["Reward"]["DevelopmentPoint"] = _building_devlopmentpoint(grade, lv, ar)
@@ -86,8 +85,6 @@ function _building_costcoin(type, grade, level, _area)
         p = _rentcoin_value(grade, abilitylevel, _area)
     end
     cost = round(Int, p * (grade*1.5) * level)
-
-    return COIN(cost)
 end
 
 function _building_costitem(type::AbstractString, grade, level, _area)
@@ -98,7 +95,8 @@ function _building_costitem(type::AbstractString, grade, level, _area)
         items = [8201, 8202, 8203]
     end
 
-    return filter(!iszero, NormalItem.(items, amounts))
+    costitem = map((k, v) -> (Key = k, Amount = v), items, amounts)
+    return filter(el -> el.Amount > 0, costitem)
 end
 
 function _building_costitem(grade, level, _area)

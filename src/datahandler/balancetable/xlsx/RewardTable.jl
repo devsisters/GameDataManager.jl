@@ -8,7 +8,7 @@ function validator_RewardTable(bt::XLSXBalanceTable)
 
     # ItemKey 확인
     d = get(Dict, bt, 1)
-    map(el -> RewardTable(el["RewardKey"]), d)
+    # map(el -> RewardTable(el["RewardKey"]), d)
 
     nothing
 end
