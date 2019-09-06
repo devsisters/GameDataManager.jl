@@ -48,7 +48,6 @@ end
 @testset "VillageToken 지급 삭제" begin
     u = User()
     
-
 end
 
 
@@ -80,8 +79,24 @@ end
 
         @test getitem(u, ENERGYMIX) == i*ENERGYMIX
     end
-
 end
+
+@testset "EnergyMix 사용" begin
+    ref = get(Dict, ("EnergyMix", "Data"))[1]
+
+    u = User(); add!(u, 1000ENERGYMIX)
+
+    vill = u.villages[1]
+    
+    spendable = div(area(vill), ref["EnergyMixPerChunk"][2])
+    for i in 1:spendable
+        @test GameDataManager.spendable_energymix(vill).val == (spendable - i + 1)
+        @test spend!(u, vill, ENERGYMIX)
+    end
+    # TODO: 사이트 구매 후 테스트 추가
+    
+end
+
 
 @testset "SiteCleaner 구매" begin
     u = User()
@@ -100,6 +115,5 @@ end
 
         @test getitem(u, SITECLEANER) == i*SITECLEANER
     end
-
 end
 
