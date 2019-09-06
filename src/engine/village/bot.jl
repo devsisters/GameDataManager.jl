@@ -159,7 +159,7 @@ function get_suitablebuilding(site_size)
 
     #건물 사이즈가 맞지 않다면 맞을 때 까지 다시 뽑기.
     while (!check_buildingsize(site_size, Building_size))
-        BuildingInfo = [rand(("Shop", "Special", "Residence", "Sandbox")), "BuildingKey", 1, rand(1:4)]
+        BuildingInfo = [rand(("Shop", "Special", "Residence", "Sandbox")), "BuildingKey", 1, rand(0:3)]
 
         #임의로 선정된 건물 카테고리 중 임의의 건물 선정.
         if BuildingInfo[1] == "Shop"
@@ -182,7 +182,7 @@ function get_suitablebuilding(site_size)
         Building_size = get_buildingsize2(BuildingInfo[2])
 
         #건물 방향이 동/서 이면 기준 건물 사이즈 x, z 값 변경.
-        if (BuildingInfo[4] == 2 || BuildingInfo[4] == 4)
+        if (BuildingInfo[4] == 1 || BuildingInfo[4] == 3)
             swap = Building_size[1]
             Building_size[1] = Building_size[2]
             Building_size[2] = swap
