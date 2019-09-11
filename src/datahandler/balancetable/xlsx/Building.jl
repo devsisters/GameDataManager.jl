@@ -68,7 +68,7 @@ end
 
 function _building_devlopmentpoint(grade, level, _area)
     # grade=1, level=1, 1청크가 1점
-    return (grade + level -1) * _area
+    return (grade - 1 + level) * _area
 end
 function _building_costtime(type, grade, level, _area)
     # 건설시간 5등급, 7레벨, 64청크가 36시간 (129600) 에 근접하도록 함수 설계
