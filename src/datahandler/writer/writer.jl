@@ -1,18 +1,17 @@
 # 단축키
-function xl(; kwargs...) 
+function xl(exportall::Bool = true) 
     cd(GAMEENV["patch_data"])
     run(`git checkout master`)
     
-    export_gamedata(collect_modified_xlsx(); kwargs...)
+    export_gamedata(exportall)
 end
-function xl(x; kwargs...) 
+function xl(x::AbstractString) 
     cd(GAMEENV["patch_data"])
     run(`git checkout master`)
     
-    export_gamedata(x; kwargs...)
+    export_gamedata(x)
 end
 
-is_xlsxfile(f)::Bool = (endswith(f, ".xlsx") || endswith(f, ".xlsm"))
 """
     export_gamedata(file::AbstractString)
     export_gamedata(exportall::Bool = false)
@@ -23,25 +22,25 @@ is_xlsxfile(f)::Bool = (endswith(f, ".xlsx") || endswith(f, ".xlsm"))
 
 mars 메인 저장소의 '.../_META.json'에 명시된 파일만 추출가능합니다
 """
-function export_gamedata(exportall::Bool = false; kwargs...)
+function export_gamedata(exportall = false)
     files = exportall ? collect_auto_xlsx() : collect_modified_xlsx()
     if isempty(files)
         help(2)
     else
-        export_gamedata(files; kwargs...)
+        export_gamedata(files)
     end
 end
-function export_gamedata(file::AbstractString; kwargs...)
+function export_gamedata(file::AbstractString)
     file = is_xlsxfile(file) ? file : MANAGERCACHE[:meta][:xlsx_shortcut][file]
-    export_gamedata([file]; kwargs...)
+    export_gamedata([file])
 end
-function export_gamedata(files::Vector; caching = false)
+function export_gamedata(files::Vector)
     if !isempty(files)
         @info "xlsx -> json 추출을 시작합니다 ⚒\n" * "-"^(displaysize(stdout)[2]-4)
         for f in files
             println("『", f, "』")
-            gd = caching ? cache_gamedata!(XLSXBalanceTable, f) : BalanceTable(f; caching = caching)
-            write_json(gd.data)
+            bt = BalanceTable(f)
+            write_json(bt.data)
         end
         @info "json 추출이 완료되었습니다 ☺"
         gamedata_export_history(files)
@@ -61,16 +60,16 @@ function write_json(jwb::JSONWorkbook)
         json = joinpath(dir, meta[s][1])
         newdata = JSON.json(jwb[s], 2)
         # 편집된 시트만 저장
-        writefile = true
+        modified = true
         if isfile(json)
-            writefile = !isequal(md5(read(json, String)), md5(newdata))
+            modified = !isequal(md5(read(json, String)), md5(newdata))
         end
-        if writefile
+        if modified
             write(json, newdata)
-            print("   SAVED => ")
+            print("  💾 => ")
             printstyled(normpath(json), "\n"; color=:blue)
         else
-            print("NOCHANGE => ")
+            print("  ⁿ/ₐ => ")
             print(normpath(json), "\n")
         end
     end

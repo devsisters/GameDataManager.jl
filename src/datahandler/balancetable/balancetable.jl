@@ -33,12 +33,12 @@ struct XLSXBalanceTable <: BalanceTable
     # 사용할 함수들
     cache::Union{Missing, Array{Dict, 1}}
 end
-function XLSXBalanceTable(jwb::JSONWorkbook; caching = true, validation = true)
+function XLSXBalanceTable(jwb::JSONWorkbook; cacheindex = true, validation = true)
     editor!(jwb)
     dummy_localizer!(jwb)
 
     dataframe = construct_dataframe(jwb)
-    cache = caching ? index_cache.(dataframe) : missing
+    cache = cacheindex ? index_cache.(dataframe) : missing
 
     x = XLSXBalanceTable(jwb, dataframe, cache)
     validation && validator(x)

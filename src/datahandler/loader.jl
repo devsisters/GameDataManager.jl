@@ -1,4 +1,5 @@
 # utility functions
+is_xlsxfile(f)::Bool = (endswith(f, ".xlsx") || endswith(f, ".xlsm"))
 function Base.readdir(dir; extension::String)
     filter(x -> endswith(x, extension), readdir(dir))
 end
@@ -7,6 +8,7 @@ function joinpath_gamedata(file)
     joinpath(GAMEENV["mars_repo"], mid_folder, file)
 end
 
+
 """
     cache_gamedata!(f; kwargs...)
 gamedata로 데이터를 불러온다
@@ -14,22 +16,17 @@ gamedata로 데이터를 불러온다
 function cache_gamedata!(::Type{XLSXBalanceTable}, f; kwargs...)
     k = split(f, ".")[1]
     # TODO: XLSX 파일이 ismodified가 안되어 있으면 JSON을 caching하면 훨씬 빠를 것임!!
-    get!(GAMEDATA, k) do 
-        BalanceTable(f; kwargs...)
-    end
+    GAMEDATA[k] = BalanceTable(f; kwargs...)
     printstyled("GAMEDATA[\"$(k)\"] is cached from Excel\n"; color=:yellow)
 
     return GAMEDATA[k]
 end
 function cache_gamedata!(::Type{JSONBalanceTable}, f; kwargs...)
-    get!(GAMEDATA, f) do 
-        JSONBalanceTable(f; kwargs...)
-    end
+    GAMEDATA[f] = JSONBalanceTable(f; kwargs...)
     printstyled("GAMEDATA[\"$(f)\"] is cached from Json\n"; color=:yellow)
 
     return GAMEDATA[f]
 end
-
 
 """
     reload!()
@@ -46,7 +43,7 @@ end
 """
     get(::Type{BalanceTable}, file::AbstractString; check_modified = false)
 
-EXCEL 파일을 파일에서 불러와 cache에 올린다. 
+BalanceTable 데이터를 가져온다. cache 안 되어있을 경우 cache에 올린다
 # KEYWORDS
 * check_modified : excel 파일의 시간을 검사하여 다를 경우 cache를 업데이트한다.
 """
@@ -57,7 +54,6 @@ function Base.get(::Type{BalanceTable}, file::AbstractString; check_modified = f
     if check_modified
         if ismodified(file) # 파일 변경 여부 체크
             cache_gamedata!(XLSXBalanceTable, file)
-            # xl(file; caching = true)
         end
     end
     bt = GAMEDATA[file]

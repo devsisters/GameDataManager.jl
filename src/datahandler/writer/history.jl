@@ -18,10 +18,10 @@ function collect_modified_xlsx()
 end
 # 자동 검출하는 파일만
 function collect_auto_xlsx()
-    filter(x -> is_xlsxfile(x), keys(MANAGERCACHE[:meta][:auto])) |> collect
+    keys(MANAGERCACHE[:meta][:auto]) |> collect
 end
 function collect_manual_xlsx()
-    filter(x -> is_xlsxfile(x), keys(MANAGERCACHE[:meta][:manual])) |> collect
+    keys(MANAGERCACHE[:meta][:manual]) |> collect
 end
 function collect_all_xlsx()
     a = collect_auto_xlsx()

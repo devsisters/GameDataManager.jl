@@ -39,19 +39,16 @@ include("engine/content/dronedelivery.jl")
 include("engine/content/buying.jl")
 include("engine/content/build.jl")
 
-
 include("engine/show.jl")
-
 
 #############################################
 include("init.jl")
 include("setup.jl")
 include("datahandler/loader.jl")
 
-include("datahandler/writer/json.jl")
+include("datahandler/writer/writer.jl")
 include("datahandler/writer/autoxl.jl")
 include("datahandler/writer/history.jl")
-
 
 # include("writer/typecheck.jl")
 include("util.jl")
