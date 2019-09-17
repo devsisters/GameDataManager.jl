@@ -1,5 +1,5 @@
 # 단축키
-function xl(exportall::Bool = true) 
+function xl(exportall::Bool = false) 
     cd(GAMEENV["patch_data"])
     run(`git checkout master`)
     
