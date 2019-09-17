@@ -36,12 +36,14 @@ function editor_Ability!(jwb::JSONWorkbook)
                 push!(shop_ability, 
                     OrderedDict(
                     "Group" => "ProfitCoin", "AbilityKey" => "ProfitCoin_G$(grade)_$(a)",
-                    "Level" => lv, "Value" => profit, "IsValueReplace" => true))
+                    "Level" => lv, "Value" => profit, "IsValueReplace" => true, 
+                    "LevelupCost" => Pair("PriceCoin", missing), "LevelupCostItem" => []))
 
                 push!(shop_ability, 
                     OrderedDict(
                     "Group" => "CoinCounterCap", "AbilityKey" => "CoinCounterCap_G$(grade)_$(a)",
-                    "Level" => lv, "Value" => coincounter, "IsValueReplace" => true))
+                    "Level" => lv, "Value" => coincounter, "IsValueReplace" => true, 
+                    "LevelupCost" => Pair("PriceCoin", missing), "LevelupCostItem" => missing))
             end
         end
     end
@@ -57,7 +59,8 @@ function editor_Ability!(jwb::JSONWorkbook)
                 push!(residence_ability, 
                     OrderedDict(
                     "Group" => "RentCoin", "AbilityKey" => "RentCoin_G$(grade)_$(a)",
-                    "Level" => lv, "Value" => rent, "IsValueReplace" => true))
+                    "Level" => lv, "Value" => rent, "IsValueReplace" => true, 
+                    "LevelupCost" => Pair("PriceCoin", missing), "LevelupCostItem" => []))
             end
         end
     end
