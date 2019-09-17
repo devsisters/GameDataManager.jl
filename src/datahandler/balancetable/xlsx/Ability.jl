@@ -5,7 +5,7 @@ function validator_Ability(bt)
             "CoinStorageCap", "AddInventory", "PipoArrivalIntervalSec", "PipoMaxQueue",
             "DroneDeliverySlot",
             "ProfitCoin", "CoinCounterCap",
-            "RentCoin"])
+            "RentCoin", "JoyTank", "JoyCreation"])
     @assert length(x) == 0 "코드상 정의된 Group이 아닙니다\n  $x\n@mars-client에 문의 바랍니다"
 
     key_level = broadcast(x -> (x[:AbilityKey], x[:Level]), eachrow(df))
