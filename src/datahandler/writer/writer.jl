@@ -66,7 +66,7 @@ function write_json(jwb::JSONWorkbook)
         end
         if modified
             write(json, newdata)
-            print("  💾 => ")
+            print(" SAVE => ")
             printstyled(normpath(json), "\n"; color=:blue)
         else
             print("  ⁿ/ₐ => ")
