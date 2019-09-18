@@ -12,9 +12,19 @@ function BalanceTable(file; kwargs...)
     elseif endswith(file, ".prefab") || endswith(file, ".asset")
         UnityBalanceTable(file; kwargs...)
     else #XLSX만 shortcut 있음. JSON은 확장자 기입 필요
-        f = is_xlsxfile(file) ? file : MANAGERCACHE[:meta][:xlsx_shortcut][file]
-        XLSXBalanceTable(f; kwargs...)
+        XLSXBalanceTable(file; kwargs...)
     end
+end
+function JWB(file)
+    f = is_xlsxfile(file) ? file : MANAGERCACHE[:meta][:xlsx_shortcut][file]
+
+    meta = getmetadata(f)
+
+    kwargs_per_sheet = Dict()
+    for el in meta
+        kwargs_per_sheet[el[1]] = el[2][2]
+    end
+    JSONWorkbook(joinpath_gamedata(f), keys(meta), kwargs_per_sheet)
 end
 
 """
@@ -45,13 +55,7 @@ function XLSXBalanceTable(jwb::JSONWorkbook; cacheindex = true, validation = tru
     return x
 end
 function XLSXBalanceTable(f::AbstractString; kwargs...)
-    meta = getmetadata(f)
-
-    kwargs_per_sheet = Dict()
-    for el in meta
-        kwargs_per_sheet[el[1]] = el[2][2]
-    end
-    jwb = JSONWorkbook(joinpath_gamedata(f), keys(meta), kwargs_per_sheet)
+    jwb = JWB(f)
 
     XLSXBalanceTable(jwb; kwargs...)
 end

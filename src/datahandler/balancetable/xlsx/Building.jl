@@ -22,7 +22,7 @@ function validator_Building(bt)
 
     path_template = joinpath(GAMEENV["patch_data"], "BuildTemplate/Buildings")
     path_thumbnails = joinpath(GAMEENV["CollectionResources"], "BusinessBuildingThumbnails")
-
+    
     validate_file(path_template, leveldata[!, :BuildingTemplate], ".json", 
                 "BuildingTemolate가 존재하지 않습니다")
     validate_file(path_thumbnails, data[!, :Icon], ".png", "Icon이 존재하지 않습니다")
@@ -64,6 +64,19 @@ function editor_Building!(type, jwb::JSONWorkbook)
         row["Reward"]["DevelopmentPoint"] = _building_devlopmentpoint(grade, lv, ar)
     end
     jwb 
+end
+
+function _building_rawdatas(target::Vector = ["Shop", "Residence", "Special", "Sandbox"])
+    x = _building_rawdatas.(target)
+    return merge(x...)
+end
+function _building_rawdatas(f)
+    d = Dict()
+    for row in JWB(f)[:Building].data
+        k = row["BuildingKey"]
+        d[k] = row
+    end
+    return d
 end
 
 function _building_devlopmentpoint(grade, level, _area)

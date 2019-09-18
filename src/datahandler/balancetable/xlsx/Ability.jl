@@ -17,16 +17,24 @@ function validator_Ability(bt)
 end
 
 function editor_Ability!(jwb::JSONWorkbook)
+    function getarea_pergrade(buildingtype)
+        # 건물이 1 ~ 5등급이 있다 가정하고 데이터 생성
+        ref = _building_rawdatas(buildingtype)
+        a = [[], [], [], [], []]
+        for el in values(ref)
+            g = el["Grade"]
+            x = el["Condition"]["ChunkWidth"] * el["Condition"]["ChunkLength"]
+            push!(a[g], x)
+        end
+        unique!.(a)
+        sort!.(a)
+        return a
+    end
+    
     jws = jwb["Level"]
+    area_per_grade = getarea_pergrade("Shop")
 
     shop_ability = []
-    # NOTE: Shop을 참조할 수도 있는데 우선 하드코딩
-    area_per_grade = [[1, 2, 4, 6, 9],
-                      [4, 6, 9, 12, 16],
-                      [16, 20, 25, 30],
-                      [20, 25, 30, 36],
-                      [36, 42, 49, 64]]
-
     for grade in 1:5
         for a in area_per_grade[grade] # 건물 면적
             for lv in 1:8
@@ -50,7 +58,7 @@ function editor_Ability!(jwb::JSONWorkbook)
     @assert keys(jws.data[1]) == keys(shop_ability[1]) "Column명이 일치하지 않습니다"
     
     residence_ability = []
-    area_per_grade = [[1,4,6,12], [6,9,12], [12,16,20], [14,16,20], [20,25]]
+    area_per_grade = getarea_pergrade("Residence")
     for grade in 1:5
         for a in area_per_grade[grade] # 건물 면적
             for lv in 1:5
