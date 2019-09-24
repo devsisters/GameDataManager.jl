@@ -3,7 +3,7 @@ using GameDataManager
 GDM = GameDataManager
 
 
-@testset "JSON export 테스트"
+@testset "JSON export 테스트" begin
     
 end
 

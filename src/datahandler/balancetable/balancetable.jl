@@ -15,17 +15,6 @@ function BalanceTable(file; kwargs...)
         XLSXBalanceTable(file; kwargs...)
     end
 end
-function JWB(file)
-    f = is_xlsxfile(file) ? file : MANAGERCACHE[:meta][:xlsx_shortcut][file]
-
-    meta = getmetadata(f)
-
-    kwargs_per_sheet = Dict()
-    for el in meta
-        kwargs_per_sheet[el[1]] = el[2][2]
-    end
-    JSONWorkbook(joinpath_gamedata(f), keys(meta), kwargs_per_sheet)
-end
 
 """
     XLSXBalanceTable
@@ -58,6 +47,40 @@ function XLSXBalanceTable(f::AbstractString; kwargs...)
     jwb = JWB(f)
 
     XLSXBalanceTable(jwb; kwargs...)
+end
+
+function JWB(file)::JSONWorkbook
+    f = is_xlsxfile(file) ? file : MANAGERCACHE[:meta][:xlsx_shortcut][file]
+    xlsxpath = joinpath_gamedata(f)
+    meta = getmetadata(f)
+
+    kwargs_per_sheet = Dict()
+    for el in meta
+        kwargs_per_sheet[el[1]] = el[2][2]
+    end
+    jwb = JSONWorkbook(xlsxpath, keys(meta), kwargs_per_sheet)
+
+    return jwb
+end
+function JWB2(file)
+    f = is_xlsxfile(file) ? file : MANAGERCACHE[:meta][:xlsx_shortcut][file]
+    xlsxpath = joinpath_gamedata(f)
+    meta = getmetadata(f)
+
+    v = []
+    for el in meta
+        if endswith(lowercase(el[2][1]), ".json") 
+            jsonfile = joinpath_gamedata(el[2][1])
+            json = JSON.parsefile(jsonfile; dicttype = OrderedDict) |> x -> convert(Array{OrderedDict, 1}, x)
+            # JSONWorksheet를 위한 가짜 meta 생성
+            # Original이랑 완벽히 일치하게 만드려면 meta만 미리 저장해두면 될 듯...
+            m = XLSXasJSON.XLSXWrapperMeta(["empty"])
+            push!(v, JSONWorksheet(xlsxpath, m, json, el[1]))
+        end
+    end
+    index = XLSXasJSON.Index(sheetnames.(v))
+    jwb = JSONWorkbook(xlsxpath, v, index)
+    return jwb
 end
 
 function construct_dataframe(data)
@@ -104,7 +127,8 @@ function index_cache(df::DataFrame)
 end
 
 """
-    JSONGameData
+    JSONBalanceTable
+
 JSON을 쥐고 있음
 """
 struct JSONBalanceTable <: BalanceTable
@@ -259,7 +283,7 @@ function validate_duplicate(df, k::Symbol; assert=true)
     target = df[!, k]
     if !allunique(target)
         duplicate = filter(el -> el[2] > 1, countmap(target))
-        msg = "$(sheetnames(df))[:$(k)]에서 중복된 값이 발견되었습니다"
+        msg = "[:$(k)]에서 중복된 값이 발견되었습니다"
         if assert
             throw(AssertionError("$msg \n $(keys(duplicate))"))
         else

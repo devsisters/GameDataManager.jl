@@ -79,6 +79,10 @@ function _building_rawdatas(f)
     return d
 end
 
+#==========================================================================================
+ -밸런싱 스크립트
+
+==========================================================================================#
 function _building_devlopmentpoint(grade, level, _area)
     # grade=1, level=1, 1청크가 1점
     return (grade - 1 + level) * _area
