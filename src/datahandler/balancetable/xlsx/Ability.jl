@@ -1,14 +1,10 @@
 function validator_Ability(bt)
-    df = get(DataFrame, bt, "Level")
+    ref = get(DataFrame, bt, "Group")
+    df_level = get(DataFrame, bt, "Level")
 
-    x = setdiff(unique(df[!, :Group]), [
-            "CoinStorageCap", "AddInventory", "PipoArrivalIntervalSec", "PipoMaxQueue",
-            "DroneDeliverySlot",
-            "ProfitCoin", "CoinCounterCap",
-            "RentCoin", "JoyTank", "JoyCreation"])
-    @assert length(x) == 0 "코드상 정의된 Group이 아닙니다\n  $x\n@mars-client에 문의 바랍니다"
+    validate_subset(unique(df_level[!, :Group]), ref[!, :GroupKey], "존재하지 않는 Ability Group입니다")
 
-    key_level = broadcast(x -> (x[:AbilityKey], x[:Level]), eachrow(df))
+    key_level = broadcast(x -> (x[:AbilityKey], x[:Level]), eachrow(df_level))
     if !allunique(key_level)
         dup = filter(el -> el[2] > 1, countmap(key_level))
         throw(AssertionError("다음의 Ability, Level이 중복되었습니다\n$(dup)"))
