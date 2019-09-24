@@ -1,15 +1,16 @@
 function validator_Block(bt)
     blocktable = get(DataFrame, bt, "Block")
     
-    b = begin
-        f = joinpath(GAMEENV["mars_repo"], "unity/Assets/ScriptableObjects/BalanceTable",
-                                      "BlockTemplateBalanceTable.asset")
-        x = filter(x -> startswith(x, "  - Key:"), readlines(f))
-        unique(broadcast(x -> split(x, "Key: ")[2], x))
-    end
-    missing_key = setdiff(unique(blocktable[!, :TemplateKey]), b)
-    if !isempty(missing_key)
-        @warn "Buidling의 TemplateKey가 BlockTemplateBalanceTable.asset 에 없습니다 \n $(missing_key)"
+    magnet_file = joinpath(GAMEENV["mars_repo"], "submodules/mars-art-assets/Internal", "BlockTemplateBalanceTable.asset")
+    if isfile(magnet_file)
+        magnet = filter(x -> startswith(x, "  - Key:"), readlines(magnet_file))
+        magnetkey = unique(broadcast(x -> split(x, "Key: ")[2], magnet))
+        missing_key = setdiff(unique(blocktable[!, :TemplateKey]), magnetkey)
+        if !isempty(missing_key)
+            @warn "다음 Block TemplateKey가 $(magnet_file)에 없습니다 \n $(missing_key)"
+        end
+    else
+        @warn "$(magnet_file)이 존재하지 않아 magnet 정보를 검증하지 못 하였습니다"
     end
 
     subcat = unique(blocktable[!, :SubCategory])
