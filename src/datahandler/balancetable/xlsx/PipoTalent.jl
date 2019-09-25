@@ -18,19 +18,17 @@ function editor_PipoTalent!(jwb::JSONWorkbook)
             prefix = "$(perk)$(unique_grade)"
 
             for f in ("Introduction", "Accepted", "Denied")
-                template[f][1]["\$Text"] = el[unique_grade]["Introduction"]
-                template[f][1]["\$Text"] = el[unique_grade]["Accepted"]
-                template[f][1]["\$Text"] = el[unique_grade]["Denied"]
-                
+                template[f][1]["\$Text"] = el[unique_grade][f]
+
                 json = joinpath(output_path, "$(prefix)$(f).json")
                 newdata = JSON.json(template[f], 2)
 
                 modified = !isequal(md5(read(json, String)), md5(newdata))
-                # if modified
+                if modified
                     write(json, newdata)
-                    # print(" SAVE => ")
-                    printstyled("$(prefix)$(f)... / "; color=:blue)
-                # end
+                    print(" SAVE => ")
+                    printstyled(normpath(json), "\n"; color=:blue)
+                end
             end
         end
     end
