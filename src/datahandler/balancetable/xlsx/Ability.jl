@@ -78,7 +78,8 @@ end
 
 function _profitcoin_value(grade, level, _area)
     # (grade + level - 1) * area * 60(1시간)
-    profit = (grade + level -1) * _area * 60
+    # 면적은 무조건 2의 배수이므로 /2를 한다
+    profit = (grade + level -1) * _area/2 * 60
 end
 
 function _coincounter_value(profit, grade, level)
