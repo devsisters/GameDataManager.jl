@@ -21,9 +21,11 @@ function editor_RewardTable!(jwb::JSONWorkbook)
     append!(jwb[:Solo].data, jwb[:Box].data)
     append!(jwb[:Solo].data, jwb[:DroneDelivery].data)
     append!(jwb[:Solo].data, jwb[:SpaceDrop].data)
+    append!(jwb[:Solo].data, jwb[:PipoWork].data)
     deleteat!(jwb, :Box)
     deleteat!(jwb, :DroneDelivery)
     deleteat!(jwb, :SpaceDrop)
+    deleteat!(jwb, :PipoWork)
 
     sort!(jwb[:Solo], "RewardKey")
 
@@ -38,7 +40,7 @@ end
 function collect_rewardscript!(jws::JSONWorksheet)
     function pull_rewardscript(x)
         origin = x["RewardScript"]["Rewards"]
-        result = map(el -> [get(el, "Weight", "1"), 
+        result = map(el -> [get(el, "Weight", "1"),
                 get(el, "Kind", "ERROR_CANNOTFIND_KIND"),
                 get(el, "ItemKey", missing),
                 get(el, "Amount", "ERROR_CANNOTFIND_AMOUNT")]
@@ -51,7 +53,7 @@ function collect_rewardscript!(jws::JSONWorksheet)
     for (i, id) in enumerate(rewardkey)
         targets = filter(el -> get(el, "RewardKey", 0) == id, jws.data)
         rewards = []
-        # 돌면서 첫번째건 첫번째로, 두번째건 두번째로 
+        # 돌면서 첫번째건 첫번째로, 두번째건 두번째로
         # 아이고...
         items = pull_rewardscript.(targets)
         rewards = Array{Any, 1}(undef, maximum(length.(items)))
