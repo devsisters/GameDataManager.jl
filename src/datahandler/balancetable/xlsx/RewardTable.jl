@@ -21,11 +21,9 @@ function editor_RewardTable!(jwb::JSONWorkbook)
     append!(jwb[:Solo].data, jwb[:Box].data)
     append!(jwb[:Solo].data, jwb[:DroneDelivery].data)
     append!(jwb[:Solo].data, jwb[:SpaceDrop].data)
-    append!(jwb[:Solo].data, jwb[:PipoWork].data)
     deleteat!(jwb, :Box)
     deleteat!(jwb, :DroneDelivery)
     deleteat!(jwb, :SpaceDrop)
-    deleteat!(jwb, :PipoWork)
 
     sort!(jwb[:Solo], "RewardKey")
 
