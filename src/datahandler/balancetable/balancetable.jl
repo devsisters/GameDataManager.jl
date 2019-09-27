@@ -213,12 +213,11 @@ end
 
 """
 function validator(bt::XLSXBalanceTable)
-    # 공통 규칙
-    validate_general(bt)
-
     filename = basename(bt)
-    f = Symbol("validator_", split(filename, ".")[1])
+
+    validate_general(bt)
     # validator 함수명 규칙에 따라 해당 함수가 있는지 찾는다
+    f = Symbol("validator_", split(filename, ".")[1])
     if isdefined(GameDataManager, f)
         foo = getfield(GameDataManager, f)
         foo(bt)
@@ -234,12 +233,12 @@ xlsx 파일명으로 된 스크립트에 가공하는 함수가 정의되어 있
 """
 function editor!(jwb::JSONWorkbook)
     filename = basename(jwb)
-    f = Symbol("editor_", split(filename, ".")[1], "!")
-    # editor 함수명 규칙에 따라 해당 함수가 있는지 찾는다
-    if isdefined(GameDataManager, f)
-        foo = getfield(GameDataManager, f)
 
+    # editor 함수명 규칙에 따라 해당 함수가 있는지 찾는다
+    f = Symbol("editor_", split(filename, ".")[1], "!")
+    if isdefined(GameDataManager, f)
         printstyled(stderr, "  $(filename) 편집 ◎﹏◎"; color = :yellow)
+        foo = getfield(GameDataManager, f)
         foo(jwb)
         printstyled(stderr, "\r", "  $(filename) 편집 ", "완료!\n"; color = :cyan)
     end
