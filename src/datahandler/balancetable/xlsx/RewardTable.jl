@@ -43,7 +43,7 @@ function collect_rewardscript!(jws::JSONWorksheet)
                 get(el, "ItemKey", missing),
                 get(el, "Amount", "ERROR_CANNOTFIND_AMOUNT")]
                 , origin)
-        map(x -> string.(filter(!ismissing, x)), result)
+        map(x -> string.(filter(!isnull, x)), result)
     end
     rewardkey = unique(broadcast(el -> el["RewardKey"], jws.data))
 
@@ -56,7 +56,7 @@ function collect_rewardscript!(jws::JSONWorksheet)
         items = pull_rewardscript.(targets)
         rewards = Array{Any, 1}(undef, maximum(length.(items)))
         for i in eachindex(rewards)
-            rewards[i] = filter(!ismissing, get.(items, i, missing))
+            rewards[i] = filter(!isnull, get.(items, i, missing))
         end
 
         new_data[i] = OrderedDict(

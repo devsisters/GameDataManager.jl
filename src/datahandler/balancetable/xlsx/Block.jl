@@ -43,7 +43,7 @@ function editor_Block!(jwb::JSONWorkbook)
                 end
             end
             m = get(el, "Members", missing)
-            if !ismissing(m)
+            if !isnull(m)
                 push!(newdata[i]["Members"], m)
             end
         end

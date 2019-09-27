@@ -1,10 +1,6 @@
 function validator_Player(bt)
     df = get(DataFrame, bt, "DevelopmentLevel")
 
-    for el in skipmissing(df[!, :NewBuildingKey])
-        Building.(el) # Key 없으면 assert
-    end
-
     p = joinpath(GAMEENV["CollectionResources"], "VillageGradeIcons")
     validate_file(p, df[!, :GradeIcon], ".png", "Icon이 존재하지 않습니다")
     # TODO 여러 폴더 검사하는 기능 필요

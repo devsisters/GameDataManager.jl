@@ -7,6 +7,12 @@ function joinpath_gamedata(file)
     mid_folder = is_xlsxfile(file) ? GAMEENV["xlsx"][file] : GAMEENV["json"][file]
     joinpath(GAMEENV["mars_repo"], mid_folder, file)
 end
+"""
+    isnull(x)
+
+json에서는 'nothing'과 'missing'을 혼용하여 사용하고 있기 때문에 필요... 
+"""
+isnull(x) = ismissing(x) | isnothing(x)
 
 
 """

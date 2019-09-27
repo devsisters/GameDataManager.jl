@@ -8,7 +8,7 @@ function validator_Building(bt)
     abilitydata = get(BalanceTable, "Ability"; check_modified = true)
     abilitykey = get(DataFrame, abilitydata, "Level")[!, :AbilityKey]
 
-    for row in filter(!ismissing, data[!, :AbilityKey])
+    for row in filter(!isnull, data[!, :AbilityKey])
         check = issubset(row, unique(abilitykey))
         @assert check "AbilityKey가 Ability_Level에 없습니다\n
                             $(setdiff(row, unique(abilitykey)))"

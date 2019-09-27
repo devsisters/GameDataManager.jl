@@ -24,7 +24,7 @@ function Base.show(io::IO, m::VillageToken)
     ref = get_cachedrow("VillageTokenTable", "Data", :TokenId, itemkey(m))[1]
     n = replace(ref["\$Name"], " " => "")
     print(io, digitsep(m.val), n)
-    if !ismissing(m.villageid)
+    if !isnull(m.villageid)
         print(io, "[VillageId: ", m.villageid, "]")
     end
 end

@@ -125,7 +125,7 @@ function get_buildings(key, savetsv = true; delim = '\t')
         t = string(buildingtype(key))
         ref = get_cachedrow(DataFrame, t, "Level", :BuildingKey, key)
         x = unique(ref[!, :BuildingTemplate])
-        convert(Vector{String}, filter(!ismissing, x))
+        convert(Vector{String}, filter(!isnull, x))
     end
 
     report = String[]

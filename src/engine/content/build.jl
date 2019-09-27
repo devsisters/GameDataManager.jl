@@ -22,12 +22,12 @@ end
 function parse_buildcost(cost::AbstractDict, villageid = missing)
     coin = begin 
         x = get(cost, "PriceCoin", missing)
-        ismissing(x) ? missing : x * COIN
+        isnull(x) ? missing : x * COIN
     end
 
     token = begin 
             id = get(cost, "VillageTokenId", missing)
-            if !ismissing(id)
+            if !isnull(id)
                 VillageToken(villageid, id, get(cost, "VillageTokenCount", missing))
             else
                 missing
@@ -35,7 +35,7 @@ function parse_buildcost(cost::AbstractDict, villageid = missing)
     end
     item = begin 
             key = get(cost, "NeedItemKey", missing)
-        if !ismissing(key)
+        if !isnull(key)
             StackItem(key, get(cost, "NeedItemCount", missing))
         else
             missing
@@ -43,5 +43,5 @@ function parse_buildcost(cost::AbstractDict, villageid = missing)
     end
     time = get(cost, "NeedTime", missing)
     # TODO time은 나중에 잘 쓰자
-    return ItemCollection(filter(!ismissing, [coin, token, item])...), time
+    return ItemCollection(filter(!isnull, [coin, token, item])...), time
 end 

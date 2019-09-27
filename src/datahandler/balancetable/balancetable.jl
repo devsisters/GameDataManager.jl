@@ -32,9 +32,14 @@ struct XLSXBalanceTable <: BalanceTable
     # 사용할 함수들
     cache::Union{Missing, Array{Dict, 1}}
 end
-function XLSXBalanceTable(jwb::JSONWorkbook; cacheindex = true, validation = true)
-    editor!(jwb)
-    dummy_localizer!(jwb)
+function XLSXBalanceTable(f::AbstractString; cacheindex = true, validation = true)
+    if ismodified(f)
+        jwb = JWB(f)
+        editor!(jwb)
+        dummy_localizer!(jwb)
+    else
+        jwb = JWB2(f)
+    end
 
     dataframe = construct_dataframe(jwb)
     cache = cacheindex ? index_cache.(dataframe) : missing
@@ -42,11 +47,6 @@ function XLSXBalanceTable(jwb::JSONWorkbook; cacheindex = true, validation = tru
     x = XLSXBalanceTable(jwb, dataframe, cache)
     validation && validator(x)
     return x
-end
-function XLSXBalanceTable(f::AbstractString; kwargs...)
-    jwb = JWB(f)
-
-    XLSXBalanceTable(jwb; kwargs...)
 end
 
 function JWB(file)::JSONWorkbook
@@ -108,7 +108,7 @@ function index_cache(df::DataFrame)
         idx = collect(1:size(df, 1))
         tf = (df[!, k] .== criteria)
         if !isa(tf, BitArray)
-            tf = map(x -> ismissing(x) ? false : x, tf)
+            tf = map(x -> isnull(x) ? false : x, tf)
         end
         idx[tf]
     end
@@ -238,11 +238,13 @@ function editor!(jwb::JSONWorkbook)
     # editor 함수명 규칙에 따라 해당 함수가 있는지 찾는다
     if isdefined(GameDataManager, f)
         foo = getfield(GameDataManager, f)
+
+        printstyled(stderr, "  $(filename) 편집 ◎﹏◎"; color = :yellow)
         foo(jwb)
+        printstyled(stderr, "\r", "  $(filename) 편집 ", "완료!\n"; color = :cyan)
     end
     return jwb
 end
-
 
 """
     validate_general(bt::XLSXBalanceTable)
@@ -305,7 +307,7 @@ function validate_subset(a, b, msg = "다음의 멤버가 subset이 아닙니다
 end
 
 function validate_file(root, files::Vector, extension = "", msg = "가 존재하지 않습니다"; kwargs...)
-    for el in filter(!ismissing, files)
+    for el in filter(!isnull, files)
         validate_file(root, "$(el)$(extension)", msg; kwargs...)
     end
     nothing
@@ -336,7 +338,7 @@ function compress!(jws::JSONWorksheet; dropmissing = true)
     vals = collect.(values.(jws.data))
     for k in keys(jws.data[1])
         x = map(el -> el[k], jws.data)
-        new_data[k] = dropmissing ? filter(!ismissing, x) : x
+        new_data[k] = dropmissing ? filter(!isnull, x) : x
     end
     jws.data = [new_data]
 end
