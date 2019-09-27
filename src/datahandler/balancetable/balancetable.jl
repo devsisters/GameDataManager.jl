@@ -34,11 +34,11 @@ struct XLSXBalanceTable <: BalanceTable
 end
 function XLSXBalanceTable(f::AbstractString; cacheindex = true, validation = true)
     if ismodified(f)
-        jwb = JWB(f)
+        jwb = JWB(f, true)
         editor!(jwb)
         dummy_localizer!(jwb)
     else
-        jwb = JWB2(f)
+        jwb = JWB(f, false)
     end
 
     dataframe = construct_dataframe(jwb)
@@ -49,60 +49,57 @@ function XLSXBalanceTable(f::AbstractString; cacheindex = true, validation = tru
     return x
 end
 
-function JWB(file)::JSONWorkbook
+function JWB(file, load_fromxlsx::Bool = true)::JSONWorkbook
     f = is_xlsxfile(file) ? file : MANAGERCACHE[:meta][:xlsx_shortcut][file]
     xlsxpath = joinpath_gamedata(f)
     meta = getmetadata(f)
 
-    kwargs_per_sheet = Dict()
-    for el in meta
-        kwargs_per_sheet[el[1]] = el[2][2]
-    end
-    jwb = JSONWorkbook(xlsxpath, keys(meta), kwargs_per_sheet)
-
-    return jwb
-end
-function JWB2(file)
-    f = is_xlsxfile(file) ? file : MANAGERCACHE[:meta][:xlsx_shortcut][file]
-    xlsxpath = joinpath_gamedata(f)
-    meta = getmetadata(f)
-
-    v = []
-    for el in meta
-        if endswith(lowercase(el[2][1]), ".json") 
-            jsonfile = joinpath_gamedata(el[2][1])
-            json = JSON.parsefile(jsonfile; dicttype = OrderedDict) |> x -> convert(Array{OrderedDict, 1}, x)
-            # JSONWorksheet를 위한 가짜 meta 생성
-            # Original이랑 완벽히 일치하게 만드려면 meta만 미리 저장해두면 될 듯...
-            m = XLSXasJSON.XLSXWrapperMeta(["empty"])
-            push!(v, JSONWorksheet(xlsxpath, m, json, el[1]))
+    if load_fromxlsx
+        kwargs_per_sheet = Dict()
+        for el in meta
+            kwargs_per_sheet[el[1]] = el[2][2]
         end
+        jwb = JSONWorkbook(xlsxpath, keys(meta), kwargs_per_sheet)
+    else
+        v = []
+        for el in meta # sheetindex가 xlsx과 다르다. getindex할 때 이름으로 참조할 것!
+            if endswith(lowercase(el[2][1]), ".json") 
+                jsonfile = joinpath_gamedata(el[2][1])
+                json = JSON.parsefile(jsonfile; dicttype = OrderedDict) |> x -> convert(Array{OrderedDict, 1}, x)
+                # JSONWorksheet를 위한 가짜 meta 생성
+                # Original이랑 완벽히 일치하게 만드려면 meta만 미리 저장해두면 될 듯...
+                m = XLSXasJSON.XLSXWrapperMeta(["empty"])
+                push!(v, JSONWorksheet(xlsxpath, m, json, el[1]))
+            end
+        end
+        index = XLSXasJSON.Index(sheetnames.(v))
+        jwb = JSONWorkbook(xlsxpath, v, index)
     end
-    index = XLSXasJSON.Index(sheetnames.(v))
-    jwb = JSONWorkbook(xlsxpath, v, index)
+
     return jwb
 end
 
-function construct_dataframe(data)
-    k = unique(keys.(data))    
+function construct_dataframe!(bt::XLSXBalanceTable)
+    for (i, jws) in enumerate(bt.data)
+        bt.dataframe[i] = construct_dataframe(jws)
+    end
+    return bt
+end
+function construct_dataframe(jwb::JSONWorkbook)
+    map(i -> construct_dataframe(jwb[i]), 1:length(jwb))
+end
+@inline function construct_dataframe(jws::JSONWorksheet)
+    k = unique(keys.(jws))    
     @assert length(k) == 1 "모든 row의 column명이 일치하지 않습니다, $k"
 
     v = Array{Any, 1}(undef, length(k[1]))
     @inbounds for (i, key) in enumerate(k[1])
-        v[i] = getindex.(data, key)
+        v[i] = getindex.(jws, key)
     end
 
     return DataFrame(v, Symbol.(k[1]))
 end
-function construct_dataframe(jwb::JSONWorkbook)
-    map(i -> construct_dataframe(jwb[i].data), 1:length(jwb))
-end
-function construct_dataframe!(bt::XLSXBalanceTable)
-    for (i, jws) in enumerate(bt.data)
-        bt.dataframe[i] = construct_dataframe(jws.data)
-    end
-    return bt
-end
+
 function index_cache(df::DataFrame)
     function collect_index(k, criteria)
         idx = collect(1:size(df, 1))
@@ -254,7 +251,7 @@ end
 """
 function validate_general(bt::XLSXBalanceTable)
     function validate_Key(df)
-        validate_duplicate(df, :Key)
+        validate_duplicate(df[!, :Key])
         # TODO 그래서 어디서 틀린건지 위치 찍어주기
         @assert !isa(eltype(df[!, :Key]), Union) "DataType이 틀린 Key가 존재합니다"
 
@@ -280,8 +277,28 @@ function validate_general(bt::XLSXBalanceTable)
     nothing
 end
 
-function validate_duplicate(df, k::Symbol; assert=true)
-    target = df[!, k]
+function validate_haskey(file, a; assert=true)
+    # 이건 하나하나 하드코딩하는 수밖에 없음
+    if file == "ItemTable"
+        jwb = JWB(file, false)
+        b = vcat(map(i -> get.(jwb[i], "Key", missing), 1:length(jwb))...)
+    elseif file == "Ability"
+        jwb = JWB(file, false)
+        b = unique(get.(jwb[:Level], "AbilityKey", missing))
+    elseif file == "Block"
+        jwb = JWB(file, false)
+        b = unique(get.(jwb[:Block], "Key", missing))
+    elseif file == "BlockSet"
+        jwb = JWB("Block", false)
+        b = unique(get.(jwb[:Set], "BlockSetKey", missing))
+    else
+        throw(AssertionError("validate_haskey($(file), ...)은 정의되지 않았습니다")) 
+    end
+
+    validate_subset(a, b, "'$(basename(jwb))'에 아래의 Key가 존재하지 않습니다";assert = assert)
+end
+
+function validate_duplicate(target; assert=true)
     if !allunique(target)
         duplicate = filter(el -> el[2] > 1, countmap(target))
         msg = "[:$(k)]에서 중복된 값이 발견되었습니다"

@@ -1,4 +1,3 @@
-
 function validator_Quest(bt)
     df = get(DataFrame, bt, "Main")
     if maximum(df[!, :QuestKey]) > 1023 || minimum(df[!, :QuestKey]) < 0

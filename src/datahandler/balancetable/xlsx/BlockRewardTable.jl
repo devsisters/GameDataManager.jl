@@ -1,20 +1,20 @@
-
 function validator_BlockRewardTable(bt)
     df = get(DataFrame, bt, "Data")
-    validate_duplicate(df, :RewardKey)
+    validate_duplicate(df[!, :RewardKey])
     # 1백만 이상은 BlockRewardTable에서만 쓴다
     @assert (rewardkey_scope(maximum(df[!, :RewardKey])) == "BlockRewardTable") "BlockRewardTable의 RewardKey는 1,000,000 이상을 사용해 주세요."
 
-    rewards = broadcast(row -> row[:RewardScript]["Rewards"], eachrow(df))
-    blocksetkeys = String[]
-    for v in rewards
-        for el in v
-            append!(blocksetkeys, getindex.(el, 3))
-        end
-    end
-    ref = get(DataFrame, ("Block", "Set"); check_modified=true)
+    # ItemKey 확인
+    itemkeys = begin 
+        x = map(el -> el["Rewards"], df[!, :RewardScript])
+        x = vcat(vcat(x...)...) # Array 2개에 쌓여 있으니 두번 해체
+        rewards = break_rewardscript.(x)
 
-    validate_subset(blocksetkeys, string.(ref[!, :BlockSetKey]), "존재하지 않는 BlockSetKey 입니다")
+        unique(map(el -> el[2][2], rewards))
+    end
+
+    export_gamedata("Block")
+    validate_haskey("BlockSet", itemkeys)
 
     nothing
 end

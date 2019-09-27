@@ -21,7 +21,8 @@ function validator_Block(bt)
     end
 
     # 임시로 ArtAsset이 중복되면 안됨. 추후 삭제
-    validate_duplicate(get(DataFrame, bt, "Block"), :ArtAsset; assert = false)
+    df = get(DataFrame, bt, "Block")
+    validate_duplicate(df[!, :ArtAsset]; assert = false)
 
     nothing
 end

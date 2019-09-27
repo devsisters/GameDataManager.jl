@@ -63,9 +63,6 @@ function break_rewardscript(item)
     end
     return weight, Tuple(x)
 end
-function extract_itemkey(x)
-
-end
 
 StatsBase.sample(a::FixedReward) = a.item
 

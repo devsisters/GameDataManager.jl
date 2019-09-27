@@ -3,13 +3,22 @@ function xl(exportall::Bool = false)
     cd(GAMEENV["patch_data"])
     run(`git checkout master`)
     
-    export_gamedata(exportall)
+    files = exportall ? collect_auto_xlsx() : collect_modified_xlsx()
+    if isempty(files)
+        help(2)
+    else
+        @info "xlsx -> json 추출을 시작합니다 ⚒\n" * "-"^(displaysize(stdout)[2]-4)
+        export_gamedata(files)
+        @info "json 추출이 완료되었습니다 ☺"
+    end
 end
 function xl(x::AbstractString) 
     cd(GAMEENV["patch_data"])
     run(`git checkout master`)
-    
+
+    @info "xlsx -> json 추출을 시작합니다 ⚒\n" * "-"^(displaysize(stdout)[2]-4)
     export_gamedata(x)
+    @info "json 추출이 완료되었습니다 ☺"
 end
 
 """
@@ -22,27 +31,17 @@ end
 
 mars 메인 저장소의 '.../_META.json'에 명시된 파일만 추출가능합니다
 """
-function export_gamedata(exportall = false)
-    files = exportall ? collect_auto_xlsx() : collect_modified_xlsx()
-    if isempty(files)
-        help(2)
-    else
-        export_gamedata(files)
-    end
-end
 function export_gamedata(file::AbstractString)
     file = is_xlsxfile(file) ? file : MANAGERCACHE[:meta][:xlsx_shortcut][file]
     export_gamedata([file])
 end
 function export_gamedata(files::Vector)
     if !isempty(files)
-        @info "xlsx -> json 추출을 시작합니다 ⚒\n" * "-"^(displaysize(stdout)[2]-4)
         for f in files
             println("『", f, "』")
             bt = BalanceTable(f)
             write_json(bt.data)
         end
-        @info "json 추출이 완료되었습니다 ☺"
         gamedata_export_history(files)
     end
     nothing

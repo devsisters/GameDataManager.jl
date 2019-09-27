@@ -1,3 +1,4 @@
+
 function editor_PipoDemographic!(jwb::JSONWorkbook)
     for s in ("Gender", "Age", "Country")
         compress!(jwb, s)

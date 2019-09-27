@@ -1,14 +1,30 @@
-
 function validator_RewardTable(bt::XLSXBalanceTable)
     # 시트를 합쳐둠
     df = get(DataFrame, bt, 1)
-    validate_duplicate(df, :RewardKey)
+    validate_duplicate(df[!, :RewardKey])
     # 1백만 이상은 BlockRewardTable에서만 쓴다
     @assert (rewardkey_scope(maximum(df[!, :RewardKey])) == "RewardTable") "RewardTable의 RewardKey는 1,000,000 미만을 사용해 주세요."
 
     # ItemKey 확인
-    d = get(Dict, bt, 1)
-    # map(el -> RewardTable(el["RewardKey"]), d)
+    itemkeys = begin 
+        x = map(el -> el["Rewards"], df[!, :RewardScript])
+        x = vcat(vcat(x...)...) # Array 2개에 쌓여 있으니 두번 해체
+        rewards = break_rewardscript.(x)
+
+        itemkeys = Array{Any}(undef, length(rewards))
+        for (i, el) in enumerate(rewards)
+            itemtype = el[2][1]
+            if itemtype == "Item" || itemtype == "BuildingSeed"
+                itemkeys[i] = el[2][2]
+            else
+                itemkeys[i] = itemtype
+            end
+        end
+        unique(itemkeys)
+    end
+
+    export_gamedata("ItemTable")
+    validate_haskey("ItemTable", itemkeys)
 
     nothing
 end

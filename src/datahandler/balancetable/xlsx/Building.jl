@@ -5,14 +5,9 @@ function validator_Building(bt)
     data = get(DataFrame, bt, "Building")
     leveldata = get(DataFrame, bt, "Level")
 
-    abilitydata = get(BalanceTable, "Ability"; check_modified = true)
-    abilitykey = get(DataFrame, abilitydata, "Level")[!, :AbilityKey]
+    export_gamedata("Ability")
+    validate_haskey("Ability", filter(!isnull, vcat(data[!, :AbilityKey]...)))
 
-    for row in filter(!isnull, data[!, :AbilityKey])
-        check = issubset(row, unique(abilitykey))
-        @assert check "AbilityKey가 Ability_Level에 없습니다\n
-                            $(setdiff(row, unique(abilitykey)))"
-    end
     buildgkey_level = broadcast(row -> (row[:BuildingKey], row[:Level]), eachrow(leveldata))
     @assert allunique(buildgkey_level) "$(basename(bt))'Level' 시트에 중복된 Level이 있습니다"
 
