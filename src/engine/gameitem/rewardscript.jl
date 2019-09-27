@@ -63,6 +63,9 @@ function break_rewardscript(item)
     end
     return weight, Tuple(x)
 end
+function extract_itemkey(x)
+
+end
 
 StatsBase.sample(a::FixedReward) = a.item
 
@@ -86,65 +89,6 @@ Base.length(a::RewardScript) = length(a.item)
 ## Printing
 ##
 ################################################################################
-function itemnames(x::Array{T, 1}) where T <: RewardScript
-    itemnames.(x)
-end
-itemnames(x::RewardScript) = itemnames.(x.item)
-function itemnames(x::Tuple{String, Int})
-    name = x[1] == "Coin" ? "COIN" :
-           x[1] == "PaidCrystal" ? "CRY" :
-           x[1] == "FreeCrystal" ? "CRY" : error("정의되지 않은 아이템 / ", x[1])
-end
-
-function itemnames(x::Tuple{String, Int, Int}, length_limit = 10)
-    ref = getjuliadata("ItemTable")
-    name = ref[x[2]][Symbol("\$Name")]
-
-    # TODO: 글자 길이 제한 넣기...
-    # if length(name) > length_limit
-    #     name = chop(name, head=0, tail=length(x)-length_limit) *"…"
-    # end
-
-    return name
-end
-
-function itemvalues(x::Array{T, 1}) where T <: RewardScript
-    itemvalues.(x)
-end
-function itemvalues(it::RandomReward)
-    w = values(it.weight) / sum(it.weight)
-    w .* broadcast(x -> x[end], it.item)
-end
-function itemvalues(it::FixedReward)
-    broadcast(x -> x[end], it.item)
-end
-
-# function Base.show(io::IO, item::FixedReward)
-#     for x in item.item
-#         print(io, show_item(x))
-#     end
-# end
-# function Base.show(io::IO, item::RandomReward)
-#     rows = displaysize(io)[1]
-#     rows < 2   && (print(io, " …"); return)
-#     rows -= 1 # Subtract the summary
-
-#     for (i, x) in enumerate(item.item)
-#         w = item.weight[i] / sum(item.weight)
-#         if isa(x, Tuple{String, Int, Int})
-#             print(io, show_item(x[2], x[3] * w))
-#         else
-#             print(io, show_item(x[1], x[2] * w))
-#         end
-#         println(io)
-
-#         if i >= rows
-#             @printf(io, "……지면상 %i개 아이템이 생략되었음……", length(item)-rows)
-#             break
-#         end
-#     end
-# end
-
 function show_item(item::FixedReward)
     show_item.(item.item)
 end
