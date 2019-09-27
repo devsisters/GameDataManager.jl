@@ -5,14 +5,14 @@ function validator_Quest(bt)
         throw(AssertionError("Quest_Main.json의 QuestKey는 0~1023만 사용 가능합니다."))
     end
     for i in 1:size(df, 1)
-        validate_questtrigger(df[i, :Trigger])
-        validate_questtrigger(df[i, :CompleteCondition])
+        validate_questtrigger.(df[i, :Trigger])
+        validate_questtrigger.(df[i, :CompleteCondition])
     end
     # Dialogue 파일 유무 체크
     path_dialogue = joinpath(GAMEENV["patch_data"], "Dialogue")
     for el in df[!, :CompleteAction]
         f = el["QuestDialogue"]
-        if !ismissing(f)
+        if !isnull(f)
             validate_file(path_dialogue, "$(f).json", "Dialogue가 존재하지 않습니다")
         end
     end
@@ -27,10 +27,7 @@ https://docs.google.com/document/d/1yvzWjz_bziGhCH6TdDUh0nXAB2J1uuHiYSPV9SyptnA/
 * 사용 가능한 trigger인지, 변수가 올바른 형태인지 체크한다
 """
 
-function validate_questtrigger(arr::Array)
-    validate_questtrigger.(arr)
-end
-function validate_questtrigger(x::Array{T, 1}) where T <: AbstractString
+function validate_questtrigger(x::Array{T, 1}) where T
     get(BalanceTable, "ItemTable"; check_modified=true)
 
     trigger = Dict(
@@ -56,7 +53,7 @@ function validate_questtrigger(x::Array{T, 1}) where T <: AbstractString
 
     ref = get(trigger, string(x[1]), missing)
 
-    @assert !ismissing(ref) "`$(x[1])`는 존재하지 않는 trigger입니다."
+    @assert !isnull(ref) "`$(x[1])`는 존재하지 않는 trigger입니다."
     @assert length(ref) == length(x[2:end]) "$(x) 변수의 수가 다릅니다"
 
     for (i, el) in enumerate(x[2:end])
