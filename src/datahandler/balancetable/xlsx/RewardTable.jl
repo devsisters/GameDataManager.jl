@@ -23,7 +23,7 @@ function validator_RewardTable(bt::XLSXBalanceTable)
         unique(itemkeys)
     end
 
-    export_gamedata("ItemTable")
+    export_gamedata("ItemTable", false)
     validate_haskey("ItemTable", itemkeys)
 
     nothing

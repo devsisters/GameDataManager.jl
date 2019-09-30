@@ -51,6 +51,10 @@ function gamedata_export_history(files::Vector)
     end
     gamedata_export_history()
 end
+function gamedata_export_history(f)
+    MANAGERCACHE[:history][f] = mtime(joinpath_gamedata(f))
+    gamedata_export_history()
+end
 
 # _Meta.json에 없는 파일 제거함
 function cleanup_gamedata_export_history!()

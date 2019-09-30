@@ -32,8 +32,8 @@ struct XLSXBalanceTable <: BalanceTable
     # 사용할 함수들
     cache::Union{Missing, Array{Dict, 1}}
 end
-function XLSXBalanceTable(f::AbstractString; cacheindex = true, validation = true)
-    if ismodified(f)
+function XLSXBalanceTable(f::AbstractString; cacheindex = true, validation = true, force_reload = false)
+    if ismodified(f) | force_reload
         jwb = JWB(f, true)
         editor!(jwb)
         dummy_localizer!(jwb)
@@ -49,12 +49,12 @@ function XLSXBalanceTable(f::AbstractString; cacheindex = true, validation = tru
     return x
 end
 
-function JWB(file, load_fromxlsx::Bool = true)::JSONWorkbook
+function JWB(file, force_reload::Bool = true)::JSONWorkbook
     f = is_xlsxfile(file) ? file : MANAGERCACHE[:meta][:xlsx_shortcut][file]
     xlsxpath = joinpath_gamedata(f)
     meta = getmetadata(f)
 
-    if load_fromxlsx
+    if force_reload
         kwargs_per_sheet = Dict()
         for el in meta
             kwargs_per_sheet[el[1]] = el[2][2]

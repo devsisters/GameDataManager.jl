@@ -13,7 +13,7 @@ function validator_BlockRewardTable(bt)
         unique(map(el -> el[2][2], rewards))
     end
 
-    export_gamedata("Block")
+    export_gamedata("Block", false)
     validate_haskey("BlockSet", itemkeys)
 
     nothing
