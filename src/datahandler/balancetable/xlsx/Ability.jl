@@ -59,11 +59,11 @@ function editor_Ability!(jwb::JSONWorkbook)
         for a in area_per_grade[grade] # 건물 면적
             for lv in 1:5
                 # (grade + level - 1) * area * 60(1시간)
-                rent = _rentcoin_value(grade, lv, a)
+                joy = _joycreation_value(grade, lv, a)
                 push!(residence_ability, 
                     OrderedDict(
-                    "Group" => "RentCoin", "AbilityKey" => "RentCoin_G$(grade)_$(a)",
-                    "Level" => lv, "Value" => rent, "IsValueReplace" => true, 
+                    "Group" => "JoyCreation", "AbilityKey" => "JoyCreation_G$(grade)_$(a)",
+                    "Level" => lv, "Value" => joy, "IsValueReplace" => true, 
                     "LevelupCost" => Pair("PriceCoin", missing), "LevelupCostItem" => []))
             end
         end
@@ -94,8 +94,14 @@ function _coincounter_value(profit, grade, level)
     coincounter = round(Int, base * level * profit)
 end
 
-function _rentcoin_value(grade, level, _area)
-    profit = _profitcoin_value(grade, level, _area)
-    # level +1 시간 분량
-    rentcoin = profit * (level + 1)
+# function _rentcoin_value(grade, level, _area)
+#     profit = _profitcoin_value(grade, level, _area)
+#     # level +1 시간 분량
+#     rentcoin = profit * (level + 1)
+# end
+
+function _joycreation_value(grade, level, _area)
+    # 2x1에서 250, 이후 변의 길이에 비례
+    joy = (grade + level -1) * 250 * sqrt(_area) * 1/sqrt(2)
+    return round(Int, joy, RoundDown)
 end

@@ -89,22 +89,25 @@ function _building_costtime(type, grade, level, _area)
     round(Int, t)
 end
 function _building_costcoin(type, grade, level, _area)
-    # 2레벨에 한번씩 profit, rent 레벨이 오른다
+    # 2레벨에 한번씩 profit이 오른다
     abilitylevel = div(level+1, 2)
+    p = _profitcoin_value(grade, abilitylevel, _area)
     if type == "Shop"
-        p = _profitcoin_value(grade, abilitylevel, _area)
+        cost = round(Int, p * (grade*1.5) * level)
     elseif type == "Residence"
-        p = _rentcoin_value(grade, abilitylevel, _area)
+        # Residence 레벨 단계가 더 적어서 보정
+        cost = round(Int, p * grade * level*2.5)
     end
-    cost = round(Int, p * (grade*1.5) * level)
+    return cost
 end
 
 function _building_costitem(type::AbstractString, grade, level, _area)
-    amounts = _building_costitem(grade, level, _area)
     if type == "Shop"
         items = [8101, 8102, 8103]
+        amounts = _building_costitem(grade, level, _area)
     elseif type == "Residence"
         items = [8201, 8202, 8203]
+        amounts = _building_costitem(grade, level, _area)
     end
 
     costitem = map((k, v) -> (Key = k, Amount = v), items, amounts)
