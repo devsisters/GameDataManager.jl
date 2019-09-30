@@ -8,7 +8,6 @@ function editor_PipoTalent!(jwb::JSONWorkbook)
         "Denied"       => JSON.parsefile(joinpath(output_path, "_Denied.json"); dicttype=OrderedDict))
 
     jws = jwb["Dialogue"]
-    println("$(output_path) Perk별 Dialogue가 생성됩니다")
 
     for el in jws.data
         perk = el["Key"]
@@ -32,7 +31,7 @@ function editor_PipoTalent!(jwb::JSONWorkbook)
             end
         end
     end
-    printstyled("\n$(size(jws, 1))개 PERK 대사 생성 완료!\n"; color=:cyan)
+    # printstyled("\n$(size(jws, 1))개 PERK 대사 생성 완료!\n"; color=:cyan)
 
     deleteat!(jwb, "Dialogue")
     jwb
