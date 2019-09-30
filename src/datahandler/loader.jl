@@ -71,8 +71,6 @@ function Base.get(::Type{JSONBalanceTable}, file::AbstractString; check_modified
     if !haskey(GAMEDATA, f)
         cache_gamedata!(JSONBalanceTable, f)
     end
-    #TODO if check_modified
-    # end
     return GAMEDATA[file]
 end
 """

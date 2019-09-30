@@ -16,8 +16,6 @@ include("datahandler/balancetable/balancetable.jl")
 for f in readdir(joinpath(@__DIR__, "datahandler/balancetable/xlsx"))
   include("datahandler/balancetable/xlsx/$f")
 end
-# include("datahandler/query.jl")
-
 
 ############ Simulation ENGINE #########################
 include("engine/structs.jl")
