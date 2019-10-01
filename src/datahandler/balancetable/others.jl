@@ -1,3 +1,4 @@
+
 """
     SubModuleQuest
 
@@ -29,15 +30,15 @@ function SubModuleQuest.validator(bt)
     end
     nothing
 end
-"""
 
-    validate_questtrigger(arr::Array)
+#=
+
+    questtrigger(arr::Array)
 https://www.notion.so/devsisters/b5ea3e51ae584f4491b40b7f47273f49
 https://docs.google.com/document/d/1yvzWjz_bziGhCH6TdDUh0nXAB2J1uuHiYSPV9SyptnA/edit
 
 * 사용 가능한 trigger인지, 변수가 올바른 형태인지 체크한다
-"""
-
+=#
 function SubModuleQuest.questtrigger(x::Array{T, 1}) where T
     get(BalanceTable, "ItemTable"; check_modified=true)
 
@@ -92,7 +93,6 @@ function SubModuleQuest.questtrigger(x::Array{T, 1}) where T
     nothing
 end
 
-
 function SubModuleQuest.editor!(jwb::JSONWorkbook)
     data = jwb[:Main].data
     for el in data
@@ -109,4 +109,110 @@ function SubModuleQuest.editor!(jwb::JSONWorkbook)
         el["CompleteCondition"] = overwrite
     end
 
+end
+
+"""
+    SubModulePlayer
+
+* Player.xlsx 데이터를 관장함
+"""
+module SubModulePlayer
+    function validator end
+    function editor! end
+    function need_developmentpoint end
+end
+using .SubModulePlayer
+
+function SubModulePlayer.validator(bt)
+    df = get(DataFrame, bt, "DevelopmentLevel")
+
+    p = joinpath(GAMEENV["CollectionResources"], "VillageGradeIcons")
+    validate_file(p, df[!, :GradeIcon], ".png", "Icon이 존재하지 않습니다")
+    # TODO 여러 폴더 검사하는 기능 필요
+    # p = joinpath(GAMEENV["CollectionResources"], "ItemIcons")
+    # validate_file(p, vcat(df[!, :DisplayIcons]...), ".png", "Icon이 존재하지 않습니다")
+
+end
+function SubModulePlayer.editor!(jwb)
+    # 레벨업 개척점수 필요량 추가
+    jws = jwb[:DevelopmentLevel]
+    for i in 1:length(jws.data)
+        lv = jws.data[i]["Level"]
+        jws.data[i]["NeedDevelopmentPoint"] = SubModulePlayer.need_developmentpoint(lv)
+    end
+    jwb[:DevelopmentLevel] = merge(jwb[:DevelopmentLevel], jwb[:DroneDelivery], "Level")
+    jwb[:DevelopmentLevel] = merge(jwb[:DevelopmentLevel], jwb[:PartTime], "Level")
+    jwb[:DevelopmentLevel] = merge(jwb[:DevelopmentLevel], jwb[:SpaceDrop], "Level")
+
+    deleteat!(jwb, :DroneDelivery)
+    deleteat!(jwb, :PartTime)
+    deleteat!(jwb, :SpaceDrop)
+end
+
+function SubModulePlayer.need_developmentpoint(level)
+    # 30레벨까지 요구량이 56015.05
+    α1 = 66; β1 = 17.45; γ1 = 3
+    p = α1*(level-1)^2 + β1*(level-1) + γ1
+    if level <= 30
+        return round(Int, p, RoundDown)
+    elseif level <= 40
+        # 30~40레벨 요구량이 56015*2 
+        p2 = 1.10845 * p
+
+        return round(Int, p2, RoundDown)
+    else 
+        #TODO 마을 3개, 4개, 5개.... 레벨 상승량 별도 책정 필요
+        # 나중가면 마을 1개당 1레벨로 된다.
+        p2 = 1.4 * p
+
+        return round(Int, p2, RoundDown)
+    end
+end
+
+module SubModuleNameGenerator
+    # function validator end
+    function editor! end
+end
+using .SubModuleNameGenerator
+
+function SubModuleNameGenerator.editor!(jwb::JSONWorkbook)
+    for s in sheetnames(jwb)
+        compress!(jwb, s)
+    end
+end
+
+"""
+    SubModuleItemTable
+
+* ItemTable.xlsx 데이터를 관장함
+"""
+module SubModuleItemTable
+    function validator end
+    # function editor! end
+end
+using .SubModuleItemTable
+
+function SubModuleItemTable.validator(bt::XLSXBalanceTable)
+    path = joinpath(GAMEENV["CollectionResources"], "ItemIcons")
+    validate_file(path, get(DataFrame, bt, "Currency")[!, :Icon], ".png", "아이템 Icon이 존재하지 않습니다")
+    validate_file(path, get(DataFrame, bt, "Normal")[!, :Icon], ".png", "아이템 Icon이 존재하지 않습니다")
+    validate_file(path, get(DataFrame, bt, "BuildingSeed")[!, :Icon], ".png", "아이템 Icon이 존재하지 않습니다")
+
+    nothing
+end
+
+"""
+    SubModuleBlockCashStore
+
+* CashStore.xlsm 데이터를 관장함
+"""
+module SubModuleCashStore
+    # function validator end
+    function editor! end
+end
+using .SubModuleCashStore
+
+function SubModuleCashStore.editor!(jwb::JSONWorkbook)
+    jwb[:Data] = merge(jwb[:Data], jwb[:args], "ProductKey")
+    deleteat!(jwb, :args)
 end

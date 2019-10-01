@@ -1,3 +1,36 @@
+"""
+    SubModuleWork
+
+* Work.xlsx 데이터를 관장함
+"""
+module SubModuleWork
+    # function validator end
+    function editor! end
+end
+using .SubModuleWork
+
+function SubModuleWork.editor!(jwb::JSONWorkbook)
+    jws = jwb[:Reward]
+
+    for i in 1:length(jws.data)
+        data = jws.data[i]["Reward"]
+        jws.data[i]["Reward"] = vcat(map(el -> collect(values(el)), data)...)
+    end
+
+    jws = jwb[:Event]
+    for i in 1:length(jws.data)
+        data = jws.data[i]["RequirePIPO"]
+        jws.data[i]["RequirePIPO"] = vcat(map(el -> collect(values(el)), data)...)
+    end
+
+    return jwb
+end
+
+"""
+    SubModulePipoTalent
+
+* PipoTalent.xlsx 데이터를 관장함
+"""
 module SubModulePipoTalent
     # function validator end
     function editor! end
@@ -40,5 +73,33 @@ function SubModulePipoTalent.editor!(jwb::JSONWorkbook)
 
     deleteat!(jwb, "Dialogue")
     jwb
+end
+
+
+"""
+    SubModulePipoDemographic    
+"""
+module SubModulePipoDemographic
+    # function validator end
+    function editor! end
+end
+using .SubModulePipoDemographic
+
+function SubModulePipoDemographic.editor!(jwb::JSONWorkbook)
+    for s in ("Gender", "Age", "Country")
+        compress!(jwb, s)
+    end
+
+    jws = jwb["enName"]
+    new_data = OrderedDict()
+    for k in keys(jws.data[1])
+        new_data[k] = OrderedDict()
+        for k2 in keys(jws.data[1][k])
+            new_data[k][k2] = filter(!isnull, map(el -> el[k][k2], jws.data))
+        end
+    end
+    jws.data = [new_data]
+
+    return jwb
 end
 

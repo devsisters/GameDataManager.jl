@@ -13,9 +13,12 @@ import Base: +, -, *, /, ==
 
 # BalanceTable
 include("datahandler/balancetable/balancetable.jl")
-for f in readdir(joinpath(@__DIR__, "datahandler/balancetable/xlsx"))
-  include("datahandler/balancetable/xlsx/$f")
-end
+include("datahandler/balancetable/others.jl")
+include("datahandler/balancetable/block.jl")
+include("datahandler/balancetable/building.jl")
+include("datahandler/balancetable/pipo.jl")
+include("datahandler/balancetable/rewardtable.jl")
+
 
 ############ Simulation ENGINE #########################
 include("engine/structs.jl")
