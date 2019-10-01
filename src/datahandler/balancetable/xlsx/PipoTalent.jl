@@ -1,5 +1,10 @@
+module SubModulePipoTalent
+    # function validator end
+    function editor! end
+end
+using .SubModulePipoTalent
 
-function editor_PipoTalent!(jwb::JSONWorkbook)
+function SubModulePipoTalent.editor!(jwb::JSONWorkbook)
     output_path = joinpath(GAMEENV["mars_repo"], "patch-data/Dialogue/PipoTalk")
 
     template = Dict(

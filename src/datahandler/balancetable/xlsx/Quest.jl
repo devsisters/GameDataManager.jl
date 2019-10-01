@@ -1,11 +1,23 @@
-function validator_Quest(bt)
+"""
+    SubModuleQuest
+
+* Quest.xlsx 데이터를 관장함
+"""
+module SubModuleQuest
+    function validator end
+    function editor! end
+    function questtrigger end
+end
+using .SubModuleQuest
+
+function SubModuleQuest.validator(bt)
     df = get(DataFrame, bt, "Main")
     if maximum(df[!, :QuestKey]) > 1023 || minimum(df[!, :QuestKey]) < 0
         throw(AssertionError("Quest_Main.json의 QuestKey는 0~1023만 사용 가능합니다."))
     end
     for i in 1:size(df, 1)
-        validate_questtrigger.(df[i, :Trigger])
-        validate_questtrigger.(df[i, :CompleteCondition])
+        SubModuleQuest.questtrigger.(df[i, :Trigger])
+        SubModuleQuest.questtrigger.(df[i, :CompleteCondition])
     end
     # Dialogue 파일 유무 체크
     path_dialogue = joinpath(GAMEENV["patch_data"], "Dialogue")
@@ -26,7 +38,7 @@ https://docs.google.com/document/d/1yvzWjz_bziGhCH6TdDUh0nXAB2J1uuHiYSPV9SyptnA/
 * 사용 가능한 trigger인지, 변수가 올바른 형태인지 체크한다
 """
 
-function validate_questtrigger(x::Array{T, 1}) where T
+function SubModuleQuest.questtrigger(x::Array{T, 1}) where T
     get(BalanceTable, "ItemTable"; check_modified=true)
 
     trigger = Dict(
@@ -81,7 +93,7 @@ function validate_questtrigger(x::Array{T, 1}) where T
 end
 
 
-function editor_Quest!(jwb::JSONWorkbook)
+function SubModuleQuest.editor!(jwb::JSONWorkbook)
     data = jwb[:Main].data
     for el in data
         overwrite = []

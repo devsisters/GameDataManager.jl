@@ -1,5 +1,15 @@
+"""
+    SubModuleWork
 
-function editor_Work!(jwb::JSONWorkbook)
+* Work.xlsx 데이터를 관장함
+"""
+module SubModuleWork
+    # function validator end
+    function editor! end
+end
+using .SubModuleWork
+
+function SubModuleWork.editor!(jwb::JSONWorkbook)
     jws = jwb[:Reward]
 
     for i in 1:length(jws.data)

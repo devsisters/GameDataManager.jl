@@ -1,4 +1,20 @@
-function validator_Ability(bt)
+"""
+    SubModuleAbility
+
+* Ability.xlsx 데이터를 관장함
+* Shop.xlsx, Residence.xlsx, Special.xlsx도 영향을 받음 
+    
+"""
+module SubModuleAbility
+    function validator end
+    function editor! end
+    function profitcoin end
+    function coincounter end
+    function joycreation end
+end
+using .SubModuleAbility
+
+function SubModuleAbility.validator(bt)
     ref = get(DataFrame, bt, "Group")
     df_level = get(DataFrame, bt, "Level")
 
@@ -12,7 +28,20 @@ function validator_Ability(bt)
     nothing
 end
 
-function editor_Ability!(jwb::JSONWorkbook)
+# TODO: 임시함수. 개편 필요
+function _building_rawdatas(target::Vector = ["Shop", "Residence", "Special", "Sandbox"])
+    x = _building_rawdatas.(target)
+    return merge(x...)
+end
+function _building_rawdatas(f)
+    d = Dict()
+    for row in JWB(f)[:Building].data
+        k = row["BuildingKey"]
+        d[k] = row
+    end
+    return d
+end
+function SubModuleAbility.editor!(jwb::JSONWorkbook)
     function getarea_pergrade(buildingtype)
         # 건물이 1 ~ 5등급이 있다 가정하고 데이터 생성
         ref = _building_rawdatas(buildingtype)
@@ -33,20 +62,20 @@ function editor_Ability!(jwb::JSONWorkbook)
     shop_ability = []
     for grade in 1:5
         for a in area_per_grade[grade] # 건물 면적
-            for lv in 1:8
+            for lv in 1:6
                 # (grade + level - 1) * area * 60(1시간)
-                profit = _profitcoin_value(grade, lv, a)
-                coincounter = _coincounter_value(profit, grade, lv)
+                profit = SubModuleAbility.profitcoin(grade, lv, a)
+                coincounter = SubModuleAbility.coincounter(profit, grade, lv)
                 push!(shop_ability, 
                     OrderedDict(
                     "Group" => "ProfitCoin", "AbilityKey" => "ProfitCoin_G$(grade)_$(a)",
-                    "Level" => lv, "Value" => profit, "IsValueReplace" => true, 
+                    "Level" => lv, "Value" => profit,  
                     "LevelupCost" => Pair("PriceCoin", missing), "LevelupCostItem" => []))
 
                 push!(shop_ability, 
                     OrderedDict(
                     "Group" => "CoinCounterCap", "AbilityKey" => "CoinCounterCap_G$(grade)_$(a)",
-                    "Level" => lv, "Value" => coincounter, "IsValueReplace" => true, 
+                    "Level" => lv, "Value" => coincounter, 
                     "LevelupCost" => Pair("PriceCoin", missing), "LevelupCostItem" => missing))
             end
         end
@@ -57,13 +86,13 @@ function editor_Ability!(jwb::JSONWorkbook)
     area_per_grade = getarea_pergrade("Residence")
     for grade in 1:5
         for a in area_per_grade[grade] # 건물 면적
-            for lv in 1:5
+            for lv in 1:6
                 # (grade + level - 1) * area * 60(1시간)
-                joy = _joycreation_value(grade, lv, a)
+                joy = SubModuleAbility.joycreation(grade, lv, a)
                 push!(residence_ability, 
                     OrderedDict(
                     "Group" => "JoyCreation", "AbilityKey" => "JoyCreation_G$(grade)_$(a)",
-                    "Level" => lv, "Value" => joy, "IsValueReplace" => true, 
+                    "Level" => lv, "Value" => joy, 
                     "LevelupCost" => Pair("PriceCoin", missing), "LevelupCostItem" => []))
             end
         end
@@ -76,14 +105,18 @@ function editor_Ability!(jwb::JSONWorkbook)
     return jwb
 end
 
-function _profitcoin_value(grade, level, _area)
+#==========================================================================================
+ -밸런싱 스크립트
+
+==========================================================================================#
+function SubModuleAbility.profitcoin(grade, level, _area)
     # (grade + level - 1) * area * 60(1시간)
     # 면적은 무조건 2의 배수이므로 /2를 한다
     profit = (grade + level -1) * _area/2 * 60
     return round(Int, profit, RoundDown)
 end
 
-function _coincounter_value(profit, grade, level)
+function SubModuleAbility.coincounter(profit, grade, level)
     base = begin 
         grade == 1 ? 3/60 : 
         grade == 2 ? 8/60 : 
@@ -100,8 +133,9 @@ end
 #     rentcoin = profit * (level + 1)
 # end
 
-function _joycreation_value(grade, level, _area)
+function SubModuleAbility.joycreation(grade, level, _area)
     # 2x1에서 250, 이후 변의 길이에 비례
     joy = (grade + level -1) * 250 * sqrt(_area) * 1/sqrt(2)
     return round(Int, joy, RoundDown)
 end
+

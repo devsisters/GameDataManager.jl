@@ -205,19 +205,21 @@ end
 ############################################################################
 """
     validator(bt::XLSXBalanceTable)
-개별 파일에 독자적으로 적용되는 규칙
-파일명, 컬럼명으로 검사한다.
 
+데이터 오류를 검사
+서브모듈 GameDataManager.SubModule\$(filename) 참조
 """
 function validator(bt::XLSXBalanceTable)
     filename = basename(bt)
 
     validate_general(bt)
-    # validator 함수명 규칙에 따라 해당 함수가 있는지 찾는다
-    f = Symbol("validator_", split(filename, ".")[1])
-    if isdefined(GameDataManager, f)
-        foo = getfield(GameDataManager, f)
-        foo(bt)
+    # SubModule이 있으면 validate 실행
+    submodule = Symbol("SubModule", split(filename, ".")[1])
+    if isdefined(GameDataManager, submodule)
+        m = getfield(GameDataManager, submodule)
+        if isdefined(m, :validator)
+            m.validator(bt)
+        end
     end
 end
 
@@ -225,19 +227,20 @@ end
     editor!(jwb::JSONWorkbook)
 
 하드코딩된 기준으로 데이터를 2차가공한다
-xlsx 파일명으로 된 스크립트에 가공하는 함수가 정의되어 있다
-
+서브모듈 GameDataManager.SubModule\$(filename) 참조
 """
 function editor!(jwb::JSONWorkbook)
     filename = basename(jwb)
 
-    # editor 함수명 규칙에 따라 해당 함수가 있는지 찾는다
-    f = Symbol("editor_", split(filename, ".")[1], "!")
-    if isdefined(GameDataManager, f)
-        printstyled(stderr, "  $(filename) 편집 ◎﹏◎"; color = :yellow)
-        foo = getfield(GameDataManager, f)
-        foo(jwb)
-        printstyled(stderr, "\r", "  $(filename) 편집 ", "완료!\n"; color = :cyan)
+    # SubModule이 있으면 editor 실행
+    submodule = Symbol("SubModule", split(filename, ".")[1])
+    if isdefined(GameDataManager, submodule)
+        m = getfield(GameDataManager, submodule)
+        if isdefined(m, :editor!)
+            printstyled(stderr, "  $(filename) 편집 ◎﹏◎"; color = :yellow)
+            m.editor!(jwb)
+            printstyled(stderr, "\r", "  $(filename) 편집 ", "완료!\n"; color = :cyan)
+        end
     end
     return jwb
 end

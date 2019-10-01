@@ -1,4 +1,16 @@
-function validator_RewardTable(bt::XLSXBalanceTable)
+"""
+    SubModuleRewardTable
+
+* RewardTable.xlsm 데이터를 관장함
+"""
+module SubModuleRewardTable
+    function validator end
+    function editor! end
+    function collect_rewardscript! end
+end
+using .SubModuleRewardTable
+
+function SubModuleRewardTable.validator(bt::XLSXBalanceTable)
     # 시트를 합쳐둠
     df = get(DataFrame, bt, 1)
     validate_duplicate(df[!, :RewardKey])
@@ -29,9 +41,9 @@ function validator_RewardTable(bt::XLSXBalanceTable)
     nothing
 end
 
-function editor_RewardTable!(jwb::JSONWorkbook)
+function SubModuleRewardTable.editor!(jwb::JSONWorkbook)
     for i in 1:length(jwb)
-        collect_rewardscript!(jwb[i])
+        SubModuleRewardTable.collect_rewardscript!(jwb[i])
     end
 
     append!(jwb[:Solo].data, jwb[:Box].data)
@@ -51,7 +63,7 @@ end
 
 `BlockRewardTable.json`, `RewardTable.json` 생성일 위한 스크립트
 """
-function collect_rewardscript!(jws::JSONWorksheet)
+function SubModuleRewardTable.collect_rewardscript!(jws::JSONWorksheet)
     function pull_rewardscript(x)
         origin = x["RewardScript"]["Rewards"]
         result = map(el -> [get(el, "Weight", "1"),

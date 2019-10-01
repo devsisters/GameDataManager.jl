@@ -1,4 +1,15 @@
-function validator_BlockRewardTable(bt)
+"""
+    SubModuleBlockRewardTable
+
+* BlockRewardTable.xlsx 데이터를 관장함
+"""
+module SubModuleBlockRewardTable
+    function validator end
+    function editor! end
+end
+using .SubModuleBlockRewardTable
+
+function SubModuleBlockRewardTable.validator(bt)
     df = get(DataFrame, bt, "Data")
     validate_duplicate(df[!, :RewardKey])
     # 1백만 이상은 BlockRewardTable에서만 쓴다
@@ -19,7 +30,7 @@ function validator_BlockRewardTable(bt)
     nothing
 end
 
-function editor_BlockRewardTable!(jwb::JSONWorkbook)
+function SubModuleBlockRewardTable.editor!(jwb::JSONWorkbook)
     for i in 1:length(jwb)
         collect_rewardscript!(jwb[i])
     end

@@ -1,5 +1,10 @@
+module SubModulePipoDemographic
+    # function validator end
+    function editor! end
+end
+using .SubModulePipoDemographic
 
-function editor_PipoDemographic!(jwb::JSONWorkbook)
+function SubModulePipoDemographic.editor!(jwb::JSONWorkbook)
     for s in ("Gender", "Age", "Country")
         compress!(jwb, s)
     end

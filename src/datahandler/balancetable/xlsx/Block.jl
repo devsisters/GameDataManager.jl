@@ -1,4 +1,18 @@
-function validator_Block(bt)
+"""
+    SubModuleBlock
+
+* Block.xlsm 데이터를 관장함
+* BlockRewardTable도 영향을 받음 
+    
+"""
+module SubModuleBlock
+    function validator end
+    function editor! end
+end
+using .SubModuleBlock
+
+
+function SubModuleBlock.validator(bt)
     blocktable = get(DataFrame, bt, "Block")
     
     magnet_file = joinpath(GAMEENV["mars_repo"], "submodules/mars-art-assets/Internal", "BlockTemplateBalanceTable.asset")
@@ -26,7 +40,7 @@ function validator_Block(bt)
 
     nothing
 end
-function editor_Block!(jwb::JSONWorkbook)
+function SubModuleBlock.editor!(jwb::JSONWorkbook)
     blockset = jwb[:Set].data
 
     ids = unique(broadcast(el -> el["BlockSetKey"], blockset))
