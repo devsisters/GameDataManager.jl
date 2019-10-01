@@ -21,9 +21,8 @@ gamedata로 데이터를 불러온다
 """
 function cache_gamedata!(::Type{XLSXBalanceTable}, f; kwargs...)
     k = split(f, ".")[1]
-    # TODO: XLSX 파일이 ismodified가 안되어 있으면 JSON을 caching하면 훨씬 빠를 것임!!
     GAMEDATA[k] = BalanceTable(f; kwargs...)
-    printstyled("GAMEDATA[\"$(k)\"] is cached from Excel\n"; color=:yellow)
+    printstyled("GAMEDATA[\"$(k)\"] is cached\n"; color=:yellow) # XLSX에서 불렀는지 JSON에서 불렀는지 알 필요가 있나?
 
     return GAMEDATA[k]
 end
