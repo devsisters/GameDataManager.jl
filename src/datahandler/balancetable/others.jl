@@ -151,13 +151,13 @@ end
 
 function SubModulePlayer.need_developmentpoint(level)
     # 30레벨까지 요구량이 56015.05
-    α1 = 66; β1 = 17.45; γ1 = 3
+    α1 = 33; β1 = 8.9; γ1 = 3
     p = α1*(level-1)^2 + β1*(level-1) + γ1
     if level <= 30
         return round(Int, p, RoundDown)
     elseif level <= 40
         # 30~40레벨 요구량이 56015*2 
-        p2 = 1.10845 * p
+        p2 = 1.11 * p
 
         return round(Int, p2, RoundDown)
     else 
