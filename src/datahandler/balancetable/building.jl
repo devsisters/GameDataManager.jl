@@ -93,7 +93,7 @@ function SubModuleBuilding.developmentpoint(type, level, _area)
     if type == "Residence" 
         level = level * 2 
     end
-    return level * _area
+    return round(Int, level * _area/2, RoundUp) #최소면적이 1x2라서 /2
 end
 function SubModuleBuilding.costtime(type, grade, level, _area)
     # Residence는 만랩이 절반이라서 경험치 두배로 책정
@@ -132,30 +132,31 @@ function SubModuleBuilding.costitem(type::AbstractString, grade, level, _area)
 end
 
 function SubModuleBuilding.costitem(grade, level, _area)
-    if (level + grade) < 6 # 등급별 일정레벨 이전엔 아이템 요구 안함
-        item_amount = [0, 0, 0]
-        totalvalue = 0
-    else
-        item_amount = SubModuleBuilding.costitem(grade, level-1, _area)
-        totalvalue = (0.4 * (grade + level - 4)^2 + 0.6 * (grade + level - 4) + 1) * _area
-        totalvalue = round(Int, totalvalue, RoundUp)
+
+    cumulated_items = [0, 0, 0]
+    itemvalue = 0
+    if (level + grade) >= 6 # 등급별 일정레벨 이전엔 아이템 요구 안함
+        cumulated_items = SubModuleBuilding.costitem(grade, level-1, _area)
+        
+        itemvalue = (0.4 * (grade + level - 4)^2 + 0.6 * (grade + level - 4) + 1) * _area/2
+        itemvalue = round(Int, itemvalue, RoundUp)
     end
 
     # NOTE 하급, 중급, 상급 아이템의 가치를 각각 1:8:64로 책정함
-    totalvalue = totalvalue - sum(item_amount .* [1, 8, 64])
-    while totalvalue > 0 
-        if totalvalue > 64 
-            item_amount[3] = item_amount[3] + 1
-            totalvalue -=64 
+    itemvalue = itemvalue - sum(cumulated_items .* [1, 8, 64])
+    while itemvalue > 0 
+        if itemvalue > 64 
+            cumulated_items[3] = cumulated_items[3] + 1
+            itemvalue -=64 
         end 
-        if totalvalue > 8 
-            item_amount[2] = item_amount[2] + 1
-            totalvalue -=8
+        if itemvalue > 8 
+            cumulated_items[2] = cumulated_items[2] + 1
+            itemvalue -=8
         end
-        item_amount[1] = item_amount[1] + 1
-        totalvalue -=1 
+        cumulated_items[1] = cumulated_items[1] + 1
+        itemvalue -=1 
     end
-    return item_amount
+    return cumulated_items
 end
 
 
