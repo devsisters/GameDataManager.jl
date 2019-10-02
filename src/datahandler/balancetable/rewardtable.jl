@@ -125,7 +125,7 @@ end
 
 function SubModuleBlockRewardTable.editor!(jwb::JSONWorkbook)
     for i in 1:length(jwb)
-        collect_rewardscript!(jwb[i])
+        SubModuleRewardTable.collect_rewardscript!(jwb[i])
     end
     sort!(jwb[:Data], "RewardKey")
 
