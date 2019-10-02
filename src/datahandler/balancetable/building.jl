@@ -203,7 +203,7 @@ function _building_rawdatas(f)
     return d
 end
 function SubModuleAbility.editor!(jwb::JSONWorkbook)
-    function getarea_pergrade(buildingtype)
+    function arearange_for_building_grade(buildingtype)
         # 건물이 1 ~ 5등급이 있다 가정하고 데이터 생성
         ref = _building_rawdatas(buildingtype)
         a = [[], [], [], [], []]
@@ -218,33 +218,41 @@ function SubModuleAbility.editor!(jwb::JSONWorkbook)
     end
     
     jws = jwb["Level"]
-    area_per_grade = getarea_pergrade("Shop")
+    area_per_grade = arearange_for_building_grade("Shop")
 
     shop_ability = []
+    template = OrderedDict(
+        "Group" => "", "AbilityKey" => "",
+        "Level" => 0, "Value" => 0,  
+        "LevelupCost" => Dict("PriceCoin" => missing, "Time" => missing), 
+        "LevelupCostItem" => [])
+
     for grade in 1:5
         for a in area_per_grade[grade] # 건물 면적
             for lv in 1:6
                 # (grade + level - 1) * area * 60(1시간)
                 profit = SubModuleAbility.profitcoin(grade, lv, a)
+                ability_1 = deepcopy(template)
+                ability_1["Group"] = "ProfitCoin"
+                ability_1["AbilityKey"] = "ProfitCoin_G$(grade)_$(a)"
+                ability_1["Level"] = lv
+                ability_1["Value"] = profit
+                push!(shop_ability, ability_1)
+                
                 coincounter = SubModuleAbility.coincounter(profit, grade, lv)
-                push!(shop_ability, 
-                    OrderedDict(
-                    "Group" => "ProfitCoin", "AbilityKey" => "ProfitCoin_G$(grade)_$(a)",
-                    "Level" => lv, "Value" => profit,  
-                    "LevelupCost" => Pair("PriceCoin", missing), "LevelupCostItem" => []))
-
-                push!(shop_ability, 
-                    OrderedDict(
-                    "Group" => "CoinCounterCap", "AbilityKey" => "CoinCounterCap_G$(grade)_$(a)",
-                    "Level" => lv, "Value" => coincounter, 
-                    "LevelupCost" => Pair("PriceCoin", missing), "LevelupCostItem" => missing))
+                ability_2 = deepcopy(template)
+                ability_2["Group"] = "CoinCounterCap"
+                ability_2["AbilityKey"] = "CoinCounterCap_G$(grade)_$(a)"
+                ability_2["Level"] = lv
+                ability_2["Value"] = coincounter
+                push!(shop_ability, ability_2)
             end
         end
     end
     @assert keys(jws.data[1]) == keys(shop_ability[1]) "Column명이 일치하지 않습니다"
     
     residence_ability = []
-    area_per_grade = getarea_pergrade("Residence")
+    area_per_grade = arearange_for_building_grade("Residence")
     for grade in 1:5
         for a in area_per_grade[grade] # 건물 면적
             for lv in 1:6
