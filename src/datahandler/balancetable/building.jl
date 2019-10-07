@@ -19,7 +19,8 @@ const SubModuleSpecial = SubModuleBuilding
 using .SubModuleBuilding
 
 function SubModuleBuilding.validator(bt)
-    if split(basename(bt), ".")[1] == "Sandbox"
+    filename = split(basename(bt), ".")[1]
+    if filename == "Sandbox"
         path_template = joinpath(GAMEENV["patch_data"], "BuildTemplate/Buildings")
         path_thumbnails = joinpath(GAMEENV["CollectionResources"], "BusinessBuildingThumbnails")
     
@@ -87,33 +88,38 @@ end
 
 ==========================================================================================#
 function SubModuleBuilding.developmentpoint(type, level, _area)
-    # Residence는 만랩이 절반이라서 경험치 두배로 책정
+    # Residence는 만랩이 절반이라서 Shop 2레벨 비용의 합
     if type == "Residence" 
-        level = level * 2 
+        base = level * 2 
+        SubModuleBuilding.developmentpoint("Shop", base, _area) + SubModuleBuilding.developmentpoint("Shop", base-1, _area)
+    else
+        round(Int, level * _area/2, RoundUp) #최소면적이 1x2라서 /2
     end
-    return round(Int, level * _area/2, RoundUp) #최소면적이 1x2라서 /2
 end
 function SubModuleBuilding.costtime(type, grade, level, _area)
-    # Residence는 만랩이 절반이라서 경험치 두배로 책정
+    # Residence는 만랩이 절반이라서 Shop 2레벨 비용의 합
     if type == "Residence" 
-        level = level * 2 
+        base = level * 2 
+        SubModuleBuilding.costtime("Shop", grade, base, _area) + SubModuleBuilding.costtime("Shop", grade, base-1, _area)
+    else
+        # 건설시간 5등급, 7레벨, 64청크가 36시간 (129600) 에 근접하도록 함수 설계
+        t = 155 * (level+grade-2)^2 + 60 * (level+grade)
+        t *= sqrt(_area)
+        round(Int, t)
     end
-    # 건설시간 5등급, 7레벨, 64청크가 36시간 (129600) 에 근접하도록 함수 설계
-    t = 155 * (level+grade-2)^2 + 60 * (level+grade)
-    t *= sqrt(_area)
-    round(Int, t)
 end
 function SubModuleBuilding.costcoin(type, grade, level, _area)
-    # 2레벨에 한번씩 profit이 오른다
-    abilitylevel = div(level+1, 2)
-    p = SubModuleAbility.profitcoin(grade, abilitylevel, _area)
-    if type == "Shop"
-        cost = round(Int, p * (grade*1.5) * level)
-    elseif type == "Residence"
-        # Residence 레벨 단계가 더 적어서 보정
-        cost = round(Int, p * grade * level*2.5)
+    # Residence는 만랩이 절반이라서 Shop 2레벨 비용의 합
+    if type == "Residence" 
+        base = level * 2 
+        SubModuleBuilding.costcoin("Shop", grade, base, _area) + SubModuleBuilding.costcoin("Shop", grade, base-1, _area)
+    else
+        # 2레벨에 한번씩 profit이 오른다
+        abilitylevel = div(level+1, 2)
+        p = SubModuleAbility.profitcoin(grade, abilitylevel, _area)
+    
+        round(Int, p * (grade*1.5) * level)
     end
-    return cost
 end
 
 function SubModuleBuilding.costitem(type::AbstractString, grade, level, _area)
@@ -121,7 +127,7 @@ function SubModuleBuilding.costitem(type::AbstractString, grade, level, _area)
         items = [8101, 8102, 8103]
         amounts = SubModuleBuilding.costitem(grade, level, _area)
     elseif type == "Residence"
-        items = [8201, 8202, 8203] #NOTE 8201가 8101의 두배 가치
+        items = [8201, 8202, 8203] # NOTE 8201가 8101의 두배 가치
         amounts = SubModuleBuilding.costitem(grade, level, _area)
     end
 
@@ -188,23 +194,11 @@ function SubModuleAbility.validator(bt)
     nothing
 end
 
-# TODO: 임시함수. 개편 필요
-function _building_rawdatas(target::Vector = ["Shop", "Residence", "Special", "Sandbox"])
-    x = _building_rawdatas.(target)
-    return merge(x...)
-end
-function _building_rawdatas(f)
-    d = Dict()
-    for row in JWB(f)[:Building].data
-        k = row["BuildingKey"]
-        d[k] = row
-    end
-    return d
-end
 function SubModuleAbility.editor!(jwb::JSONWorkbook)
     function arearange_for_building_grade(buildingtype)
         # 건물이 1 ~ 5등급이 있다 가정하고 데이터 생성
-        ref = _building_rawdatas(buildingtype)
+        jwb2 = JWB(buildingtype)
+        ref = map(el -> (el["BuildingKey"], el), jwb2[:Building]) |> Dict
         a = [[], [], [], [], []]
         for el in values(ref)
             g = el["Grade"]
