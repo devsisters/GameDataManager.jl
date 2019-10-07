@@ -161,7 +161,7 @@ function SubModulePlayer.need_developmentpoint(level)
 
         return round(Int, p2, RoundDown)
     else 
-        #TODO 마을 3개, 4개, 5개.... 레벨 상승량 별도 책정 필요
+        # TODO 마을 3개, 4개, 5개.... 레벨 상승량 별도 책정 필요
         # 나중가면 마을 1개당 1레벨로 된다.
         p2 = 1.4 * p
 

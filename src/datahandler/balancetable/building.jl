@@ -82,8 +82,6 @@ function SubModuleBuilding.editor!(type, jwb::JSONWorkbook)
     jwb 
 end
 
-
-
 #==========================================================================================
  -밸런싱 스크립트
 
