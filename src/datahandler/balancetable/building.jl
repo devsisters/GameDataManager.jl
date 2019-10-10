@@ -301,3 +301,29 @@ function SubModuleAbility.joycreation(grade, level, _area)
     return round(Int, joy, RoundDown)
 end
 
+
+"""
+    SubModuleSiteBonus
+
+* SiteBonus.xlsx 데이터를 관장함
+    
+"""
+module SubModuleSiteBonus
+    function validator end
+end
+
+function SubModuleSiteBonus.validator(bt)
+    ref = get(DataFrame, bt, "Data")
+    a = begin 
+        x = ref[!, :Requirement]
+        x = map(el -> get.(el, "Buildings", [""]), x)
+        x = vcat(vcat(x...)...)
+        unique(x)
+    end
+    validate_haskey("Building", a)
+
+end
+
+# function SubModuleSiteBonus.required_area()
+
+# end

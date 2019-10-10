@@ -280,25 +280,36 @@ function validate_general(bt::XLSXBalanceTable)
     nothing
 end
 
-function validate_haskey(file, a; assert=true)
-    # 이건 하나하나 하드코딩하는 수밖에 없음
-    if file == "ItemTable"
-        jwb = JWB(file, false)
+"""
+    validate_haskey(class, a; assert=true)
+
+클래스별로 하나하나 하드코딩
+"""
+function validate_haskey(class, a; assert=true)
+    if class == "ItemTable"
+        jwb = JWB(class, false)
         b = vcat(map(i -> get.(jwb[i], "Key", missing), 1:length(jwb))...)
-    elseif file == "Ability"
-        jwb = JWB(file, false)
+    elseif class == "Building"
+        b = String[]
+        for f in ("Shop", "Residence", "Sandbox", "Special")
+            jwb = JWB(f, false)
+            x = get.(jwb[:Building], "BuildingKey", "")
+            append!(b, x)
+        end
+    elseif class == "Ability"
+        jwb = JWB(class, false)
         b = unique(get.(jwb[:Level], "AbilityKey", missing))
-    elseif file == "Block"
-        jwb = JWB(file, false)
+    elseif class == "Block"
+        jwb = JWB(class, false)
         b = unique(get.(jwb[:Block], "Key", missing))
-    elseif file == "BlockSet"
+    elseif class == "BlockSet"
         jwb = JWB("Block", false)
         b = unique(get.(jwb[:Set], "BlockSetKey", missing))
     else
-        throw(AssertionError("validate_haskey($(file), ...)은 정의되지 않았습니다")) 
+        throw(AssertionError("validate_haskey($(class), ...)은 정의되지 않았습니다")) 
     end
 
-    validate_subset(a, b, "'$(basename(jwb))'에 아래의 Key가 존재하지 않습니다";assert = assert)
+    validate_subset(a, b, "'$(class)'에 아래의 Key가 존재하지 않습니다";assert = assert)
 end
 
 function validate_duplicate(target; assert=true)
