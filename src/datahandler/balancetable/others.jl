@@ -150,8 +150,8 @@ function SubModulePlayer.editor!(jwb)
 end
 
 function SubModulePlayer.need_developmentpoint(level)
-    # 30레벨까지 요구량이 36250
-    α1 = 42.5; β1 = 17.4; γ1 = 4
+    # 30레벨까지 요구량이 36187
+    α1 = 42.3; β1 = 21; γ1 = 4
     p = α1*(level-1)^2 + β1*(level-1) + γ1
     if level <= 30
         return round(Int, p, RoundDown)
