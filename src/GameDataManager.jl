@@ -30,10 +30,9 @@ include("engine/gameitem/itemcollection.jl")
 include("engine/gameitem/guid.jl")
 include("engine/gameitem/arithmetic.jl")
 
-include("engine/site/site.jl")
-include("engine/village/village.jl")
-include("engine/village/bot.jl")
+include("engine/gameitem/nonstackitem.jl")
 include("engine/user/user.jl")
+include("engine/user/bot.jl")
 
 include("engine/content/pipoparttime.jl")
 include("engine/content/dronedelivery.jl")
