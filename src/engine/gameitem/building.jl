@@ -37,7 +37,13 @@ function Ability(key, level = 1)
     @assert haskey(Ability, key) "'Key:$(key)'은 Ability에 존재하지 않습니다"
 
     ref = get_cachedrow("Ability", "Level", :AbilityKey, key)
-    val = ref[level]["IsValueReplace"] ? ref[level]["Value"] : sum(el -> el["Value"], ref[1:level])
+    
+    valuereplace = begin 
+        groupkey = ref[1]["Group"]
+        x = get_cachedrow("Ability", "Group", :GroupKey, groupkey)
+        x[1]["IsValueReplace"]
+    end
+    val = valuereplace ? ref[level]["Value"] : sum(el -> el["Value"], ref[1:level])
     GROUP = ref[level]["Group"] |> Symbol
     
     Ability{GROUP}(key, level, val)
