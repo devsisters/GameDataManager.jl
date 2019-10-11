@@ -21,7 +21,7 @@ include("datahandler/balancetable/rewardtable.jl")
 
 
 ############ Simulation ENGINE #########################
-include("engine/structs.jl")
+include("engine/engine.jl")
 include("engine/gameitem/monetary.jl")
 include("engine/gameitem/stackitem.jl")
 include("engine/gameitem/building.jl") # NonStackItem
