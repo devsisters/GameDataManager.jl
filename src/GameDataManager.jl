@@ -18,6 +18,7 @@ include("datahandler/balancetable/block.jl")
 include("datahandler/balancetable/building.jl")
 include("datahandler/balancetable/pipo.jl")
 include("datahandler/balancetable/rewardtable.jl")
+include("datahandler/util.jl")
 
 
 ############ Simulation ENGINE #########################
@@ -39,6 +40,9 @@ include("engine/content/dronedelivery.jl")
 include("engine/content/buying.jl")
 include("engine/content/build.jl")
 
+include("engine/analyzer.jl")
+
+
 include("engine/show.jl")
 
 #############################################
@@ -51,7 +55,6 @@ include("datahandler/writer/autoxl.jl")
 include("datahandler/writer/history.jl")
 
 # include("writer/typecheck.jl")
-include("util.jl")
 
 
 export GAMEENV, GAMEDATA, help,
