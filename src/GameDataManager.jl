@@ -30,7 +30,7 @@ include("engine/gameitem/itemcollection.jl")
 include("engine/gameitem/guid.jl")
 include("engine/gameitem/arithmetic.jl")
 
-include("engine/gameitem/nonstackitem.jl")
+include("engine/gameitem/estate.jl")
 include("engine/user/user.jl")
 include("engine/user/bot.jl")
 
@@ -65,9 +65,8 @@ export GAMEENV, GAMEDATA, help,
        findblock, get_buildings, get_blocks,
 
       # engine functions
-      User,
-      Village, create_bot, area,
-      PrivateSite, Site,
+      User, create_bot,
+
       GameItem, ItemCollection,
           Currency, COIN, CRY, ENERGYMIX,SITECLEANER,
                     SPACEDROPTICKET, DEVELIPMENTPOINT, TOTALDEVELIPMENTPOINT,
@@ -77,10 +76,15 @@ export GAMEENV, GAMEDATA, help,
           itemkey, itemvalue, issamekey,
           ItemCollection,
           add!, remove!, has, getitem,
+    # 건물
       NonStackItem, Building, Special, Residence, Shop, Ability,
-      abilitysum,
-      price, buy!, build!, spend!,
+                    abilitysum,
+                    price, buy!, build!, spend!,
+    # 부동산 
+      Village, PrivateSite, 
+            area, clean!,
 
+    # 콘텐츠
       RewardTable, sample, expectedvalue,
       DroneDelivery, deliveryreward, deliverycost
 

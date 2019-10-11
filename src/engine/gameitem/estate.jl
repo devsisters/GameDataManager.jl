@@ -1,5 +1,9 @@
+"""
+    PrivateSite
+
+유저가 보유하는 사이트
+"""
 mutable struct PrivateSite <: AbstractSite
-    # owner::VillageLayout 이걸 연결 할 필요 있나...
     index::Int16
     # ChunkMinX
     # ChunkMinZ
@@ -14,30 +18,6 @@ function PrivateSite(index, position::Vector, sz::Vector)
     s = tuple(Int16.(sz)...)
 
     PrivateSite(index, p, s, false)
-end
-
-clean!(x::AbstractSite) = x.cleaned = true
-function clean!(xs::Array{T, 1}, i) where T <: AbstractSite 
-    clean!(xs[i])
-end
-iscleaned(x::AbstractSite) = x.cleaned 
-
-Base.size(x::AbstractSite) = x.size
-function Base.size(x::AbstractSite, dim) 
-    dim == 1 ? x.size[1] : 
-    dim == 2 ? x.size[2] :
-    1
-end
-area(x::AbstractSite) = *(size(x,1), size(x, 2))
-
-"""
-    price(x::PrivateSite)
-
-x 사이트를 청소하는데 필요한 사이트 클리너 수량
-"""
-function price(x::PrivateSite) 
-    ref = get_cachedrow("Village", "SiteCleanerPrice", :Area, area(x))[1]
-    return ref["Cost"]*SITECLEANER
 end
 
 """
@@ -115,7 +95,16 @@ function Village()
 end
 
 
-# functions
+#==========================================================================================
+  Functions
+
+==========================================================================================#
+Base.size(x::AbstractSite) = x.size
+function Base.size(x::AbstractSite, dim) 
+    dim == 1 ? x.size[1] : 
+    dim == 2 ? x.size[2] :
+    1
+end
 Base.size(x::VillageLayout) = x.size
 function Base.size(x::VillageLayout, dim) 
     dim == 1 ? x.size[1] : 
@@ -125,28 +114,51 @@ end
 Base.size(v::Village) = size(v.layout)
 Base.size(v::Village, dim) = size(v.layout, dim)
 
-function sites(v::Village; cleaned = false) 
-    x = v.layout.sites
-    if cleaned
-        x = filter(iscleaned, x)
-    end
-    return x
-end
+sites(v::Village) = v.layout.sites
+
+area(x::AbstractSite) = *(size(x,1), size(x, 2))
 """
-    area(v::Village; bought = true)
+    area(v::Village; cleaned = true)
 
 'Village'의 총 면적을 구합니다.
-*bought=true: 이미 구매한 사이트의 면적만 반환합니다. 
-*bought=false: 구매한 사이트를 포함하여 빌리지 전체 면적을 반환합니다.
+* cleaned=true: 이미 구매한 사이트의 면적만 반환합니다. 
+* cleaned=false: 구매한 사이트를 포함하여 빌리지 전체 면적을 반환합니다.
 """
-@inline function area(v::Village; bought::Bool = true)
-    if bought
-        x = area.(sites(v; cleaned = true))
-    else
-        x = area.(sites(v))
+function area(v::Village; cleaned = true)
+    s = sites(v)
+    if cleaned
+        s = filter(iscleaned, s)
     end
-    sum(x)
+    sum(area.(s))
 end
+
+function clean!(x::AbstractSite) 
+    if x.cleaned 
+        false
+    else
+        x.cleaned = true
+        true
+    end
+end
+function clean!(xs::Array{T, 1}, i) where T <: AbstractSite 
+    clean!(xs[i])
+end
+clean!(v::Village, i) = clean!(sites(v), i)
+
+iscleaned(x::AbstractSite) = x.cleaned 
+
+
+"""
+    price(x::PrivateSite)
+
+x 사이트를 청소하는데 필요한 사이트 클리너 수량
+"""
+function price(x::PrivateSite) 
+    ref = get_cachedrow("Village", "SiteCleanerPrice", :Area, area(x))[1]
+    return ref["Cost"]*SITECLEANER
+end
+
+
 
 function spendable_energymix(v::Village)
     ref = get(Dict, ("EnergyMix", "Data"))[1]
@@ -171,3 +183,4 @@ function update_token!(v::Village)
     end
     nothing
 end
+
