@@ -166,7 +166,7 @@ struct VillageTokenStorage <: AbstractGameItemStorage
     ownermid::UInt64
     tokens::Dict{UInt64, ItemCollection}
 end
-function VillageTokenStorage(mid::UInt64, x::AbstractVillage)
+function VillageTokenStorage(mid::UInt64, x::AbstractCell)
     ref = get(DataFrame, ("VillageTokenTable", "Data"))
     tokens = Dict(x.id => ItemCollection(VillageToken.(x.id, ref[!, :TokenId], 0)))
     

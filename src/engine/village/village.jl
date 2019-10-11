@@ -51,7 +51,7 @@ file_layout의 필리지 생성
 
 빌리지의 사이트 구성과 크기, 그리고 사이트별 건물 정보를 저장
 """
-struct Village <: AbstractVillage
+struct Village <: AbstractCell
     id::UInt64
     # name
     # owner
@@ -59,7 +59,7 @@ struct Village <: AbstractVillage
     layout::VillageLayout
 end
 function Village(layout::VillageLayout)
-    id = village_uid()
+    id = cell_uid()
     storage = ItemCollection(0*ENERGYMIX, VillageToken(id, 1, 0), VillageToken(id, 2, 0))
     Village(id, storage, layout)
 end
@@ -129,6 +129,3 @@ function update_token!(v::Village)
     end
     nothing
 end
-
-add!(v::Village, x::AbstractMonetary) = add!(v.storage, x)
-getitem(v::Village, x::AbstractMonetary) = getitem(v.storage, x)

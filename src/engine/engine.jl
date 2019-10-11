@@ -10,14 +10,14 @@ RewardTable 등 Key로 묶여 있는 데이터
 abstract type AbstractContent end
 
 """
-    AbstractVillage
+    AbstractCell
 
 확장성 고려하여 추상화 레이어 둔다
 """
-abstract type AbstractVillage end
+abstract type AbstractCell end
 let uid = UInt64(0)
-    global village_uid
-    village_uid() = (uid +=1; uid)
+    global cell_uid
+    cell_uid() = (uid +=1; uid)
 end
 """
     AbstractSite
