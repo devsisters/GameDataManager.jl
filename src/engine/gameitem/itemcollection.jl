@@ -59,6 +59,11 @@ Base.values(ic::ItemCollection) = values(ic.map)
 Base.merge!(f, m::ItemCollection, n::ItemCollection) = merge!(f, m.map, n.map)
 Base.iterate(ic::ItemCollection, s...) = iterate(ic.map, s...)
 
+"""
+    getitem(ic::ItemCollection, x::StackItem)
+
+'ic'안에 들어있는 'x'를 반환, x가 없으면 zero(x)
+"""
 getitem(ic::ItemCollection, x::StackItem) = get(ic, guid(x), zero(x))
 
 

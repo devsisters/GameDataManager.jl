@@ -82,7 +82,7 @@ struct Village <: AbstractCell
 end
 function Village(layout::VillageLayout)
     id = cell_uid()
-    storage = ItemCollection(0*ENERGYMIX, VillageToken(id, 1, 0), VillageToken(id, 2, 0))
+    storage = ItemCollection(VillageToken(id, 1, 0), VillageToken(id, 2, 0))
     Village(id, storage, layout)
 end
 function Village(f::AbstractString)
@@ -144,43 +144,40 @@ function clean!(xs::Array{T, 1}, i) where T <: AbstractSite
     clean!(xs[i])
 end
 clean!(v::Village, i) = clean!(sites(v), i)
-
 iscleaned(x::AbstractSite) = x.cleaned 
 
 
-"""
-    price(x::PrivateSite)
-
-x 사이트를 청소하는데 필요한 사이트 클리너 수량
-"""
-function price(x::PrivateSite) 
-    ref = get_cachedrow("Village", "SiteCleanerPrice", :Area, area(x))[1]
-    return ref["Cost"]*SITECLEANER
+function get_villagetoken(v::Village, tokenid)
+    getitem(v.storage, VillageToken(v.id, tokenid, 0))
 end
 
-
-
-function spendable_energymix(v::Village)
+function assignable_energymix(v::Village)
     ref = get(Dict, ("EnergyMix", "Data"))[1]
 
-    current = getitem(v.storage, 0*ENERGYMIX)
-    return div(area(v), ref["EnergyMixPerChunk"][2])*ENERGYMIX - current
+    energymix_limit = div(area(v), ref["EnergyMixPerChunk"][2])
+
+    tokenid = ref["AssignOnVillage"][1]["TokenId"] 
+    amount = ref["AssignOnVillage"][1]["Amount"]
+    current_token = get_villagetoken(v, tokenid)
+
+    # (할당된에너지믹스) = (현재토큰) / (믹스당토큰증가량)    
+    return energymix_limit - Int(itemvalue(current_token) / amount)
 end
-function spendable_token(v::Village)
-    #TODO, 보유한 토큰에서 건물에서 사용중인 양 빼기
-end
 
-function update_token!(v::Village)
-    em = getitem(v, zero(ENERGYMIX))
-    ref = get(Dict, ("EnergyMix", "Data"))[1]["AssignOnVillage"]
+function assign_energymix!(v::Village, amount=1)
+    # NOTE 비용은 User가 지불해야 됨
+    em = assignable_energymix(v)
+    if em >= amount
+        ref = get(Dict, ("EnergyMix", "Data"))[1]["AssignOnVillage"]
 
-    t1 = em.val * VillageToken(v.id, ref[1]["TokenId"], ref[1]["Amount"])
-    t2 = em.val * VillageToken(v.id, ref[2]["TokenId"], ref[2]["Amount"])
+        t1 = amount * VillageToken(v.id, ref[1]["TokenId"], ref[1]["Amount"])
+        t2 = amount * VillageToken(v.id, ref[2]["TokenId"], ref[2]["Amount"])
 
-    if t1 != getitem(v, t1)
-        setindex!(v.storage, t1, guid(t1))
-        setindex!(v.storage, t2, guid(t2))
+        add!(v.storage, t1)
+        add!(v.storage, t2)
+
+        return true
     end
-    nothing
+    return false
 end
 

@@ -75,9 +75,10 @@ function has(u::User, items::ItemCollection)
     has(u.item_storage, items)
 end
 # 보유한 재화 확인
-getitem(u::User, item::StackItem)  = getitem(u.item_storage, item)
-getitem(u::User, ::Type{T}) where T <: Currency = getitem(u.item_storage, T)
-
+"""
+    getitem(u::User, x)
+"""
+getitem(u::User, item)  = getitem(u.item_storage, item)
 
 # 토큰은 빌리지 ID 필요
 # add!(u::User, t::VillageToken) = add!(u.item_storage, t)

@@ -51,6 +51,8 @@ Currency(NAME::Symbol, val) = Currency{NAME}(val)
     VillageToken
 
 * villageid: 연결된 Village가 없으면 missing으로 한다
+
+VillageToken(villageid::UInt64, tokenid, val)
 """
 struct VillageToken{ID, T} <: AbstractMonetary
     villageid::Union{Missing, UInt64}
@@ -72,6 +74,7 @@ end
 function VillageToken(villageid::UInt64, tokenid, val)
     VillageToken{tokenid}(villageid, val)
 end
+VillageToken(tokenid, val) = VillageToken{tokenid}(missing, val)
 
 
 """

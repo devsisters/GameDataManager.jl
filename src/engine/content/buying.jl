@@ -73,6 +73,17 @@ end
     end
     return ItemCollection(totalcost)
 end
+
+"""
+    price(x::PrivateSite)
+
+x 사이트를 청소하는데 필요한 사이트 클리너 수량
+"""
+function price(x::PrivateSite) 
+    ref = get_cachedrow("Village", "SiteCleanerPrice", :Area, area(x))[1]
+    return ref["Cost"]*SITECLEANER
+end
+
 """
     spend!(u::User, v::Village, ENERGYMIX)
 
@@ -83,7 +94,7 @@ function spend!(u::User, v::Village, ::Type{Currency{:ENERGYMIX}})
     if getitem(u, ENERGYMIX) <= zero(ENERGYMIX)
         printstyled("buy! 함수로 ENERGYMIX를 먼저 구매하세요\n", color = :yellow)
     else
-        margin = spendable_energymix(v)
+        margin = assignable_energymix(v)
         if margin > zero(ENERGYMIX)
             if remove!(u, 1*ENERGYMIX)
                 add!(v, 1*ENERGYMIX)
@@ -96,3 +107,4 @@ function spend!(u::User, v::Village, ::Type{Currency{:ENERGYMIX}})
     end
     return b
 end
+
