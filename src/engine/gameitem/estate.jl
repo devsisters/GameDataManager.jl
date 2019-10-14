@@ -143,8 +143,9 @@ end
 function clean!(xs::Array{T, 1}, i) where T <: AbstractSite 
     clean!(xs[i])
 end
-clean!(v::Village, i) = clean!(sites(v), i)
 iscleaned(x::AbstractSite) = x.cleaned 
+clean!(v::Village, i) = clean!(sites(v), i)
+iscleaned(v::Village, i) = iscleaned(sites(v)[i])
 
 
 function get_villagetoken(v::Village, tokenid)
