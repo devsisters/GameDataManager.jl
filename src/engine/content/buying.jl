@@ -38,17 +38,18 @@ end
 
 * SITECLEANER 1개 가격
 """
-@inline function price(u::User, ::Type{Currency{:SITECLEANER}})
+function price(u::User, ::Type{Currency{:SITECLEANER}})
     bc = buycount(u)[:sitecleaner]
     price(bc, SITECLEANER)
 end
-@inline function price(buycount::Integer, ::Type{Currency{:SITECLEANER}})
-    ref = begin
+function price(buycount::Integer, ::Type{Currency{:SITECLEANER}})
+    func_variable = begin
         x = get(DataFrame, ("SpaceDrop", "SiteCleaner"))
-        i = findlast(x[!, :AccumulatedPurchase] .<= buycount)
-        x[i, :]
+        # TODO AccumulatedPurchase2 -> AccumulatedPurchase 로 수정
+        i = findfirst(x[!, :AccumulatedPurchase2] .>= buycount)
+        x[i, :FuncVariable]
     end
-    return ref[:PriceCoin]*COIN
+    (func_variable["Alpha"] * buycount + func_variable["Beta"]) * COIN
 end
 
 """
