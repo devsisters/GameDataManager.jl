@@ -44,10 +44,10 @@ function price(u::User, ::Type{Currency{:SITECLEANER}})
 end
 function price(buycount::Integer, ::Type{Currency{:SITECLEANER}})
     func_variable = begin
-        x = get(DataFrame, ("SpaceDrop", "SiteCleaner"))
+        ref = get(DataFrame, ("SpaceDrop", "SiteCleaner"))
         # TODO AccumulatedPurchase2 -> AccumulatedPurchase 로 수정
-        i = findfirst(x[!, :AccumulatedPurchase2] .>= buycount)
-        x[i, :FuncVariable]
+        i = findlast(x -> x <= buycount, ref[!, :AccumulatedPurchase])
+        ref[i, :FuncVariable]
     end
     (func_variable["Alpha"] * buycount + func_variable["Beta"]) * COIN
 end
@@ -57,15 +57,15 @@ end
 
 * ENERGYMIX 1개 가격
 """
-@inline function price(u::User, ::Type{Currency{:ENERGYMIX}})
+function price(u::User, ::Type{Currency{:ENERGYMIX}})
     bc = buycount(u)[:energymix]
     price(bc, ENERGYMIX)
 end
-@inline function price(buycount::Integer, ::Type{Currency{:ENERGYMIX}})
+function price(buycount::Integer, ::Type{Currency{:ENERGYMIX}})
     ref = begin
-        x = get(DataFrame, ("EnergyMix", "Price"))
-        i = findlast(x[!, :AccumulatedPurchase] .<= buycount)
-        x[i, :]
+        ref = get(DataFrame, ("EnergyMix", "Price"))
+        i = findlast(x -> x <= buycount. ref[!, :AccumulatedPurchase])
+        ref[i, :]
     end
     totalcost = begin 
         coin = ref[:PriceCoin]*COIN
