@@ -36,7 +36,7 @@ function SubModuleBlock.validator(bt)
 
     # BlockSet 검사
     blockset = get(DataFrame, bt, "Set")
-    a = broadcast(el -> get.(el, "BlockItemKey", 0), blockset[!, :Members])
+    a = broadcast(el -> get.(el, "BlockKey", 0), blockset[!, :Members])
     a = unique(vcat(a...))
     validate_subset(a, block[!, :Key], "다음의 Block은 존재하지 않습니다 [Set] 시트를 정리해 주세요")
 
