@@ -216,3 +216,32 @@ function SubModuleCashStore.editor!(jwb::JSONWorkbook)
     jwb[:Data] = merge(jwb[:Data], jwb[:args], "ProductKey")
     deleteat!(jwb, :args)
 end
+
+"""
+    SubModulePipoFashion
+
+* SubModulePipoFashion.xlsx 데이터를 관장함
+"""
+module SubModulePipoFashion
+    function validator end
+    # function editor! end
+end
+using .SubModulePipoFashion
+
+function SubModulePipoFashion.validator(bt)
+    # jwb[:Data] = merge(jwb[:Data], jwb[:args], "ProductKey")
+    root = joinpath(GAMEENV["mars_repo"], "unity/Assets/4_ArtAssets/GameResources/Pipo")
+
+    df = get(DataFrame, bt, "Hair")
+    validate_file(joinpath(root, "HeadHair"), df[!, :ArtAsset], ".prefab", "[Hair]에 위의 ArtAsset이 존재하지 않습니다")
+
+    df = get(DataFrame, bt, "Face")
+    for gdf in groupby(df, :Part)
+        p2 = joinpath(root, string("Head", gdf[1, :Part]))
+        validate_file(p2, string.(gdf[!, :ArtAsset]), ".prefab", "[Face]에 ArtAsset이 존재하지 않습니다")
+    end
+
+    df = get(DataFrame, bt, "Dress")
+    # TODO: root 폴더 경로가 다른데...
+    
+end
