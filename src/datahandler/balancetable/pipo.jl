@@ -19,8 +19,8 @@ function SubModuleWork.editor!(jwb::JSONWorkbook)
 
     jws = jwb[:Event]
     for i in 1:length(jws.data)
-        data = jws.data[i]["RequirePIPO"]
-        jws.data[i]["RequirePIPO"] = vcat(map(el -> collect(values(el)), data)...)
+        data = jws.data[i]["RequirePipo"]
+        jws.data[i]["RequirePipo"] = vcat(map(el -> collect(values(el)), data)...)
     end
 
     return jwb
