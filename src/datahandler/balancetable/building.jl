@@ -62,13 +62,13 @@ end
 function SubModuleBuilding.editor!(type, jwb::JSONWorkbook)
     info = Dict()
     for row in jwb[:Building].data
-        info[row["BuildingKey"]] = row["Condition"]
+        info[row["BuildingKey"]] = row
     end
     for row in jwb[:Level].data
         bd = row["BuildingKey"]
         lv = row["Level"]
         grade = info[bd]["Grade"]
-        ar = info[bd]["ChunkWidth"] * info[bd]["ChunkLength"]
+        ar = info[bd]["Condition"]["ChunkWidth"] * info[bd]["Condition"]["ChunkLength"]
 
         levelupcost = Dict("NeedTime" => SubModuleBuilding.costtime(type, grade, lv, ar),
                            "PriceCoin" => SubModuleBuilding.costcoin(type, grade, lv, ar))
