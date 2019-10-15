@@ -16,10 +16,17 @@ function SubModuleQuest.validator(bt)
     if maximum(df[!, :QuestKey]) > 1023 || minimum(df[!, :QuestKey]) < 0
         throw(AssertionError("Quest_Main.json의 QuestKey는 0~1023만 사용 가능합니다."))
     end
+
+    # RewardKey 존재 여부
+    rewards = get.(df[!, :CompleteAction], "RewardKey", missing)
+    validate_haskey("RewardTable", rewards)
+
+    # Trigger 정합성 검사
     for i in 1:size(df, 1)
         SubModuleQuest.questtrigger.(df[i, :Trigger])
         SubModuleQuest.questtrigger.(df[i, :CompleteCondition])
     end
+
     # Dialogue 파일 유무 체크
     path_dialogue = joinpath(GAMEENV["patch_data"], "Dialogue")
     for el in df[!, :CompleteAction]
@@ -28,6 +35,7 @@ function SubModuleQuest.validator(bt)
             validate_file(path_dialogue, "$(f).json", "Dialogue가 존재하지 않습니다")
         end
     end
+
     nothing
 end
 
@@ -295,7 +303,7 @@ end
 """
     SubModulePipoFashion
 
-* SubModulePipoFashion.xlsx 데이터를 관장함
+* PipoFashion.xlsx 데이터를 관장함
 """
 module SubModulePipoFashion
     function validator end
@@ -320,4 +328,25 @@ function SubModulePipoFashion.validator(bt)
     # TODO: root 폴더 경로가 다른데...
     
     nothing
+end
+
+"""
+    SubModuleDroneDelivery
+
+* SubModuleDroneDelivery.xlsx 데이터를 관장함
+"""
+module SubModuleDroneDelivery
+    function validator end
+    # function editor! end
+end
+function SubModuleDroneDelivery.validator(bt)
+    df = get(DataFrame, bt, "Group")
+    validate_haskey("RewardTable", df[!, :RewardKey])
+
+    itemkey = Int[]
+    df = get(DataFrame, bt, "Order")
+    for row in eachrow(df)
+        append!(itemkey, get.(row[:Items], "Key", missing))
+    end
+    validate_haskey("ItemTable", unique(itemkey))
 end

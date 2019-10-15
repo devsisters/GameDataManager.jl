@@ -261,21 +261,9 @@ function validate_general(bt::XLSXBalanceTable)
         check = broadcast(x -> isa(x, String) ? occursin(r"(\s)|(\t)|(\n)", x) : false, df[!, :Key])
         @assert !any(check) "Key에는 공백, 줄바꿈, 탭이 들어갈 수 없습니다 \n $(df[!, :Key][check])"
     end
-    function validate_RewardKey(df)
-        rewardkey = begin 
-            ref = get(BalanceTable, "RewardTable")
-            [-1; get(DataFrame, ref, 1)[!, :RewardKey]]
-        end
-        if !issubset(df[!, :RewardKey],  rewardkey)
-            x = setdiff(df[!, :RewardKey], rewardkey)
-            @error "RewardKey가 RewardTable에 없습니다\n $(x)"
-        end
-    end
     #################
     for df in get(DataFrame, bt)
         hasproperty(df, :Key) && validate_Key(df)
-        # TODO BlockRewardTable 처리 필요
-        # hasproperty(df, :RewardKey) && validate_RewardKey(df)
     end
     nothing
 end
@@ -305,6 +293,11 @@ function validate_haskey(class, a; assert=true)
     elseif class == "BlockSet"
         jwb = JWB("Block", false)
         b = unique(get.(jwb[:Set], "BlockSetKey", missing))
+    elseif class == "RewardTable"
+        jws1 = JWB(class, false)[1]
+        jws2 = JWB("BlockRewardTable", false)[1]
+
+        b = [get.(jws1, "RewardKey", missing); get.(jws2, "RewardKey", missing)]
     else
         throw(AssertionError("validate_haskey($(class), ...)은 정의되지 않았습니다")) 
     end

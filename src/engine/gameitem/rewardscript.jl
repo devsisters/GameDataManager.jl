@@ -151,17 +151,12 @@ struct RewardTable <: AbstractContent
     reward::Array{T, 1} where T <: RewardScript
 end
 function RewardTable(key)
-    data = get_cachedrow(rewardkey_scope(key), 1, :RewardKey, key)
+    data = get_cachedrow(SubModuleRewardTable.keyscope(key), 1, :RewardKey, key)
 
     script = data[1]["RewardScript"]     
     reward = RewardScript(script["Rewards"])
 
     RewardTable(key, reward)
- end
-
- function rewardkey_scope(key)
-    # 1백만 이상은 BlockRewardTable
-    key < 1000000 ? "RewardTable" : "BlockRewardTable"
  end
 
  function StatsBase.sample(r::RewardTable, n = 1)

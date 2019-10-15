@@ -7,6 +7,10 @@ module SubModuleRewardTable
     function validator end
     function editor! end
     function collect_rewardscript! end
+    function keyscope(key::Integer)
+        # 1백만 이상은 BlockRewardTable
+        key < 1000000 ? "RewardTable" : "BlockRewardTable"
+     end
 end
 using .SubModuleRewardTable
 
@@ -15,7 +19,7 @@ function SubModuleRewardTable.validator(bt::XLSXBalanceTable)
     df = get(DataFrame, bt, 1)
     validate_duplicate(df[!, :RewardKey])
     # 1백만 이상은 BlockRewardTable에서만 쓴다
-    @assert (rewardkey_scope(maximum(df[!, :RewardKey])) == "RewardTable") "RewardTable의 RewardKey는 1,000,000 미만을 사용해 주세요."
+    @assert (SubModuleRewardTable.keyscope(maximum(df[!, :RewardKey])) == "RewardTable") "RewardTable의 RewardKey는 1,000,000 미만을 사용해 주세요."
 
     # ItemKey 확인
     itemkeys = begin 
@@ -106,7 +110,7 @@ function SubModuleBlockRewardTable.validator(bt)
     df = get(DataFrame, bt, "Data")
     validate_duplicate(df[!, :RewardKey])
     # 1백만 이상은 BlockRewardTable에서만 쓴다
-    @assert (rewardkey_scope(maximum(df[!, :RewardKey])) == "BlockRewardTable") "BlockRewardTable의 RewardKey는 1,000,000 이상을 사용해 주세요."
+    @assert (SubModuleRewardTable.keyscope(maximum(df[!, :RewardKey])) == "BlockRewardTable") "BlockRewardTable의 RewardKey는 1,000,000 이상을 사용해 주세요."
 
     # ItemKey 확인
     itemkeys = begin 
