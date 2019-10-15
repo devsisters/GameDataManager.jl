@@ -48,8 +48,8 @@ function SubModuleQuest.questtrigger(x::Array{T, 1}) where T
         "ResidenceCount"               => (:equality, :number),
         "Coin"                         => (:equality, :number),
         "UserLevel"                    => (:equality, :number),
-        "QuestFlags"                   => (:number,     :flag),
-        "TutorialFlags"                => (:number,     :flag),
+        "QuestFlags"                   => (:number,     :questflag),
+        "TutorialFlags"                => (:number,     :questflag),
         "MaxSegmentLevelByUseType"     => (:number,     :equality, :number),
         "MaxSegmentLevelByBuildingKey" => (:buildingkey,:equality, :number),
         "OwnedItem"                    => (:itemkey,    :equality),
@@ -74,16 +74,20 @@ function SubModuleQuest.questtrigger(x::Array{T, 1}) where T
         # TODO validate_haskey 로 변경
         b = if checker == :equality
                 in(el, ("<","<=","=",">=",">"))
-            elseif checker == :flag
+            elseif checker == :questflag
                 in(el, ("x", "p", "o"))
             elseif checker == :number
                 all(isdigit.(collect(el)))
+            # NOTE 이거 이렇게 하면 매번 json을 다시 읽어와서... 문제 소지가 있음
             elseif checker == :buildingkey
-                haskey(Building, el)
+                validate_haskey("Building", [el])
+                true
             elseif checker == :abilitykey
-                haskey(Ability, el)
+                validate_haskey("Ability", [el])
+                true
             elseif checker == :itemkey
-                haskey(StackItem, el)
+                validate_haskey("ItemTable", [el])
+                true
             else
                 throw(ArgumentError(string(checker, "가 validate_questtrigger에 정의되지 않았습니다.")))
             end
@@ -113,6 +117,40 @@ function SubModuleQuest.editor!(jwb::JSONWorkbook)
 end
 
 """
+    SubModuleFlag
+
+* Flag.xlsx 데이터를 관장함
+"""
+module SubModuleFlag
+    function validator end
+    function editor! end
+end
+using .SubModuleFlag
+
+function SubModuleFlag.validator(bt)
+    df = get(DataFrame, bt, "BuildingUnlock")
+    validate_haskey("Building", df[!, :BuildingKey])
+
+    for i in 1:size(df, 1)
+        SubModuleQuest.questtrigger.(df[i, :Condition])
+    end
+    nothing
+end
+
+function SubModuleFlag.editor!(jwb::JSONWorkbook)
+    jws = jwb[:BuildingUnlock]
+    for el in jws.data
+        overwrite = []
+        for x in el["Condition"]
+            append!(overwrite, collect(values(x)))
+        end
+        el["Condition"] = overwrite
+    end
+    jwb
+end
+
+
+"""
     SubModulePlayer
 
 * Player.xlsx 데이터를 관장함
@@ -132,7 +170,7 @@ function SubModulePlayer.validator(bt)
     # TODO 여러 폴더 검사하는 기능 필요
     # p = joinpath(GAMEENV["CollectionResources"], "ItemIcons")
     # validate_file(p, vcat(df[!, :DisplayIcons]...), ".png", "Icon이 존재하지 않습니다")
-
+    nothing
 end
 function SubModulePlayer.editor!(jwb)
     # 레벨업 개척점수 필요량 추가
@@ -178,6 +216,8 @@ function SubModuleNameGenerator.editor!(jwb::JSONWorkbook)
     for s in sheetnames(jwb)
         compress!(jwb, s)
     end
+
+    jwb
 end
 
 """
@@ -217,6 +257,7 @@ function SubModuleItemTable.editor!(jwb::JSONWorkbook)
     @inbounds for (i, el) in enumerate(jws.data)
         el["PriceJoy"] = SubModuleItemTable.buildingseed_pricejoy(ref, el["BuildingKey"])
     end
+
     jwb
 end
 
@@ -247,6 +288,8 @@ using .SubModuleCashStore
 function SubModuleCashStore.editor!(jwb::JSONWorkbook)
     jwb[:Data] = merge(jwb[:Data], jwb[:args], "ProductKey")
     deleteat!(jwb, :args)
+
+    jwb
 end
 
 """
@@ -276,4 +319,5 @@ function SubModulePipoFashion.validator(bt)
     df = get(DataFrame, bt, "Dress")
     # TODO: root 폴더 경로가 다른데...
     
+    nothing
 end
