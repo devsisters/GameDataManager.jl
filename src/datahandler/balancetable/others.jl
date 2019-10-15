@@ -206,27 +206,6 @@ end
 function SubModuleItemTable.editor!(jwb::JSONWorkbook)
     jws = jwb[:BuildingSeed]
 
-    building_keys = get.(jws.data, "BuildingKey", "")
-    x = SubModuleItemTable.buildingseed_pricejoy(building_keys)
-    # NOTE 이런 경우가 많은데 setindex!(jws, ...) 추가 할까?
-    for (i, el) in enumerate(jws.data)
-        el["PriceJoy"] = x[i]
-    end
-    jwb
-end
-
-function SubModuleItemTable.buildingseed_pricejoy(building_keys)
-    function pricejoy(x) 
-        baseprice = startswith(x, "p") ? missing : 
-                    startswith(x, "s") ? 10 : 
-                    startswith(x, "r") ? 10 : error("'$key'가 BuildingKey 규칙에 맞지 않습니다")
-
-        _area = ref[x]["Condition"]["ChunkWidth"] * ref[x]["Condition"]["ChunkLength"]
-        grade = get(ref[x], "Grade", 1)
-
-        # 일단 대충
-        return baseprice * grade * _area
-    end
     # construct BuildingData
     ref = begin
         a = map(x -> (x["BuildingKey"], x), JWB("Shop", false)[:Building])
@@ -234,7 +213,23 @@ function SubModuleItemTable.buildingseed_pricejoy(building_keys)
         c = map(x -> (x["BuildingKey"], x), JWB("Special", false)[:Building])
         Dict([a; b; c])
     end
-    pricejoy.(building_keys)
+    # NOTE 이런 경우가 많은데 setindex!(jws, ...) 추가 할까?
+    @inbounds for (i, el) in enumerate(jws.data)
+        el["PriceJoy"] = SubModuleItemTable.buildingseed_pricejoy(ref, el["BuildingKey"])
+    end
+    jwb
+end
+
+function SubModuleItemTable.buildingseed_pricejoy(ref, key)::Integer
+    baseprice = startswith(key, "p") ? missing : 
+                startswith(key, "s") ? 10 : 
+                startswith(key, "r") ? 10 : error("'$key'가 BuildingKey 규칙에 맞지 않습니다")
+
+    _area = ref[key]["Condition"]["ChunkWidth"] * ref[key]["Condition"]["ChunkLength"]
+    grade = get(ref[key], "Grade", 1)
+
+    # 일단 대충
+    return baseprice * grade * _area
 end
 
 
