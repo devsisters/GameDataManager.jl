@@ -71,6 +71,7 @@ function SubModuleQuest.questtrigger(x::Array{T, 1}) where T
     for (i, el) in enumerate(x[2:end])
         b = false
         checker = ref[i]
+        # TODO validate_haskey 로 변경
         b = if checker == :equality
                 in(el, ("<","<=","=",">=",">"))
             elseif checker == :flag
@@ -136,16 +137,14 @@ end
 function SubModulePlayer.editor!(jwb)
     # 레벨업 개척점수 필요량 추가
     jws = jwb[:DevelopmentLevel]
-    for i in 1:length(jws.data)
+    @inbounds for i in 1:length(jws.data)
         lv = jws.data[i]["Level"]
         jws.data[i]["NeedDevelopmentPoint"] = SubModulePlayer.need_developmentpoint(lv)
     end
     jwb[:DevelopmentLevel] = merge(jwb[:DevelopmentLevel], jwb[:DroneDelivery], "Level")
-    jwb[:DevelopmentLevel] = merge(jwb[:DevelopmentLevel], jwb[:PartTime], "Level")
     jwb[:DevelopmentLevel] = merge(jwb[:DevelopmentLevel], jwb[:SpaceDrop], "Level")
 
     deleteat!(jwb, :DroneDelivery)
-    deleteat!(jwb, :PartTime)
     deleteat!(jwb, :SpaceDrop)
 end
 
@@ -188,7 +187,8 @@ end
 """
 module SubModuleItemTable
     function validator end
-    # function editor! end
+    function editor! end
+    function buildingseed_pricejoy end
 end
 using .SubModuleItemTable
 
@@ -196,10 +196,48 @@ function SubModuleItemTable.validator(bt::XLSXBalanceTable)
     path = joinpath(GAMEENV["CollectionResources"], "ItemIcons")
     validate_file(path, get(DataFrame, bt, "Currency")[!, :Icon], ".png", "아이템 Icon이 존재하지 않습니다")
     validate_file(path, get(DataFrame, bt, "Normal")[!, :Icon], ".png", "아이템 Icon이 존재하지 않습니다")
-    validate_file(path, get(DataFrame, bt, "BuildingSeed")[!, :Icon], ".png", "아이템 Icon이 존재하지 않습니다")
+    
+    df = get(DataFrame, bt, "BuildingSeed")
+    validate_haskey("Building", df[!, :BuildingKey])
+    validate_file(path, df[!, :Icon], ".png", "아이템 Icon이 존재하지 않습니다")
 
     nothing
 end
+function SubModuleItemTable.editor!(jwb::JSONWorkbook)
+    jws = jwb[:BuildingSeed]
+
+    building_keys = get.(jws.data, "BuildingKey", "")
+    x = SubModuleItemTable.buildingseed_pricejoy(building_keys)
+    # NOTE 이런 경우가 많은데 setindex!(jws, ...) 추가 할까?
+    for (i, el) in enumerate(jws.data)
+        el["PriceJoy"] = x[i]
+    end
+    @show jws
+    jwb
+end
+
+function SubModuleItemTable.buildingseed_pricejoy(building_keys)
+    function pricejoy(x) 
+        baseprice = startswith(x, "p") ? missing : 
+                    startswith(x, "s") ? 10 : 
+                    startswith(x, "r") ? 10 : error("'$key'가 BuildingKey 규칙에 맞지 않습니다")
+
+        _area = ref[x]["Condition"]["ChunkWidth"] * ref[x]["Condition"]["ChunkLength"]
+        grade = get(ref[x], "Grade", 1)
+
+        # 일단 대충
+        return baseprice * grade * _area
+    end
+    # construct BuildingData
+    ref = begin
+        a = map(x -> (x["BuildingKey"], x), JWB("Shop", false)[:Building])
+        b = map(x -> (x["BuildingKey"], x), JWB("Residence", false)[:Building])
+        c = map(x -> (x["BuildingKey"], x), JWB("Special", false)[:Building])
+        Dict([a; b; c])
+    end
+    pricejoy.(building_keys)
+end
+
 
 """
     SubModuleBlockCashStore
