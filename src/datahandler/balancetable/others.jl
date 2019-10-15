@@ -212,7 +212,6 @@ function SubModuleItemTable.editor!(jwb::JSONWorkbook)
     for (i, el) in enumerate(jws.data)
         el["PriceJoy"] = x[i]
     end
-    @show jws
     jwb
 end
 
