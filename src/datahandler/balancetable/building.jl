@@ -324,16 +324,11 @@ end
 
 function SubModuleSiteBonus.validator(bt)
     ref = get(DataFrame, bt, "Data")
-    # a = begin 
-    #     x = ref[!, :Requirement]
-    #     x = map(el -> get.(el, "Buildings", [""]), x)
-    #     x = vcat(vcat(x...)...)
-    #     unique(x)
-    # end
-    # validate_haskey("Building", a)
-
+    a = begin 
+        x = ref[!, :Requirement]
+        x = map(el -> get.(el, "Buildings", [""]), x)
+        x = vcat(vcat(x...)...)
+        unique(x)
+    end
+    validate_haskey("Building", a)
 end
-
-# function SubModuleSiteBonus.required_area()
-
-# end
