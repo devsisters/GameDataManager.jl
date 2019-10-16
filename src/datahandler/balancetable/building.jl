@@ -289,15 +289,25 @@ function SubModuleAbility.coincounter(profit, grade, level)
     coincounter = round(Int, base * level * profit)
 end
 
-# function _rentcoin_value(grade, level, _area)
-#     profit = _profitcoin_value(grade, level, _area)
-#     # level +1 시간 분량
-#     rentcoin = profit * (level + 1)
-# end
+"""
+    joycreation(grade, level, area)
 
+* 1레벨에서 피포 1명분(900) Joy생산에 필요한 시간은  
+   'grade * 90분'으로 정한다. 따라서 시간당 조이 생산량x는  
+   x = (900 * 60 / (grade * 90))
+"""
 function SubModuleAbility.joycreation(grade, level, _area)
-    # 2x1에서 250, 이후 변의 길이에 비례
-    joy = (grade + level -1) * 250 * sqrt(_area) * 1/sqrt(2)
+    # 피포의 임시 저장량은 고정
+    joystash = begin 
+        ref = get(Dict, ("PipoTalent", "Grade"))
+        ref[1]["JoyStash"]
+    end
+
+    # 레벨별 채집 소요시간 10분씩 감소 (100, 90, 80, 70, 60)
+    joy = joystash / (100 - 10*level) # 분당 생산량
+    joy = joy * grade * 60 # 피포수량 = grade, 시간당 생산량으로 환산
+    joy = joy * sqrt(_area / 2) # 조이 생산량은 면적차이의 제곱근에 비례
+    
     return round(Int, joy, RoundDown)
 end
 
@@ -314,13 +324,13 @@ end
 
 function SubModuleSiteBonus.validator(bt)
     ref = get(DataFrame, bt, "Data")
-    a = begin 
-        x = ref[!, :Requirement]
-        x = map(el -> get.(el, "Buildings", [""]), x)
-        x = vcat(vcat(x...)...)
-        unique(x)
-    end
-    validate_haskey("Building", a)
+    # a = begin 
+    #     x = ref[!, :Requirement]
+    #     x = map(el -> get.(el, "Buildings", [""]), x)
+    #     x = vcat(vcat(x...)...)
+    #     unique(x)
+    # end
+    # validate_haskey("Building", a)
 
 end
 

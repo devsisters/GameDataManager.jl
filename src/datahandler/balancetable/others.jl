@@ -269,16 +269,24 @@ function SubModuleItemTable.editor!(jwb::JSONWorkbook)
     jwb
 end
 
-function SubModuleItemTable.buildingseed_pricejoy(ref, key)::Integer
-    baseprice = startswith(key, "p") ? missing : 
-                startswith(key, "s") ? 10 : 
-                startswith(key, "r") ? 10 : error("'$key'가 BuildingKey 규칙에 맞지 않습니다")
+function SubModuleItemTable.buildingseed_pricejoy(ref, key)
+    if startswith(key, "p")
+        return missing
+    else
+        grade = get(ref[key], "Grade", 1)
+        _area = ref[key]["Condition"]["ChunkWidth"] * ref[key]["Condition"]["ChunkLength"]
+    
+        multi = grade == 1 ? 1 : 
+                grade == 2 ? 2 : 
+                grade == 3 ? 4 : 
+                grade == 4 ? 12 : 
+                grade == 5 ? 36 : 
+                grade == 6 ? 72 : error("6등급 이상 건물에 대한 joyprice 추가 필요")
 
-    _area = ref[key]["Condition"]["ChunkWidth"] * ref[key]["Condition"]["ChunkLength"]
-    grade = get(ref[key], "Grade", 1)
-
-    # 일단 대충
-    return baseprice * grade * _area
+        # 1레벨 조이 생산량
+        base = SubModuleAbility.joycreation(grade, 1, _area)
+        return round(Int, base * multi)
+    end
 end
 
 
