@@ -1,11 +1,18 @@
-mutable struct BuyCount <: AbstractUserRecord
-    coin::Int32 #날짜도 기록?
-    energymix::Int32
-    sitecleaner::Int32
+mutable struct BuyCountFlag <: AbstractFlag
+    map::Dict{Symbol, Int}
 
-    BuyCount() = new(0, 0, 0)
 end
+function BuyCountFlag()
+    d1 = Dict(zip([:COIN, :ENERGYMIX, :SITECLEANER], [0, 0, 0]))
+    d2 = begin 
+        ref = get(DataFrame, ("ItemTable", "BuildingSeed"))
+        k = Symbol.(ref[!, :BuildingKey])
+        # 해금전에는 -1
+        Dict(zip(k, zeros(Int, length(k)) .- 1))
+    end
 
+    BuyCountFlag(merge(d1, d2))
+end
 """
     UserInfo
 mutable 정보를 분리
@@ -29,9 +36,8 @@ struct User
     info::UserInfo
     villages::Array{Village, 1}
     buildings::BuildingStorage
-    item_storage::UserItemStorage
-    token_storage::VillageTokenStorage
-    buycount::BuyCount
+    items::UserItemStorage
+    buycount::BuyCountFlag
 
     let mid = UInt64(0)
         function User(name::AbstractString)
@@ -40,13 +46,12 @@ struct User
             init_village = Village()
             info = UserInfo(mid, name)
             buildings = BuildingStorage(mid)
-            item_storage = UserItemStorage(mid)
-            token_storage = VillageTokenStorage(mid, init_village)
+            items = UserItemStorage(mid)
             # construct 
             user = new(mid, info, 
                        [init_village], buildings,
-                       item_storage, token_storage, 
-                       BuyCount())
+                       items, 
+                       BuyCountFlag())
             USERLIST[mid] = user
 
             return user
@@ -62,27 +67,27 @@ end
 const USERLIST = Dict{UInt64, User}()
 
 buycount(u::User) = u.buycount
-Base.getindex(x::AbstractUserRecord, name) = getfield(x, name) 
-Base.setindex!(x::AbstractUserRecord, value::Integer, name) = setfield!(x, name, Int32(value))
+Base.getindex(x::AbstractFlag, name) = getfield(x, name) 
+Base.setindex!(x::AbstractFlag, value::Integer, name) = setfield!(x, name, Int32(value))
 
-add!(u::User, item::StackItem) = add!(u.item_storage, item)
-add!(u::User, items::ItemCollection) = add!(u.item_storage, items)
-remove!(u::User, item::StackItem) = remove!(u.item_storage, item)
-remove!(u::User, items::ItemCollection) = remove!(u.item_storage, items)
+add!(u::User, item::StackItem) = add!(u.items, item)
+add!(u::User, items::ItemCollection) = add!(u.items, items)
+remove!(u::User, item::StackItem) = remove!(u.items, item)
+remove!(u::User, items::ItemCollection) = remove!(u.items, items)
 
-has(u::User, item::StackItem) = has(u.item_storage, item)
+has(u::User, item::StackItem) = has(u.items, item)
 function has(u::User, items::ItemCollection)
-    has(u.item_storage, items)
+    has(u.items, items)
 end
 # 보유한 재화 확인
 """
     getitem(u::User, x)
 """
-getitem(u::User, item)  = getitem(u.item_storage, item)
+getitem(u::User, item)  = getitem(u.items, item)
 
 # 토큰은 빌리지 ID 필요
-# add!(u::User, t::VillageToken) = add!(u.item_storage, t)
-# remove!(u::User, t::VillageToken) = remove!(u.item_storage, t)
+# add!(u::User, t::VillageToken) = add!(u.items, t)
+# remove!(u::User, t::VillageToken) = remove!(u.items, t)
 # has(u::User, t::VillageToken) = has(u.token_storage, t)
 # getitem(u::User, t::VillageToken) = getitem(u.token_storage, t)
 

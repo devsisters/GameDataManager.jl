@@ -80,7 +80,7 @@ export GAMEENV, GAMEDATA, help,
           ItemCollection,
           add!, remove!, has, getitem,
     # 건물
-      NonStackItem, Building, Special, Residence, Shop, Ability,
+      NonStackItem, Building, Special, Residence, Shop, Ability, SegmentInfo,
                     abilitysum,
                     price, buy!, build!, spend!,
     # 부동산 

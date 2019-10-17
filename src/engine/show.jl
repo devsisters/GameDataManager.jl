@@ -21,12 +21,9 @@ function Base.show(io::IO, m::Currency)
     print(io, digitsep(m.val), ISO4217[itemkey(m)][2])
 end
 function Base.show(io::IO, m::VillageToken)
-    ref = get_cachedrow("VillageTokenTable", "Data", :TokenId, itemkey(m))[1]
+    ref = get_cachedrow("Village", "Token", :TokenId, itemkey(m))[1]
     n = replace(ref["\$Name"], " " => "")
     print(io, digitsep(m.val), n)
-    if !isnull(m.villageid)
-        print(io, "[VillageId: ", m.villageid, "]")
-    end
 end
 
 function Base.show(io::IO, x::T) where T <: StackItem
@@ -58,7 +55,7 @@ end
 
 function Base.show(io::IO, x::RewardTable)
     k = x.key
-    data = get_cachedrow(rewardkey_scope(k), 1, :RewardKey, k)
+    data = get_cachedrow(SubModuleRewardTable.keyscope(k), 1, :RewardKey, k)
     script = data[1]["RewardScript"]     
 
     print(io, "($k)", script["TraceTag"], ": ")
@@ -67,17 +64,23 @@ end
 
 # 건물, 개조
 function Base.show(io::IO, x::T) where T <: Building
-    print(io, string(T), " \"$(itemname(x))\" Lv", x.level, "\n┗ ")
+    summary(io, x)
+    print(io, "\n↳")
     for a in x.abilities
-        print(io, a, "; ")
+        show(io, a)
+        a != last(x.abilities) && print(io, ", ")
     end
 end
 function Base.show(io::IO, x::Sandbox)
-    print(io, "Sandbox", " \"$(itemname(x))\" Lv", x.level)
+    summary(io, x)
 end
-function Base.print(io::IO, x::Ability{GROUP}) where GROUP
-    a = replace(string(itemkey(x)), string(GROUP) => "{‥")
-    print(io, GROUP, a, "} Lv", x.level, ": ", x.val)
+function Base.summary(io::IO, x::T) where T <: Building
+    print(io, string(T), "(\"$(itemname(x))\", Lv", x.level, ")")
+end
+function Base.show(io::IO, x::Ability{GROUP}) where GROUP
+    # a = replace(string(itemkey(x)), string(GROUP) => "{‥")
+
+    print(io, "\"$(itemkey(x))(", x.level, ")\"=>", x.val)
 end
 
 function Base.show(io::IO, x::DroneDelivery)
@@ -88,21 +91,23 @@ end
 
 function Base.show(io::IO, x::User)
     println(io, "(mid:", usermid(x), ")", username(x))
-    println(io, x.item_storage)
-    println(io, x.buycount)
-    print(io, x.villages)
-    # print(io, x.token_storage)
+    println(io, x.items)
+    # println(io, x.buycount)
+    println(io, x.villages)
+    println(io, x.buildings)
 end
 
 function Base.show(io::IO, x::Village)
-    print(io, "Village(id:", x.id, ") / ")
-    print(io, x.storage)
-    print(io, "\t")
+    print(io, "Village($(x.id)) has ")
+    tokens = collect(values(x.storage))
+    print(io, tokens[1], ", ")
+    print(io, tokens[2], "\n\t")
+      
     print(io, x.layout)
 end
 
 function Base.show(io::IO, x::VillageLayout)
-    print(io,  "VillageLayout{\"x.name\"}")
+    print(io,  "Layout{\"$(x.name)\"}")
     print(io, " with ", summary(x.sites))
 end
 
@@ -111,7 +116,6 @@ function Base.show(io::IO, x::AbstractSite)
     s = size(x)
     # 상자 아래에 기입
     sz = string(s[1], "x", s[2])
-
     
     print(io, '┌', "─╶"^(size(x, 1)-2), '┐', '\n')
     for i in 1:(size(x, 2)-2)
@@ -125,5 +129,13 @@ function Base.show(io::IO, x::AbstractSite)
         print(io, "─╶"^(s[1]- 2 - length(sz)))
     end
     print(io, '┘')
-    
+end
+function Base.summary(io::IO, a::Array{T, 1}) where T <: AbstractSite
+    print(io, length(a), "-Sites ")
+    x = filter(iscleaned, a)
+    print(io, "CleanedArea{", sum(area.(x)), " / ", sum(area.(a)), "}")
+end
+
+function Base.show(io::IO, x::SegmentInfo)
+    print(io, x.building)
 end

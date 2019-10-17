@@ -14,8 +14,12 @@ function guid(::Type{T}) where T <: Currency
 end
 
 function guid(a::VillageToken{ID}) where {ID}
-    guid(string("VillageToken_", ID, "/ villageid", a.villageid))
+    guid("VillageToken{$ID}")
 end
+function guid(::Type{T}) where T <: VillageToken
+    guid(zero(T))
+end
+
 function guid(a::T) where {T <: StackItem}
     guid(string(T, "_", a.key))
 end

@@ -82,7 +82,7 @@ struct Village <: AbstractCell
 end
 function Village(layout::VillageLayout)
     id = cell_uid()
-    storage = ItemCollection(VillageToken(id, 1, 0), VillageToken(id, 2, 0))
+    storage = ItemCollection(VillageToken{1}(0), VillageToken{2}(0))
     Village(id, storage, layout)
 end
 function Village(f::AbstractString)
@@ -149,7 +149,7 @@ iscleaned(v::Village, i) = iscleaned(sites(v)[i])
 
 
 function get_villagetoken(v::Village, tokenid)
-    getitem(v.storage, VillageToken(v.id, tokenid, 0))
+    getitem(v.storage, VillageToken{tokenid}(0))
 end
 
 function assignable_energymix(v::Village)

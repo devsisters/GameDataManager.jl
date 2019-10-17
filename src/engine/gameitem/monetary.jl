@@ -31,7 +31,11 @@ struct Currency{NAME, T} <: AbstractMonetary
         
     (::Type{Currency{NAME}})(x::T) where {NAME,T} = new{NAME,T}(x)
     function (::Type{Currency{NAME,T}})(x::T2) where {NAME,T,T2<:Integer}
-        new{NAME, promote_type(T, T2)}(x)
+        if haskey(ISO4217, NAME)
+            new{NAME, promote_type(T, T2)}(x)
+        else
+            throw(KeyError("ISO4217에 $(NAME)에 정의되어 있지 않습니다"))
+        end
     end
     function (::Type{Currency{NAME,T}})(x::T) where {NAME,T}
         if haskey(ISO4217, NAME)
@@ -50,31 +54,21 @@ Currency(NAME::Symbol, val) = Currency{NAME}(val)
 """
     VillageToken
 
-* villageid: 연결된 Village가 없으면 missing으로 한다
-
 VillageToken(villageid::UInt64, tokenid, val)
 """
 struct VillageToken{ID, T} <: AbstractMonetary
-    villageid::Union{Missing, UInt64}
     val::T
 
-    function (::Type{VillageToken{ID}})(villageid, val::T) where {ID, T}
-        ref = get(DataFrame, ("VillageTokenTable", "Data"))
+    (::Type{VillageToken{ID}})(val::T) where {ID,T} = new{Int8(ID),T}(val)
+    function (::Type{VillageToken{ID,T}})(val) where {ID,T}
+        ref = get(DataFrame, ("Village", "Token"))
         @assert in(ID, ref[!, :TokenId]) "$(ID)는 존재하지 않는 토큰ID 입니다"
 
-        new{ID,Int16}(villageid, Int16(val))
-    end
-    function (::Type{VillageToken{ID, T}})(villageid, val::T) where {ID, T}
-        ref = get(DataFrame, ("VillageTokenTable", "Data"))
-        @assert in(ID, ref[!, :TokenId]) "$(ID)는 존재하지 않는 토큰ID 입니다"
-
-        new{ID,Int16}(villageid, Int16(val))
+        new{Int8(ID),Int16}(Int16(val))
     end
 end
-function VillageToken(villageid::UInt64, tokenid, val)
-    VillageToken{tokenid}(villageid, val)
-end
-VillageToken(tokenid, val) = VillageToken{tokenid}(missing, val)
+VillageToken(ID; storage::DataType = Int) = VillageToken{ID}(storage(1))
+VillageToken(ID, val) = VillageToken{ID}(val)
 
 
 """

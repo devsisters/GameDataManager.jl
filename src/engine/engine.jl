@@ -89,9 +89,9 @@ AbstractGameItemStorage
 abstract type AbstractGameItemStorage end
 
 """
-AbstractUserRecord
+AbstractFlag
 
 * BuyCount
 * QuestComplete
 """
-abstract type AbstractUserRecord end
+abstract type AbstractFlag end

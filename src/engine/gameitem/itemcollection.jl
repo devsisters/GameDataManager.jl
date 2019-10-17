@@ -163,29 +163,14 @@ function getitem(s::UserItemStorage, ::Type{T}) where T <: Currency
     get(s.storage, guid(T), zero(T))
 end
 
-"""
-    VillageTokenStorage
-Village id별로 token
-"""
-struct VillageTokenStorage <: AbstractGameItemStorage
-    ownermid::UInt64
-    tokens::Dict{UInt64, ItemCollection}
-end
-function VillageTokenStorage(mid::UInt64, x::AbstractCell)
-    ref = get(DataFrame, ("VillageTokenTable", "Data"))
-    tokens = Dict(x.id => ItemCollection(VillageToken.(x.id, ref[!, :TokenId], 0)))
-    
-    VillageTokenStorage(mid, tokens)
-end
-
 
 struct BuildingStorage <: AbstractGameItemStorage
     ownermid::UInt64
-    shop::Array{SegmentItem, 1}
-    residence::Array{SegmentItem, 1}
-    special::Array{SegmentItem, 1}
-    sandbox::Array{SegmentItem, 1}
+    shop::Array{SegmentInfo, 1}
+    residence::Array{SegmentInfo, 1}
+    special::Array{SegmentInfo, 1}
+    sandbox::Array{SegmentInfo, 1}
 end
 function BuildingStorage(mid)
-    BuildingStorage(mid, SegmentItem[], SegmentItem[], SegmentItem[], SegmentItem[])
+    BuildingStorage(mid, SegmentInfo[], SegmentInfo[], SegmentInfo[], SegmentInfo[])
 end
