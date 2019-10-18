@@ -13,7 +13,7 @@ function ItemCollection(map::Dict{UUID,T}) where T <: GameItem
     ItemCollection{UUID,T2}(map)
 end
 function ItemCollection(::Type{Currency})
-    ItemCollection(0CON, 0CRY)
+    ItemCollection(0COIN, 0CRY)
 end
 function ItemCollection(::Type{T}) where T <: StackItem
     ItemCollection{UUID,T}()
@@ -163,14 +163,26 @@ function getitem(s::UserItemStorage, ::Type{T}) where T <: Currency
     get(s.storage, guid(T), zero(T))
 end
 
-
+"""
+    BuildingStorage
+"""
 struct BuildingStorage <: AbstractGameItemStorage
     ownermid::UInt64
     shop::Array{SegmentInfo, 1}
     residence::Array{SegmentInfo, 1}
-    special::Array{SegmentInfo, 1}
     sandbox::Array{SegmentInfo, 1}
+    special::Array{SegmentInfo, 1}
 end
 function BuildingStorage(mid)
     BuildingStorage(mid, SegmentInfo[], SegmentInfo[], SegmentInfo[], SegmentInfo[])
 end
+function add!(s::BuildingStorage, seg::SegmentInfo)
+    target = isa(seg.building, Shop) ? s.shop :
+            isa(seg.building, Residence) ? s.residence :
+            isa(seg.building, Sandbox) ? s.sandbox :
+            isa(seg.building, Special) ? s.special  :
+            throw(MethodError(add!, seg.building))
+
+    push!(target, seg)
+end
+

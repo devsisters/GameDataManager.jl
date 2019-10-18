@@ -9,14 +9,10 @@ end
 function guid(a::Currency{NAME}) where NAME
     guid("Currency{$NAME}")
 end
-function guid(::Type{T}) where T <: Currency
-    guid(zero(T))
-end
-
 function guid(a::VillageToken{ID}) where {ID}
     guid("VillageToken{$ID}")
 end
-function guid(::Type{T}) where T <: VillageToken
+function guid(::Type{T}) where T <: AbstractMonetary
     guid(zero(T))
 end
 

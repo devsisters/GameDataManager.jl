@@ -59,7 +59,8 @@ VillageToken(villageid::UInt64, tokenid, val)
 struct VillageToken{ID, T} <: AbstractMonetary
     val::T
 
-    (::Type{VillageToken{ID}})(val::T) where {ID,T} = new{Int8(ID),T}(val)
+    # VillageToken 은 ValueType을 Int16으로 강제 고정
+    (::Type{VillageToken{ID}})(val::T) where {ID,T} = new{Int8(ID),Int16}(Int16(val))
     function (::Type{VillageToken{ID,T}})(val) where {ID,T}
         ref = get(DataFrame, ("Village", "Token"))
         @assert in(ID, ref[!, :TokenId]) "$(ID)는 존재하지 않는 토큰ID 입니다"

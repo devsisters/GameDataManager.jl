@@ -36,7 +36,7 @@ end
 @testset "BuildingSeed 추가 삭제" begin
     ref = get(DataFrame, itemtable, "BuildingSeed")
 
-    u = User(); remove!(u, StackItem(5001)) 
+    u = User(); remove!(u, StackItem(2001)) 
     for k in ref[!, :Key]
         @test add!(u, StackItem(k, 11))
         @test has(u, StackItem(k, 11))
@@ -86,7 +86,7 @@ end
 
     u = User(); add!(u, 1000ENERGYMIX)
 
-    vill = u.villages[1]
+    vill = u.village[1]
     
     spendable = div(area(vill), ref["EnergyMixPerChunk"][2])
     for i in 1:spendable

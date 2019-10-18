@@ -48,7 +48,20 @@ function Base.show(io::IO, x::ItemCollection{T,V}) where {T,V}
         for (i, pair) in enumerate(m)
             print(io, "  ", string(pair[1])[1:4], "… => ")
             print(io, pair[2])
-            print(io, "\n")
+            i < length(m) && print(io, "\n")
+        end
+    end
+end
+
+function Base.show(io::IO, x::BuildingStorage)
+    println(io, "Building")
+    # 총 Shop 수, Residence 수 등 기입?
+
+    # TODO: Village마다 모아서 보여주게 수정
+    for field in (:shop, :residence, :sandbox, :special)
+        for el in getfield(x, field)
+            print(io, "\t", el)
+            el != last(x.sandbox) && print(io, "\n")
         end
     end
 end
@@ -91,10 +104,10 @@ end
 
 function Base.show(io::IO, x::User)
     println(io, "(mid:", usermid(x), ")", username(x))
-    println(io, x.items)
+    println(io, x.item)
     # println(io, x.buycount)
-    println(io, x.villages)
-    println(io, x.buildings)
+    println(io, x.village)
+    println(io, x.building)
 end
 
 function Base.show(io::IO, x::Village)
@@ -107,7 +120,7 @@ function Base.show(io::IO, x::Village)
 end
 
 function Base.show(io::IO, x::VillageLayout)
-    print(io,  "Layout{\"$(x.name)\"}")
+    print(io,  "Layout\"$(x.name)\"")
     print(io, " with ", summary(x.sites))
 end
 
@@ -137,5 +150,5 @@ function Base.summary(io::IO, a::Array{T, 1}) where T <: AbstractSite
 end
 
 function Base.show(io::IO, x::SegmentInfo)
-    print(io, x.building)
+    print(io, "Village(", x.villageid, "-", x.siteindex, ") => ", summary(x.building))
 end

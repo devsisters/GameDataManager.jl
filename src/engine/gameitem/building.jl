@@ -179,10 +179,9 @@ Base.size(t::T, d) where T <: Building = size(t)[d]
 struct SegmentInfo
     villageid::UInt64
     siteindex::Int8
-    building::Building
     #sitecoord 좌표
+    building::Building
 end
 function SegmentInfo(villageid, siteindex, key::AbstractString)
     SegmentInfo(villageid, siteindex, Building(key))
 end
-

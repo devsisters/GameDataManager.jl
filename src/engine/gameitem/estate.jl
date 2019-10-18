@@ -147,22 +147,17 @@ iscleaned(x::AbstractSite) = x.cleaned
 clean!(v::Village, i) = clean!(sites(v), i)
 iscleaned(v::Village, i) = iscleaned(sites(v)[i])
 
-
-function get_villagetoken(v::Village, tokenid)
-    getitem(v.storage, VillageToken{tokenid}(0))
-end
-
 function assignable_energymix(v::Village)
     ref = get(Dict, ("EnergyMix", "Data"))[1]
 
     energymix_limit = div(area(v), ref["EnergyMixPerChunk"][2])
 
     tokenid = ref["AssignOnVillage"][1]["TokenId"] 
-    amount = ref["AssignOnVillage"][1]["Amount"]
-    current_token = get_villagetoken(v, tokenid)
+    amount_per_mix = ref["AssignOnVillage"][1]["Amount"]
+    current_token = getitem(v.storage, VillageToken(tokenid))
 
     # (할당된에너지믹스) = (현재토큰) / (믹스당토큰증가량)    
-    return energymix_limit - Int(itemvalue(current_token) / amount)
+    return energymix_limit - Int(itemvalue(current_token) / amount_per_mix)
 end
 
 function assign_energymix!(v::Village, amount=1)
@@ -171,14 +166,17 @@ function assign_energymix!(v::Village, amount=1)
     if em >= amount
         ref = get(Dict, ("EnergyMix", "Data"))[1]["AssignOnVillage"]
 
-        t1 = amount * VillageToken(v.id, ref[1]["TokenId"], ref[1]["Amount"])
-        t2 = amount * VillageToken(v.id, ref[2]["TokenId"], ref[2]["Amount"])
+        t1 = amount * VillageToken(ref[1]["TokenId"], ref[1]["Amount"])
+        t2 = amount * VillageToken(ref[2]["TokenId"], ref[2]["Amount"])
 
-        add!(v.storage, t1)
-        add!(v.storage, t2)
+        add!(v, t1)
+        add!(v, t2)
 
         return true
     end
     return false
 end
 
+has(v::Village, item::VillageToken) = has(v.storage, item)
+add!(v::Village, item::VillageToken) = add!(v.storage, item)
+remove!(v::Village, item::VillageToken) = remove!(v.storage, item)

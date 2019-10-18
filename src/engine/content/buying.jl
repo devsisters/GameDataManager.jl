@@ -10,7 +10,7 @@ function buy!(u::User, ::Type{Currency{:SITECLEANER}}) #사이트 클리너
     cost = price(u, Currency{:SITECLEANER})
     if remove!(u, cost)
         add!(u, 1SITECLEANER)
-        buycount(u)[:sitecleaner] = buycount(u)[:sitecleaner] + 1
+        addbuycount!(u, SITECLEANER)
         return true
     end
     return false
@@ -24,7 +24,7 @@ function buy!(u::User, ::Type{Currency{:ENERGYMIX}}) #에너지 믹스
     cost = price(u, Currency{:ENERGYMIX})
     if remove!(u, cost)
         add!(u, 1ENERGYMIX)
-        buycount(u)[:energymix] = buycount(u)[:energymix] + 1
+        addbuycount!(u, ENERGYMIX)
         return true
     end
     return false
@@ -39,14 +39,18 @@ end
 * SITECLEANER 1개 가격
 """
 function price(u::User, ::Type{Currency{:SITECLEANER}})
-    bc = buycount(u)[:sitecleaner]
+    bc = getbuycount(u, SITECLEANER)
     price(bc, SITECLEANER)
 end
 function price(buycount::Integer, ::Type{Currency{:SITECLEANER}})
     func_variable = begin
         ref = get(DataFrame, ("SpaceDrop", "SiteCleaner"))
         # TODO AccumulatedPurchase2 -> AccumulatedPurchase 로 수정
-        i = findlast(x -> x <= buycount, ref[!, :AccumulatedPurchase])
+        if buycount >= ref[end, :AccumulatedPurchase]
+            i = size(ref, 1)
+        else
+            i = findfirst(x -> x >= buycount, ref[!, :AccumulatedPurchase])
+        end
         ref[i, :FuncVariable]
     end
     (func_variable["Alpha"] * buycount + func_variable["Beta"]) * COIN
@@ -58,13 +62,13 @@ end
 * ENERGYMIX 1개 가격
 """
 function price(u::User, ::Type{Currency{:ENERGYMIX}})
-    bc = buycount(u)[:energymix]
+    bc = getbuycount(u, ENERGYMIX)
     price(bc, ENERGYMIX)
 end
 function price(buycount::Integer, ::Type{Currency{:ENERGYMIX}})
     ref = begin
         ref = get(DataFrame, ("EnergyMix", "Price"))
-        i = findlast(x -> x <= buycount. ref[!, :AccumulatedPurchase])
+        i = findlast(x -> x <= buycount, ref[!, :AccumulatedPurchase])
         ref[i, :]
     end
     totalcost = begin 
@@ -98,8 +102,7 @@ function spend!(u::User, v::Village, ::Type{Currency{:ENERGYMIX}})
         margin = assignable_energymix(v)
         if margin > zero(ENERGYMIX)
             if remove!(u, 1*ENERGYMIX)
-                add!(v, 1*ENERGYMIX)
-                update_token!(v)
+                assign_energymix!(v)
                 b = true
             end
         else

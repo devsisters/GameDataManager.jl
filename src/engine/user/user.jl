@@ -1,6 +1,5 @@
 mutable struct BuyCountFlag <: AbstractFlag
     map::Dict{Symbol, Int}
-
 end
 function BuyCountFlag()
     d1 = Dict(zip([:COIN, :ENERGYMIX, :SITECLEANER], [0, 0, 0]))
@@ -13,6 +12,10 @@ function BuyCountFlag()
 
     BuyCountFlag(merge(d1, d2))
 end
+Base.getindex(x::BuyCountFlag, i) = getindex(x.map, i)
+Base.setindex!(x::BuyCountFlag, value, key) = setindex!(x.map, value, key)
+
+
 """
     UserInfo
 mutable 정보를 분리
@@ -34,9 +37,9 @@ end
 struct User
     mid::UInt64
     info::UserInfo
-    villages::Array{Village, 1}
-    buildings::BuildingStorage
-    items::UserItemStorage
+    village::Array{Village, 1}
+    building::BuildingStorage
+    item::UserItemStorage
     buycount::BuyCountFlag
 
     let mid = UInt64(0)
@@ -45,14 +48,14 @@ struct User
 
             init_village = Village()
             info = UserInfo(mid, name)
-            buildings = BuildingStorage(mid)
-            items = UserItemStorage(mid)
+            building = BuildingStorage(mid)
+            item = UserItemStorage(mid)
             # construct 
             user = new(mid, info, 
-                       [init_village], buildings,
-                       items, 
+                       [init_village], building,
+                       item, 
                        BuyCountFlag())
-            USERLIST[mid] = user
+            USERDB[mid] = user
 
             return user
         end
@@ -64,34 +67,38 @@ function User()
     User(name)
 end
 
-const USERLIST = Dict{UInt64, User}()
+const USERDB = Dict{UInt64, User}()
 
-buycount(u::User) = u.buycount
-Base.getindex(x::AbstractFlag, name) = getfield(x, name) 
-Base.setindex!(x::AbstractFlag, value::Integer, name) = setfield!(x, name, Int32(value))
+add!(u::User, item::StackItem) = add!(u.item, item)
+add!(u::User, items::ItemCollection) = add!(u.item, items)
+add!(u::User, seg::SegmentInfo) = add!(u.building, seg)
 
-add!(u::User, item::StackItem) = add!(u.items, item)
-add!(u::User, items::ItemCollection) = add!(u.items, items)
-remove!(u::User, item::StackItem) = remove!(u.items, item)
-remove!(u::User, items::ItemCollection) = remove!(u.items, items)
+remove!(u::User, item::StackItem) = remove!(u.item, item)
+remove!(u::User, items::ItemCollection) = remove!(u.item, items)
 
-has(u::User, item::StackItem) = has(u.items, item)
+has(u::User, item::StackItem) = has(u.item, item)
 function has(u::User, items::ItemCollection)
-    has(u.items, items)
+    has(u.item, items)
 end
 # 보유한 재화 확인
 """
     getitem(u::User, x)
 """
-getitem(u::User, item)  = getitem(u.items, item)
-
-# 토큰은 빌리지 ID 필요
-# add!(u::User, t::VillageToken) = add!(u.items, t)
-# remove!(u::User, t::VillageToken) = remove!(u.items, t)
-# has(u::User, t::VillageToken) = has(u.token_storage, t)
-# getitem(u::User, t::VillageToken) = getitem(u.token_storage, t)
+getitem(u::User, item)  = getitem(u.item, item)
 
 username(u::User) = username(u.info)
 usermid(u::User) = u.mid
 username(i::UserInfo) = i.name
 usermid(i::UserInfo) = i.mid
+
+getbuycount(u::User, ::Type{Currency{NAME}}) where NAME = u.buycount[NAME]
+
+getbuycount(u::User, key::AbstractString) = getbuycount(u, Symbol(key))
+getbuycount(u::User, k::Symbol) = u.buycount[k]
+
+addbuycount!(u::User, key::AbstractString, value = 1) = addbuycount!(u, Symbol(key), value)
+function addbuycount!(u::User, k::Symbol, value = 1)
+    u.buycount[k] += value
+end
+
+addbuycount!(u::User, ::Type{Currency{NAME}}, value = 1) where NAME = u.buycount[NAME] += value

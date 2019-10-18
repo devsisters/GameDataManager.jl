@@ -30,23 +30,6 @@ Base.isless(m::Currency{NAME,T}, n::Currency{NAME,T2}) where {NAME,T,T2} = isles
 -(m::Currency{NAME,T}, n::Currency{NAME,T}) where {NAME,T} = Currency{NAME,T}(m.val - n.val)
 -(m::Currency{NAME}, n::Currency{NAME}) where {NAME} = -(promote(m, n)...)
 
-# VillageToken
-Base.zero(x::VillageToken{ID, T}) where {ID,T} = VillageToken{ID}(x.villageid, zero(T))
-function +(m::VillageToken{ID}, n::VillageToken{ID}) where ID
-    if m.villageid == n.villageid
-        VillageToken{ID}(itemkey(m), m.val + n.val)
-    else
-        throw(ArgumentError("빌리지 id가 다르면 연산할 수 없습니다"))
-    end
-end
-function -(m::VillageToken{ID}, n::VillageToken{ID}) where ID
-    if m.villageid == n.villageid
-        VillageToken{ID}(itemkey(m), m.val - n.val)
-    else
-        throw(ArgumentError("빌리지 id가 다르면 연산할 수 없습니다"))
-    end
-end
-
 
 # arithmetic operations on monetary and dimensionless values
 *(m::T, i::Real) where {T<:Currency} = T(m.val * i)
@@ -100,6 +83,18 @@ function Base.convert(::Type{Currency{NAME,T}}, m::Currency{NAME,T2}) where {NAM
 end
 
 
+Base.zero(x::VillageToken{ID, T}) where {ID,T} = VillageToken{ID, T}(zero(T))
+m::VillageToken == n::VillageToken = m.val == n.val == 0
+==(m::T, n::T) where {T<:VillageToken} = m.val == n.val
+==(m::VillageToken{NAME}, n::VillageToken{NAME}) where {NAME} = (m - n).val == 0
++(m::VillageToken{NAME,T}, n::VillageToken{NAME,T}) where {NAME,T} = VillageToken{NAME,T}(m.val + n.val)
+
+-(m::T) where {T<:VillageToken} = T(-m.val)
+-(m::VillageToken{NAME,T}, n::VillageToken{NAME,T}) where {NAME,T} = VillageToken{NAME,T}(m.val - n.val)
+
+*(m::T, i::Real) where {T<:VillageToken} = T(m.val * i)
+*(i::Real, m::T) where {T<:VillageToken} = T(i * m.val)
+
 
 ################################################################################
 ## numeric operations for StackItem
@@ -139,8 +134,6 @@ end
 *(m::T, i::Real) where {T<:StackItem} = T(m.val * i)
 *(i::Real, m::T) where {T<:StackItem} = T(i * m.val)
 
-*(m::VillageToken{ID}, i::Real) where ID = VillageToken{ID}(m.villageid, m.val * i)
-*(i::Real, m::VillageToken{ID}) where ID = VillageToken{ID}(m.villageid, i * m.val)
 m::StackItem / f::Real = m * inv(f)
 
 ################################################################################
