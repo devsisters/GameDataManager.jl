@@ -308,7 +308,7 @@ end
 function validate_duplicate(target; assert=true)
     if !allunique(target)
         duplicate = filter(el -> el[2] > 1, countmap(target))
-        msg = "[:$(k)]에서 중복된 값이 발견되었습니다"
+        msg = "[:$(target)]에서 중복된 값이 발견되었습니다"
         if assert
             throw(AssertionError("$msg \n $(keys(duplicate))"))
         else
