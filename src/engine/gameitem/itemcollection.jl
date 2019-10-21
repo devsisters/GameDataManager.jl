@@ -127,7 +127,10 @@ end
 function UserItemStorage(ownermid)
     ref = get(Dict, ("GeneralSetting", "AddOnAccountCreation"))[1]
 
-    a = ItemCollection(Currency[ref["AddCoin"]*COIN, ref["AddCrystal"]*CRY])
+    a = ItemCollection(Currency[
+        ref["AddCoin"]*COIN, 
+        ref["AddCrystal"]*CRY, 
+        ref["AddJoy"]*JOY])
     b = ItemCollection(StackItem.(ref["AddItem"]))
     c = ItemCollection(StackItem.(ref["AddBuildingSeed"]))
 

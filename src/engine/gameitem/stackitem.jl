@@ -12,10 +12,14 @@ struct BuildingSeedItem <: StackItem
     key::Int32
     val::Int32
 
-    function BuildingSeedItem(key, val)
+    function BuildingSeedItem(key::Integer, val)
         !haskey(BuildingSeedItem, key) && throw(KeyError(key))
         new(key, val)
     end
+end
+function BuildingSeedItem(key::AbstractString, val=1)
+    ref = get_cachedrow("ItemTable", "BuildingSeed", :BuildingKey, key)[1]
+    BuildingSeedItem(ref["Key"], val)
 end
 struct BlockItem <: StackItem
     key::Int32

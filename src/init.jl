@@ -5,6 +5,7 @@ const GAMEENV = Dict{String, Any}()
 
 # Currencies
 const COIN                  = Currency{:COIN}
+const JOY                   = Currency{:JOY}
 const CRY                   = Currency{:CRY}
 const ENERGYMIX             = Currency{:ENERGYMIX}
 const SITECLEANER           = Currency{:SITECLEANER}
