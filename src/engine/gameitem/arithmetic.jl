@@ -100,33 +100,32 @@ m::VillageToken == n::VillageToken = m.val == n.val == 0
 ## numeric operations for StackItem
 ##
 ################################################################################
-Base.zero(x::T) where T <: StackItem = T(itemkey(x), 0)
-
+Base.zero(x::T) where T <: StackItem = T(itemkeys(x), 0)
 
 # comparisons
 function ==(m::T, n::T) where T <: StackItem 
-    @assert issamekey(m, n) "일치하지 않는 아이템 ==($(itemkey(m)), $(itemkey(n)))"
+    @assert issamekey(m, n) "일치하지 않는 아이템 ==($(itemkeys(m)), $(itemkeys(n)))"
     (m - n).val == 0
 end
 function Base.isless(m::T, n::T) where T <: StackItem 
-    @assert issamekey(m, n) "일치하지 않는 아이템 isless($(itemkey(m)), $(itemkey(n)))"
-    isless(itemvalue(m), itemvalue(n))
+    @assert issamekey(m, n) "일치하지 않는 아이템 isless($(itemkeys(m)), $(itemkeys(n)))"
+    isless(itemvalues(m), itemvalues(n))
 end
 # unary plus/minus
 + m::StackItem = m
--(m::T) where {T<:StackItem} = T(itemkey(m), -itemvalue(m))
+-(m::T) where {T<:StackItem} = T(itemkeys(m), -itemvalues(m))
 
 # arithmetic operations on two item
 function +(m::T, n::T) where T <: StackItem 
-    @assert issamekey(m, n) "일치하지 않는 아이템 +($(itemkey(m)), $(itemkey(n)))"
-    T(itemkey(m), m.val + n.val)
+    @assert issamekey(m, n) "일치하지 않는 아이템 +($(itemkeys(m)), $(itemkeys(n)))"
+    T(itemkeys(m), m.val + n.val)
 end
 function -(m::T, n::T) where T <: StackItem 
-    @assert issamekey(m, n) "일치하지 않는 아이템 -($(itemkey(m)), $(itemkey(n)))"
-    T(itemkey(m), m.val - n.val)
+    @assert issamekey(m, n) "일치하지 않는 아이템 -($(itemkeys(m)), $(itemkeys(n)))"
+    T(itemkeys(m), m.val - n.val)
 end
 function /(m::T, n::T) where T <: StackItem 
-    @assert issamekey(m, n) "일치하지 않는 아이템 /($(itemkey(m)), $(itemkey(n)))"
+    @assert issamekey(m, n) "일치하지 않는 아이템 /($(itemkeys(m)), $(itemkeys(n)))"
     float(m.val) / float(n.val)
 end
 
@@ -135,6 +134,16 @@ end
 *(i::Real, m::T) where {T<:StackItem} = T(i * m.val)
 
 m::StackItem / f::Real = m * inv(f)
+
+################################################################################
+## numeric operations for Building
+##
+################################################################################
+function Base.isless(m::Shop, n::Shop)
+    @assert issamekey(m, n) "일치하지 않는 아이템 isless($(itemkeys(m)), $(itemkeys(n)))"
+    isless(itemvalues(m), itemvalues(n))
+end
+
 
 ################################################################################
 ## numeric operations for ItemCollection

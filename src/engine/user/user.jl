@@ -25,10 +25,10 @@ mutable struct UserInfo
     mid::UInt64
     name::AbstractString
     level::Int16
-    total_devpoint::Int
+    developmentpoint::Currency{NAME, T} where {NAME, T}
 end
 function UserInfo(mid, name)
-    UserInfo(mid, name, 0, 0)
+    UserInfo(mid, name, 1, 0*DEVELOPMENTPOINT)
 end
 
 """
@@ -67,14 +67,40 @@ function User()
     User(name)
 end
 
+"""
+    USERDB
+
+생성한 모든 유저를 저장해 둠
+"""
 const USERDB = Dict{UInt64, User}()
 
 add!(u::User, item::StackItem) = add!(u.item, item)
 add!(u::User, items::ItemCollection) = add!(u.item, items)
 add!(u::User, seg::SegmentInfo) = add!(u.building, seg)
 
+function add!(u::User, item::Currency{:DEVELOPMENTPOINT, T}) where T 
+    add!(u.info, item)
+end
+function add!(info::UserInfo, item::Currency{:DEVELOPMENTPOINT, T}) where T 
+    ref = get(DataFrame, ("Player", "DevelopmentLevel"))
+    
+    p = info.developmentpoint + item
+    level = findlast(x -> itemvalues(p) >= x, ref[!, :NeedDevelopmentPoint])
+    if level > info.level
+        info.level = level
+    end
+    info.developmentpoint = p
+    
+    return true
+end
+
+
 remove!(u::User, item::StackItem) = remove!(u.item, item)
 remove!(u::User, items::ItemCollection) = remove!(u.item, items)
+function remove!(u::User, item::Currency{:DEVELOPMENTPOINT, T}) where T 
+    remove!(u.info, item)
+end
+
 
 has(u::User, item::StackItem) = has(u.item, item)
 function has(u::User, items::ItemCollection)
@@ -87,9 +113,12 @@ end
 getitem(u::User, item)  = getitem(u.item, item)
 
 username(u::User) = username(u.info)
-usermid(u::User) = u.mid
 username(i::UserInfo) = i.name
+usermid(u::User) = u.mid
 usermid(i::UserInfo) = i.mid
+levels(u::User) = levels(u.info)
+levels(i::UserInfo) = i.level
+
 
 getbuycount(u::User, ::Type{Currency{NAME}}) where NAME = u.buycount[NAME]
 

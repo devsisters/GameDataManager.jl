@@ -18,10 +18,10 @@ function digitsep(value::Integer; seperator=",", per_separator=3)
 end
 
 function Base.show(io::IO, m::Currency)
-    print(io, digitsep(m.val), ISO4217[itemkey(m)][2])
+    print(io, digitsep(m.val), ISO4217[itemkeys(m)][2])
 end
 function Base.show(io::IO, m::VillageToken)
-    ref = get_cachedrow("Village", "Token", :TokenId, itemkey(m))[1]
+    ref = get_cachedrow("Village", "Token", :TokenId, itemkeys(m))[1]
     n = replace(ref["\$Name"], " " => "")
     print(io, digitsep(m.val), n)
 end
@@ -30,10 +30,10 @@ function Base.show(io::IO, x::T) where T <: StackItem
     sheet = T == BuildingSeedItem ? "BuildingSeed" :
             T == NormalItem ? "Normal" : error("Block...")
 
-    ref = get_cachedrow("ItemTable", sheet, :Key, itemkey(x))
+    ref = get_cachedrow("ItemTable", sheet, :Key, itemkeys(x))
     name = ref[1]["Name"]
 
-    print(io, "(", itemkey(x), ")", name,  ": ", itemvalue(x))
+    print(io, "(", itemkeys(x), ")", name,  ": ", itemvalues(x))
 end
 
 function Base.show(io::IO, x::ItemCollection{T,V}) where {T,V}
@@ -93,7 +93,7 @@ end
 function Base.show(io::IO, x::Ability{GROUP}) where GROUP
     # a = replace(string(itemkey(x)), string(GROUP) => "{‥")
 
-    print(io, "\"$(itemkey(x))(", x.level, ")\"=>", x.val)
+    print(io, "\"$(itemkeys(x))(", x.level, ")\"=>", x.val)
 end
 
 function Base.show(io::IO, x::DroneDelivery)
@@ -146,7 +146,7 @@ end
 function Base.summary(io::IO, a::Array{T, 1}) where T <: AbstractSite
     print(io, length(a), "-Sites ")
     x = filter(iscleaned, a)
-    print(io, "CleanedArea{", sum(area.(x)), " / ", sum(area.(a)), "}")
+    print(io, "CleanedArea{", sum(areas.(x)), " / ", sum(areas.(a)), "}")
 end
 
 function Base.show(io::IO, x::SegmentInfo)

@@ -38,9 +38,9 @@ function itemtype(key)
     throw(KeyError(key))
 end
 
-itemkey(x::StackItem) = x.key
-itemvalue(x::StackItem) = x.val
-issamekey(m::StackItem, n::StackItem) = itemkey(m) == itemkey(n)
+itemkeys(x::StackItem) = x.key
+itemvalues(x::StackItem) = x.val
+issamekey(m::StackItem, n::StackItem) = itemkeys(m) == itemkeys(n)
 
 function Base.haskey(::Type{NormalItem}, key)
     in(key, get(DataFrame, ("ItemTable", "Normal"))[!, :Key])
@@ -62,11 +62,11 @@ function _sortindex(x::Currency{KEY}) where KEY
     KEY == :SPACEDROPTICKET ? 6 : 7
 end
 function _sortindex(x::VillageToken)
-    100 + itemkey(x)
+    100 + itemkeys(x)
 end
 function _sortindex(x::BuildingSeedItem)
-    500 + itemkey(x)
+    500 + itemkeys(x)
 end
 function _sortindex(x::NormalItem)
-    10000 + itemkey(x)
+    10000 + itemkeys(x)
 end

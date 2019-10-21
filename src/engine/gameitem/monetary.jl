@@ -79,9 +79,9 @@ Fill in default type parameters to get a fully-specified concrete type from a
 partially-specified one.
 """
 filltype(::Type{Currency{NAME}}) where NAME = Currency{NAME, Int}
-itemkey(x::Currency{NAME, T}) where {NAME, T} = NAME
-itemvalue(x::Currency) = x.val
+itemkeys(x::Currency{NAME, T}) where {NAME, T} = NAME
+itemvalues(x::Currency) = x.val
 
-itemkey(::VillageToken{ID}) where {ID} = ID
-itemvalue(x::VillageToken) = x.val
+itemkeys(::VillageToken{ID}) where {ID} = ID
+itemvalues(x::VillageToken) = x.val
 

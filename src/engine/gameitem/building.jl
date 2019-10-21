@@ -63,14 +63,10 @@ mutable struct Shop <: Building
     abilities::Array{Ability, 1}
     # blueprint  건물 도면
 end
-function Shop(key, level = 1)
+function Shop(key)
     ref = get_cachedrow("Shop", "Building", :BuildingKey, key)
     abilities = Ability.(ref[1]["AbilityKey"])
-    # TODO: 이거 무식함...... levelup! 함수 정의 필요
-    if level > 1
-        @error "다시 만들어야지!!"
-    end
-    Shop(building_uid(), key, level, abilities)
+    Shop(building_uid(), key, 1, abilities)
 end
 
 """
@@ -82,12 +78,12 @@ mutable struct Residence <: Building
     level::Int8
     abilities::Array{Ability, 1}
     # blueprint  건물 도면
-    # occupant::Vector # 피포 거주자
+    # tenant::Vector # 피포 거주자
 end
-function Residence(key, level = 1)
+function Residence(key)
     ref = get_cachedrow("Residence", "Building", :BuildingKey, key)
     abilities = Ability.(ref[1]["AbilityKey"])
-    Residence(building_uid(), key, level, abilities)
+    Residence(building_uid(), key, 1, abilities)
 end
 
 """
@@ -101,10 +97,10 @@ mutable struct Special <: Building
     # blueprint  건물 도면
 
 end
-function Special(key, level = 1)
+function Special(key)
     ref = get_cachedrow("Special", "Building", :BuildingKey, key)
     abilities = Ability.(ref[1]["AbilityKey"])
-    Special(building_uid(), key, level, abilities)
+    Special(building_uid(), key, 1, abilities)
 end
 
 """
@@ -115,21 +111,22 @@ mutable struct Sandbox <: Building
     key::String
     level::Int8
     # blueprint  건물 도면
-
 end
-function Sandbox(key, level = 1)
+function Sandbox(key)
     ref = get_cachedrow("Sandbox", "Building", :BuildingKey, key)
-    Sandbox(building_uid(), key, level)
+    Sandbox(building_uid(), key, 1)
 end
 
 # Functions
-itemkey(x::Ability) = x.key
+itemkeys(x::Ability) = x.key
 groupkey(x::Ability) = typeof(x).parameters[1]
-itemkey(x::T) where T <: Building = x.key
+itemkeys(x::T) where T <: Building = x.key
+levels(x::T) where T <: Building = x.level
+grades(x::Shop) = 1
 
 function itemname(x::T) where T <: Building
     file = replace(string(T), "GameDataManager." => "")
-    ref = get_cachedrow(file, "Building", :BuildingKey, itemkey(x)) 
+    ref = get_cachedrow(file, "Building", :BuildingKey, itemkeys(x)) 
     ref[1]["Name"]
 end
 
@@ -169,7 +166,7 @@ function Base.haskey(::Type{Ability}, x)
 end
 
 function Base.size(x::T) where T <: Building
-    @assert itemkey(x) != :pHome "Home은 크기가 고정되어 있지 않습니다"
+    @assert itemkeys(x) != :Home "Home은 크기가 고정되어 있지 않습니다"
     bdtype = nameof(T)
     # ref = get(DataFrame, bdtype, [itemkey(x)]
     # (ref[:Condition]["ChunkWidth"], ref[:Condition]["ChunkLength"])

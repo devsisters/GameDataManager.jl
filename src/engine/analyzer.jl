@@ -21,7 +21,7 @@ function Analyzer.maximum_developmentpoint(v::Village = Village())
     shop_per_chunk = ref["AssignOnVillage"][1]["Amount"] / emperchunk 
     res_per_chunk = ref["AssignOnVillage"][2]["Amount"] / emperchunk 
 
-    whole_area = area(v;cleaned = false)
+    whole_area = areas(v;cleaned = false)
     area_shop = round(Int, whole_area * shop_per_chunk, RoundDown)
     area_res = round(Int, whole_area * res_per_chunk, RoundDown)
 

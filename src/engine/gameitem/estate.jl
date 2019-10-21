@@ -116,20 +116,20 @@ Base.size(v::Village, dim) = size(v.layout, dim)
 
 sites(v::Village) = v.layout.sites
 
-area(x::AbstractSite) = *(size(x,1), size(x, 2))
+areas(x::AbstractSite) = *(size(x,1), size(x, 2))
 """
-    area(v::Village; cleaned = true)
+    areas(v::Village; cleaned = true)
 
 'Village'의 총 면적을 구합니다.
 * cleaned=true: 이미 구매한 사이트의 면적만 반환합니다. 
 * cleaned=false: 구매한 사이트를 포함하여 빌리지 전체 면적을 반환합니다.
 """
-function area(v::Village; cleaned = true)
+function areas(v::Village; cleaned = true)
     s = sites(v)
     if cleaned
         s = filter(iscleaned, s)
     end
-    sum(area.(s))
+    sum(areas.(s))
 end
 
 function clean!(x::AbstractSite) 
@@ -150,14 +150,14 @@ iscleaned(v::Village, i) = iscleaned(sites(v)[i])
 function assignable_energymix(v::Village)
     ref = get(Dict, ("EnergyMix", "Data"))[1]
 
-    energymix_limit = div(area(v), ref["EnergyMixPerChunk"][2])
+    energymix_limit = div(areas(v), ref["EnergyMixPerChunk"][2])
 
     tokenid = ref["AssignOnVillage"][1]["TokenId"] 
     amount_per_mix = ref["AssignOnVillage"][1]["Amount"]
     current_token = getitem(v.storage, VillageToken(tokenid))
 
     # (할당된에너지믹스) = (현재토큰) / (믹스당토큰증가량)    
-    return energymix_limit - Int(itemvalue(current_token) / amount_per_mix)
+    return energymix_limit - Int(itemvalues(current_token) / amount_per_mix)
 end
 
 function assign_energymix!(v::Village, amount=1)

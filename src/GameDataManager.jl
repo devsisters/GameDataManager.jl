@@ -74,16 +74,16 @@ export GAMEENV, GAMEDATA, help,
           VillageToken,
           StackItem, NormalItem,
           BuildingSeedItem, BlockItem,
-          itemkey, itemvalue, issamekey,
+          itemkeys, itemvalues, issamekey,
           ItemCollection,
-          add!, remove!, has, getitem,
+          add!, remove!, has, getitem, levels,
     # 건물
       NonStackItem, Building, Special, Residence, Shop, Sandbox, Ability, SegmentInfo,
                     abilitysum,
-                    price, buy!, build!, spend!,
+                    price, buy!, build!, levelup!, spend!,
     # 부동산 
       Village, PrivateSite, 
-            area,
+            areas,
 
     # 콘텐츠
       RewardTable, sample, expectedvalue,

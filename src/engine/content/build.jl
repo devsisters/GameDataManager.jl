@@ -1,5 +1,3 @@
-
-
 """
     build!(u::User, v::Village, key)
 

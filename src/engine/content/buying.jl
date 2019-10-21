@@ -110,7 +110,7 @@ function price(buycount::Integer, ::Type{Currency{:ENERGYMIX}})
 end
 
 function price(x::PrivateSite) 
-    ref = get_cachedrow("Village", "SiteCleanerPrice", :Area, area(x))[1]
+    ref = get_cachedrow("Village", "SiteCleanerPrice", :Area, areas(x))[1]
     return ref["Cost"]*SITECLEANER
 end
 
