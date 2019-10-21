@@ -56,7 +56,7 @@ end
 function _sortindex(x::Currency{KEY}) where KEY
     KEY == :CRY ? 1 :
     KEY == :COIN ? 2 : 
-    KEY == :DEVELIPMENTPOINT ? 3 :
+    KEY == :DEVELOPMENTPOINT ? 3 :
     KEY == :ENERGYMIX ? 4 :
     KEY == :SITECLEANER ? 5 :
     KEY == :SPACEDROPTICKET ? 6 : 7

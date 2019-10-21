@@ -10,8 +10,8 @@ const ISO4217 = Dict{Symbol, Tuple{Int, String, Int}}(
     :CRY => (0, "크리스탈", 0),
     :COIN => (0, "코인", 0), 
     :JOY => (0, "조이", 0),
-    :DEVELIPMENTPOINT  => (0, "개척점수", 0),
-    :TOTALDEVELIPMENTPOINT => (0, "총개척점수", 0),
+    :DEVELOPMENTPOINT  => (0, "개척점수", 0),
+    :TOTALDEVELOPMENTPOINT => (0, "총개척점수", 0),
     :ENERGYMIX  => (0, "에너지믹스", 0),
     :SITECLEANER  => (0, "사이트청소", 0))
     

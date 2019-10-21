@@ -54,8 +54,6 @@ include("datahandler/writer/writer.jl")
 include("datahandler/writer/autoxl.jl")
 include("datahandler/writer/history.jl")
 
-# include("writer/typecheck.jl")
-
 
 export GAMEENV, GAMEDATA, help,
        # datahandler
@@ -72,7 +70,7 @@ export GAMEENV, GAMEDATA, help,
 
       GameItem, ItemCollection,
           Currency, COIN, CRY, JOY, ENERGYMIX, SITECLEANER,
-                    DEVELIPMENTPOINT, TOTALDEVELIPMENTPOINT,
+                    DEVELOPMENTPOINT, TOTALDEVELOPMENTPOINT,
           VillageToken,
           StackItem, NormalItem,
           BuildingSeedItem, BlockItem,

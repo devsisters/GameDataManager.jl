@@ -10,9 +10,8 @@ const CRY                   = Currency{:CRY}
 const ENERGYMIX             = Currency{:ENERGYMIX}
 const SITECLEANER           = Currency{:SITECLEANER}
 const SPACEDROPTICKET       = Currency{:SPACEDROPTICKET}
-const DEVELIPMENTPOINT      = Currency{:DEVELIPMENTPOINT}
-const TOTALDEVELIPMENTPOINT = Currency{:TOTALDEVELIPMENTPOINT}
-
+const DEVELOPMENTPOINT      = Currency{:DEVELOPMENTPOINT}
+const TOTALDEVELOPMENTPOINT = Currency{:TOTALDEVELOPMENTPOINT}
 
 function __init__()
     setup_env!(GAMEENV)

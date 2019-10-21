@@ -131,7 +131,7 @@ function show_item(itemkey::Integer, val::T;
     end
     if print_on_console
         sz = displaysize(stdout)[2]-6
-        name = length(name) > sz ? chop(x, head=0, tail=length(name)-sz) *"…" : name
+        name = length(name) > sz ? chop(name, head=0, tail=length(name)-sz) *"…" : name
     end
 
     if T <: Integer

@@ -17,6 +17,7 @@ function build!(u::User, key, v::Village)
             remove!(v, cost[2])
             # SiteID 할당 필요!!
             add!(u, SegmentInfo(v.id, 0, key))
+            add!(u, developmentpoint(T, key))
             b = true
         end
     else
@@ -35,27 +36,42 @@ build!(u::User, key, villageidx = 1) = build!(u, key, u.village[villageidx])
 
 * key 건물 가격
 """
-price(key::AbstractString) = price(buildingtype(key), key)
+price(key::String) = price(buildingtype(key), key)
 
-function price(::Type{Shop}, key::AbstractString)
+function price(::Type{Shop}, key::String)
     ref = get_cachedrow("Shop", "Building", :BuildingKey, key)[1]["BuildCost"]
 
     return [StackItem(ref["NeedItemKey"], ref["NeedItemCount"]),
             VillageToken(ref["VillageTokenId"], ref["VillageTokenCount"])]
 end
-function price(::Type{Residence}, key::AbstractString)
+function price(::Type{Residence}, key::String)
     ref = get_cachedrow("Residence", "Building", :BuildingKey, key)[1]["BuildCost"]
 
     return [StackItem(ref["NeedItemKey"], ref["NeedItemCount"]),
             VillageToken(ref["VillageTokenId"], ref["VillageTokenCount"])]
 end
-function price(::Type{Special}, key::AbstractString)
+function price(::Type{Special}, key::String)
     ref = get_cachedrow("Special", "Building", :BuildingKey, key)[1]["BuildCost"]
 
     ItemCollection(StackItem(ref["NeedItemKey"], ref["NeedItemCount"]), ref["PriceCoin"]*COIN)
 end
-function price(::Type{Sandbox}, key::AbstractString)
+function price(::Type{Sandbox}, key::String)
     ref = get_cachedrow("Sandbox", "Building", :BuildingKey, key)[1]["BuildCost"]
 
     return ref["PriceCoin"]*COIN
+end
+
+function developmentpoint(::Type{Shop}, key::String, level)
+    ref = get_cachedrow("Shop", "Level", :BuildingKey, key)[level]
+
+    @assert ref["Level"] == level "Shop.xlsx!\$Level 컬럼이 정렬되어 있지 않습니다"
+
+    return ref["Reward"]["DevelopmentPoint"]*DEVELOPMENTPOINT
+end
+function developmentpoint(::Type{Residence}, key::String, level)
+    ref = get_cachedrow("Residence", "Level", :BuildingKey, key)[level]
+
+    @assert ref["Level"] == level "Residence.xlsx!\$Level 컬럼이 정렬되어 있지 않습니다"
+
+    return ref["Reward"]["DevelopmentPoint"]*DEVELOPMENTPOINT
 end
