@@ -85,7 +85,7 @@ export GAMEENV, GAMEDATA, help,
                     price, buy!, build!, spend!,
     # 부동산 
       Village, PrivateSite, 
-            area, clean!,
+            area,
 
     # 콘텐츠
       RewardTable, sample, expectedvalue,

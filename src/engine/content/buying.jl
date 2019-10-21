@@ -82,7 +82,7 @@ end
 """
     price(x::PrivateSite)
 
-x 사이트를 청소하는데 필요한 사이트 클리너 수량
+* x 사이트를 청소하는데 필요한 사이트 클리너 수량
 """
 function price(x::PrivateSite) 
     ref = get_cachedrow("Village", "SiteCleanerPrice", :Area, area(x))[1]
@@ -100,13 +100,30 @@ function spend!(u::User, v::Village, ::Type{Currency{:ENERGYMIX}})
         printstyled("buy! 함수로 ENERGYMIX를 먼저 구매하세요\n", color = :yellow)
     else
         margin = assignable_energymix(v)
-        if margin > zero(ENERGYMIX)
+        if margin > 0
             if remove!(u, 1*ENERGYMIX)
                 assign_energymix!(v)
                 b = true
             end
         else
             printstyled("Village(id:$(v.id))에 더 이상 ENERGYMIX를 사용할 수 없습니다.\n", color = :yellow)
+        end
+    end
+    return b
+end
+
+"""
+    buy!(u::User, v::Village, idx)
+
+* idx 사이트를 구매한다
+"""
+function buy!(u::User, v::Village, idx::Integer)
+    b = false
+    if in(idx, cleanable_sites(v))
+        p = price(v.layout.sites[idx])
+        if remove!(u, p)
+            clean!(v, idx)
+            b = true
         end
     end
     return b
