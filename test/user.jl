@@ -35,8 +35,10 @@ end
 end
 @testset "BuildingSeed 추가 삭제" begin
     ref = get(DataFrame, itemtable, "BuildingSeed")
+    
 
-    u = User(); remove!(u, StackItem(2001)) 
+    u = User()
+    remove!(u, u.item.storage)
     for k in ref[!, :Key]
         @test add!(u, StackItem(k, 11))
         @test has(u, StackItem(k, 11))
@@ -44,12 +46,6 @@ end
         @test getitem(u, StackItem(k)) == zero(StackItem(k))
     end
 end
-
-@testset "VillageToken 지급 삭제" begin
-    u = User()
-    
-end
-
 
 @testset "ItemCollection 추가 삭제" begin
     normal = get(DataFrame, itemtable, "Normal")
@@ -64,56 +60,61 @@ end
 
 @testset "EnergyMix 구매" begin
     u = User()
-    @time getitem(u, ENERGYMIX) == zero(ENERGYMIX)
+    @test getitem(u, ENERGYMIX) == zero(ENERGYMIX)
 
-    ref = get(DataFrame, ("EnergyMix", "Price"))
     # TODO price가 제대로 계산됐는지 확인하는 함수 추가
-    for i in 1:50
+    # ref = get(DataFrame, ("EnergyMix", "Price"))
+    for i in 1:30
         cost = price(u, ENERGYMIX)
-        @test buy!(u, ENERGYMIX) == false
         @test add!(u, cost)
-
         @test buy!(u, ENERGYMIX)
-        @test u.buycount[:energymix] == i
-        @test has(u, cost) == false
+        @test u.buycount[:ENERGYMIX] == i
 
         @test getitem(u, ENERGYMIX) == i*ENERGYMIX
     end
 end
 
-@testset "EnergyMix 사용" begin
+@testset "EnergyMix 사용, VillageToken 보유량" begin
+    u = User(); 
+    add!(u, 100ENERGYMIX)
+
+    v = u.village[1]
     ref = get(Dict, ("EnergyMix", "Data"))[1]
-
-    u = User(); add!(u, 1000ENERGYMIX)
-
-    vill = u.village[1]
-    
-    spendable = div(area(vill), ref["EnergyMixPerChunk"][2])
+    spendable = div(area(v), ref["EnergyMixPerChunk"][2])
     for i in 1:spendable
-        @test GameDataManager.spendable_energymix(vill).val == (spendable - i + 1)
-        @test spend!(u, vill, ENERGYMIX)
+        @test GameDataManager.assignable_energymix(v) == (spendable - i + 1)
+        @test spend!(u, v, ENERGYMIX)
     end
-    # TODO: 사이트 구매 후 테스트 추가
-    
 end
-
 
 @testset "SiteCleaner 구매" begin
     u = User()
-    @time getitem(u, SITECLEANER) == zero(SITECLEANER)
+    @test getitem(u, SITECLEANER) == zero(SITECLEANER)
 
-    ref = get(DataFrame, ("SpaceDrop", "SiteCleaner"))
     # TODO price가 제대로 계산됐는지 확인하는 함수 추가
+    # ref = get(DataFrame, ("SpaceDrop", "SiteCleaner"))
     for i in 1:50
-        cost = price(u, SITECLEANER)
-        @test buy!(u, SITECLEANER) == false
-        @test add!(u, cost)
-
-        @test buy!(u, SITECLEANER)
-        @test u.buycount[:sitecleaner] == i
-        @test has(u, cost) == false
+        p = price(u, SITECLEANER)
+        @test add!(u, p)
+        @test buy!(u, SITECLEANER) == true
 
         @test getitem(u, SITECLEANER) == i*SITECLEANER
     end
+end
+
+@testset "SiteCleaner 사용" begin
+    u = User()
+    add!(u, 100SITECLEANER)
+
+    v = u.village[1]
+    target = GameDataManager.cleanable_sites(v)
+
+    for idx in target
+        s = v.layout.sites[idx]
+        @test GameDataManager.iscleaned(s) == false
+        @test buy!(u, v, idx)
+        @test GameDataManager.iscleaned(s) == true
+    end
+    
 end
 
