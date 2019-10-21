@@ -76,7 +76,6 @@ file_layout의 필리지 생성
 struct Village <: AbstractCell
     id::UInt64
     # name
-    # owner
     storage::ItemCollection{UUID, AbstractMonetary}
     layout::VillageLayout
 end

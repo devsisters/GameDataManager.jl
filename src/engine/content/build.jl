@@ -14,14 +14,14 @@ function build!(u::User, key, v::Village)
             remove!(u, cost[1])
             remove!(v, cost[2])
             # SiteID 할당 필요!!
-            add!(u, SegmentInfo(v.id, 0, key))
+            add!(u, SegmentInfo(u.mid, v, key))
             add!(u, developmentpoint(T, key))
             b = true
         end
     else
         if remove!(u, cost)
             # 가용면적 검사 및 사이트 ID 할당 필요
-            add!(u, SegmentInfo(v.id, 0, key))
+            add!(u, SegmentInfo(u.mid, v, key))
             b = true
         end
     end

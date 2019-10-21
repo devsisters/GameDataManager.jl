@@ -173,12 +173,17 @@ function Base.size(x::T) where T <: Building
 end
 Base.size(t::T, d) where T <: Building = size(t)[d]
 
+"""
+    SegmentInfo
+"""
 struct SegmentInfo
+    ownermid::UInt64
     villageid::UInt64
     siteindex::Int8
     #sitecoord 좌표
     building::Building
 end
-function SegmentInfo(villageid, siteindex, key::AbstractString)
-    SegmentInfo(villageid, siteindex, Building(key))
+function SegmentInfo(mid::UInt64, villageid::UInt64, key::AbstractString)
+    siteindex = 0 # TODO: 건설할 사이트 정하기
+    SegmentInfo(mid, villageid, siteindex, Building(key))
 end

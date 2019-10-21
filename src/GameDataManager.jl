@@ -32,6 +32,7 @@ include("engine/gameitem/guid.jl")
 include("engine/gameitem/arithmetic.jl")
 
 include("engine/gameitem/estate.jl")
+include("engine/user/flag.jl")
 include("engine/user/user.jl")
 include("engine/user/bot.jl")
 

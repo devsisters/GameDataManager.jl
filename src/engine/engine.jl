@@ -91,7 +91,8 @@ abstract type AbstractGameItemStorage end
 """
 AbstractFlag
 
-* BuyCount
-* QuestComplete
+* BuyCountFlag
+* BuildingSeedFlag
+* Quest?
 """
 abstract type AbstractFlag end

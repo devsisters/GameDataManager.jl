@@ -1,20 +1,3 @@
-mutable struct BuyCountFlag <: AbstractFlag
-    map::Dict{Symbol, Int}
-end
-function BuyCountFlag()
-    d1 = Dict(zip([:COIN, :ENERGYMIX, :SITECLEANER], [0, 0, 0]))
-    d2 = begin 
-        ref = get(DataFrame, ("ItemTable", "BuildingSeed"))
-        k = Symbol.(ref[!, :BuildingKey])
-        # 해금전에는 -1
-        Dict(zip(k, zeros(Int, length(k)) .- 1))
-    end
-
-    BuyCountFlag(merge(d1, d2))
-end
-Base.getindex(x::BuyCountFlag, i) = getindex(x.map, i)
-Base.setindex!(x::BuyCountFlag, value, key) = setindex!(x.map, value, key)
-
 
 """
     UserInfo
