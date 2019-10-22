@@ -68,7 +68,12 @@ function add!(info::UserInfo, item::Currency{:DEVELOPMENTPOINT, T}) where T
     ref = get(DataFrame, ("Player", "DevelopmentLevel"))
     
     p = info.developmentpoint + item
-    level = findlast(x -> itemvalues(p) >= x, ref[!, :NeedDevelopmentPoint])
+    level = if itemvalues(p) < ref[1, :NeedDevelopmentPoint]
+            1
+        else
+            findlast(x -> itemvalues(p) >= x, ref[!, :NeedDevelopmentPoint])
+        end
+
     if level > info.level
         info.level = level
     end
