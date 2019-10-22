@@ -192,7 +192,7 @@ function connected_sites(v::Village, needle::Integer)
     candidate = begin 
         x = filter(el -> in(needle, el), haystacks)
         x = convert(Array{Int16, 1}, unique(vcat(x...)))
-        setdiff(x, needle)
+        setdiff(x, needle) |> x -> x.+1
     end
     return candidate
 end
@@ -201,13 +201,12 @@ function connected_sites(v::Village, needle::Array{T, 1}) where T <: Integer
 
     candidate = begin 
         x = filter(el -> any(broadcast(n -> in(n, el), needle)), haystacks)
-        x = convert(Array{Int16, 1}, unique(vcat(x...)))
-        setdiff(x, needle) # 이미 청소된 사이트 제거
+        x = convert(Array{Int16, 1}, unique(vcat(x...))) 
+        setdiff(x, needle) |> x -> x.+1 # 이미 청소된 사이트 제거
     end
     
     return candidate
 end
-
 
 function cleanable_sites(v::Village)
     s = filter(GameDataManager.iscleaned, v.layout.sites)

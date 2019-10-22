@@ -61,7 +61,7 @@ function Base.show(io::IO, x::BuildingStorage)
     for field in (:shop, :residence, :sandbox, :special)
         for el in getfield(x, field)
             print(io, "\t", el)
-            el != last(x.sandbox) && print(io, "\n")
+            el != last(getfield(x, field)) && print(io, "\n")
         end
     end
 end

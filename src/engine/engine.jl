@@ -71,6 +71,10 @@ function StackItem(x::AbstractDict)
     end
     StackItem(x["Key"], x["Amount"])
 end
+function StackItem(x::NamedTuple)
+    @assert keys(x) == (:Key, :Amount) "$(keys(x)) 에 대한 StackItem 생성이 정의되지 않았습니다"
+    StackItem(values(x)...)
+end
 
 """
     AbstractMonetary

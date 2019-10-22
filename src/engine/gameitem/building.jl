@@ -10,9 +10,9 @@ TODO Ability 빼기 -레벨별 동일하니 Building에 있을 필요 없다
 * Sandbox
 """
 abstract type Building <: NonStackItem end
-function Building(x, lv = 1)
+function Building(x)
     T = buildingtype(x)
-    T(x, lv)
+    T(x)
 end
 
 let uid = UInt64(0)
@@ -49,6 +49,21 @@ function Ability(key, level = 1)
     Ability{GROUP}(key, level, val)
 end
 Ability(key::Missing) = missing
+
+function setlevel!(a::Ability, level)
+    ref = get_cachedrow("Ability", "Level", :AbilityKey, itemkeys(a))
+    
+    valuereplace = begin 
+        groupkey = ref[1]["Group"]
+        x = get_cachedrow("Ability", "Group", :GroupKey, groupkey)
+        x[1]["IsValueReplace"]
+    end
+    val = valuereplace ? ref[level]["Value"] : sum(el -> el["Value"], ref[1:level])
+    
+    a.level = level 
+    a.val = val
+    return a
+end
 
 
 """
@@ -117,33 +132,19 @@ function Sandbox(key)
     Sandbox(building_uid(), key, 1)
 end
 
-# Functions
-itemkeys(x::Ability) = x.key
-groupkey(x::Ability) = typeof(x).parameters[1]
-itemkeys(x::T) where T <: Building = x.key
-levels(x::T) where T <: Building = x.level
-grades(x::Shop) = 1
-
-function itemname(x::T) where T <: Building
-    file = replace(string(T), "GameDataManager." => "")
-    ref = get_cachedrow(file, "Building", :BuildingKey, itemkeys(x)) 
-    ref[1]["Name"]
+"""
+    SegmentInfo
+"""
+struct SegmentInfo
+    ownermid::UInt64
+    villageid::UInt64
+    siteindex::Int8
+    #sitecoord 좌표
+    building::Building
 end
-
-abilitysum(x::T) where T <: Building = abilitysum(x.abilities)
-function abilitysum(a::Array{T, 1}) where T <: Building
-    x = abilitysum.(a)
-    merge(+, x...)
-end
-function abilitysum(a::Array{Ability, 1})
-    groups = groupkey.(a)
-    # 필요할 경우 Ability{Group}(:abilitysum, 0, val) 타입으로 변경
-    d = Dict{Symbol, Int}()
-    for x in a
-        g = groupkey(x)
-        d[g] = get(d, g, 0) + x.val  
-    end 
-    return d
+function SegmentInfo(mid::UInt64, villageid::UInt64, key::AbstractString)
+    siteindex = 0 # TODO: 건설할 사이트 정하기
+    SegmentInfo(mid, villageid, siteindex, Building(key))
 end
 
 function buildingtype(key)
@@ -154,6 +155,11 @@ function buildingtype(key)
     key == "Home" ? Special :
     throw(KeyError(key))
 end
+
+
+
+
+# Functions
 function Base.haskey(::Type{Building}, x)
     haskey(Shop, x) | haskey(Residence, x) | haskey(Special, x)
 end
@@ -173,17 +179,79 @@ function Base.size(x::T) where T <: Building
 end
 Base.size(t::T, d) where T <: Building = size(t)[d]
 
+itemkeys(x::Ability) = x.key
+groupkeys(x::Ability) = typeof(x).parameters[1]
+itemkeys(x::T) where T <: Building = x.key
+levels(x::T) where T <: Building = x.level
+grades(x::Shop) = 1
+
 """
-    SegmentInfo
+    levelup!(b::Residence)
+    levelup!(b::Shop)
+
+Shop과 Residence만 레벨업 가능
+Ability를 설장시켜 준다
+
 """
-struct SegmentInfo
-    ownermid::UInt64
-    villageid::UInt64
-    siteindex::Int8
-    #sitecoord 좌표
-    building::Building
+function levelup!(seg::SegmentInfo)
+    u = USERDB[seg.ownermid]
+
+    p = price(seg.building)
+    if remove!(u, p)
+        b = seg.building
+
+        levelup!(b)
+        dev = GameDataManager.developmentpoint(Shop, itemkeys(b), levels(b))
+        add!(u, dev)
+
+        return true
+    end
+    return false
 end
-function SegmentInfo(mid::UInt64, villageid::UInt64, key::AbstractString)
-    siteindex = 0 # TODO: 건설할 사이트 정하기
-    SegmentInfo(mid, villageid, siteindex, Building(key))
+function levelup!(b::T) where T <: Building
+    r = false
+    ref = get_cachedrow(string(T), "Level", :BuildingKey, itemkeys(b))
+    if levels(b) < length(ref)
+        ref = ref[levels(b)]
+        @assert ref["Level"] == levels(b) "$(string(T)).xlsx!\$Level 컬럼이 정렬되어 있지 않습니다"
+
+        for el in ref["Abilityup"]
+            for a in b.abilities
+                if groupkeys(a) == Symbol(el["Group"])
+                    setlevel!(a, el["Level"])
+                    r = true
+                end
+            end
+        end
+    end
+    r && (b.level = b.level + 1)
+    return r
 end
+levelup!(b::Special) = b
+levelup!(b::Sandbox) = b
+
+levelup!(a::Ability) = setlevel!(a, a.level + 1)
+
+function itemname(x::T) where T <: Building
+    file = replace(string(T), "GameDataManager." => "")
+    ref = get_cachedrow(file, "Building", :BuildingKey, itemkeys(x)) 
+    ref[1]["Name"]
+end
+
+abilitysum(x::T) where T <: Building = abilitysum(x.abilities)
+function abilitysum(a::Array{T, 1}) where T <: Building
+    x = abilitysum.(a)
+    merge(+, x...)
+end
+function abilitysum(a::Array{Ability, 1})
+    groups = groupkeys.(a)
+    # 필요할 경우 Ability{Group}(:abilitysum, 0, val) 타입으로 변경
+    d = Dict{Symbol, Int}()
+    for x in a
+        g = groupkeys(x)
+        d[g] = get(d, g, 0) + x.val  
+    end 
+    return d
+end
+
+

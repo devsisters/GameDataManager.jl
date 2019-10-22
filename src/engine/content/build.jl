@@ -3,9 +3,9 @@
 
 빈 Site를 골라서 건설 비용을 차감하고 건물을 추가해 준다
 """
-function build!(u::User, key, v::Village)
+function build!(u::User, v::Village, key)
     b = false
-    cost = price(key)
+    cost = price(buildingtype(key), key)
     # site = findsite(v)
     T = buildingtype(key)
     if T == Shop || T == Residence
@@ -14,14 +14,14 @@ function build!(u::User, key, v::Village)
             remove!(u, cost[1])
             remove!(v, cost[2])
             # SiteID 할당 필요!!
-            add!(u, SegmentInfo(u.mid, v, key))
-            add!(u, developmentpoint(T, key))
+            add!(u, SegmentInfo(u.mid, v.id, key))
+            add!(u, developmentpoint(T, key, 1))
             b = true
         end
     else
         if remove!(u, cost)
             # 가용면적 검사 및 사이트 ID 할당 필요
-            add!(u, SegmentInfo(u.mid, v, key))
+            add!(u, SegmentInfo(u.mid, v.id, key))
             b = true
         end
     end
@@ -30,20 +30,14 @@ end
 build!(u::User, key, villageidx = 1) = build!(u, key, u.village[villageidx])
 
 """
-    price(key::AbstractString)
-
+    price(::Type{T}, key::AbstractString) where T <: Building
 * key 건물 가격
+
+    price(b::T) where T <: Building
+* 레벨업 비용, 최대 레벨일 경우 missing을 반환
 """
-price(key::String) = price(buildingtype(key), key)
-
-function price(::Type{Shop}, key::String)
-    ref = get_cachedrow("Shop", "Building", :BuildingKey, key)[1]["BuildCost"]
-
-    return [StackItem(ref["NeedItemKey"], ref["NeedItemCount"]),
-            VillageToken(ref["VillageTokenId"], ref["VillageTokenCount"])]
-end
-function price(::Type{Residence}, key::String)
-    ref = get_cachedrow("Residence", "Building", :BuildingKey, key)[1]["BuildCost"]
+function price(::Type{T}, key::String) where T <: Building
+    ref = get_cachedrow(string(T), "Building", :BuildingKey, key)[1]["BuildCost"]
 
     return [StackItem(ref["NeedItemKey"], ref["NeedItemCount"]),
             VillageToken(ref["VillageTokenId"], ref["VillageTokenCount"])]
@@ -51,25 +45,37 @@ end
 function price(::Type{Special}, key::String)
     ref = get_cachedrow("Special", "Building", :BuildingKey, key)[1]["BuildCost"]
 
-    ItemCollection(StackItem(ref["NeedItemKey"], ref["NeedItemCount"]), ref["PriceCoin"]*COIN)
+    return ItemCollection(StackItem(ref["NeedItemKey"], ref["NeedItemCount"]), ref["PriceCoin"]*COIN)
 end
 function price(::Type{Sandbox}, key::String)
     ref = get_cachedrow("Sandbox", "Building", :BuildingKey, key)[1]["BuildCost"]
 
     return ref["PriceCoin"]*COIN
 end
+function price(b::T) where T <: Building
+    ref = get_cachedrow(string(T), "Level", :BuildingKey, itemkeys(b))
+    if levels(b) < length(ref)
+        ref = ref[levels(b)]
 
-function developmentpoint(::Type{Shop}, key::String, level)
-    ref = get_cachedrow("Shop", "Level", :BuildingKey, key)[level]
+        @assert ref["Level"] == levels(b) "$(string(T)).xlsx!\$Level 컬럼이 정렬되어 있지 않습니다"
 
-    @assert ref["Level"] == level "Shop.xlsx!\$Level 컬럼이 정렬되어 있지 않습니다"
+        item = ref["LevelupCost"]["PriceCoin"] * COIN
+        if !isempty(ref["LevelupCostItem"])
+            item = ItemCollection(StackItem.(ref["LevelupCostItem"])..., item)
+        end
+        return item
+    end
+    return missing
+end
+price(b::Special) = missing
+price(b::Sandbox) = missing
+
+function developmentpoint(::Type{T}, key::String, level) where T <: Building
+    ref = get_cachedrow(string(T), "Level", :BuildingKey, key)[level]
+
+    @assert ref["Level"] == level "$(string(T)).xlsx!\$Level 컬럼이 정렬되어 있지 않습니다"
 
     return ref["Reward"]["DevelopmentPoint"]*DEVELOPMENTPOINT
 end
-function developmentpoint(::Type{Residence}, key::String, level)
-    ref = get_cachedrow("Residence", "Level", :BuildingKey, key)[level]
-
-    @assert ref["Level"] == level "Residence.xlsx!\$Level 컬럼이 정렬되어 있지 않습니다"
-
-    return ref["Reward"]["DevelopmentPoint"]*DEVELOPMENTPOINT
-end
+developmentpoint(b::Special) = missing
+developmentpoint(b::Sandbox) = missing

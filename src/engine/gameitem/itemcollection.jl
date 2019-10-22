@@ -8,6 +8,7 @@ struct ItemCollection{UUID,T <: GameItem}
     (::Type{ItemCollection{UUID,T}})(map::AbstractDict) where T = new{UUID,T}(map)
     (::Type{ItemCollection{UUID,T}})() where T = new{UUID,T}(Dict{UUID,T}())
 end
+ItemCollection() = ItemCollection{UUID, GameItem}()
 function ItemCollection(map::Dict{UUID,T}) where T <: GameItem
     T2 = promote_type(typeof.(values(map))...)
     ItemCollection{UUID,T2}(map)
@@ -18,29 +19,24 @@ end
 function ItemCollection(::Type{T}) where T <: StackItem
     ItemCollection{UUID,T}()
 end
+function ItemCollection(x::T) where T <: GameItem
+    ItemCollection{UUID,T}(Dict(guid(x) => x))
+end
 function ItemCollection(items::Array{T,1}) where T <: GameItem
-    d = Dict{UUID,T}()
-    ids = guid.(items)
+    ItemCollection(items...)
+end
+function ItemCollection(args...)
+    ids = guid.(args)
     if allunique(ids)
-        d = Dict{UUID,T}(zip(ids, items))
+        d = Dict(zip(ids, args))
     else
-        d = Dict{UUID,T}()
-        for (i, el) in enumerate(items)
+        d = Dict{UUID,GameItem}()
+        for (i, el) in enumerate(args)
             id = ids[i]
             d[id] = haskey(d, id) ? (d[id] + el) : el
         end
     end
-    ItemCollection{UUID,T}(d)
-end
-
-function ItemCollection(x::T) where T <: GameItem
-    ItemCollection{UUID,T}(Dict(guid(x) => x))
-end
-function ItemCollection(x::Currency)
-    ItemCollection{UUID,Currency}(Dict(guid(x) => x))
-end
-function ItemCollection(args...)
-    ItemCollection([args...])
+    ItemCollection(d)
 end
 
 Base.copy(ic::ItemCollection) = ItemCollection(copy(ic.map))

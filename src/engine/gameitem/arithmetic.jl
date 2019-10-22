@@ -217,3 +217,9 @@ end
 function Base.convert(::Type{ItemCollection{UUID,T}}, m::ItemCollection{UUID,U}) where {T,U}
     ItemCollection{UUID, promote_type(T, U)}(m.map)
 end
+
+# Binary operators for missing
+for f in (:(+), :(-), :(*), :(/), :(div), :(mod), :(fld), :(rem)) # :(^) 빠짐 
+    @eval Base.$(f)(::Missing, ::StackItem)  = missing
+    @eval Base.$(f)(::StackItem,  ::Missing) = missing
+end
