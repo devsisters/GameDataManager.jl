@@ -189,9 +189,12 @@ function SubModulePlayer.editor!(jwb)
     end
     jwb[:DevelopmentLevel] = merge(jwb[:DevelopmentLevel], jwb[:DroneDelivery], "Level")
     jwb[:DevelopmentLevel] = merge(jwb[:DevelopmentLevel], jwb[:SpaceDrop], "Level")
+    jwb[:DevelopmentLevel] = merge(jwb[:DevelopmentLevel], jwb[:Festival], "Level")
 
     deleteat!(jwb, :DroneDelivery)
     deleteat!(jwb, :SpaceDrop)
+    deleteat!(jwb, :Festival)
+
 end
 
 function SubModulePlayer.need_developmentpoint(level)
