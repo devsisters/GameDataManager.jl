@@ -3,7 +3,6 @@ using GameDataManager
 
 itemtable = get(BalanceTable, "ItemTable")
 
-
 @testset "Currency 추가 삭제" begin
     u = User()
     creationitem = get(Dict, ("GeneralSetting", 2))[1]
@@ -13,7 +12,10 @@ itemtable = get(BalanceTable, "ItemTable")
     @test getitem(u, CRY) == creationitem["AddCrystal"] * CRY
     @test remove!(u, creationitem["AddCrystal"] * CRY)
 
-    for C in (CRY, COIN, ENERGYMIX, SITECLEANER, SPACEDROPTICKET, DEVELIPMENTPOINT)
+    @test getitem(u, JOY) == creationitem["AddJoy"] * JOY
+    @test remove!(u, creationitem["AddJoy"] * JOY)
+
+    for C in (CRY, COIN, JOY, ENERGYMIX, SITECLEANER)
         @test add!(u, 1000C)
         @test has(u, 1000C)
         @test remove!(u, 1000C)
@@ -33,10 +35,10 @@ end
         @test getitem(u, StackItem(k)) == zero(StackItem(k))
     end
 end
-@testset "BuildingSeed 추가 삭제" begin
+
+@testset "BuildingSeed 구매" begin
     ref = get(DataFrame, itemtable, "BuildingSeed")
     
-
     u = User()
     remove!(u, u.item.storage)
     for k in ref[!, :Key]
@@ -74,21 +76,9 @@ end
     end
 end
 
-@testset "EnergyMix 사용, VillageToken 보유량" begin
-    u = User(); 
-    add!(u, 100ENERGYMIX)
-
-    v = u.village[1]
-    ref = get(Dict, ("EnergyMix", "Data"))[1]
-    spendable = div(area(v), ref["EnergyMixPerChunk"][2])
-    for i in 1:spendable
-        @test GameDataManager.assignable_energymix(v) == (spendable - i + 1)
-        @test spend!(u, v, ENERGYMIX)
-    end
-end
-
+# 유저 정보 유지
+u = User(); 
 @testset "SiteCleaner 구매" begin
-    u = User()
     @test getitem(u, SITECLEANER) == zero(SITECLEANER)
 
     # TODO price가 제대로 계산됐는지 확인하는 함수 추가
@@ -103,18 +93,47 @@ end
 end
 
 @testset "SiteCleaner 사용" begin
-    u = User()
-    add!(u, 100SITECLEANER)
+    add!(u, 2000SITECLEANER)
 
     v = u.village[1]
-    target = GameDataManager.cleanable_sites(v)
-
-    for idx in target
-        s = v.layout.sites[idx]
-        @test GameDataManager.iscleaned(s) == false
-        @test buy!(u, v, idx)
+    target = filter(!GameDataManager.iscleaned, v.layout.sites)
+    # TODO: 연결 사이트 확인도...
+    
+    # TODO: 구매 불가 사이트 buy! 에서 false오는지 테스트
+    for t in target
+        s = v.layout.sites[t.index]
+        @test buy!(u, v, t.index)
         @test GameDataManager.iscleaned(s) == true
     end
-    
 end
 
+@testset "EnergyMix 사용, VillageToken 보유량" begin
+    add!(u, 10000ENERGYMIX)
+
+    v = u.village[1]
+    ref = get(Dict, ("EnergyMix", "Data"))[1]
+    spendable = div(areas(v), ref["EnergyMixPerChunk"][2])
+    for i in 1:spendable
+        @test GameDataManager.assignable_energymix(v) == (spendable - i + 1)
+        @test spend!(u, v, ENERGYMIX)
+    end
+end
+
+@testset "건물 건설" begin
+    shop = get(DataFrame, ("Shop", "Building"))
+    res = get(DataFrame, ("Residence", "Building"))
+    sandbox = get(DataFrame, ("Sandbox", "Building"))
+
+    for k in res[!, :BuildingKey]
+        add!(u, BuildingSeedItem(k))
+        @test build!(u, u.village[1], k)
+    end
+    for k in shop[!, :BuildingKey]
+        add!(u, BuildingSeedItem(k))
+        @test build!(u, u.village[1], k)
+    end
+end
+
+@testset "건물 레벨업, 계정 레벨업" begin
+
+end
