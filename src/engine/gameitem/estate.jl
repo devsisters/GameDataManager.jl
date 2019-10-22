@@ -189,10 +189,10 @@ remove!(v::Village, item::VillageToken) = remove!(v.storage, item)
 function connected_sites(v::Village, needle::Integer)
     haystacks = get.(v.layout.roadedges, "RelatedSites", 0)
 
-    candidate = begin 
-        x = filter(el -> in(needle, el), haystacks)
+    candidate = begin
+        x = filter(el -> in(needle , el), haystacks)
         x = convert(Array{Int16, 1}, unique(vcat(x...)))
-        setdiff(x, needle) |> x -> x.+1
+        setdiff(x, needle)
     end
     return candidate
 end
@@ -202,13 +202,13 @@ function connected_sites(v::Village, needle::Array{T, 1}) where T <: Integer
     candidate = begin 
         x = filter(el -> any(broadcast(n -> in(n, el), needle)), haystacks)
         x = convert(Array{Int16, 1}, unique(vcat(x...))) 
-        setdiff(x, needle) |> x -> x.+1 # 이미 청소된 사이트 제거
+        setdiff(x, needle) # 이미 청소된 사이트 제거
     end
-    
     return candidate
 end
 
 function cleanable_sites(v::Village)
     s = filter(GameDataManager.iscleaned, v.layout.sites)
-    connected_sites(v, getfield.(s, :index))
+    site_index = getfield.(s, :index)
+    connected_sites(v, site_index)
 end
