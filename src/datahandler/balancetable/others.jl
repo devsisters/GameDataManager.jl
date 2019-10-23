@@ -60,7 +60,7 @@ function SubModuleQuest.questtrigger(x::Array{T, 1}) where T
         "TutorialFlags"                => (:number,     :questflag),
         "MaxSegmentLevelByUseType"     => (:number,     :equality, :number),
         "MaxSegmentLevelByBuildingKey" => (:buildingkey,:equality, :number),
-        "OwnedItem"                    => (:itemkey,    :equality),
+        "OwnedItem"                    => (:itemkey,    :equality, :number),
         "SiteGradeCount"               => (:number,     :equality),
         "CoinCollecting"               => (:equality,   :number),
         "AbilityLevel"                 => (:abilitykey, :equality, :number),
@@ -69,7 +69,12 @@ function SubModuleQuest.questtrigger(x::Array{T, 1}) where T
         "MaxVillageGrade"              => (:equality, :number),
         "CompletePartTime"             => (:equality, :number),
         "CompleteDelivery"             => (:equality, :number),
-        "CompleteBlockEdit"            => (:equality, :number))
+        "CompleteBlockEdit"            => (:equality, :number),
+        "CompletePipoWork"             => (:equality, :number),
+        "JoyCollecting" => (:equality, :number),
+        "BuildingSeedBuyCount" => (:buildingkey, :equality, :number),
+        "SingleKeyBuyCount"  => (:buycount, :equality, :number),
+        "SandboxCount" => (:equality, :number))
 
     ref = get(trigger, string(x[1]), missing)
 
@@ -94,7 +99,10 @@ function SubModuleQuest.questtrigger(x::Array{T, 1}) where T
                 validate_haskey("Ability", [el])
                 true
             elseif checker == :itemkey
-                validate_haskey("ItemTable", [el])
+                validate_haskey("ItemTable", [parse(Int, el)])
+                true
+            elseif checker == :buycount
+                @warn "만들어..."
                 true
             else
                 throw(ArgumentError(string(checker, "가 validate_questtrigger에 정의되지 않았습니다.")))
