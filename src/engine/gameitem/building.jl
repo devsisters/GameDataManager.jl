@@ -239,7 +239,8 @@ function itemname(x::T) where T <: Building
     ref[1]["Name"]
 end
 
-abilitysum(x::T) where T <: Building = abilitysum(x.abilities)
+abilitysum(x::SegmentInfo) = abilitysum(x.building)
+abilitysum(x::Building) = abilitysum(x.abilities)
 function abilitysum(a::Array{T, 1}) where T <: Building
     x = abilitysum.(a)
     merge(+, x...)
