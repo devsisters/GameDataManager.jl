@@ -39,6 +39,7 @@ end
 function Base.show(io::IO, x::ItemCollection{T,V}) where {T,V}
     # TODO: 아이템 ID 순서대로 보여줄까?
     # line_limit = displaysize(io)[2]
+    row_limit = 7
     println(io, "ItemCollection{$V} with ", length(x), " entries:")
     if !isempty(x)
         m = x.map
@@ -49,19 +50,7 @@ function Base.show(io::IO, x::ItemCollection{T,V}) where {T,V}
             print(io, "  ", string(pair[1])[1:4], "… => ")
             print(io, pair[2])
             i < length(m) && print(io, "\n")
-        end
-    end
-end
-
-function Base.show(io::IO, x::BuildingStorage)
-    println(io, "Building")
-    # 총 Shop 수, Residence 수 등 기입?
-
-    # TODO: Village마다 모아서 보여주게 수정
-    for field in (:shop, :residence, :sandbox, :special)
-        for el in getfield(x, field)
-            print(io, "\t", el)
-            el != last(getfield(x, field)) && print(io, "\n")
+            i == row_limit && (print(io, lpad("⋮", 7), " => ⋮"); break)
         end
     end
 end
@@ -105,9 +94,33 @@ end
 function Base.show(io::IO, x::User)
     println(io, "(mid:", usermid(x), ")", username(x))
     println(io, x.item)
-    # println(io, x.buycount)
-    println(io, x.village)
+    # println(io, x.buycount)\
+    println(io, ".village")
+    for v in x.village
+        println(io, "\t", v)
+    end
     println(io, x.building)
+end
+
+function Base.show(io::IO, x::BuildingStorage)
+    println(io, ".building")
+    # 총 Shop 수, Residence 수 등 기입?
+
+    # TODO: Village마다 모아서 보여주게 수정
+    i = 1
+    row_limit = 3
+
+    for field in (:shop, :residence, :sandbox, :special)
+        data = getfield(x, field)
+        if length(data) > 0
+            println(io, "↳", uppercasefirst(string(field)), " with ", length(data), " entries:")
+            for (i, el) in enumerate(data)
+                print(io, "\t", el)
+                i < row_limit ? print(io, "\n") : (print(io, "\n\t", lpad("⋮", 12), " => ⋮"); break)
+            end
+        end
+    end
+
 end
 
 function Base.show(io::IO, x::Village)
@@ -120,7 +133,7 @@ function Base.show(io::IO, x::Village)
 end
 
 function Base.show(io::IO, x::VillageLayout)
-    print(io,  "Layout\"$(x.name)\"")
+    print(io,  "∟Layout\"$(x.name)\"")
     print(io, " with ", summary(x.sites))
 end
 
