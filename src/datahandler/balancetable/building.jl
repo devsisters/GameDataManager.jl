@@ -303,8 +303,8 @@ function SubModuleAbility.joycreation(grade, level, _area)
         ref[1]["JoyStash"]
     end
 
-    # 레벨별 채집 소요시간 10분씩 감소 (100, 90, 80, 70, 60)
-    joy = joystash / (100 - 10*level) # 분당 생산량
+    # 레벨별 채집 소요시간 1분씩 감소 (10, 9, 8, 7, 6)
+    joy = joystash / (8 - 1*level) # 분당 생산량
     joy = joy * grade * 60 # 피포수량 = grade, 시간당 생산량으로 환산
     joy = joy * sqrt(_area / 2) # 조이 생산량은 면적차이의 제곱근에 비례
     
