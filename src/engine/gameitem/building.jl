@@ -174,15 +174,17 @@ end
 function Base.size(x::T) where T <: Building
     @assert itemkeys(x) != :Home "Home은 크기가 고정되어 있지 않습니다"
     bdtype = nameof(T)
-    # ref = get(DataFrame, bdtype, [itemkey(x)]
-    # (ref[:Condition]["ChunkWidth"], ref[:Condition]["ChunkLength"])
+    ref = get_cachedrow(string(T), "Building", :BuildingKey, itemkeys(x))[1]
+    (ref["Condition"]["ChunkWidth"], ref["Condition"]["ChunkLength"])
 end
-Base.size(t::T, d) where T <: Building = size(t)[d]
+Base.size(t::Building, d) where T <: Building = size(t)[d]
+areas(x::Building) = *(size(x,1), size(x, 2))
 
 itemkeys(x::Ability) = x.key
 groupkeys(x::Ability) = typeof(x).parameters[1]
 itemkeys(x::T) where T <: Building = x.key
-levels(x::T) where T <: Building = x.level
+itemlevel(x::T) where T <: Building = x.level
+itemlevel(x::SegmentInfo) = itemlevel(x.building)
 grades(x::Shop) = 1
 
 """
@@ -201,8 +203,7 @@ function levelup!(seg::SegmentInfo)
         b = seg.building
 
         levelup!(b)
-        dev = GameDataManager.developmentpoint(Shop, itemkeys(b), levels(b))
-        add!(u, dev)
+        add!(u, developmentpoint(b))
 
         return true
     end
@@ -211,9 +212,9 @@ end
 function levelup!(b::T) where T <: Building
     r = false
     ref = get_cachedrow(string(T), "Level", :BuildingKey, itemkeys(b))
-    if levels(b) < length(ref)
-        ref = ref[levels(b)]
-        @assert ref["Level"] == levels(b) "$(string(T)).xlsx!\$Level 컬럼이 정렬되어 있지 않습니다"
+    if itemlevel(b) < length(ref)
+        ref = ref[itemlevel(b)]
+        @assert ref["Level"] == itemlevel(b) "$(string(T)).xlsx!\$Level 컬럼이 정렬되어 있지 않습니다"
 
         for el in ref["Abilityup"]
             for a in b.abilities

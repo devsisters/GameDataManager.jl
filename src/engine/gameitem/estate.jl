@@ -81,7 +81,7 @@ struct Village <: AbstractCell
 end
 function Village(layout::VillageLayout)
     id = cell_uid()
-    storage = ItemCollection(VillageToken{1}(0), VillageToken{2}(0))
+    storage = ItemCollection(0*ENERGYMIX, VillageToken{1}(0), VillageToken{2}(0))
     Village(id, storage, layout)
 end
 function Village(f::AbstractString)
@@ -151,12 +151,11 @@ function assignable_energymix(v::Village)
 
     energymix_limit = div(areas(v), ref["EnergyMixPerChunk"][2])
 
-    tokenid = ref["AssignOnVillage"][1]["TokenId"] 
+    current_mix = getitem(v.storage, zero(ENERGYMIX))
     amount_per_mix = ref["AssignOnVillage"][1]["Amount"]
-    current_token = getitem(v.storage, VillageToken(tokenid))
 
     # (할당된에너지믹스) = (현재토큰) / (믹스당토큰증가량)    
-    return energymix_limit - Int(itemvalues(current_token) / amount_per_mix)
+    return energymix_limit - itemvalues(current_mix)
 end
 
 function assign_energymix!(v::Village, amount=1)
@@ -168,6 +167,7 @@ function assign_energymix!(v::Village, amount=1)
         t1 = amount * VillageToken(ref[1]["TokenId"], ref[1]["Amount"])
         t2 = amount * VillageToken(ref[2]["TokenId"], ref[2]["Amount"])
 
+        add!(v, amount * ENERGYMIX)
         add!(v, t1)
         add!(v, t2)
 
@@ -176,9 +176,9 @@ function assign_energymix!(v::Village, amount=1)
     return false
 end
 
-has(v::Village, item::VillageToken) = has(v.storage, item)
-add!(v::Village, item::VillageToken) = add!(v.storage, item)
-remove!(v::Village, item::VillageToken) = remove!(v.storage, item)
+has(v::Village, item::AbstractMonetary) = has(v.storage, item)
+add!(v::Village, item::AbstractMonetary) = add!(v.storage, item)
+remove!(v::Village, item::AbstractMonetary) = remove!(v.storage, item)
 
 """
     connected_sites(v::Village, needle::Integer)

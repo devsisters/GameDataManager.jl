@@ -14,6 +14,7 @@ function build!(u::User, v::Village, key)
             remove!(u, cost[1])
             remove!(v, cost[2])
             # SiteID 할당 필요!!
+            addbuycount!(u, key)
             add!(u, SegmentInfo(u.mid, v.id, key))
             add!(u, developmentpoint(T, key, 1))
             b = true
@@ -54,10 +55,10 @@ function price(::Type{Sandbox}, key::String)
 end
 function price(b::T) where T <: Building
     ref = get_cachedrow(string(T), "Level", :BuildingKey, itemkeys(b))
-    if levels(b) < length(ref)
-        ref = ref[levels(b)]
+    if itemlevel(b) < length(ref)
+        ref = ref[itemlevel(b)]
 
-        @assert ref["Level"] == levels(b) "$(string(T)).xlsx!\$Level 컬럼이 정렬되어 있지 않습니다"
+        @assert ref["Level"] == itemlevel(b) "$(string(T)).xlsx!\$Level 컬럼이 정렬되어 있지 않습니다"
 
         item = ref["LevelupCost"]["PriceCoin"] * COIN
         if !isempty(ref["LevelupCostItem"])
@@ -69,6 +70,7 @@ function price(b::T) where T <: Building
 end
 price(b::Special) = missing
 price(b::Sandbox) = missing
+price(seg::SegmentInfo) = price(seg.building)
 
 function developmentpoint(::Type{T}, key::String, level) where T <: Building
     ref = get_cachedrow(string(T), "Level", :BuildingKey, key)[level]
@@ -77,5 +79,6 @@ function developmentpoint(::Type{T}, key::String, level) where T <: Building
 
     return ref["Reward"]["DevelopmentPoint"]*DEVELOPMENTPOINT
 end
+developmentpoint(b::T) where T <: Building = developmentpoint(T, itemkeys(b), itemlevel(b))
 developmentpoint(b::Special) = missing
 developmentpoint(b::Sandbox) = missing

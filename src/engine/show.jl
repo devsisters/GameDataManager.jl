@@ -92,7 +92,9 @@ function Base.show(io::IO, x::DroneDelivery)
 end
 
 function Base.show(io::IO, x::User)
-    println(io, "(mid:", usermid(x), ")", username(x))
+    print(io, "(mid:", usermid(x), ")", username(x))
+    println(io, " Lv", userlevel(x), " - ", x.info.developmentpoint)
+
     println(io, x.item)
     # println(io, x.buycount)\
     println(io, ".village")
@@ -115,9 +117,10 @@ function Base.show(io::IO, x::BuildingStorage)
         if length(data) > 0
             println(io, "↳", uppercasefirst(string(field)), " with ", length(data), " entries:")
             for (i, el) in enumerate(data)
-                print(io, "\t", el)
-                i < row_limit ? print(io, "\n") : (print(io, "\n\t", lpad("⋮", 12), " => ⋮"); break)
+                println(io, "\t", el)
+                i > row_limit && (print(io, "\t", lpad("⋮", 12), " => ⋮"); break)
             end
+            field != :special && print(io, "\n")
         end
     end
 
@@ -127,7 +130,8 @@ function Base.show(io::IO, x::Village)
     print(io, "Village($(x.id)) has ")
     tokens = collect(values(x.storage))
     print(io, tokens[1], ", ")
-    print(io, tokens[2], "\n\t")
+    print(io, tokens[2], " / ")
+    print(io, tokens[3], "\n\t")
       
     print(io, x.layout)
 end

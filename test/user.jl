@@ -136,4 +136,11 @@ end
 
 @testset "건물 레벨업, 계정 레벨업" begin
 
+    # 먼저 레벨업 가격 받은 다음
+
+    # 종류별로 레벨업...
+    levelup!(u.building.shop[1])
+    levelup!(u.building.residence[1])
+
+
 end

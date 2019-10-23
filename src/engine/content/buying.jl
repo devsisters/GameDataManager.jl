@@ -59,6 +59,8 @@ end
 
 
 """
+TODO 여러개 구매할 때 가격 계산!!
+
     price(u::User, SITECLEANER)    
 * SITECLEANER 1개 가격
 
@@ -78,6 +80,7 @@ function price(u::User, ::Type{Currency{:SITECLEANER}})
     bc = getbuycount(u, SITECLEANER)
     price(bc, SITECLEANER)
 end
+
 function price(buycount::Integer, ::Type{Currency{:SITECLEANER}})
     func_variable = begin
         ref = get(DataFrame, ("SpaceDrop", "SiteCleaner"))
@@ -118,16 +121,15 @@ function price(u::User, buildingkey::AbstractString)
     buycnt = getbuycount(u, buildingkey)
     if buycnt < 0 # 구매 불가, Unlock 먼저 필요
         @warn "$(buildingkey)는 구매 불가 건물입니다"
-        p = typemax(Int32)
+        return missing
     else 
         ref = get_cachedrow("ItemTable", "BuildingSeed", :BuildingKey, buildingkey)[1]
         ref2 = get(Dict, ("SpaceDrop", "Data"))[1]
        
         limit = ref2["BuildingSeed"]["BuyCountLimit"]
         base = ref["PriceJoy"]
-        p = min(buycnt, limit) * base
+        return min(buycnt+1, limit) * base * JOY
     end
-    return p * JOY
 end
 
 

@@ -104,18 +104,15 @@ username(u::User) = username(u.info)
 username(i::UserInfo) = i.name
 usermid(u::User) = u.mid
 usermid(i::UserInfo) = i.mid
-levels(u::User) = levels(u.info)
-levels(i::UserInfo) = i.level
+userlevel(u::User) = userlevel(u.info)
+userlevel(i::UserInfo) = i.level
 
 
-getbuycount(u::User, ::Type{Currency{NAME}}) where NAME = u.buycount[NAME]
+getbuycount(u::User, ::Type{Currency{NAME}}) where NAME = u.buycount[string(NAME)]
+getbuycount(u::User, k::AbstractString) = u.buycount[k]
 
-getbuycount(u::User, key::AbstractString) = getbuycount(u, Symbol(key))
-getbuycount(u::User, k::Symbol) = u.buycount[k]
-
-addbuycount!(u::User, key::AbstractString, value = 1) = addbuycount!(u, Symbol(key), value)
-function addbuycount!(u::User, k::Symbol, value = 1)
+function addbuycount!(u::User, k::AbstractString, value = 1)
     u.buycount[k] += value
 end
 
-addbuycount!(u::User, ::Type{Currency{NAME}}, value = 1) where NAME = u.buycount[NAME] += value
+addbuycount!(u::User, ::Type{Currency{NAME}}, value = 1) where NAME = u.buycount[string(NAME)] += value

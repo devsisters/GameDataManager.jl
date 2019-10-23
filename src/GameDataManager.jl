@@ -77,7 +77,7 @@ export GAMEENV, GAMEDATA, help,
           BuildingSeedItem, BlockItem,
           itemkeys, itemvalues, issamekey,
           ItemCollection,
-          add!, remove!, has, getitem, levels,
+          add!, remove!, has, getitem, itemlevel, userlevel,
     # 건물
       NonStackItem, Building, Special, Residence, Shop, Sandbox, Ability, SegmentInfo,
                     abilitysum,
