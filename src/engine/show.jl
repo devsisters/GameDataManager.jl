@@ -37,7 +37,7 @@ function Base.show(io::IO, x::T) where T <: StackItem
 end
 
 function Base.show(io::IO, x::ItemCollection{T,V}) where {T,V}
-    # TODO: 아이템 ID 순서대로 보여줄까?
+    # TODO: 아이템 ID 순서대로 표모양으로 그려서 보여주기?
     # line_limit = displaysize(io)[2]
     row_limit = 7
     println(io, "ItemCollection{$V} with ", length(x), " entries:")
