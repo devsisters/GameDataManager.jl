@@ -31,7 +31,6 @@ function SubModuleBuilding.validator(bt)
         data = get(DataFrame, bt, "Building")
         leveldata = get(DataFrame, bt, "Level")
 
-        export_gamedata("Ability", false)
         validate_haskey("Ability", filter(!isnull, vcat(data[!, :AbilityKey]...)))
 
         buildgkey_level = broadcast(row -> (row[:BuildingKey], row[:Level]), eachrow(leveldata))
