@@ -315,12 +315,12 @@ function SubModuleItemTable.buildingseed_pricejoy(ref, key)
         grade = get(ref[key], "Grade", 1)
         _area = ref[key]["Condition"]["ChunkWidth"] * ref[key]["Condition"]["ChunkLength"]
     
-        multi = grade == 1 ? 1 : 
-                grade == 2 ? 2 : 
-                grade == 3 ? 4 : 
-                grade == 4 ? 12 : 
-                grade == 5 ? 36 : 
-                grade == 6 ? 72 : error("6등급 이상 건물에 대한 joyprice 추가 필요")
+        multi = grade == 1 ? 0.4 : 
+                grade == 2 ? 0.6 : 
+                grade == 3 ? 0.8 : 
+                grade == 4 ? 1.0 : 
+                grade == 5 ? 1.2 : 
+                grade == 6 ? 2 : error("6등급 이상 건물에 대한 joyprice 추가 필요")
 
         # 1레벨 조이 생산량
         base = SubModuleAbility.joycreation(grade, 1, _area)
