@@ -93,13 +93,13 @@ function SubModuleQuest.questtrigger(x::Array{T, 1}) where T
                 all(isdigit.(collect(el)))
             # NOTE 이거 이렇게 하면 매번 json을 다시 읽어와서... 문제 소지가 있음
             elseif checker == :buildingkey
-                # validate_haskey("Building", [el])
+                validate_haskey("Building", [el])
                 true
             elseif checker == :abilitykey
-                # validate_haskey("Ability", [el])
+                validate_haskey("Ability", [el])
                 true
             elseif checker == :itemkey
-                # validate_haskey("ItemTable", [parse(Int, el)])
+                validate_haskey("ItemTable", [parse(Int, el)])
                 true
             elseif checker == :buycount
                 in(el, ("EnergyMix", "SiteCleaner"))
@@ -367,5 +367,5 @@ function SubModuleDroneDelivery.validator(bt)
     for row in eachrow(df)
         append!(itemkey, get.(row[:Items], "Key", missing))
     end
-    # validate_haskey("ItemTable", unique(itemkey))
+    validate_haskey("ItemTable", unique(itemkey))
 end
