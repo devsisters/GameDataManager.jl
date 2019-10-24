@@ -7,7 +7,6 @@
 module SubModuleQuest
     function validator end
     function editor! end
-    function generate_dialogue end
     function questtrigger end
 end
 using .SubModuleQuest
@@ -129,35 +128,8 @@ function SubModuleQuest.editor!(jwb::JSONWorkbook)
         end
         el["CompleteCondition"] = overwrite
     end
-    SubModuleQuest.generate_dialogue(jwb["Dialogue"])
-    deleteat!(jwb, "Dialogue")
+    jwb
 end
-
-
-function SubModuleQuest.generate_dialogue(jws)
-    output_path = joinpath(GAMEENV["mars_repo"], "patch-data/Dialogue/MainQuest")
-
-    template = JSON.parsefile(joinpath(output_path, "_Template.json"); dicttype=OrderedDict)
-
-    for el in jws.data
-        d = deepcopy(template)
-        push!(d[1]["CallOnStart"], el["CallOnStart"])
-
-        for (i, x) in enumerate(el["Temp"])
-            if i > 1
-                push!(d, deepcopy(d[1]))
-                d[i]["Index"] = i
-            end
-            d[i]["\$Text"] = x["\$Text"]
-        end
-        push!(d[end]["CallOnEnd"], "DestroyDialogue()")
-        f = el["FileName"]
-        write(joinpath(output_path, "$f.json"), JSON.json(d, 2))
-    end
-    # printstyled("\n$(size(jws, 1))개 PERK 대사 생성 완료!\n"; color=:cyan)
-    nothing
-end
-
 
 
 """
