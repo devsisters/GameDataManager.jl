@@ -48,8 +48,6 @@ https://docs.google.com/document/d/1yvzWjz_bziGhCH6TdDUh0nXAB2J1uuHiYSPV9SyptnA/
 * 사용 가능한 trigger인지, 변수가 올바른 형태인지 체크한다
 =#
 function SubModuleQuest.questtrigger(x::Array{T, 1}) where T
-    get(BalanceTable, "ItemTable"; check_modified=true)
-
     trigger = Dict(
         "ShopCount"                    => (:equality, :number),
         "SiteCount"                    => (:equality, :number),
