@@ -20,3 +20,6 @@ jobs:
       run: |
         echo Install Julia
         sudo snap install julia --classic
+    - name: Install Dependency
+      run: |
+        julia -e 'using Pkg; Pkg.add("https://github.com/devsisters/XLSXasJSON.jl"); Pkg.add("https://github.com/yongheekim-dev/Nameless.jl");
