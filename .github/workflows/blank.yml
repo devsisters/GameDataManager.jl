@@ -22,6 +22,4 @@ jobs:
         sudo snap install julia --classic
     - name: Install Dependency
       run: |
-        julia -e 'using Pkg; 
-        Pkg.add("https://github.com/devsisters/XLSXasJSON.jl"); 
-        Pkg.add("https://github.com/yongheekim-dev/Nameless.jl");`
+              julia -e 'using Pkg; Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
