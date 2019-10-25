@@ -32,13 +32,22 @@ struct XLSXBalanceTable <: BalanceTable
     # 사용할 함수들
     cache::Union{Missing, Array{Dict, 1}}
 end
-function XLSXBalanceTable(f::AbstractString; cacheindex = true, validation = true, force_reload = false)
-    if ismodified(f) | force_reload
-        jwb = JWB(f, true)
+function XLSXBalanceTable(file::AbstractString; cacheindex = true, validation = true, read_from_xlsx = false)
+    if ismodified(file) | read_from_xlsx
+        jwb = begin 
+            f = is_xlsxfile(file) ? file : MANAGERCACHE[:meta][:xlsx_shortcut][file]
+
+            meta = getmetadata(f)
+            kwargs_per_sheet = Dict()
+            for el in meta
+                kwargs_per_sheet[el[1]] = el[2][2]
+            end
+            JSONWorkbook(joinpath_gamedata(f), keys(meta), kwargs_per_sheet)
+        end
         editor!(jwb)
         dummy_localizer!(jwb)
     else
-        jwb = JWB(f, false)
+        jwb = JWB(file, false)
     end
 
     dataframe = construct_dataframe(jwb)
@@ -49,18 +58,14 @@ function XLSXBalanceTable(f::AbstractString; cacheindex = true, validation = tru
     return x
 end
 
-function JWB(file, force_reload::Bool = true)::JSONWorkbook
+function JWB(file, read_from_xlsx::Bool)::JSONWorkbook
     f = is_xlsxfile(file) ? file : MANAGERCACHE[:meta][:xlsx_shortcut][file]
-    xlsxpath = joinpath_gamedata(f)
-    meta = getmetadata(f)
-
-    if force_reload
-        kwargs_per_sheet = Dict()
-        for el in meta
-            kwargs_per_sheet[el[1]] = el[2][2]
-        end
-        jwb = JSONWorkbook(xlsxpath, keys(meta), kwargs_per_sheet)
+    
+    if read_from_xlsx
+        jwb = XLSXBalanceTable(f;cacheindex = false, validation = false, read_from_xlsx = true).data
     else
+        xlsxpath = joinpath_gamedata(f)
+        meta = getmetadata(f)
         v = []
         for el in meta # sheetindex가 xlsx과 다르다. getindex할 때 이름으로 참조할 것!
             if endswith(lowercase(el[2][1]), ".json") 
@@ -275,29 +280,29 @@ end
 """
 function validate_haskey(class, a; assert=true)
     if class == "ItemTable"
-        jwb = JWB(class, false)
+        jwb = get!(MANAGERCACHE[:validator], class, JWB(class, false))
         b = vcat(map(i -> get.(jwb[i], "Key", missing), 1:length(jwb))...)
     elseif class == "Building"
         b = String[]
         for f in ("Shop", "Residence", "Sandbox", "Special")
-            jwb = JWB(f, false)
+            jwb = get!(MANAGERCACHE[:validator], f, JWB(f, false))
             x = get.(jwb[:Building], "BuildingKey", "")
             append!(b, x)
         end
     elseif class == "Ability"
-        jwb = JWB(class, false)
+        jwb = get!(MANAGERCACHE[:validator], class, JWB(class, false))
         b = unique(get.(jwb[:Level], "AbilityKey", missing))
     elseif class == "Block"
-        jwb = JWB(class, false)
+        jwb = get!(MANAGERCACHE[:validator], class, JWB(class, false))
         b = unique(get.(jwb[:Block], "Key", missing))
     elseif class == "BlockSet"
-        jwb = JWB("Block", false)
+        jwb = get!(MANAGERCACHE[:validator], "Block", JWB("Block", false))
         b = unique(get.(jwb[:Set], "BlockSetKey", missing))
     elseif class == "RewardTable"
-        jws1 = JWB(class, false)[1]
-        jws2 = JWB("BlockRewardTable", false)[1]
+        jwb = get!(MANAGERCACHE[:validator], class, JWB(class, false))
+        jwb2 = get!(MANAGERCACHE[:validator], "BlockRewardTable", JWB("BlockRewardTable", false))
 
-        b = [get.(jws1, "RewardKey", missing); get.(jws2, "RewardKey", missing)]
+        b = [get.(jwb[1], "RewardKey", missing); get.(jwb2[1], "RewardKey", missing)]
     else
         throw(AssertionError("validate_haskey($(class), ...)은 정의되지 않았습니다")) 
     end

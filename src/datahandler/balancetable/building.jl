@@ -197,7 +197,7 @@ end
 function SubModuleAbility.editor!(jwb::JSONWorkbook)
     function arearange_for_building_grade(buildingtype)
         # 건물이 1 ~ 5등급이 있다 가정하고 데이터 생성
-        jwb2 = JWB(buildingtype)
+        jwb2 = JWB(buildingtype, false)
         ref = map(el -> (el["BuildingKey"], el), jwb2[:Building]) |> Dict
         a = [[], [], [], [], []]
         for el in values(ref)
@@ -299,8 +299,8 @@ end
 function SubModuleAbility.joycreation(grade, level, _area)
     # 피포의 임시 저장량은 고정
     joystash = begin 
-        ref = get(Dict, ("PipoTalent", "Grade"))
-        ref[1]["JoyStash"]
+        jwb = JWB("PipoTalent", false)
+        jwb[:Grade][1]["JoyStash"]
     end
 
     # 레벨별 채집 소요시간 1분씩 감소 (10, 9, 8, 7, 6)

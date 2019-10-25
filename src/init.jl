@@ -26,6 +26,7 @@ end
 function init_cache!(env)
     MANAGERCACHE[:meta] = init_meta(env["json"]["root"])
     MANAGERCACHE[:history] = init_gamedata_history(env["history"])
+    MANAGERCACHE[:validator] = Dict()
 
     MANAGERCACHE
 end

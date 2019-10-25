@@ -32,11 +32,11 @@ end
 
 mars 메인 저장소의 '.../_META.json'에 명시된 파일만 추출가능합니다
 """
-function export_gamedata(file::AbstractString, force_reload::Bool)
+function export_gamedata(file::AbstractString, read_from_xlsx::Bool)
     f = is_xlsxfile(file) ? file : MANAGERCACHE[:meta][:xlsx_shortcut][file]
 
     println("『", f, "』")
-    bt = BalanceTable(f; force_reload = force_reload)
+    bt = BalanceTable(f; read_from_xlsx = read_from_xlsx)
     write_json(bt.data)
     gamedata_export_history(f)
 
