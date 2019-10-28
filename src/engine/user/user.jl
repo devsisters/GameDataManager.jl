@@ -69,11 +69,13 @@ function add!(info::UserInfo, item::Currency{:DEVELOPMENTPOINT, T}) where T
     
     p = info.developmentpoint + item
     level = if itemvalues(p) < ref[1, :NeedDevelopmentPoint]
-            1
-        else
-            findlast(x -> itemvalues(p) >= x, ref[!, :NeedDevelopmentPoint])
-        end
-
+                1
+            elseif itemvalues(p) > ref[end, :NeedDevelopmentPoint]
+                size(ref, 1)
+            else
+                findfirst(x -> x > itemvalues(p), ref[!, :NeedDevelopmentPoint])
+            end
+    # TODO 레벨업 처리
     if level > info.level
         info.level = level
     end
@@ -81,7 +83,6 @@ function add!(info::UserInfo, item::Currency{:DEVELOPMENTPOINT, T}) where T
     
     return true
 end
-
 
 remove!(u::User, item::StackItem) = remove!(u.item, item)
 remove!(u::User, items::ItemCollection) = remove!(u.item, items)
