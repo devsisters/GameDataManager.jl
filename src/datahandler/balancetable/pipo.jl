@@ -38,12 +38,12 @@ end
 using .SubModulePipoTalent
 
 function SubModulePipoTalent.editor!(jwb::JSONWorkbook)
-    output_path = joinpath(GAMEENV["mars_repo"], "patch-data/Dialogue/PipoTalk")
+    output_folder = joinpath(GAMEENV["mars_repo"], "patch-data/Dialogue/PipoTalk")
 
     template = Dict(
-        "Introduction" => JSON.parsefile(joinpath(output_path, "_Introduction.json"); dicttype=OrderedDict),
-        "Accepted"     => JSON.parsefile(joinpath(output_path, "_Accepted.json"); dicttype=OrderedDict),
-        "Denied"       => JSON.parsefile(joinpath(output_path, "_Denied.json"); dicttype=OrderedDict))
+        "Introduction" => JSON.parsefile(joinpath(output_folder, "_Introduction.json"); dicttype=OrderedDict),
+        "Accepted"     => JSON.parsefile(joinpath(output_folder, "_Accepted.json"); dicttype=OrderedDict),
+        "Denied"       => JSON.parsefile(joinpath(output_folder, "_Denied.json"); dicttype=OrderedDict))
 
     jws = jwb["Dialogue"]
 
@@ -57,7 +57,7 @@ function SubModulePipoTalent.editor!(jwb::JSONWorkbook)
             for f in ("Introduction", "Accepted", "Denied")
                 template[f][1]["\$Text"] = el[unique_grade][f]
 
-                json = joinpath(output_path, "$(prefix)$(f).json")
+                json = joinpath(output_folder, "$(prefix)$(f).json")
                 newdata = JSON.json(template[f], 2)
 
                 modified = !isequal(md5(read(json, String)), md5(newdata))
