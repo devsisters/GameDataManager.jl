@@ -1,0 +1,23 @@
+[
+  {
+    "Index": 1,
+    "Type": "Normal",
+    "$Text": "흑흑...;이럴수가... 날 버린건가요?;화성의 밤은 추운데...\n복수할테다!",
+    "CallOnStart": [
+      "DisplayPipoName()"
+    ],
+    "CallOnEnd": [
+    ]
+  },
+  {
+    "Index": 2,
+    "Type": "Info",
+    "$Text": "$(PipoName)이(가) 정착할 다른 마을을 찾아 떠났습니다.",
+    "CallOnStart": [
+      "DisplayPipoName()"
+    ],
+    "CallOnEnd": [
+      "DestroyDialogue()"
+    ]
+  }
+]

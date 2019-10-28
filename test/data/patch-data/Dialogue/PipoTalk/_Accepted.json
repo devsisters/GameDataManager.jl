@@ -1,0 +1,14 @@
+[
+  {
+    "Index": 1,
+    "Type": "Normal",
+    "$Text": "고마워!;엣헴! 이몸을 거절할 순 없지;하하하, 당연한 일이지",
+    "CallOnStart": [
+      "DisplayPipoName()"
+    ],
+    "CallOnEnd": [
+      "DestroyDialogue()"
+    ],
+    "UserChoices": []
+  }
+]

@@ -1,0 +1,286 @@
+{
+    "manual": [
+        {
+            "comment": "정말 가끔 뽑는 파일만 manual에 넣을 것",
+            "xlsx": "PipoDemographic.xlsx",
+            "sheets": {
+                "Gender": "PipoDemographic_gender.json",
+                "Age": "PipoDemographic_age.json",
+                "Country": "PipoDemographic_country.json",
+                "enName": "PipoDemographic_enName.json"
+            }
+        },
+        {
+            "xlsx": "NameGenerator.xlsx",
+            "start_line": 1,
+            "sheets": {
+                "WorldKOR": "NameGenerator_WorldKOR.json",
+                "WorldENG": "NameGenerator_World.json"
+            }
+        }
+    ],
+    "auto": [
+        {
+            "xlsx": "GeneralSetting.xlsx",
+            "row_oriented": false,
+            "sheets": {
+                "Data": "GeneralSetting_Data.json",
+                "AddOnAccountCreation": "GeneralSetting_AddOnAccountCreation.json"
+            }
+        },
+        {
+            "xlsx": "ArchipelagoGenerator.xlsx",
+            "sheets": {
+                "Data": "ArchipelagoGenerator_Data.json"
+            },
+            "row_oriented": false
+        },
+        {
+            "xlsx": "Player.xlsx",
+            "sheets": {
+                "DevelopmentLevel": "Player_DevelopmentLevel.json",
+                "DroneDelivery": "Player_DevelopmentLevel 과 통합됩니다",
+                "SpaceDrop": "Player_DevelopmentLevel 과 통합됩니다",
+                "Festival": "Player_DevelopmentLevel 과 통합됩니다"
+            }
+        },
+        {
+            "xlsx": "Shop.xlsx",
+            "sheets": {
+                "Building": "Shop_Building.json",
+                "Level": "Shop_Level.json"
+            }
+        },
+        {
+            "xlsx": "Residence.xlsx",
+            "sheets": {
+                "Building": "Residence_Building.json",
+                "Level": "Residence_Level.json"
+            }
+        },
+        {
+            "xlsx": "Special.xlsx",
+            "sheets": {
+                "Building": "Special_Building.json",
+                "Level": "Special_Level.json"
+            }
+        },
+        {
+            "xlsx": "Sandbox.xlsx",
+            "sheets": {
+                "Building": "Sandbox_Building.json",
+                "Level": "Sandbox_Level.json"
+            }
+        },
+        {
+            "xlsx": "PipoFashion.xlsx",
+            "sheets": {
+                "AccSlotProbability": "PipoFashion_AccSlotProbability.json",
+                "TagProbability": "PipoFashion_TagProbability.json",
+                "Hair": "PipoFashion_Hair.json",
+                "Face": "PipoFashion_Face.json",
+                "Skin": "PipoFashion_Skin.json",
+                "Dress": "PipoFashion_Dress.json",
+                "Acc": "PipoFashion_Acc.json"
+            }
+        },
+        {
+            "xlsx": "PipoColorTable.xlsm",
+            "sheets": {
+                "Skin": "PipoColorTable_Skin.json",
+                "Hair": "PipoColorTable_Hair.json"
+            }
+        },
+        {
+            "xlsx": "PipoTalent.xlsx",
+            "sheets": {
+                "Setting":"PipoTalent_Setting.json",
+                "Grade": "PipoTalent_Grade.json",
+                "Type": "PipoTalent_Type.json",
+                "Perk": "PipoTalent_Perk.json",
+                "Dialogue": "SubModulePipoTalent.editor! 참조",
+                "PipoWelcome": "PipoTalent_Welcome.json"
+            },
+            "kwargs": {
+                "Setting": {
+                    "row_oriented": false
+                }
+            }
+        },
+        {
+            "xlsx": "Block.xlsx",
+            "sheets": {
+                "Block": "ItemTable_Block.json",
+                "Set": "Block_Set.json",
+                "MainCategory": "Block_MainCategory.json",
+                "SubCategory": "Block_SubCategory.json",
+                "RecommendCategory": "Block_RecommendCategory.json",
+                "LuxuryGrade": "Block_LuxuryGrade.json"
+            }
+        },
+        {
+            "xlsx": "Ability.xlsx",
+            "sheets": {
+                "Group" : "Ability_Group.json",
+                "Level": "Ability_Level.json"
+            }
+        },
+        {
+            "xlsx": "Dialogue.xlsx",
+            "sheets": {
+                "Char": "Dialogue_Char.json"
+            }
+        },
+        {
+            "xlsx": "HomeCustomize.xlsx",
+            "sheets": {
+                "Type": "HomeCustomize_Type.json",
+                "Step": "HomeCustomize_Step.json",
+                "StepTitle": "HomeCustomize_StepTitle.json"
+            }
+        },
+        {
+            "xlsx": "ItemTable.xlsx",
+            "sheets": {
+                "Currency": "ItemTable_Currency.json",
+                "Normal": "ItemTable_Normal.json",
+                "BuildingSeed": "ItemTable_BuildingSeed.json"
+            }
+        },
+        {
+            "xlsx": "Quest.xlsx",
+            "sheets": {
+                "Main": "Quest_Main.json"
+            }
+        },
+        {
+            "xlsx": "CoinPurchase.xlsx",
+            "sheets": {
+                "Data": "CoinPurchase_Data.json"
+            }
+        },
+        {
+            "xlsx": "Camera.xlsx",
+            "sheets": {
+                "Config": "Camera_Config.json"
+            }
+        },
+        {
+            "xlsx": "CashStore.xlsm",
+            "sheets": {
+                "Data": "CashStore_Data.json",
+                "args": "나는 Data랑 합쳐지지롱"
+            }
+        },
+        {
+            "xlsx": "TimePurchase.xlsx",
+            "sheets": {
+                "Data": "TimePurchase_Data.json"
+            }
+        },
+        {
+            "xlsx": "Estate.xlsx",
+            "sheets": {
+                "SiteGrade": "Estate_SiteGrade.json"
+            }
+        },
+        {
+            "xlsx": "DroneDelivery.xlsx",
+            "sheets": {
+                "Group": "DroneDelivery_Group.json",
+                "Order": "DroneDelivery_Order.json"
+            }
+        },
+        {
+            "xlsx": "EnergyMix.xlsx",
+            "sheets": {
+                "Data": "EnergyMix_Data.json",
+                "Price": "EnergyMix_Price.json"
+            },
+            "kwargs": {
+                "Data": {
+                    "row_oriented": false
+                }
+            }
+        },
+        {
+            "xlsx": "SpaceDrop.xlsx",
+            "sheets": {
+                "SiteCleaner": "SpaceDrop_SiteCleaner.json",
+                "Data": "SpaceDrop_Data.json"
+            },
+            "kwargs": {
+                "Data": {
+                    "row_oriented": false
+                }
+            }
+        },
+        {
+            "xlsx": "Village.xlsx",
+            "sheets": {
+                "Grade": "Village_Grade.json",
+                "SiteCleanerPrice": "Village_SiteCleanerPrice.json",
+                "VillagePrice": "Village_VillagePrice.json",
+                "Token": "VillageTokenTable_Data.json"
+            }
+        },
+        {
+            "xlsx": "RewardTable.xlsm",
+            "sheets": {
+                "Solo": "RewardTable.json",
+                "Box": "RewardTable로 통합된다",
+                "DroneDelivery": "RewardTable로 통합된다",
+                "SpaceDrop": "RewardTable로 통합된다"
+            }
+        },
+        {
+            "xlsx": "BlockRewardTable.xlsx",
+            "sheets": {
+                "Data": "BlockRewardTable.json"
+            }
+        },
+        {
+            "xlsx": "BluePrint.xlsx",
+            "sheets": {
+                "BluePrintGeneral": "BluePrint_General.json",
+                "BluePrintLike": "BluePrint_LikePrice.json",
+                "BluePrintBlockPrice": "BluePrint_BlockPrice.json",
+                "BluePrintDecorPrice": "BluePrint_DecorPrice.json"
+            },
+            "kwargs": {
+                "BluePrintGeneral": {
+                    "row_oriented": false
+                }
+            }
+        },
+        {
+            "xlsx": "SiteBonus.xlsx",
+            "sheets": {
+                "Data": "SiteBonus_Data.json"
+            }
+        },
+        {
+            "xlsx": "Flag.xlsx",
+            "sheets": {
+                "BuildingUnlock": "Flag_BuildingUnlock.json"
+            }
+        },
+        {
+            "xlsx": "Work.xlsx",
+            "sheets": {
+                "Setting": "Work_Setting.json",
+                "Info": "Work_Info.json",
+                "Event": "Work_Event.json",
+                "Limit": "Work_Limit.json",
+                "DistanceChance": "Work_DistanceChance.json",
+                "Reward": "Work_Reward.json",
+                "ReportDialog": "Work_ReportDialog.json"
+            },
+            "kwargs": {
+                "Setting": {
+                    "row_oriented": false
+                }
+            }
+        }
+    ]
+}
