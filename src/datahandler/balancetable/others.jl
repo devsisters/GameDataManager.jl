@@ -7,6 +7,7 @@
 module SubModuleQuest
     function validator end
     function editor! end
+    function dialogue end
     function questtrigger end
 end
 using .SubModuleQuest
@@ -126,7 +127,39 @@ function SubModuleQuest.editor!(jwb::JSONWorkbook)
         end
         el["CompleteCondition"] = overwrite
     end
+
+    SubModuleQuest.dialogue(jwb[:Dialogue])
+    deleteat!(jwb, :Dialogue)
     jwb
+end
+function SubModuleQuest.dialogue(jws::JSONWorksheet)
+    filenames = unique(get.(jws.data, "FileName", ""))
+
+    output_folder = joinpath(GAMEENV["patch_data"], "Dialogue/MainQuest")
+    for f in filenames
+        json = joinpath(output_folder, "$f.json")
+        
+        data = filter(el -> el["FileName"] == f, jws.data)
+        for el in data
+            callon = get(el["CallOnStart"], "CharOn", missing)
+            if !ismissing(callon)
+                el["CallOnStart"] = "CharOn(" * callon * ")"
+            end
+        end
+        newdata = JSON.json(data, 2)
+
+        modified = if isfile(json)
+            !isequal(md5(read(json, String)), md5(newdata))
+        else
+            true
+        end
+        if modified
+            write(json, newdata)
+            print(" SAVE => ")
+            printstyled(normpath(json), "\n"; color=:blue)
+        end
+    end
+    nothing
 end
 
 
