@@ -127,8 +127,10 @@ function SubModuleBuilding.costitem(type::AbstractString, grade, level, _area)
         items = [8101, 8102, 8103]
         amounts = SubModuleBuilding.costitem(grade, level, _area)
     elseif type == "Residence"
-        items = [8201, 8202, 8203] # NOTE 8201가 8101의 두배 가치
-        amounts = SubModuleBuilding.costitem(grade, level, _area)
+        items = [8201, 8202, 8203] 
+        # 주택 레벨 단계가 적은 것에 대한 보정
+        base = level * 2 
+        amounts = SubModuleBuilding.costitem(grade, base, _area) + SubModuleBuilding.costitem(grade, base-1, _area)
     end
 
     costitem = map((k, v) -> (Key = k, Amount = v), items, amounts)
