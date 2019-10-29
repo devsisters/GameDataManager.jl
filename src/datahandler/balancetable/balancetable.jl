@@ -36,16 +36,17 @@ function XLSXBalanceTable(file::AbstractString; cacheindex = true, validation = 
     if ismodified(file) | read_from_xlsx
         jwb = begin 
             f = is_xlsxfile(file) ? file : MANAGERCACHE[:meta][:xlsx_shortcut][file]
+            xlsxpath = joinpath_gamedata(f)
 
             meta = getmetadata(f)
             kwargs_per_sheet = Dict()
             for el in meta
                 kwargs_per_sheet[el[1]] = el[2][2]
-            end
-            JSONWorkbook(joinpath_gamedata(f), keys(meta), kwargs_per_sheet)
+            end            
+            jwb = JSONWorkbook(copy_to_cache(xlsxpath), keys(meta), kwargs_per_sheet)
+            dummy_localizer!(jwb)
+            editor!(jwb)
         end
-        editor!(jwb)
-        dummy_localizer!(jwb)
     else
         jwb = JWB(file, false)
     end
@@ -57,15 +58,28 @@ function XLSXBalanceTable(file::AbstractString; cacheindex = true, validation = 
     validation && validator(x)
     return x
 end
+function copy_to_cache(f)
+    cache_file = joinpath(GAMEENV["cache"], "GameData", basename(f))
+    cp(f, cache_file; force = true)
+end
 
 function JWB(file, read_from_xlsx::Bool)::JSONWorkbook
     f = is_xlsxfile(file) ? file : MANAGERCACHE[:meta][:xlsx_shortcut][file]
     
+    xlsxpath = joinpath_gamedata(f)
+    meta = getmetadata(f)
     if read_from_xlsx
-        jwb = XLSXBalanceTable(f;cacheindex = false, validation = false, read_from_xlsx = true).data
+        #TODO 중복 코드 제거
+        jwb = begin 
+            kwargs_per_sheet = Dict()
+            for el in meta
+                kwargs_per_sheet[el[1]] = el[2][2]
+            end
+            jwb = JSONWorkbook(copy_to_cache(xlsxpath), keys(meta), kwargs_per_sheet)
+            dummy_localizer!(jwb)
+            editor!(jwb)
+        end
     else
-        xlsxpath = joinpath_gamedata(f)
-        meta = getmetadata(f)
         v = []
         for el in meta # sheetindex가 xlsx과 다르다. getindex할 때 이름으로 참조할 것!
             if endswith(lowercase(el[2][1]), ".json") 
@@ -385,6 +399,7 @@ function dummy_localizer!(jwb::JSONWorkbook)
     for s in sheetnames(jwb)
         jwb[s].data = dummy_localizer.(jwb[s].data)
     end
+    return jwb
 end
 function dummy_localizer(x::T) where {T <: AbstractDict}
     for k in keys(x)

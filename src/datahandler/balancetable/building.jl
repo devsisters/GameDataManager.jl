@@ -57,7 +57,7 @@ function SubModuleBuilding.editor!(jwb::JSONWorkbook)
     if type == "Shop" || type == "Residence"
         SubModuleBuilding.editor!(type, jwb)
     end
-    jwb
+    return jwb
 end
 function SubModuleBuilding.editor!(type, jwb::JSONWorkbook)
     info = Dict()
@@ -80,7 +80,7 @@ function SubModuleBuilding.editor!(type, jwb::JSONWorkbook)
         row["Reward"] = convert(OrderedDict{String, Any}, row["Reward"])
         row["Reward"]["DevelopmentPoint"] = SubModuleBuilding.developmentpoint(type, lv, ar)
     end
-    jwb 
+    return jwb 
 end
 
 #==========================================================================================
