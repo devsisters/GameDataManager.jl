@@ -140,15 +140,11 @@ function SubModuleQuest.dialogue(jws::JSONWorksheet)
         json = joinpath(output_folder, "$f.json")
         
         data = filter(el -> el["FileName"] == f, jws.data)
-        for el in data
-            _temp = []
-            for k in keys(el["CallOnStart"])
-                _child = get(el["CallOnStart"], k, missing)
-                if !ismissing(_child)
-                    push!(_temp, "$k(" * _child * ")")
-                end
+        for column in ("CallOnStart", "CallOnEnd")
+            for el in data
+                val = collect.(values.(el[column]))
+                el[column] = val
             end
-            el["CallOnStart"] = _temp
         end
         newdata = JSON.json(data, 2)
 
