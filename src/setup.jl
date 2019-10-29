@@ -19,8 +19,9 @@ function setup_env!(d)
 
     # patch-data
     env["patch_data"] = joinpath(env["mars_repo"], "patch-data")
-    env["GameData"] = "M:/GameData"
-    if !isdir(env["GameData"])  
+    
+    env["GameData"] = _search_xlsxpath()
+    if isempty(env["GameData"]) 
         m = """`M:/GameData` 가 마운팅 되어 있지 않습니다. 
         https://www.notion.so/devsisters/ccb5824c48544ec28c077a1f39182f01 의 메뉴얼을 참고하여 `M:/GameData` 를 설정해 주세요
         """
@@ -40,10 +41,21 @@ function setup_env!(d)
 
     merge!(d, env)
 end
+function _search_xlsxpath()::String
+    path = ""
+    for (root, dir, f) in walkdir("M:/")        
+        i = findfirst(el -> el == "GameData", dir)
+        if !isnothing(i)
+            path = joinpath(root, dir[i])
+            break
+        end
+    end
+    return path
+end
 
 
 function xl_chage_datapath!()
-    network_path = "M:/GameData"
+    network_path = _search_xlsxpath()
     GAMEENV["GameData"] = GAMEENV["GameData"] == network_path ? joinpath(GAMEENV["patch_data"], "_GameData") : 
                           network_path
     setup_env_xlsxpath!(GAMEENV)
