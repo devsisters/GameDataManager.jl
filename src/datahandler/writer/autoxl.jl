@@ -1,14 +1,14 @@
 
 """
-    autoxl()
+xl_auto()
 
 MANAGERCACHE[:auto]의 파일을 감시하며 파일 변경이 확인되면 xl(f)로 export 한다
 ctrl + x 로 강제종료 되어야 하는데?
 
 TODO: 키입력으로 중단, 재실행 기능
 """
-autoxl(interval = 3, timeout = 10000) = autoxl(collect_auto_xlsx(), interval, timeout)
-@inline function autoxl(candidate, interval::Integer, timeout::Integer)
+xl_auto(interval = 3, timeout = 10000) = xl_auto(collect_auto_xlsx(), interval, timeout)
+@inline function xl_auto(candidate, interval::Integer, timeout::Integer)
     @info """$(candidate)
     .xlsx 파일 감시를 시작합니다...
         감시 종료를 원할경우 'Ctrl + c'를 누르면 감시를 멈출 수 있습니다

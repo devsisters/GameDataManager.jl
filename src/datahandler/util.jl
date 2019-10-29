@@ -15,17 +15,18 @@ function help(idx = 1)
       xl("Player"): Player.xlsx 파일만 json으로 추출합니다
       xl()        : 수정된 엑셀파일만 검색하여 json으로 추출합니다
       xl(true)    : '_Meta.json'에서 관리하는 모든 파일을 json으로 추출합니다
-      autoxl()    : '01_XLSX/' 폴더를 감시하면서 변경된 파일을 자동으로 json 추출합니다
+      xl_auto()    : '$(GAMEENV["xlsx"]["root"])' 폴더를 감시하면서 변경된 파일을 자동으로 json 추출합니다
+      xl_chage_datapath!() : '$(GAMEENV["xlsx"]["root"])' 폴더를 변경합니다
     """
 
     if idx == 1
         msg = intro * rand([thankyou; oneline_asciiarts]) * "\n" * basic * """\n
         # 보조 기능
-          findblock(): 'Block'데이터와 '../4_ArtAssets/GameResources/Blocks/' 폴더를 비교하여 누락된 항목을 찾습니다.
-          get_blocks(1020001): 블록Key별 '../BuildTemplate/Buildings/' 에서 사용되는 빈도를 계산합니다
-          get_buildings("sIcecream"): 건물Key별 사용되는 블록의 종류와 수량을 계산합니다.
-          `help()`를 입력하면 도움을 드립니다!
-          md5hash(): `help?>md5hash` 도움말 참조
+          findblock() : 'Block'데이터와 '../4_ArtAssets/GameResources/Blocks/' 폴더를 비교하여 누락된 항목을 찾습니다.
+          get_blocks(1020001) : 블록Key별 '../BuildTemplate/Buildings/' 에서 사용되는 빈도를 계산합니다
+          get_buildings("sIcecream") : 건물Key별 사용되는 블록의 종류와 수량을 계산합니다.
+          help()  : 를 입력하면 도움을 드립니다!
+          md5hash()  : `help?>md5hash` 도움말 참조
         """
     elseif idx == 2
         line_breaker = "-"^(displaysize(stdout)[2]-4)

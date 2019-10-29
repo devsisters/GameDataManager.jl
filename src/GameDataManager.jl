@@ -61,7 +61,7 @@ export GAMEENV, GAMEDATA, help,
        BalanceTable, XLSXBalanceTable, JSONBalanceTable, UnityBalanceTable,
        sheetnames, get_cachedrow, reload!,
        DataFrame,
-       xl, autoxl, md5hash,
+       xl, xl_chage_datapath!, xl_auto, md5hash,
 
        # 유틸리티
        findblock, get_buildings, get_blocks,
