@@ -22,8 +22,8 @@ function setup_env!(d)
     
     env["GameData"] = _search_xlsxpath()
     if isempty(env["GameData"]) 
-        m = """`M:/GameData` 가 마운팅 되어 있지 않습니다. 
-        https://www.notion.so/devsisters/ccb5824c48544ec28c077a1f39182f01 의 메뉴얼을 참고하여 `M:/GameData` 를 설정해 주세요
+        m = """`M:/` 가 마운팅 되어 있지 않습니다. 
+        https://www.notion.so/devsisters/ccb5824c48544ec28c077a1f39182f01 의 메뉴얼을 참고하여 `M:/` 를 설정해 주세요
         """
         @warn m
         xl_chage_datapath!()
@@ -52,7 +52,6 @@ function _search_xlsxpath()::String
     end
     return path
 end
-
 
 function xl_chage_datapath!()
     network_path = _search_xlsxpath()
