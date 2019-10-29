@@ -130,7 +130,7 @@ function SubModuleBuilding.costitem(type::AbstractString, grade, level, _area)
         items = [8201, 8202, 8203] 
         # 주택 레벨 단계가 적은 것에 대한 보정
         base = level * 2 
-        amounts = SubModuleBuilding.costitem(grade, base, _area) + SubModuleBuilding.costitem(grade, base-1, _area)
+        amounts = SubModuleBuilding.costitem(grade, base, _area) .+ SubModuleBuilding.costitem(grade, base-1, _area)
     end
 
     costitem = map((k, v) -> (Key = k, Amount = v), items, amounts)
@@ -282,11 +282,11 @@ end
 
 function SubModuleAbility.coincounter(profit, grade, level)
     base = begin 
-        grade == 1 ? 3/60 : 
-        grade == 2 ? 8/60 : 
-        grade == 3 ? 15/60 : 
-        grade == 4 ? 30/60 : 
-        grade == 5 ? 60/60 : error("Shop Grade5 이상은 기준이 없습니다") 
+        grade == 1 ? 10/60 : 
+        grade == 2 ? 15/60 : 
+        grade == 3 ? 20/60 : 
+        grade == 4 ? 40/60 : 
+        grade == 5 ? 80/60 : error("Shop Grade5 이상은 기준이 없습니다") 
     end
     coincounter = round(Int, base * level * profit)
 end
