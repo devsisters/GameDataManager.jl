@@ -70,10 +70,10 @@ function SubModuleQuest.questtrigger(x::Array{T, 1}) where T
         "CompleteDelivery"             => (:equality, :number),
         "CompleteBlockEdit"            => (:equality, :number),
         "CompletePipoWork"             => (:equality, :number),
-        "JoyCollecting" => (:equality, :number),
-        "BuildingSeedBuyCount" => (:buildingkey, :equality, :number),
-        "SingleKeyBuyCount"  => (:buycount, :equality, :number),
-        "SandboxCount" => (:equality, :number))
+        "JoyCollecting"                => (:equality, :number),
+        "BuildingSeedBuyCount"         => (:buildingkey, :equality, :number),
+        "SingleKeyBuyCount"            => (:buycount, :equality, :number),
+        "SandboxCount"                 => (:equality, :number))
 
     ref = get(trigger, string(x[1]), missing)
 
@@ -115,17 +115,8 @@ end
 function SubModuleQuest.editor!(jwb::JSONWorkbook)
     data = jwb[:Main].data
     for el in data
-        overwrite = []
-        for x in el["Trigger"]
-            append!(overwrite, collect(values(x)))
-        end
-        el["Trigger"] = overwrite
-
-        overwrite = []
-        for x in el["CompleteCondition"]
-            append!(overwrite, collect(values(x)))
-        end
-        el["CompleteCondition"] = overwrite
+        el["Trigger"] = collect_values(el["Trigger"])
+        el["CompleteCondition"] = collect_values(el["CompleteCondition"])
     end
 
     SubModuleQuest.dialogue(jwb[:Dialogue])
@@ -140,12 +131,11 @@ function SubModuleQuest.dialogue(jws::JSONWorksheet)
         json = joinpath(output_folder, "$f.json")
         
         data = filter(el -> el["FileName"] == f, jws.data)
-        for column in ("CallOnStart", "CallOnEnd")
-            for el in data
-                val = collect.(values.(el[column]))
-                el[column] = val
-            end
+        for el in data
+            el["CallOnStart"] = collect_values(el["CallOnStart"])
+            el["CallOnEnd"] = collect_values(el["CallOnEnd"])
         end
+
         newdata = JSON.json(data, 2)
 
         modified = if isfile(json)
