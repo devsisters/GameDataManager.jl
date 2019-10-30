@@ -113,7 +113,7 @@ end
 function xl_backup()
     # 네트워크에 있는 XLSX 파일들을 가져옵니다. 
     if GAMEENV["GameData"] != _search_xlsxpath()
-        setup_env_jsonpath!()
+        xl_chage_datapath!()
     end
     @assert !isempty(GAMEENV["GameData"]) "네트워크에 연결할 수 없어 XLSX 데이터 백업이 불가능 합니다"
 
