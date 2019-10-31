@@ -7,7 +7,7 @@ using XLSX, JSON, XLSXasJSON
 using DataFrames, DataFramesMeta, DataStructures, CSV
 using MD5
 import XLSXasJSON.Index
-# using LibGit2 Git 함수 라이브러리
+# using LibGit2 # Git 함수 라이브러리
 
 import Base: +, -, *, /, ==
 
@@ -21,7 +21,7 @@ include("datahandler/balancetable/rewardtable.jl")
 include("datahandler/util.jl")
 
 
-############ Simulation ENGINE #########################
+#######  Simulation ENGINE #########################
 include("engine/engine.jl")
 include("engine/gameitem/monetary.jl")
 include("engine/gameitem/stackitem.jl")
@@ -46,7 +46,7 @@ include("engine/analyzer.jl")
 
 include("engine/show.jl")
 
-#############################################
+#######  DataHandler      ##########################################
 include("init.jl")
 include("setup.jl")
 include("datahandler/loader.jl")
@@ -54,6 +54,9 @@ include("datahandler/loader.jl")
 include("datahandler/writer/writer.jl")
 include("datahandler/writer/autoxl.jl")
 include("datahandler/writer/history.jl")
+
+#######  Logger      ##########################################
+include("logger/logger.jl")
 
 
 export GAMEENV, GAMEDATA, help,
@@ -89,6 +92,5 @@ export GAMEENV, GAMEDATA, help,
     # 콘텐츠
       RewardTable, sample, expectedvalue,
       DroneDelivery, deliveryreward, deliverycost
-
 
 end
