@@ -301,8 +301,8 @@ end
 function SubModuleAbility.joycreation(grade, level, _area)
     # 피포의 임시 저장량은 고정
     joystash = begin 
-        jwb = JWB("PipoTalent", false)
-        jwb[:Grade][1]["JoyStash"]
+        jwb = JWB("Pipo", false)
+        jwb[:Setting][1]["JoyStash"]
     end
 
     # 레벨별 채집 소요시간 1분씩 감소 (10, 9, 8, 7, 6)

@@ -27,17 +27,17 @@ function SubModuleWork.editor!(jwb::JSONWorkbook)
 end
 
 """
-    SubModulePipoTalent
+    SubModulePipo
 
-* PipoTalent.xlsx 데이터를 관장함
+* Pipo.xlsx 데이터를 관장함
 """
-module SubModulePipoTalent
+module SubModulePipo
     # function validator end
     function editor! end
 end
-using .SubModulePipoTalent
+using .SubModulePipo
 
-function SubModulePipoTalent.editor!(jwb::JSONWorkbook)
+function SubModulePipo.editor!(jwb::JSONWorkbook)
     output_folder = joinpath(GAMEENV["mars_repo"], "patch-data/Dialogue/PipoTalk")
 
     template = Dict(
