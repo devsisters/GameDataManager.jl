@@ -13,16 +13,11 @@ end
 using .SubModuleQuest
 
 function SubModuleQuest.editor!(jwb::JSONWorkbook)
-    data = jwb[:Member].data
-    groupname_to_key = Dict(map(el -> (el["Name"], el["Key"]), jwb[:Group].data))
-    for el in data
+    member = jwb[:Member].data
+    for el in member
         el["CompleteCondition"] = collect_values(el["CompleteCondition"])
-
-        gk = get(groupname_to_key, el["GroupName"], missing)
-        @assert !ismissing(gk) "$(el["GroupName"])은 존재하지 않는 GroupName입니다"
-        el["GroupKey"] = gk
     end
-    
+
     data = jwb[:Group].data
     for el in data
         el["AndCondition"] = collect_values(el["AndCondition"])
@@ -85,6 +80,9 @@ function SubModuleQuest.validator(bt)
     rewards = get.(member[!, :CompleteAction], "RewardKey", missing)
     validate_haskey("RewardTable", rewards)
 
+    a = unique(member[!, :GroupName])
+    validate_subset(a, group[!, :Name], "존재하지 않는 GroupName 입니다")
+    
 
     # Dialogue 파일 유무 체크
     path_dialogue = joinpath(GAMEENV["patch_data"], "Dialogue")
