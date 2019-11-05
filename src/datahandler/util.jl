@@ -16,7 +16,7 @@ function help(idx = 1)
       xl()        : 수정된 엑셀파일만 검색하여 json으로 추출합니다
       xl(true)    : '_Meta.json'에서 관리하는 모든 파일을 json으로 추출합니다
       xl_auto()    : '$(GAMEENV["xlsx"]["root"])' 폴더를 감시하면서 변경된 파일을 자동으로 json 추출합니다
-      xl_chage_datapath!() : '$(GAMEENV["xlsx"]["root"])' 폴더를 변경합니다
+      xl_change_datapath!() : '$(GAMEENV["xlsx"]["root"])' 폴더를 변경합니다
       xl_backup() : $(GAMEENV["GameData"])의 데이터를 'patchdata/_GameData'에 덮어 씌웁니다
     """
 

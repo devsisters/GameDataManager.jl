@@ -5,12 +5,58 @@
 * Quest.xlsx 데이터를 관장함
 """
 module SubModuleQuest
-    function validator end
-    function editor! end
+    function editor! end    
     function dialogue end
+    function validator end
     function questtrigger end
 end
 using .SubModuleQuest
+
+function SubModuleQuest.editor!(jwb::JSONWorkbook)
+    data = jwb[:Main].data
+    for el in data
+        el["Trigger"] = collect_values(el["Trigger"])
+        el["CompleteCondition"] = collect_values(el["CompleteCondition"])
+    end
+    
+    data = jwb[:Group].data
+    for el in data
+        el["Condition"] = collect_values(el["Condition"])
+    end
+
+    SubModuleQuest.dialogue(jwb[:Dialogue])
+    deleteat!(jwb, :Dialogue)
+    jwb
+end
+
+function SubModuleQuest.dialogue(jws::JSONWorksheet)
+    filenames = unique(get.(jws.data, "FileName", ""))
+
+    output_folder = joinpath(GAMEENV["patch_data"], "Dialogue/MainQuest")
+    for f in filenames
+        json = joinpath(output_folder, "$f.json")
+        
+        data = filter(el -> el["FileName"] == f, jws.data)
+        for el in data
+            el["CallOnStart"] = collect_values(el["CallOnStart"])
+            el["CallOnEnd"] = collect_values(el["CallOnEnd"])
+        end
+
+        newdata = JSON.json(data, 2)
+
+        modified = if isfile(json)
+            !isequal(md5(read(json, String)), md5(newdata))
+        else
+            true
+        end
+        if modified
+            write(json, newdata)
+            print(" SAVE => ")
+            printstyled(normpath(json), "\n"; color=:blue)
+        end
+    end
+    nothing
+end
 
 function SubModuleQuest.validator(bt)
     df = get(DataFrame, bt, "Main")
@@ -109,46 +155,6 @@ function SubModuleQuest.questtrigger(x::Array{T, 1}) where T
         @assert b "$(x), $(el)이 trigger 조건에 부합하지 않습니다"
     end
 
-    nothing
-end
-
-function SubModuleQuest.editor!(jwb::JSONWorkbook)
-    data = jwb[:Main].data
-    for el in data
-        el["Trigger"] = collect_values(el["Trigger"])
-        el["CompleteCondition"] = collect_values(el["CompleteCondition"])
-    end
-
-    SubModuleQuest.dialogue(jwb[:Dialogue])
-    deleteat!(jwb, :Dialogue)
-    jwb
-end
-function SubModuleQuest.dialogue(jws::JSONWorksheet)
-    filenames = unique(get.(jws.data, "FileName", ""))
-
-    output_folder = joinpath(GAMEENV["patch_data"], "Dialogue/MainQuest")
-    for f in filenames
-        json = joinpath(output_folder, "$f.json")
-        
-        data = filter(el -> el["FileName"] == f, jws.data)
-        for el in data
-            el["CallOnStart"] = collect_values(el["CallOnStart"])
-            el["CallOnEnd"] = collect_values(el["CallOnEnd"])
-        end
-
-        newdata = JSON.json(data, 2)
-
-        modified = if isfile(json)
-            !isequal(md5(read(json, String)), md5(newdata))
-        else
-            true
-        end
-        if modified
-            write(json, newdata)
-            print(" SAVE => ")
-            printstyled(normpath(json), "\n"; color=:blue)
-        end
-    end
     nothing
 end
 

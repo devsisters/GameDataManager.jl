@@ -26,7 +26,7 @@ function setup_env!(d)
         https://www.notion.so/devsisters/ccb5824c48544ec28c077a1f39182f01 의 메뉴얼을 참고하여 `M:/` 를 설정해 주세요
         """
         @warn m
-        xl_chage_datapath!()
+        xl_change_datapath!()
     end
   
     setup_env_xlsxpath!(env)
@@ -53,7 +53,7 @@ function _search_xlsxpath()::String
     return path
 end
 
-function xl_chage_datapath!()
+function xl_change_datapath!()
     network_path = _search_xlsxpath()
     GAMEENV["GameData"] = GAMEENV["GameData"] == network_path ? joinpath(GAMEENV["patch_data"], "_GameData") : 
                           network_path
