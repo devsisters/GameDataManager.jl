@@ -15,10 +15,8 @@ const TOTALDEVELOPMENTPOINT = Currency{:TOTALDEVELOPMENTPOINT}
 
 function __init__()
     setup_env!(GAMEENV)
-    try
-        writelog_userinfo()
-    catch
-    end
+    writelog_userinfo()
+
     # cache 준비
     init_cache!(GAMEENV)
     # DELIM에 ,쉼표 추가

@@ -26,7 +26,7 @@ function setup_env!(d)
         https://www.notion.so/devsisters/ccb5824c48544ec28c077a1f39182f01 의 메뉴얼을 참고하여 `M:/` 를 설정해 주세요
         """
         @warn m
-        xl_change_datapath!()
+        env["GameData"] = joinpath(env["patch_data"], "_GameData")
     end
   
     setup_env_xlsxpath!(env)
@@ -43,20 +43,20 @@ function setup_env!(d)
 end
 function _search_xlsxpath()::String
     path = ""
-    for (root, dir, f) in walkdir("M:/")        
-        i = findfirst(el -> el == "GameData", dir)
-        if !isnothing(i)
-            path = joinpath(root, dir[i])
-            break
+    if isdir("M:/")
+        for (root, dir, f) in walkdir("M:/")        
+            i = findfirst(el -> el == "GameData", dir)
+            if !isnothing(i)
+                path = joinpath(root, dir[i])
+                break
+            end
         end
     end
     return path
 end
 
 function xl_change_datapath!()
-    network_path = _search_xlsxpath()
-    GAMEENV["GameData"] = GAMEENV["GameData"] == network_path ? joinpath(GAMEENV["patch_data"], "_GameData") : 
-                          network_path
+    GAMEENV["GameData"] = startswith(GAMEENV["GameData"], "M:") ? joinpath(GAMEENV["patch_data"], "_GameData") : _search_xlsxpath()
     setup_env_xlsxpath!(GAMEENV)
     @info ".xlsx 파일 참조 경로를 " * GAMEENV["GameData"] * "로 변경하였습니다."
 
