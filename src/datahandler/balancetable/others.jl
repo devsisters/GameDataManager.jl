@@ -13,15 +13,20 @@ end
 using .SubModuleQuest
 
 function SubModuleQuest.editor!(jwb::JSONWorkbook)
-    data = jwb[:Main].data
+    data = jwb[:Member].data
+    groupname_to_key = Dict(map(el -> (el["Name"], el["Key"]), jwb[:Group].data))
     for el in data
-        el["Trigger"] = collect_values(el["Trigger"])
         el["CompleteCondition"] = collect_values(el["CompleteCondition"])
+
+        gk = get(groupname_to_key, el["GroupName"], missing)
+        @assert !ismissing(gk) "$(el["GroupName"])은 존재하지 않는 GroupName입니다"
+        el["GroupKey"] = gk
     end
     
     data = jwb[:Group].data
     for el in data
-        el["Condition"] = collect_values(el["Condition"])
+        el["AndCondition"] = collect_values(el["AndCondition"])
+        el["OrCondition"] = collect_values(el["OrCondition"])
     end
 
     SubModuleQuest.dialogue(jwb[:Dialogue])
@@ -59,24 +64,31 @@ function SubModuleQuest.dialogue(jws::JSONWorksheet)
 end
 
 function SubModuleQuest.validator(bt)
-    df = get(DataFrame, bt, "Main")
-    if maximum(df[!, :QuestKey]) > 1023 || minimum(df[!, :QuestKey]) < 0
-        throw(AssertionError("Quest_Main.json의 QuestKey는 0~1023만 사용 가능합니다."))
+    # Group시트 검사
+    group = get(DataFrame, bt, "Group")
+    @assert allunique(group[!, :Key]) "GroupKey는 Unique 해야 합니다"
+    if maximum(group[!, :Key]) > 1023 || minimum(group[!, :Key]) < 0
+        throw(AssertionError("GroupKey는 0~1023만 사용 가능합니다."))
+    end
+    # Trigger 정합성 검사
+    for i in 1:size(group, 1)
+        SubModuleQuest.questtrigger.(group[i, :OrCondition])
+        SubModuleQuest.questtrigger.(group[i, :AndCondition])
     end
 
+    # Main시트 검사
+    member = get(DataFrame, bt, "Member")
+    if maximum(member[!, :MemberKey]) > 9 || minimum(member[!, :MemberKey]) < 0
+        throw(AssertionError("MemberKey는 0~9만 사용 가능합니다."))
+    end
     # RewardKey 존재 여부
-    rewards = get.(df[!, :CompleteAction], "RewardKey", missing)
+    rewards = get.(member[!, :CompleteAction], "RewardKey", missing)
     validate_haskey("RewardTable", rewards)
 
-    # Trigger 정합성 검사
-    for i in 1:size(df, 1)
-        SubModuleQuest.questtrigger.(df[i, :Trigger])
-        SubModuleQuest.questtrigger.(df[i, :CompleteCondition])
-    end
 
     # Dialogue 파일 유무 체크
     path_dialogue = joinpath(GAMEENV["patch_data"], "Dialogue")
-    for el in df[!, :CompleteAction]
+    for el in member[!, :CompleteAction]
         f = el["QuestDialogue"]
         if !isnull(f)
             validate_file(path_dialogue, "$(f).json", "Dialogue가 존재하지 않습니다")
