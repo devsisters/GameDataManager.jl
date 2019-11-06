@@ -108,12 +108,16 @@ function construct_dataframe(jwb::JSONWorkbook)
     map(i -> construct_dataframe(jwb[i]), 1:length(jwb))
 end
 @inline function construct_dataframe(jws::JSONWorksheet)
-    k = unique(keys.(jws))    
-    @assert length(k) == 1 "모든 row의 column명이 일치하지 않습니다, $k"
+    k = unique(keys.(jws))
 
+    if length(k) > 1 
+        sort!(k; by = length)
+        # @warn "모든 row의 column명이 일치하지 않습니다, $(k[1])"
+    end
+    
     v = Array{Any, 1}(undef, length(k[1]))
     @inbounds for (i, key) in enumerate(k[1])
-        v[i] = getindex.(jws, key)
+        v[i] = get.(jws, key, missing)
     end
 
     return DataFrame(v, Symbol.(k[1]))

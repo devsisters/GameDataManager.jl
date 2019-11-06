@@ -66,9 +66,11 @@ function SubModuleBlock.editor!(jwb::JSONWorkbook)
         end
   
     end
-
     jwb[:Set].data = newdata
     sort!(jwb[:Block], "Key")
+
+    merge(jwb[:Block], jwb[:args], "Key")
+    deleteat!(jwb, :args)
 
     return jwb
 end
