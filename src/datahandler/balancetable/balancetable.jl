@@ -111,7 +111,7 @@ end
     k = unique(keys.(jws))
 
     if length(k) > 1 
-        sort!(k; by = length)
+        sort!(k; by = length, rev = true)
         # @warn "모든 row의 column명이 일치하지 않습니다, $(k[1])"
     end
     
