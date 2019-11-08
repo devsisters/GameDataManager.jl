@@ -1,7 +1,8 @@
 """
     SubModuleDialogue
 
-* Dialogue.xlsx 데이터를 관장함
+* Dialogue를 자동으로 생성함
+* Quest.xlsx, Pipo.xlsx, VillagerTalk.xlsx에서 호출
 """
 module SubModuleDialogue
     function editor! end    

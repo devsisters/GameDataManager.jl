@@ -393,10 +393,9 @@ end
     collect_values
 * Array{AbstractDict, 1} 에서 value만 뽑아 Array{Array{Any, 1}, 1}로 만든다 
 """
-function collect_values(arr)
+function collect_values(arr::AbstractArray)
     vcat(map(el -> collect(values(el)), arr)...)
 end
-
 ############################################################################
 # Localizer
 # TODO: GameLocalizer로 옮길 것
@@ -423,3 +422,14 @@ function dummy_localizer(x::T) where {T <: AbstractDict}
     end
     return x
 end
+
+function dummy_localizer(x::AbstractArray)
+    # x2 = convert(Array{Any, 1}, x)
+    for (i, el) in enumerate(x)
+        if isa(el, AbstractDict)
+            x[i] = dummy_localizer(el)
+        end
+    end
+    x
+end
+

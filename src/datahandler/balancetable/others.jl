@@ -25,7 +25,7 @@ function SubModuleQuest.editor!(jwb::JSONWorkbook)
 
     SubModuleDialogue.create_dialogue_script(jwb[:Dialogue], "MainQuest")
     deleteat!(jwb, :Dialogue)
-    jwb
+    return jwb
 end
 
 function SubModuleQuest.validator(bt)
@@ -53,7 +53,6 @@ function SubModuleQuest.validator(bt)
     a = unique(member[!, :GroupName])
     validate_subset(a, group[!, :Name], "존재하지 않는 GroupName 입니다")
     
-
     # Dialogue 파일 유무 체크
     path_dialogue = joinpath(GAMEENV["patch_data"], "Dialogue")
     for el in member[!, :CompleteAction]
@@ -169,7 +168,7 @@ function SubModuleFlag.editor!(jwb::JSONWorkbook)
         end
         el["Condition"] = overwrite
     end
-    jwb
+    return jwb
 end
 
 
@@ -210,6 +209,7 @@ function SubModulePlayer.editor!(jwb)
     deleteat!(jwb, :SpaceDrop)
     deleteat!(jwb, :Festival)
 
+    return jwb
 end
 
 function SubModulePlayer.need_developmentpoint(level)
@@ -243,7 +243,7 @@ function SubModuleNameGenerator.editor!(jwb::JSONWorkbook)
         compress!(jwb, s)
     end
 
-    jwb
+    return jwb
 end
 
 """
@@ -375,4 +375,27 @@ function SubModuleDroneDelivery.validator(bt)
         append!(itemkey, get.(row[:Items], "Key", missing))
     end
     validate_haskey("ItemTable", unique(itemkey))
+
+    nothing
+end
+
+
+"""
+    SubModuleVillagerTalk
+
+* VillagerTalk.xlsx 데이터를 관장함
+"""
+module SubModuleVillagerTalk
+    function validator end
+    function editor! end
+end
+using .SubModuleVillagerTalk
+
+function SubModuleVillagerTalk.validator(bt)
+   
+end
+
+function SubModuleVillagerTalk.editor!(jwb::JSONWorkbook)
+    SubModuleDialogue.create_dialogue_script(jwb[:Dialogue], "Villager")
+    deleteat!(jwb, :Dialogue)
 end
