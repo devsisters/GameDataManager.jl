@@ -28,7 +28,7 @@ function SubModuleBlock.validator(bt)
     end
 
     subcat = unique(block[!, :SubCategory])
-    target = get(DataFrame, bt, "SubCategory")[!, :CategoryKey]
+    target = get(DataFrame, bt, "Sub")[!, :CategoryKey]
     if !issubset(subcat, target)
         @warn """SubCategory에서 정의하지 않은 SubCategory가 있습니다
         $(setdiff(subcat, target))"""
@@ -69,8 +69,10 @@ function SubModuleBlock.editor!(jwb::JSONWorkbook)
     jwb[:Set].data = newdata
     sort!(jwb[:Block], "Key")
 
-    merge(jwb[:Block], jwb[:args], "Key")
-    deleteat!(jwb, :args)
+    merge(jwb[:Block], jwb[:_args], "Key")
+    merge(jwb[:Block], jwb[:_vert], "Key")
+    deleteat!(jwb, :_args)
+    deleteat!(jwb, :_vert)
 
     return jwb
 end
