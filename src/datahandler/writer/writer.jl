@@ -18,6 +18,7 @@ function xl(x::AbstractString; branch = "master")
 
     @info "xlsx -> json 추출을 시작합니다 ⚒\n" * "-"^(displaysize(stdout)[2]-4)
     # 한개만 골라 뽑을 땐 무조건 엑셀 읽기
+    reload_meta!()
     export_gamedata(x, true)
     @info "json 추출이 완료되었습니다 ☺"
 end

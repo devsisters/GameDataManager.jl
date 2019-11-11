@@ -1,5 +1,7 @@
 # utility functions
 is_xlsxfile(f)::Bool = (endswith(f, ".xlsx") || endswith(f, ".xlsm"))
+is_jsonfile(f)::Bool = endswith(f, ".json")
+
 function Base.readdir(dir; extension::String)
     filter(x -> endswith(x, extension), readdir(dir))
 end

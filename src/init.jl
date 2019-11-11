@@ -17,30 +17,28 @@ function __init__()
     setup_env!(GAMEENV)
     writelog_userinfo()
 
-    # cache 준비
-    init_cache!(GAMEENV)
+    # MANAGERCACHE 준비
+    MANAGERCACHE[:meta] = loadmeta()
+    MANAGERCACHE[:history] = init_gamedata_history(GAMEENV["history"])
+    MANAGERCACHE[:validator_data] = Dict()
+
     # DELIM에 ,쉼표 추가
     push!(XLSXasJSON.DELIM, ",")
     help()
 end
-
-function init_cache!(env)
-    MANAGERCACHE[:meta] = init_meta(env["json"]["root"])
-    MANAGERCACHE[:history] = init_gamedata_history(env["history"])
-    MANAGERCACHE[:validator] = Dict()
-
-    MANAGERCACHE
+function reload_meta!()
+    if ismodified("_Meta.json")
+        MANAGERCACHE[:meta] = loadmeta()
+        gamedata_export_history("_Meta.json")
+    end
 end
 
-
 """
-    init_meta(path)
+    loadmeta(path)
 
 path 경로에 있는 _Meta.json을 읽는다
-
-TODO meta 리로딩
 """
-function init_meta(path)
+function loadmeta(metafile = joinpath_gamedata("_Meta.json"))
     # 개별 시트에대한 kwargs 값이 있으면 가져오고, 없으면 global 세팅 사용
     function get_kwargs(json_row, sheet)
         x = json_row
@@ -68,7 +66,7 @@ function init_meta(path)
     function foo(d)
         broadcast(x -> (split(x, ".")[1], x), filter(is_xlsxfile, keys(d))) |> Dict
     end
-    jsonfile = JSON.parsefile("$path/_Meta.json"; dicttype=OrderedDict{String, Any})
+    jsonfile = JSON.parsefile(metafile; dicttype=OrderedDict{String, Any})
 
     meta = Dict()
     # xl()로 자동 추출하는 파일
@@ -81,11 +79,14 @@ function init_meta(path)
     return meta
 end
 
-function init_gamedata_history(file)
+function init_gamedata_history(file = GAMEENV["history"])
     h = isfile(file) ? JSON.parsefile(file; dicttype=Dict{String, Float64}) :
                        Dict{String, Float64}()
     # 좀 이상하긴 한데... 가끔식 히스토리 청소해 줌
     rand() < 0.002 && cleanup_gamedata_export_history!()
+
+    # 방금 로딩한 _Meta.json 시간
+    h["_Meta.json"] = mtime(joinpath_gamedata("_Meta.json"))
 
     return h
 end

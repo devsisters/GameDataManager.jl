@@ -7,14 +7,8 @@ json 익스포트 후 변경된 파일을 찾는다
 function collect_modified_xlsx()
     # files = collect_all_xlsx()
     files = collect_auto_xlsx()
-
-    x = Int[]
-    for (i, f) in enumerate(files)
-        if ismodified(f)
-            append!(x, i)
-        end
-    end
-    return files = files[x]
+    
+    return files[ismodified.(files)]
 end
 # 자동 검출하는 파일만
 function collect_auto_xlsx()
@@ -30,7 +24,9 @@ function collect_all_xlsx()
 end
 
 function ismodified(f)::Bool
-    file = is_xlsxfile(f) ? f : MANAGERCACHE[:meta][:xlsx_shortcut][f]
+    file = is_xlsxfile(f) ? f : 
+           is_jsonfile(f) ? f : 
+           MANAGERCACHE[:meta][:xlsx_shortcut][f]
 
     mtime(joinpath_gamedata(file)) > get(MANAGERCACHE[:history], file ,0.)
 end
