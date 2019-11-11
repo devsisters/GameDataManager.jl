@@ -424,12 +424,11 @@ function dummy_localizer(x::T) where {T <: AbstractDict}
 end
 
 function dummy_localizer(x::AbstractArray)
-    # x2 = convert(Array{Any, 1}, x)
     for (i, el) in enumerate(x)
         if isa(el, AbstractDict)
             x[i] = dummy_localizer(el)
         end
     end
-    x
+    return x
 end
 
