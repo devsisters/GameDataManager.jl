@@ -80,8 +80,6 @@ function SubModuleQuest.questtrigger(x::Array{T, 1}) where T
         "ResidenceCount"               => (:equality, :number),
         "Coin"                         => (:equality, :number),
         "UserLevel"                    => (:equality, :number),
-        "QuestFlags"                   => (:number,     :questflag),
-        "TutorialFlags"                => (:number,     :questflag),
         "MaxSegmentLevelByUseType"     => (:number,     :equality, :number),
         "MaxSegmentLevelByBuildingKey" => (:buildingkey,:equality, :number),
         "OwnedItem"                    => (:itemkey,    :equality, :number),
@@ -98,7 +96,8 @@ function SubModuleQuest.questtrigger(x::Array{T, 1}) where T
         "JoyCollecting"                => (:equality, :number),
         "BuildingSeedBuyCount"         => (:buildingkey, :equality, :number),
         "SingleKeyBuyCount"            => (:buycount, :equality, :number),
-        "SandboxCount"                 => (:equality, :number))
+        "SandboxCount"                 => (:equality, :number),
+        "CompleteQuestGroup"           => (:questgroupname,))
 
     ref = get(trigger, string(x[1]), missing)
 
@@ -111,11 +110,8 @@ function SubModuleQuest.questtrigger(x::Array{T, 1}) where T
         # TODO validate_haskey 로 변경
         b = if checker == :equality
                 in(el, ("<","<=","=",">=",">"))
-            elseif checker == :questflag
-                in(el, ("x", "p", "o"))
             elseif checker == :number
                 all(isdigit.(collect(el)))
-            # NOTE 이거 이렇게 하면 매번 json을 다시 읽어와서... 문제 소지가 있음
             elseif checker == :buildingkey
                 validate_haskey("Building", [el])
                 true
@@ -127,6 +123,9 @@ function SubModuleQuest.questtrigger(x::Array{T, 1}) where T
                 true
             elseif checker == :buycount
                 in(el, ("EnergyMix", "SiteCleaner"))
+            elseif checker == :questgroupname
+                # TODO
+                true
             else
                 throw(ArgumentError(string(checker, "가 validate_questtrigger에 정의되지 않았습니다.")))
             end
