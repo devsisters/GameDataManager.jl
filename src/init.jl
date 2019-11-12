@@ -29,6 +29,7 @@ end
 function reload_meta!()
     if ismodified("_Meta.json")
         MANAGERCACHE[:meta] = loadmeta()
+        setup_env_xlsxpath!(GAMEENV)
         gamedata_export_history("_Meta.json")
     end
 end
