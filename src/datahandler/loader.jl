@@ -117,24 +117,21 @@ function get_cachedrow(::Type{T}, bt::BalanceTable, sheet, col, matching_value) 
 end
 function _cached_index(bt, sheet, col, value)
     # NOTE 일단 여기에서만 사용... 나중에 엑셀파일명 틀릴때도 쓸 수 있게 빼자
-    function fuzzymatch(names, idx::AbstractString; 
-        msg = "'$(idx)'를 찾을 수 없습니다.")
+    function fuzzymatch(names, idx::AbstractString; msg = "'$(idx)'를 찾을 수 없습니다.")
         l = Dict{AbstractString, Int}(zip(names, eachindex(names)))
         candidates = XLSXasJSON.fuzzymatch(l, idx)
         if isempty(candidates)
             throw(ArgumentError(msg))
         end
         candidatesstr = join(string.(':', candidates), ", ", " and ")
-        throw(ArgumentError(msg * " 혹시? $candidatesstr"))
+        throw(ArgumentError(msg * "\n혹시? $candidatesstr"))
     end
 
     c = cache(bt)[index(bt)[sheet]]
     address = "[$(basename(bt))]$(sheet)!\$$(col)"
-    # TODO 컬럼명 비슷한거 알려주기?
     if !haskey(c, col) 
         fuzzymatch(string.(collect(keys(c))), string(col); msg = "$(address)를 찾을 수 없습니다.")
     end
-        # "$(address) 컬럼이 존재하지 않습니다" 
     @assert haskey(c[col], value) "$(address) 에 $(value)가 존재하지 않습니다"
 
     return c[col][value]
