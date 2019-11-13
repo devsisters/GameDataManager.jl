@@ -39,7 +39,6 @@ function SubModuleRewardTable.validator(bt::XLSXBalanceTable)
         unique(itemkeys)
     end
 
-    export_gamedata("ItemTable", false)
     validate_haskey("ItemTable", itemkeys)
 
     nothing
@@ -52,10 +51,8 @@ function SubModuleRewardTable.editor!(jwb::JSONWorkbook)
 
     append!(jwb[:Solo].data, jwb[:Box].data)
     append!(jwb[:Solo].data, jwb[:DroneDelivery].data)
-    append!(jwb[:Solo].data, jwb[:SpaceDrop].data)
     deleteat!(jwb, :Box)
     deleteat!(jwb, :DroneDelivery)
-    deleteat!(jwb, :SpaceDrop)
 
     sort!(jwb[:Solo], "RewardKey")
 
@@ -120,8 +117,6 @@ function SubModuleBlockRewardTable.validator(bt)
 
         unique(map(el -> el[2][2], rewards))
     end
-
-    export_gamedata("Block", false)
     validate_haskey("BlockSet", itemkeys)
 
     nothing
