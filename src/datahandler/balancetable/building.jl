@@ -11,6 +11,7 @@ module SubModuleBuilding
     function costtime end
     function costcoin end
     function costitem end
+    function coincollecttime end
 end
 const SubModuleShop = SubModuleBuilding
 const SubModuleResidence = SubModuleBuilding
@@ -20,35 +21,28 @@ using .SubModuleBuilding
 
 function SubModuleBuilding.validator(bt)
     filename = split(basename(bt), ".")[1]
-    if filename == "Sandbox"
-        path_template = joinpath(GAMEENV["patch_data"], "BuildTemplate/Buildings")
-        path_thumbnails = joinpath(GAMEENV["CollectionResources"], "BusinessBuildingThumbnails")
-    
-        validate_file(path_template, get(DataFrame, bt, "Level")[!, :BuildingTemplate], ".json", 
-                    "BuildingTemolate가 존재하지 않습니다")
-        validate_file(path_thumbnails, get(DataFrame, bt, "Building")[!, :Icon], ".png", "Icon이 존재하지 않습니다")
-    else    
-        data = get(DataFrame, bt, "Building")
-        leveldata = get(DataFrame, bt, "Level")
 
-        export_gamedata("Ability", false)
+    data = get(DataFrame, bt, "Building")
+
+    if filename != "Sandbox"    
         validate_haskey("Ability", filter(!isnull, vcat(data[!, :AbilityKey]...)))
 
-        buildgkey_level = broadcast(row -> (row[:BuildingKey], row[:Level]), eachrow(leveldata))
-        @assert allunique(buildgkey_level) "$(basename(bt))'Level' 시트에 중복된 Level이 있습니다"
-
-        for el in data[!, :BuildCost]
-            BuildingSeedItem(el["NeedItemKey"], el["NeedItemCount"])
-        end
-
-        path_template = joinpath(GAMEENV["patch_data"], "BuildTemplate/Buildings")
-        path_thumbnails = joinpath(GAMEENV["CollectionResources"], "BusinessBuildingThumbnails")
-        
-        validate_file(path_template, leveldata[!, :BuildingTemplate], ".json", 
-                    "BuildingTemolate가 존재하지 않습니다")
-        validate_file(path_thumbnails, data[!, :Icon], ".png", "Icon이 존재하지 않습니다")
+        building_seeds = get.(data[!, :BuildCost], "NeedItemKey", missing)
+        validate_haskey("ItemTable", building_seeds)
     end
 
+    # Level 시트
+    leveldata = get(DataFrame, bt, "Level")
+
+    buildgkey_level = broadcast(row -> (row[:BuildingKey], row[:Level]), eachrow(leveldata))
+    @assert allunique(buildgkey_level) "$(basename(bt))'Level' 시트에 중복된 Level이 있습니다"
+
+    path_template = joinpath(GAMEENV["patch_data"], "BuildTemplate/Buildings")
+    validate_file(path_template, leveldata[!, :BuildingTemplate], ".json", 
+                    "BuildingTemolate가 존재하지 않습니다")
+
+    path_thumbnails = joinpath(GAMEENV["CollectionResources"], "BusinessBuildingThumbnails")
+    validate_file(path_thumbnails, data[!, :Icon], ".png", "Icon이 존재하지 않습니다")
     nothing
 end
 
@@ -166,6 +160,20 @@ function SubModuleBuilding.costitem(grade, level, _area)
 end
 
 
+function SubModuleBuilding.coincollecttime(grade, level, area)
+    data = JWB("GeneralSetting", false)[:Data][1]
+
+    a = data["CoinCollecting"]["PressTimeVariable"]["Alpha"]
+    b = data["CoinCollecting"]["PressTimeVariable"]["Beta"]
+
+    profit = SubModuleAbility.profitcoin(grade, level, area)
+    coincounter = SubModuleAbility.coincounter(grade, level, area)
+
+    @show a b
+
+    return a * log10(10 + (coincounter / profit))
+end
+
 """
     SubModuleAbility
 
@@ -234,7 +242,7 @@ function SubModuleAbility.editor!(jwb::JSONWorkbook)
                 ability_1["Value"] = profit
                 push!(shop_ability, ability_1)
                 
-                coincounter = SubModuleAbility.coincounter(profit, grade, lv)
+                coincounter = SubModuleAbility.coincounter(grade, lv, a)
                 ability_2 = deepcopy(template)
                 ability_2["Group"] = "CoinCounterCap"
                 ability_2["AbilityKey"] = "CoinCounterCap_G$(grade)_$(a)"
@@ -280,7 +288,7 @@ function SubModuleAbility.profitcoin(grade, level, _area)
     return round(Int, profit, RoundDown)
 end
 
-function SubModuleAbility.coincounter(profit, grade, level)
+function SubModuleAbility.coincounter(grade, level, _area)
     base = begin 
         grade == 1 ? 10/60 : 
         grade == 2 ? 15/60 : 
@@ -288,6 +296,7 @@ function SubModuleAbility.coincounter(profit, grade, level)
         grade == 4 ? 40/60 : 
         grade == 5 ? 80/60 : error("Shop Grade5 이상은 기준이 없습니다") 
     end
+    profit = SubModuleAbility.profitcoin(grade, level, _area)
     coincounter = round(Int, base * level * profit)
 end
 

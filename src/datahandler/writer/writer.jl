@@ -19,7 +19,7 @@ function xl(x::AbstractString; branch = "master")
     @info "xlsx -> json 추출을 시작합니다 ⚒\n" * "-"^(displaysize(stdout)[2]-4)
     # 한개만 골라 뽑을 땐 무조건 엑셀 읽기
     reload_meta!()
-    export_gamedata(x, true)
+    export_gamedata(x)
     @info "json 추출이 완료되었습니다 ☺"
 end
 
@@ -33,11 +33,11 @@ end
 
 mars 메인 저장소의 '.../_META.json'에 명시된 파일만 추출가능합니다
 """
-function export_gamedata(file::AbstractString, read_from_xlsx::Bool)
+function export_gamedata(file::AbstractString)
     f = is_xlsxfile(file) ? file : MANAGERCACHE[:meta][:xlsx_shortcut][file]
 
     println("『", f, "』")
-    bt = BalanceTable(f; read_from_xlsx = read_from_xlsx, cacheindex = false)
+    bt = BalanceTable(f; read_from_xlsx = true, cacheindex = false)
     write_json(bt.data)
     gamedata_export_history(f)
 
@@ -47,7 +47,7 @@ function export_gamedata(files::Vector)
     if !isempty(files)
         for f in files
             println("『", f, "』")
-            bt = BalanceTable(f; cacheindex = false)
+            bt = BalanceTable(f; read_from_xlsx = true, cacheindex = false)
             write_json(bt.data)
         end
         gamedata_export_history(files)

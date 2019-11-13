@@ -5,7 +5,7 @@
 * Quest.xlsx, Pipo.xlsx, VillagerTalk.xlsx에서 호출
 """
 module SubModuleDialogue
-    function editor! end    
+    # function editor! end    
     function create_dialogue_script end
     # function validator end
 end

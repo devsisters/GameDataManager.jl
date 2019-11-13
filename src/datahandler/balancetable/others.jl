@@ -43,8 +43,8 @@ function SubModuleQuest.validator(bt)
 
     # Main시트 검사
     member = get(DataFrame, bt, "Member")
-    if maximum(member[!, :MemberKey]) > 9 || minimum(member[!, :MemberKey]) < 0
-        throw(AssertionError("MemberKey는 0~9만 사용 가능합니다."))
+    if maximum(member[!, :MemberKey]) > 9 || minimum(member[!, :MemberKey]) < 1
+        throw(AssertionError("MemberKey는 1~9만 사용 가능합니다."))
     end
     # RewardKey 존재 여부
     rewards = get.(member[!, :CompleteAction], "RewardKey", missing)
