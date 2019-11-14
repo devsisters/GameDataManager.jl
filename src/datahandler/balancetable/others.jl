@@ -51,14 +51,14 @@ function SubModuleQuest.validator(bt)
     validate_haskey("RewardTable", rewards)
 
     a = unique(member[!, :GroupName])
-    validate_subset(a, group[!, :Name], "존재하지 않는 GroupName 입니다")
+    validate_subset(a, group[!, :Name];msg = "존재하지 않는 GroupName 입니다")
     
     # Dialogue 파일 유무 체크
     path_dialogue = joinpath(GAMEENV["patch_data"], "Dialogue")
     for el in member[!, :CompleteAction]
         f = el["QuestDialogue"]
         if !isnull(f)
-            validate_file(path_dialogue, "$(f).json", "Dialogue가 존재하지 않습니다")
+            validate_file(path_dialogue, "$(f).json";msg = "Dialogue가 존재하지 않습니다")
         end
     end
 
@@ -187,7 +187,7 @@ function SubModulePlayer.validator(bt)
     df = get(DataFrame, bt, "DevelopmentLevel")
 
     p = joinpath(GAMEENV["CollectionResources"], "VillageGradeIcons")
-    validate_file(p, df[!, :GradeIcon], ".png", "Icon이 존재하지 않습니다")
+    validate_file(p, df[!, :GradeIcon], ".png";msg = "Icon이 존재하지 않습니다")
     # TODO 여러 폴더 검사하는 기능 필요
     # p = joinpath(GAMEENV["CollectionResources"], "ItemIcons")
     # validate_file(p, vcat(df[!, :DisplayIcons]...), ".png", "Icon이 존재하지 않습니다")
@@ -259,12 +259,12 @@ using .SubModuleItemTable
 
 function SubModuleItemTable.validator(bt::XLSXBalanceTable)
     path = joinpath(GAMEENV["CollectionResources"], "ItemIcons")
-    validate_file(path, get(DataFrame, bt, "Currency")[!, :Icon], ".png", "아이템 Icon이 존재하지 않습니다")
-    validate_file(path, get(DataFrame, bt, "Normal")[!, :Icon], ".png", "아이템 Icon이 존재하지 않습니다")
+    validate_file(path, get(DataFrame, bt, "Currency")[!, :Icon], ".png";msg = "아이템 Icon이 존재하지 않습니다")
+    validate_file(path, get(DataFrame, bt, "Normal")[!, :Icon], ".png";msg = "아이템 Icon이 존재하지 않습니다")
     
     df = get(DataFrame, bt, "BuildingSeed")
     validate_haskey("Building", df[!, :BuildingKey])
-    validate_file(path, df[!, :Icon], ".png", "아이템 Icon이 존재하지 않습니다")
+    validate_file(path, df[!, :Icon], ".png";msg = "아이템 Icon이 존재하지 않습니다")
 
     nothing
 end
@@ -341,12 +341,12 @@ function SubModulePipoFashion.validator(bt)
     root = joinpath(GAMEENV["mars_repo"], "unity/Assets/4_ArtAssets/GameResources/Pipo")
 
     df = get(DataFrame, bt, "Hair")
-    validate_file(joinpath(root, "HeadHair"), df[!, :ArtAsset], ".prefab", "[Hair]에 위의 ArtAsset이 존재하지 않습니다")
+    validate_file(joinpath(root, "HeadHair"), df[!, :ArtAsset], ".prefab";msg = "[Hair]에 위의 ArtAsset이 존재하지 않습니다")
 
     df = get(DataFrame, bt, "Face")
     for gdf in groupby(df, :Part)
         p2 = joinpath(root, string("Head", gdf[1, :Part]))
-        validate_file(p2, string.(gdf[!, :ArtAsset]), ".prefab", "[Face]에 ArtAsset이 존재하지 않습니다")
+        validate_file(p2, string.(gdf[!, :ArtAsset]), ".prefab";msg = "[Face]에 ArtAsset이 존재하지 않습니다")
     end
 
     df = get(DataFrame, bt, "Dress")

@@ -19,7 +19,8 @@ function setup_env!(d)
 
     # patch-data
     env["patch_data"] = joinpath(env["mars_repo"], "patch-data")
-    
+    env["ArtAssets"] = joinpath(env["mars_repo"], "unity/assets/4_ArtAssets")
+
     env["GameData"] = _search_xlsxpath()
     if isempty(env["GameData"]) 
         m = """`M:/` 가 마운팅 되어 있지 않습니다. 

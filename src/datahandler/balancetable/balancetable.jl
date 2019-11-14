@@ -325,7 +325,7 @@ function validate_haskey(class, a; assert=true)
         throw(AssertionError("validate_haskey($(class), ...)은 정의되지 않았습니다")) 
     end
 
-    validate_subset(a, b, "'$(class)'에 아래의 Key가 존재하지 않습니다";assert = assert)
+    validate_subset(a, b;msg = "'$(class)'에 아래의 Key가 존재하지 않습니다", assert = assert)
 end
 
 function validate_duplicate(target; assert=true)
@@ -341,7 +341,7 @@ function validate_duplicate(target; assert=true)
     nothing
 end
 
-function validate_subset(a, b, msg = "다음의 멤버가 subset이 아닙니다"; assert=true)
+function validate_subset(a, b; msg = "다음의 멤버가 subset이 아닙니다", assert=true)
     if !issubset(a, b)
         dif = setdiff(a, b)
         if assert
@@ -352,13 +352,25 @@ function validate_subset(a, b, msg = "다음의 멤버가 subset이 아닙니다
     end
 end
 
-function validate_file(root, files::Vector, extension = "", msg = "가 존재하지 않습니다"; kwargs...)
-    for el in filter(!isnull, files)
-        validate_file(root, "$(el)$(extension)", msg; kwargs...)
+function validate_file(root, files::Vector, extension = "", walksubfolder = false; kwargs...)
+    if walksubfolder
+        a = String[]
+        for (root, dir, _files) in walkdir(root)
+            append!(a, _files)
+        end
+        # TODO 어라...? 이러면 extension 없으면 작동 안함....
+        a = filter(el -> endswith(el, extension), unique(a))
+        a = chop.(a; tail = length(extension))
+
+        validate_subset(files, a; kwargs...)
+    else
+        for el in filter(!isnull, files)
+            validate_file(root, "$(el)$(extension)"; kwargs...)
+        end
     end
     nothing
 end
-function validate_file(root, file, msg = "가 존재하지 않습니다"; assert = false)
+function validate_file(root, file; msg = "가 존재하지 않습니다", assert = false)
     f = joinpath(root, file)
     if !isfile(f)
         if assert

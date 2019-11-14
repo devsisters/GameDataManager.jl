@@ -38,11 +38,11 @@ function SubModuleBuilding.validator(bt)
     @assert allunique(buildgkey_level) "$(basename(bt))'Level' 시트에 중복된 Level이 있습니다"
 
     path_template = joinpath(GAMEENV["patch_data"], "BuildTemplate/Buildings")
-    validate_file(path_template, leveldata[!, :BuildingTemplate], ".json", 
-                    "BuildingTemolate가 존재하지 않습니다")
+    validate_file(path_template, leveldata[!, :BuildingTemplate], ".json"; 
+                  msg = "BuildingTemolate가 존재하지 않습니다")
 
     path_thumbnails = joinpath(GAMEENV["CollectionResources"], "BusinessBuildingThumbnails")
-    validate_file(path_thumbnails, data[!, :Icon], ".png", "Icon이 존재하지 않습니다")
+    validate_file(path_thumbnails, data[!, :Icon], ".png";msg = "Icon이 존재하지 않습니다")
     nothing
 end
 
@@ -200,7 +200,7 @@ function SubModuleAbility.validator(bt)
     ref = get(DataFrame, bt, "Group")
     df_level = get(DataFrame, bt, "Level")
 
-    validate_subset(unique(df_level[!, :Group]), ref[!, :GroupKey], "존재하지 않는 Ability Group입니다")
+    validate_subset(unique(df_level[!, :Group]), ref[!, :GroupKey];msg = "존재하지 않는 Ability Group입니다")
 
     key_level = broadcast(x -> (x[:AbilityKey], x[:Level]), eachrow(df_level))
     if !allunique(key_level)

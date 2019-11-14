@@ -26,13 +26,21 @@ function SubModuleBlock.validator(bt)
     else
         @warn "$(magnet_file)이 존재하지 않아 magnet 정보를 검증하지 못 하였습니다"
     end
+    # 블록 파일명
+    p = joinpath(GAMEENV["ArtAssets"], "GameResources/Blocks")
+    validate_file(p, block[!, :ArtAsset], ".prefab", true; 
+                  msg = "다음의 prefab이 존재하지 않습니다", assert = false)
 
+    # SubCategory Key 오류
     subcat = unique(block[!, :SubCategory])
     target = get(DataFrame, bt, "Sub")[!, :CategoryKey]
     if !issubset(subcat, target)
         @warn """SubCategory에서 정의하지 않은 SubCategory가 있습니다
         $(setdiff(subcat, target))"""
     end
+    # 추천카테고리 탭 건물Key
+    rc = get(DataFrame, bt, "RecommendCategory")
+    validate_haskey("Building", rc[!, :BuildingKey]; assert = false)
 
     # BlockSet 검사
     blockset_keys = begin 
@@ -40,11 +48,7 @@ function SubModuleBlock.validator(bt)
         x = broadcast(el -> get.(el, "BlockKey", 0), df[!, :Members])
         unique(vcat(x...))
     end
-    validate_subset(blockset_keys, block[!, :Key], "다음의 Block은 존재하지 않습니다 [Set] 시트를 정리해 주세요")
-
-    # 추천카테고리 탭 건물Key
-    rc = get(DataFrame, bt, "RecommendCategory")
-    validate_haskey("Building", rc[!, :BuildingKey]; assert = false)
+    validate_subset(blockset_keys, block[!, :Key]; msg = "다음의 Block은 존재하지 않습니다 [Set] 시트를 정리해 주세요")
 
     nothing
 end
