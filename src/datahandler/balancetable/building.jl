@@ -161,18 +161,24 @@ end
 
 
 function SubModuleBuilding.coincollecttime(grade, level, area)
-    data = JWB("GeneralSetting", false)[:Data][1]
+    x = SubModuleAbility.coincounter(grade, level, area)
 
-    a = data["CoinCollecting"]["PressTimeVariable"]["Alpha"]
-    b = data["CoinCollecting"]["PressTimeVariable"]["Beta"]
-
-    profit = SubModuleAbility.profitcoin(grade, level, area)
-    coincounter = SubModuleAbility.coincounter(grade, level, area)
-
-    @show a b
-
-    return a * log10(10 + (coincounter / profit))
+    coincollecttime(x)
 end
+function SubModuleBuilding.coincollecttime(coincounter)
+    data = JWB("GeneralSetting", false)[:Data][1]
+    data = data["CoinCollecting"]
+
+    α = data["PressTimeVariable"]["Alpha"]
+    β = data["PressTimeVariable"]["Beta"]
+    ub = data["PressTimeVariable"]["UpperBoundMilliSec"]
+    lb = data["PressTimeVariable"]["LowerBoundMilliSec"]
+
+    t = α * log10(β * coincounter) * 1000
+    
+    return clamp(ceil(t), lb, ub)
+end
+
 
 """
     SubModuleAbility
