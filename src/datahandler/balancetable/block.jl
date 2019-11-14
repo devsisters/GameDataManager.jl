@@ -42,6 +42,10 @@ function SubModuleBlock.validator(bt)
     end
     validate_subset(blockset_keys, block[!, :Key], "다음의 Block은 존재하지 않습니다 [Set] 시트를 정리해 주세요")
 
+    # 추천카테고리 탭 건물Key
+    rc = get(DataFrame, bt, "RecommendCategory")
+    validate_haskey("Building", rc[!, :BuildingKey]; assert = false)
+
     nothing
 end
 function SubModuleBlock.editor!(jwb::JSONWorkbook)
