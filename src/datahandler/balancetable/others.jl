@@ -200,13 +200,11 @@ function SubModulePlayer.editor!(jwb)
         lv = jws.data[i]["Level"]
         jws.data[i]["NeedDevelopmentPoint"] = SubModulePlayer.need_developmentpoint(lv)
     end
-    jwb[:DevelopmentLevel] = merge(jwb[:DevelopmentLevel], jwb[:DroneDelivery], "Level")
-    jwb[:DevelopmentLevel] = merge(jwb[:DevelopmentLevel], jwb[:SpaceDrop], "Level")
-    jwb[:DevelopmentLevel] = merge(jwb[:DevelopmentLevel], jwb[:Festival], "Level")
 
-    deleteat!(jwb, :DroneDelivery)
-    deleteat!(jwb, :SpaceDrop)
-    deleteat!(jwb, :Festival)
+    for sheet in [:DroneDelivery, :Chore, :Festival, :SpaceDrop]
+        jwb[:DevelopmentLevel] = merge(jwb[:DevelopmentLevel], jwb[sheet], "Level")
+        deleteat!(jwb, sheet)
+    end
 
     return jwb
 end
