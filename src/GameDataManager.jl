@@ -38,7 +38,6 @@ include("engine/user/flag.jl")
 include("engine/user/user.jl")
 include("engine/user/bot.jl")
 
-include("engine/content/pipoparttime.jl")
 include("engine/content/dronedelivery.jl")
 include("engine/content/buying.jl")
 include("engine/content/build.jl")
