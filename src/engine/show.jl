@@ -142,23 +142,10 @@ function Base.show(io::IO, x::VillageLayout)
 end
 
 function Base.show(io::IO, x::AbstractSite)
-    print(io, "[", x.position[1], ",", x.position[2], "]", " idx:", x.index, "\n")
     s = size(x)
     # 상자 아래에 기입
-    sz = string(s[1], "x", s[2])
-    
-    print(io, '┌', "─╶"^(size(x, 1)-2), '┐', '\n')
-    for i in 1:(size(x, 2)-2)
-        print(io, '│', "  "^(size(x, 1)-2), '│')
-        print(io, '\n')
-    end
-
-    print(io, '└')
-    print(io, sz, " "^length(sz))
-    if (s[1]-2) > length(sz)
-        print(io, "─╶"^(s[1]- 2 - length(sz)))
-    end
-    print(io, '┘')
+    col = iscleaned(x) ? :green : :normal
+    printstyled(io, x.index, " - Site(", s[1], "x", s[2], ")"; color = col)
 end
 function Base.summary(io::IO, a::Array{T, 1}) where T <: AbstractSite
     print(io, length(a), "-Sites ")
