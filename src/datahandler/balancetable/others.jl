@@ -5,7 +5,7 @@
 * Quest.xlsx 데이터를 관장함
 """
 module SubModuleQuest
-    function editor! end    
+    function editor! end
     function validator end
     function questtrigger end
 end
@@ -52,7 +52,7 @@ function SubModuleQuest.validator(bt)
 
     a = unique(member[!, :GroupName])
     validate_subset(a, group[!, :Name];msg = "존재하지 않는 GroupName 입니다")
-    
+
     # Dialogue 파일 유무 체크
     path_dialogue = joinpath(GAMEENV["patch_data"], "Dialogue")
     for el in member[!, :CompleteAction]
@@ -216,11 +216,11 @@ function SubModulePlayer.need_developmentpoint(level)
     if level <= 30
         return round(Int, p, RoundDown)
     elseif level <= 40
-        # 30~40레벨 요구량이 56015*2 
+        # 30~40레벨 요구량이 56015*2
         p2 = 1.11 * p
 
         return round(Int, p2, RoundDown)
-    else 
+    else
         # TODO 마을 3개, 4개, 5개.... 레벨 상승량 별도 책정 필요
         # 나중가면 마을 1개당 1레벨로 된다.
         p2 = 1.4 * p
@@ -259,7 +259,7 @@ function SubModuleItemTable.validator(bt::XLSXBalanceTable)
     path = joinpath(GAMEENV["CollectionResources"], "ItemIcons")
     validate_file(path, get(DataFrame, bt, "Currency")[!, :Icon], ".png";msg = "아이템 Icon이 존재하지 않습니다")
     validate_file(path, get(DataFrame, bt, "Normal")[!, :Icon], ".png";msg = "아이템 Icon이 존재하지 않습니다")
-    
+
     df = get(DataFrame, bt, "BuildingSeed")
     validate_haskey("Building", df[!, :BuildingKey])
     validate_file(path, df[!, :Icon], ".png";msg = "아이템 Icon이 존재하지 않습니다")
@@ -290,12 +290,12 @@ function SubModuleItemTable.buildingseed_pricejoy(ref, key)
     else
         grade = get(ref[key], "Grade", 1)
         _area = ref[key]["Condition"]["ChunkWidth"] * ref[key]["Condition"]["ChunkLength"]
-    
-        multi = grade == 1 ? 0.4 : 
-                grade == 2 ? 0.6 : 
-                grade == 3 ? 0.8 : 
-                grade == 4 ? 1.0 : 
-                grade == 5 ? 1.2 : 
+
+        multi = grade == 1 ? 0.4 :
+                grade == 2 ? 0.6 :
+                grade == 3 ? 0.8 :
+                grade == 4 ? 1.0 :
+                grade == 5 ? 1.2 :
                 grade == 6 ? 2 : error("6등급 이상 건물에 대한 joyprice 추가 필요")
 
         # 1레벨 조이 생산량
@@ -349,7 +349,7 @@ function SubModulePipoFashion.validator(bt)
 
     df = get(DataFrame, bt, "Dress")
     # TODO: root 폴더 경로가 다른데...
-    
+
     nothing
 end
 
@@ -389,10 +389,31 @@ end
 using .SubModuleVillagerTalk
 
 function SubModuleVillagerTalk.validator(bt)
-   
+
 end
 
 function SubModuleVillagerTalk.editor!(jwb::JSONWorkbook)
     SubModuleDialogue.create_dialogue_script(jwb[:Dialogue], "Villager")
     deleteat!(jwb, :Dialogue)
+end
+
+
+"""
+    SubModuleChore
+
+* Chore.xlsx 데이터를 관장함
+"""
+module SubModuleChore
+    function editor! end
+    # function validator end
+end
+using .SubModuleChore
+
+function SubModuleChore.editor!(jwb::JSONWorkbook)
+    data = jwb[:Group].data
+    for el in data
+        el["Reward"] = collect_values(el["Reward"])
+        el["AssistReward"] = collect_values(el["AssistReward"])
+    end
+
 end
