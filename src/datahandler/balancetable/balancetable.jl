@@ -321,6 +321,9 @@ function validate_haskey(class, a; assert=true)
         jwb2 = get!(MANAGERCACHE[:validator_data], "BlockRewardTable", JWB("BlockRewardTable", false))
 
         b = [get.(jwb[1], "RewardKey", missing); get.(jwb2[1], "RewardKey", missing)]
+    elseif class == "Perk"
+        jwb = get!(MANAGERCACHE[:validator_data], "Pipo", JWB("Pipo", false))
+        b = unique(get.(jwb[:Perk], "Key", missing))
     else
         throw(AssertionError("validate_haskey($(class), ...)은 정의되지 않았습니다")) 
     end

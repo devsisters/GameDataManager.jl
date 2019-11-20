@@ -383,16 +383,19 @@ end
 * VillagerTalk.xlsx 데이터를 관장함
 """
 module SubModuleVillagerTalk
-    function validator end
     function editor! end
+    function validator end
 end
 using .SubModuleVillagerTalk
 
 function SubModuleVillagerTalk.validator(bt)
-
+    nothing
 end
 
 function SubModuleVillagerTalk.editor!(jwb::JSONWorkbook)
+    if minimum(get.(jwb[:Dialogue], "Index", missing)) < 2 
+        throw(AssertionError("VillagerTalk 대사Index는 2부터 시작해 주세요"))
+    end
     SubModuleDialogue.create_dialogue_script(jwb[:Dialogue], "Villager")
     deleteat!(jwb, :Dialogue)
 end
@@ -405,9 +408,16 @@ end
 """
 module SubModuleChore
     function editor! end
-    # function validator end
+    function validator end
 end
 using .SubModuleChore
+
+function SubModuleChore.validator(bt)
+    df = get(DataFrame, bt, "Theme")
+    validate_haskey("Perk", unique(df[!, :Perk]))
+
+    nothing
+end
 
 function SubModuleChore.editor!(jwb::JSONWorkbook)
     data = jwb[:Group].data
