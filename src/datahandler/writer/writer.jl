@@ -116,13 +116,15 @@ function xl_backup()
     @assert startswith(GAMEENV["GameData"], "M") "네트워크에 연결할 수 없어 XLSX 데이터 백업이 불가능 합니다"
 
     exe7z = joinpath(Compat.Sys.BINDIR, "7z.exe")
-
-    # TODO 뭔가 백업하는 XLSX의 정보를 포함하도록?
     cd(GAMEENV["GameData"])
     f = "GameData.zip"
-    run(`$exe7z a -r GameData.zip`)
-
-    cp(joinpath(GAMEENV["GameData"], f), joinpath(GAMEENV["patch_data"], "_GameData/$f"); force = true)
-    rm(joinpath(GAMEENV["GameData"], f))
+    run(`$exe7z a -r $f`)
+    
+    origin = joinpath(GAMEENV["GameData"], f)
+    target = joinpath(GAMEENV["patch_data"], "_GameData/$f")
+    print("↳Move File: ", origin)
+        cp(origin, target; force = true)
+        rm(origin)
+    println(" => ", target)
 
 end
