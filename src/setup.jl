@@ -9,7 +9,7 @@ function setup!(marsrepo)
     marsrepo = replace(marsrepo, "\\" => "/")
     f = joinpath(DEPOT_PATH[1], "config/juno_startup.jl")
     startup = """
-    ENV["mars-client"] = \"$marsrepo\"
+    ENV["MARS-CLIENT"] = \"$marsrepo\"
     ENV["GAMEDATAMANAGER"] = Base.find_package("GameDataManager")
     if !isnothing(ENV["GAMEDATAMANAGER"])
         include(joinpath(dirname(ENV["GAMEDATAMANAGER"]), "_startup.jl"))
@@ -32,7 +32,7 @@ setup_env()
 
 """
 function setup_env!()
-    repo = get(ENV, "mars-client", missing)
+    repo = get(ENV, "MARS-CLIENT", missing)
     if ismissing(repo) 
         @warn "mars-client를 찾을 수 없습니다. \nsetup!(\"C:/mars-client경로\")를 실행한 후 다시 시작해 주세요."
         return false
