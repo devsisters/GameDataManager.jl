@@ -113,13 +113,16 @@ end
 
 function xl_backup()
     # 네트워크에 있는 XLSX 파일들을 가져옵니다. 
-    if GAMEENV["GameData"] != _search_xlsxpath()
-        xl_change_datapath!()
-    end
-    @assert !isempty(GAMEENV["GameData"]) "네트워크에 연결할 수 없어 XLSX 데이터 백업이 불가능 합니다"
+    @assert startswith(GAMEENV["GameData"], "M") "네트워크에 연결할 수 없어 XLSX 데이터 백업이 불가능 합니다"
 
-    git_xlsxpath = joinpath(GAMEENV["patch_data"], "_GameData")
-    @warn "$(git_xlsxpath)의 데이터를 모두 $(GAMEENV["GameData"])의 데이터로 덮어 씌웁니다"
-    
-    cp(GAMEENV["GameData"], git_xlsxpath; force = true)
+    exe7z = joinpath(Compat.Sys.BINDIR, "7z.exe")
+
+    # TODO 뭔가 백업하는 XLSX의 정보를 포함하도록?
+    cd(GAMEENV["GameData"])
+    f = "GameData.zip"
+    run(`$exe7z a -r GameData.zip`)
+
+    cp(joinpath(GAMEENV["GameData"], f), joinpath(GAMEENV["patch_data"], "_GameData/$f"); force = true)
+    rm(joinpath(GAMEENV["GameData"], f))
+
 end
