@@ -60,7 +60,7 @@ include("datahandler/writer/history.jl")
 include("logger/logger.jl")
 
 
-export GAMEENV, GAMEDATA, help,
+export GAMEENV, GAMEDATA, help, setup!,
        # datahandler
        BalanceTable, XLSXBalanceTable, JSONBalanceTable, UnityBalanceTable,
        sheetnames, get_cachedrow, reload!,

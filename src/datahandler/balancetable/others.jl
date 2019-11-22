@@ -336,7 +336,7 @@ using .SubModulePipoFashion
 
 function SubModulePipoFashion.validator(bt)
     # jwb[:Data] = merge(jwb[:Data], jwb[:args], "ProductKey")
-    root = joinpath(GAMEENV["mars_repo"], "unity/Assets/4_ArtAssets/GameResources/Pipo")
+    root = joinpath(GAMEENV["mars-client"], "unity/Assets/4_ArtAssets/GameResources/Pipo")
 
     df = get(DataFrame, bt, "Hair")
     validate_file(joinpath(root, "HeadHair"), df[!, :ArtAsset], ".prefab";msg = "[Hair]에 위의 ArtAsset이 존재하지 않습니다")

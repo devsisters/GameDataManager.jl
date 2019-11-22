@@ -10,7 +10,7 @@ function create_bot(amount; )
     accountnames = shuffle(get(JSONBalanceTable, "zBotName.json")[1]["KOR"])
 
     profile_pics = begin #봇의 프로필 사진 경로
-        p = joinpath(GAMEENV["mars_repo"], "unity/Assets/1_CollectionResources/BotProfilePictures")
+        p = joinpath(GAMEENV["mars-client"], "unity/Assets/1_CollectionResources/BotProfilePictures")
         chop.(readdir(p; extension = "png"); tail=4)
     end
 

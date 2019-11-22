@@ -1,46 +1,67 @@
+function setup!(marsrepo)
+    git_config = joinpath(marsrepo, ".git/config")
+    # 진짜 주소맞는지 볼 필요는 없겠지...
+    # s = read(joinpath(marsrepo, ".git/config"), String) 
+    if !isfile(git_config) 
+        throw(AssertionError("\"$marsrepo\" 경로가 올바르지 않습니다\n올바른 'mars-client'의 경로를 입력해 주세요"))
+    end
+
+    marsrepo = replace(marsrepo, "\\" => "/")
+    f = joinpath(DEPOT_PATH[1], "config/juno_startup.jl")
+    startup = """
+    ENV["mars-client"] = \"$marsrepo\"
+    ENV["GAMEDATAMANAGER"] = Base.find_package("GameDataManager")
+    if !isnothing(ENV["GAMEDATAMANAGER"])
+        include(joinpath(dirname(ENV["GAMEDATAMANAGER"]), "_startup.jl"))
+    end
+    let 
+        using Pkg
+        checkout_GameDataManager()
+    end
+    using GameDataManager
+    """    
+    write(f, startup)
+
+    @info "$(f) 를 성공적으로 생성하였습니다\n\tAtom을 종료 후 다시 시작해 주세요."
+end
+
 """
 setup_env()
 
 프로젝트 https://github.com/devsisters/mars-prototype 로컬 위치를 찾기...
 
 """
-function setup_env!(d)
-    # NOTE gitrepo인지만 확인한다. 정확히 주소까지 맞는지 볼 필요 없어 보임
-    repo_candidate = normpath(joinpath(@__DIR__, "../../.."))    
-    # 저기가 gitrepo가 아니면 무언가 잘못된 것...
-    if !isfile(joinpath(repo_candidate, ".gitconfig"))
-        env_file = normpath(joinpath(ENV["HOMEPATH"], ".GameDataManager.json"))
-        
-        @assert isfile(env_file) "$(env_file)을 생성해 주세요 / @김용희 문의"
-        env = convert(Dict{String, Any}, JSON.parsefile(env_file))
+function setup_env!()
+    repo = get(ENV, "mars-client", missing)
+    if ismissing(repo) 
+        @warn "mars-client를 찾을 수 없습니다. \nsetup!(\"C:/mars-client경로\")를 실행한 후 다시 시작해 주세요."
+        return false
     else
-        env = Dict{String, Any}("mars_repo" => repo_candidate)
-    end
+        GAMEENV["mars-client"] = repo
+        # patch-data
+        GAMEENV["patch_data"] = joinpath(GAMEENV["mars-client"], "patch-data")
+        GAMEENV["ArtAssets"] = joinpath(GAMEENV["mars-client"], "unity/assets/4_ArtAssets")
 
-    # patch-data
-    env["patch_data"] = joinpath(env["mars_repo"], "patch-data")
-    env["ArtAssets"] = joinpath(env["mars_repo"], "unity/assets/4_ArtAssets")
-
-    env["GameData"] = _search_xlsxpath()
-    if isempty(env["GameData"]) 
-        m = """`M:/` 가 마운팅 되어 있지 않습니다. 
-        https://www.notion.so/devsisters/ccb5824c48544ec28c077a1f39182f01 의 메뉴얼을 참고하여 `M:/` 를 설정해 주세요
-        """
-        @warn m
-        env["GameData"] = joinpath(env["patch_data"], "_GameData")
-    end
-  
-    setup_env_xlsxpath!(env)
-    setup_env_jsonpath!(env)
-
-    # unity folders
-    env["CollectionResources"] = joinpath(env["mars_repo"], "unity/Assets/1_CollectionResources")
+        GAMEENV["GameData"] = _search_xlsxpath()
+        if isempty(GAMEENV["GameData"]) 
+            m = """`M:/` 가 마운팅 되어 있지 않습니다. 
+            https://www.notion.so/devsisters/ccb5824c48544ec28c077a1f39182f01 의 메뉴얼을 참고하여 `M:/` 를 설정해 주세요
+            """
+            @warn m
+            GAMEENV["GameData"] = joinpath(GAMEENV["patch_data"], "_GameData")
+        end
     
-    # GameDataManager paths
-    env["cache"] = joinpath(env["patch_data"], ".cache")
-    env["history"] = joinpath(env["cache"], "history.json")
+        setup_env_xlsxpath!(GAMEENV)
+        setup_env_jsonpath!(GAMEENV)
 
-    merge!(d, env)
+        # unity folders
+        GAMEENV["CollectionResources"] = joinpath(GAMEENV["mars-client"], "unity/Assets/1_CollectionResources")
+        
+        # GameDataManager paths
+        GAMEENV["cache"] = joinpath(GAMEENV["patch_data"], ".cache")
+        GAMEENV["history"] = joinpath(GAMEENV["cache"], "history.json")
+        return true
+    end
 end
 function _search_xlsxpath()::String
     path = ""
@@ -70,7 +91,7 @@ function setup_env_xlsxpath!(env)
     for (root, dirs, files) in walkdir(env["xlsx"]["root"])
         for f in filter(x -> (is_xlsxfile(x) && !startswith(x, "~\$")), files)
             @assert !haskey(env["xlsx"], f) "$f 파일이 중복됩니다. 폴더가 다르더라도 파일명을 다르게 해주세요"
-            env["xlsx"][f] = replace(root, env["mars_repo"]*"/" => "")
+            env["xlsx"][f] = replace(root, env["mars-client"]*"/" => "")
         end
     end
     env
@@ -81,7 +102,7 @@ function setup_env_jsonpath!(env)
     for (root, dirs, files) in walkdir(env["json"]["root"])
         for f in filter(x -> endswith(x, ".json"), files)
             @assert !haskey(env["json"], f) "$f 파일이 중복됩니다. 폴더가 다르더라도 파일명을 다르게 해주세요"
-            env["json"][f] = replace(root, env["mars_repo"]*"/" => "")
+            env["json"][f] = replace(root, env["mars-client"]*"/" => "")
         end
     end
     env

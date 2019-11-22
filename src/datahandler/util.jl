@@ -55,7 +55,7 @@ GAMEDATA["Block"] 과 ../4_ArtAssets/GameResources/Blocks/ 하위에 있는 .pre
 상호 누락된 파일명 리스트를 '.cache'폴더에 저장합니다
 """
 function findblock()
-    root = joinpath(GAMEENV["mars_repo"], "unity/Assets/4_ArtAssets/GameResources/Blocks/")
+    root = joinpath(GAMEENV["mars-client"], "unity/Assets/4_ArtAssets/GameResources/Blocks/")
 
     artassets = String[]
     for (folder, dir, files) in walkdir(root)
@@ -83,7 +83,7 @@ function findblock()
        end
 
     # 요약 정보
-    p = normpath("$(GAMEENV["mars_repo"])/unity/Assets")
+    p = normpath("$(GAMEENV["mars-client"])/unity/Assets")
     x = replace(normpath(root), p => "..")
 
     printstyled("'$x'폴더와 Block데이터를 비교하여 다음 파일에 저장했습니다\n"; color=:green)

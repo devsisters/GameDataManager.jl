@@ -38,7 +38,7 @@ end
 using .SubModulePipo
 
 function SubModulePipo.editor!(jwb::JSONWorkbook)
-    output_folder = joinpath(GAMEENV["mars_repo"], "patch-data/Dialogue/PipoTalk")
+    output_folder = joinpath(GAMEENV["mars-client"], "patch-data/Dialogue/PipoTalk")
     
     SubModuleDialogue.create_dialogue_script(jwb[:Dialogue], "PipoTalk")
     deleteat!(jwb, "Dialogue")

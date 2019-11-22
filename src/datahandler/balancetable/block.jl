@@ -15,7 +15,7 @@ using .SubModuleBlock
 function SubModuleBlock.validator(bt)
     block = get(DataFrame, bt, "Block")
     
-    magnet_file = joinpath(GAMEENV["mars_repo"], "submodules/mars-art-assets/Internal", "BlockTemplateBalanceTable.asset")
+    magnet_file = joinpath(GAMEENV["mars-client"], "submodules/mars-art-assets/Internal", "BlockTemplateBalanceTable.asset")
     if isfile(magnet_file)
         magnet = filter(x -> startswith(x, "  - Key:"), readlines(magnet_file))
         magnetkey = unique(broadcast(x -> split(x, "Key: ")[2], magnet))

@@ -10,7 +10,7 @@ function writelog_userinfo()
         userinfo["OS"] = get(ENV, "OS", missing)
         userinfo["JULIA_DEPOT_PATH"] = DEPOT_PATH
         userinfo["GDM_PATH"] = pathof(GameDataManager)
-        userinfo["GAMEENV"] = filter(el -> in(el[1], ["mars_repo","patch_data","GameData"]), GAMEENV)
+        userinfo["GAMEENV"] = filter(el -> in(el[1], ["mars-client","patch_data","GameData"]), GAMEENV)
 
         file = gethostname() * ".json"
         f = joinpath(root, "../Tools/.log", file)

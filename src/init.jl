@@ -9,22 +9,23 @@ const JOY                   = Currency{:JOY}
 const CRY                   = Currency{:CRY}
 const ENERGYMIX             = Currency{:ENERGYMIX}
 const SITECLEANER           = Currency{:SITECLEANER}
-const SPACEDROPTICKET       = Currency{:SPACEDROPTICKET}
 const DEVELOPMENTPOINT      = Currency{:DEVELOPMENTPOINT}
 const TOTALDEVELOPMENTPOINT = Currency{:TOTALDEVELOPMENTPOINT}
 
 function __init__()
-    setup_env!(GAMEENV)
-    writelog_userinfo()
+    s = setup_env!()
+    if s
+        writelog_userinfo()
+        push!(XLSXasJSON.DELIM, ",")
+        
+        # MANAGERCACHE 준비
+        MANAGERCACHE[:meta] = loadmeta()
+        MANAGERCACHE[:history] = init_gamedata_history(GAMEENV["history"])
+        MANAGERCACHE[:validator_data] = Dict()
 
-    # MANAGERCACHE 준비
-    MANAGERCACHE[:meta] = loadmeta()
-    MANAGERCACHE[:history] = init_gamedata_history(GAMEENV["history"])
-    MANAGERCACHE[:validator_data] = Dict()
-
-    # DELIM에 ,쉼표 추가
-    push!(XLSXasJSON.DELIM, ",")
-    help()
+        # DELIM에 ,쉼표 추가
+        help()
+    end
 end
 function reload_meta!()
     if ismodified("_Meta.json")
@@ -84,7 +85,7 @@ function init_gamedata_history(file = GAMEENV["history"])
     h = isfile(file) ? JSON.parsefile(file; dicttype=Dict{String, Float64}) :
                        Dict{String, Float64}()
     # 좀 이상하긴 한데... 가끔식 히스토리 청소해 줌
-    rand() < 0.002 && cleanup_gamedata_export_history!()
+    # rand() < 0.002 && cleanup_gamedata_export_history!()
 
     # 방금 로딩한 _Meta.json 시간
     h["_Meta.json"] = mtime(joinpath_gamedata("_Meta.json"))
