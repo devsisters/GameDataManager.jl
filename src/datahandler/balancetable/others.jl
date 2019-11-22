@@ -269,37 +269,39 @@ end
 function SubModuleItemTable.editor!(jwb::JSONWorkbook)
     jws = jwb[:BuildingSeed]
 
-    # construct BuildingData
-    ref = begin
-        a = map(x -> (x["BuildingKey"], x), JWB("Shop", false)[:Building])
-        b = map(x -> (x["BuildingKey"], x), JWB("Residence", false)[:Building])
-        c = map(x -> (x["BuildingKey"], x), JWB("Special", false)[:Building])
-        Dict([a; b; c])
-    end
     # NOTE 이런 경우가 많은데 setindex!(jws, ...) 추가 할까?
     @inbounds for (i, el) in enumerate(jws.data)
-        el["PriceJoy"] = SubModuleItemTable.buildingseed_pricejoy(ref, el["BuildingKey"])
+        el["PriceJoy"] = SubModuleItemTable.buildingseed_pricejoy(el["BuildingKey"])
     end
 
     jwb
 end
 
-function SubModuleItemTable.buildingseed_pricejoy(ref, key)
-    if startswith(key, "p")
+function SubModuleItemTable.buildingseed_pricejoy(key)
+    T = buildingtype(key)
+    if T == Special
         return missing
     else
-        grade = get(ref[key], "Grade", 1)
-        _area = ref[key]["Condition"]["ChunkWidth"] * ref[key]["Condition"]["ChunkLength"]
+        f = string(T)
+        ref = get!(MANAGERCACHE[:validator_data], f, JWB(f, false))[:Building]
+        i = findfirst(el -> el["BuildingKey"] == key, ref.data)
 
-        multi = grade == 1 ? 0.4 :
-                grade == 2 ? 0.6 :
-                grade == 3 ? 0.8 :
-                grade == 4 ? 1.0 :
-                grade == 5 ? 1.2 :
-                grade == 6 ? 2 : error("6등급 이상 건물에 대한 joyprice 추가 필요")
+        grade = get(ref[i], "Grade", 1)
+        area = ref[i]["Condition"]["ChunkWidth"] * ref[i]["Condition"]["ChunkLength"]
+        base = SubModuleAbility.joycreation(grade, 1, area)
+
+        if T == Sandbox
+            multi = 0.1
+        else
+            multi = grade == 1 ? 0.4 :
+                    grade == 2 ? 0.6 :
+                    grade == 3 ? 0.8 :
+                    grade == 4 ? 1.0 :
+                    grade == 5 ? 1.2 :
+                    grade == 6 ? 2 : error("6등급 이상 건물에 대한 joyprice 추가 필요")
+        end
 
         # 1레벨 조이 생산량
-        base = SubModuleAbility.joycreation(grade, 1, _area)
         return round(Int, base * multi)
     end
 end

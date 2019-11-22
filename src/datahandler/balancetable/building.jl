@@ -191,6 +191,7 @@ module SubModuleAbility
     function validator end
     function editor! end
     function profitcoin end
+    function coinproduction end
     function coincounter end
     function joycreation end
 end
@@ -293,6 +294,21 @@ function SubModuleAbility.profitcoin(grade, level, _area)
     profit = (grade + level -1) * _area/2 * 60
     return round(Int, profit, RoundDown)
 end
+function SubModuleAbility.coinproduction(grade, level, area)
+    # (grade + level - 1) * area * 60(1시간)
+    # 면적은 무조건 2의 배수이므로 /2를 한다
+    profit = (grade + level -1) * area/2 * 60
+
+    base_amount = 1 * area/2
+    base_interval = 30
+
+    amount_mult = [1., 2., 4., 5., 6., 7., 7.5, 8., 8.5, 9, 9.5, 10.]
+
+    interval_modifier = [1]
+
+    return round(Int, profit, RoundDown)
+end
+
 
 function SubModuleAbility.coincounter(grade, level, _area)
     base = begin 
