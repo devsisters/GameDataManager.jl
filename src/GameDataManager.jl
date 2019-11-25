@@ -4,7 +4,7 @@ using Compat
 using Printf, UUIDs, Dates, Statistics
 using Random, StatsBase, Distributions
 using XLSX, JSON, XLSXasJSON
-using DataFrames, DataFramesMeta, DataStructures, CSV
+using DataFrames, DataStructures, CSV
 using MD5
 import XLSXasJSON.Index
 # using LibGit2 # Git 함수 라이브러리
@@ -58,6 +58,8 @@ include("datahandler/writer/history.jl")
 
 #######  Logger      ##########################################
 include("logger/logger.jl")
+
+init()
 
 
 export GAMEENV, GAMEDATA, help, setup!,

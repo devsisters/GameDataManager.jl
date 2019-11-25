@@ -8,9 +8,9 @@ version = "0.3.1"
 
 [[ArrayLayouts]]
 deps = ["FillArrays", "LinearAlgebra"]
-git-tree-sha1 = "d9215d1294a89571977eda8fdec5830646b27a7e"
+git-tree-sha1 = "bc779df8d73be70e4e05a63727d3a4dfb4c52b1f"
 uuid = "4c555306-a7a7-4459-81d9-ec55ddd5c99a"
-version = "0.1.4"
+version = "0.1.5"
 
 [[Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
@@ -35,9 +35,9 @@ version = "0.5.18"
 
 [[CategoricalArrays]]
 deps = ["Compat", "DataAPI", "Future", "JSON", "Missings", "Printf", "Reexport", "Unicode"]
-git-tree-sha1 = "2473560b9c7cb18f98c3c926af0dc7bedccfc7ab"
+git-tree-sha1 = "4d85a015093760ff23b20f3e25fa195b4cb76794"
 uuid = "324d7699-5711-5eae-9e2f-1d82baa6b597"
-version = "0.7.2"
+version = "0.7.3"
 
 [[Compat]]
 deps = ["Base64", "Dates", "DelimitedFiles", "Distributed", "InteractiveUtils", "LibGit2", "Libdl", "LinearAlgebra", "Markdown", "Mmap", "Pkg", "Printf", "REPL", "Random", "Serialization", "SharedArrays", "Sockets", "SparseArrays", "Statistics", "Test", "UUIDs", "Unicode"]
@@ -56,17 +56,11 @@ git-tree-sha1 = "271528230c65a4517522e2968c3deed76b92b998"
 uuid = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 version = "0.19.4"
 
-[[DataFramesMeta]]
-deps = ["DataFrames", "Tables"]
-git-tree-sha1 = "8a6dd4f640dd6b729f5d1f0d80d475fbf60b32af"
-uuid = "1313f7d8-7da2-5740-9ea0-a2ca25f37964"
-version = "0.5.0"
-
 [[DataStructures]]
 deps = ["InteractiveUtils", "OrderedCollections"]
-git-tree-sha1 = "1fe8fad5fc84686dcbc674aa255bc867a64f8132"
+git-tree-sha1 = "a1b652fb77ae8ca7ea328fa7ba5aa151036e5c10"
 uuid = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
-version = "0.17.5"
+version = "0.17.6"
 
 [[DataValueInterfaces]]
 git-tree-sha1 = "bfc1187b79289637fa0ef6d4436ebdfe6905cbd6"
@@ -105,9 +99,9 @@ version = "0.7.0"
 
 [[FillArrays]]
 deps = ["LinearAlgebra", "Random", "SparseArrays"]
-git-tree-sha1 = "b2cf74f09216cfe3c241e8484178ec0ea941870f"
+git-tree-sha1 = "1a9fe4e1323f38de0ba4da49eafd15b25ec62298"
 uuid = "1a297f60-69ca-5386-bcde-b61e274b549b"
-version = "0.8.1"
+version = "0.8.2"
 
 [[Future]]
 deps = ["Random"]
@@ -136,9 +130,9 @@ version = "0.21.0"
 
 [[LazyArrays]]
 deps = ["ArrayLayouts", "FillArrays", "LinearAlgebra", "MacroTools", "StaticArrays"]
-git-tree-sha1 = "9b12c5346242923c8d51f99f3dfa2cd0c156090f"
+git-tree-sha1 = "cc98c58f97eda8f710dcf5bbf9f28c1d960ca0ee"
 uuid = "5078a376-72f3-5289-bfd5-ec5146d43c02"
-version = "0.14.7"
+version = "0.14.8"
 
 [[LibGit2]]
 uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
@@ -192,9 +186,9 @@ version = "0.9.10"
 
 [[Parsers]]
 deps = ["Dates", "Test"]
-git-tree-sha1 = "a23968e107c0544aca91bfab6f7dd34de1206a54"
+git-tree-sha1 = "0139ba59ce9bc680e2925aec5b7db79065d60556"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "0.3.9"
+version = "0.3.10"
 
 [[Pkg]]
 deps = ["Dates", "LibGit2", "Markdown", "Printf", "REPL", "Random", "SHA", "UUIDs"]
@@ -287,7 +281,7 @@ uuid = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
 version = "0.9.0"
 
 [[SuiteSparse]]
-deps = ["Libdl", "LinearAlgebra", "SparseArrays"]
+deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
 uuid = "4607b0f0-06f3-5cda-b6b1-a6196a1729e9"
 
 [[TableTraits]]
