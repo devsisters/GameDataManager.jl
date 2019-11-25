@@ -13,16 +13,15 @@ const TOTALDEVELOPMENTPOINT = Currency{:TOTALDEVELOPMENTPOINT}
 
 function init()
     s = setup_env!()
+
+    # push!(XLSXasJSON.DELIM, ",") XLSXasJSON 버그로 임시로 포함시킴
+
     if s
-        writelog_userinfo()
-        push!(XLSXasJSON.DELIM, ",")
-        
+        writelog_userinfo()        
         # MANAGERCACHE 준비
         MANAGERCACHE[:meta] = loadmeta()
         MANAGERCACHE[:history] = init_gamedata_history(GAMEENV["history"])
         MANAGERCACHE[:validator_data] = Dict()
-
-        # DELIM에 ,쉼표 추가
     end
     nothing
 end
