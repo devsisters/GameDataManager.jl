@@ -21,6 +21,9 @@ function xl(x::AbstractString; branch = "master")
     reload_meta!()
     export_gamedata(x)
     @info "json 추출이 완료되었습니다 ☺"
+
+    # 좀 이상하지만 가끔 버전 확인해주기
+    rand() < 0.1 && checkout_GameDataManager()
 end
 
 """

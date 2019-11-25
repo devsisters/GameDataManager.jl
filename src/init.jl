@@ -90,3 +90,18 @@ function init_gamedata_history(file = GAMEENV["history"])
 
     return h
 end
+
+
+function checkout_GameDataManager()
+    v2 = "M:/Tools/GameDataManager/Project.toml"
+    if isfile(v2)
+        f = joinpath(@__DIR__, "../project.toml")
+        v1 = readlines("M:/Tools/GameDataManager/Project.toml")[4]
+        v2 = readlines("M:/Tools/GameDataManager/Project.toml")[4]
+        if VersionNumber(chop(v1; head=11, tail=1)) < VersionNumber(chop(v2; head=11, tail=1))
+            @info "최신 버전의 GameDataManager가 발견 되었습니다.\nAtom을 종료 후 다시 실행해주세요"
+        end
+    else
+        @warn "M:/Tools/GameDataManager 를 찾을 수 없습니다"
+    end
+end
