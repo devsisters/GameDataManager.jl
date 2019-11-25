@@ -59,9 +59,6 @@ include("datahandler/writer/history.jl")
 #######  Logger      ##########################################
 include("logger/logger.jl")
 
-init()
-
-
 export GAMEENV, GAMEDATA, help, setup!,
        # datahandler
        BalanceTable, XLSXBalanceTable, JSONBalanceTable, UnityBalanceTable,
@@ -95,5 +92,8 @@ export GAMEENV, GAMEDATA, help, setup!,
     # 콘텐츠
       RewardTable, sample, expectedvalue,
       DroneDelivery, deliveryreward, deliverycost
+
+      init()
+      help()
 
 end

@@ -1,19 +1,17 @@
+const GAMEENV = Dict{String, Any}()
+const GAMEDATA = Dict{String, BalanceTable}()
+const MANAGERCACHE = Dict{Symbol, Dict}()
+
+# Currencies
+const COIN                  = Currency{:COIN}
+const JOY                   = Currency{:JOY}
+const CRY                   = Currency{:CRY}
+const ENERGYMIX             = Currency{:ENERGYMIX}
+const SITECLEANER           = Currency{:SITECLEANER}
+const DEVELOPMENTPOINT      = Currency{:DEVELOPMENTPOINT}
+const TOTALDEVELOPMENTPOINT = Currency{:TOTALDEVELOPMENTPOINT}
 
 function init()
-    # const GAMEENV = Dict{String, Any}()
-    global GAMEDATA = Dict{String, BalanceTable}()
-    global MANAGERCACHE = Dict{Symbol, Dict}()
-    global GAMEENV = Dict{String, Any}()
-
-    # Currencies
-    global COIN                  = Currency{:COIN}
-    global JOY                   = Currency{:JOY}
-    global CRY                   = Currency{:CRY}
-    global ENERGYMIX             = Currency{:ENERGYMIX}
-    global SITECLEANER           = Currency{:SITECLEANER}
-    global DEVELOPMENTPOINT      = Currency{:DEVELOPMENTPOINT}
-    global TOTALDEVELOPMENTPOINT = Currency{:TOTALDEVELOPMENTPOINT}
-
     s = setup_env!()
     if s
         writelog_userinfo()
@@ -26,7 +24,7 @@ function init()
 
         # DELIM에 ,쉼표 추가
     end
-    help()
+    nothing
 end
 function reload_meta!()
     if ismodified("_Meta.json")
