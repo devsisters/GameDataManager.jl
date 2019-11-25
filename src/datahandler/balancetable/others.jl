@@ -75,30 +75,27 @@ https://docs.google.com/document/d/1yvzWjz_bziGhCH6TdDUh0nXAB2J1uuHiYSPV9SyptnA/
 =#
 function SubModuleQuest.questtrigger(x::Array{T, 1}) where T
     trigger = Dict(
-        "ShopCount"                    => (:equality, :number),
         "SiteCount"                    => (:equality, :number),
         "ResidenceCount"               => (:equality, :number),
+        "ShopCount"                    => (:equality, :number),
+        "SandboxCount"                 => (:equality, :number),
         "Coin"                         => (:equality, :number),
         "UserLevel"                    => (:equality, :number),
         "MaxSegmentLevelByUseType"     => (:number,     :equality, :number),
         "MaxSegmentLevelByBuildingKey" => (:buildingkey,:equality, :number),
         "OwnedItem"                    => (:itemkey,    :equality, :number),
-        "SiteGradeCount"               => (:number,     :equality),
         "CoinCollecting"               => (:equality,   :number),
-        "AbilityLevel"                 => (:abilitykey, :equality, :number),
         "CoinPurchasing"               => (:equality, :number),
+        "AbilityLevel"                 => (:abilitykey, :equality, :number),
         "OwnedPipoCount"               => (:equality, :number),
-        "MaxVillageGrade"              => (:equality, :number),
         "CompletePartTime"             => (:equality, :number),
         "CompleteDelivery"             => (:equality, :number),
         "CompleteBlockEdit"            => (:equality, :number),
-        "CompletePipoWork"             => (:equality, :number),
         "JoyCollecting"                => (:equality, :number),
         "BuildingSeedBuyCount"         => (:buildingkey, :equality, :number),
         "SingleKeyBuyCount"            => (:buycount, :equality, :number),
-        "SandboxCount"                 => (:equality, :number),
         "CompleteQuestGroup"           => (:questgroupname,))
-
+        
     ref = get(trigger, string(x[1]), missing)
 
     @assert !isnull(ref) "`$(x[1])`는 존재하지 않는 trigger입니다."
