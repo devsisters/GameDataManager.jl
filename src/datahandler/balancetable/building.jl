@@ -314,7 +314,7 @@ function SubModuleAbility.profitcoin2(step, area)
     @assert step > 0 "Level과 Grade는 모두 1 이상이어야 합니다"
 
     base_amount = if step == 1
-                        1. * area/2 # 건물 면적은 2의 배수 
+                        1. * area
                     else 
                         SubModuleAbility.profitcoin2(step - 1, area)
                     end
@@ -326,16 +326,15 @@ end
 function SubModuleAbility.coinproduction(grade, level, area)
     step = (grade + level - 1) #grade는 레벨1과 동일하게 취급
 
-    SubModuleAbility.coinproduction(step, area)
-end
-function SubModuleAbility.coinproduction(step, area)
-    base_interval = 6000
+    base_interval = 6500
     if step == 1
         profit = SubModuleAbility.profitcoin2(step, area)
+        profit = Int(profit)
         interval = base_interval * 1
     else 
         profit_per_min = SubModuleAbility.profitcoin2(step, area)
-        prev = SubModuleAbility.coinproduction(step-1, area)
+        # TODO 이러니까 낭비가 심하지... 이전꺼 다 계산할 필요 없는데 
+        prev = SubModuleAbility.coinproduction(grade-1, level, area)
 
         prev_interval_mult = prev[2] / base_interval
         
@@ -345,19 +344,18 @@ function SubModuleAbility.coinproduction(step, area)
         x = filter(el -> el[1] >= prev_interval_mult , solution)
         @assert !isempty(x) "[TODO] threshold를 높여서 탐색...."
 
-        if length(x) > 1
-            a = collect(values(x))[2]
-        else 
-            a = collect(values(x))[1]
+        a = begin 
+            α = collect(values(x))
+            i = iszero(rem(level, 2))     ? 1 : 
+                α[1] > prev_interval_mult ? 1 : 2
+            rationalize(α[i])
         end
-        a = rationalize(a)
-        profit = a.num
 
+        profit = a.num
         interval = a.den * base_interval
     end
     return profit, interval 
 end
-
 #TODO MarsBalancing 으로 옮길것
 function search_optimal_divider(origin, threahold::Integer; margin = 0.03)
     x = broadcast(i -> origin + i, -origin*margin:0.00001:origin*margin)
