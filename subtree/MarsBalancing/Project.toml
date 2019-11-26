@@ -2,3 +2,7 @@ name = "MarsBalancing"
 uuid = "301949a3-6496-44f4-88b4-1e5e1abd79e8"
 authors = ["김용희 <yongheekim@devsisters.com>"]
 version = "0.1.0"
+
+[deps]
+DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
+XLSXasJSON = "8c9e00cc-ccf1-11e8-3de6-5b028f480d9e"
