@@ -1,0 +1,6 @@
+[submodule "submodules/Localizer"]
+	path = submodules/Localizer
+	url = https://github.com/devsisters/Localizer.jl
+[submodule "submodules/MarsBalancing"]
+	path = submodules/MarsBalancing
+	url = https://github.com/devsisters/MarsBalancing.jl
