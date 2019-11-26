@@ -1,0 +1,32 @@
+[
+  {
+    "Key": 1,
+    "$Name": "FirstItem",
+    "$Desc": null,
+    "Child_Dict": {
+      "$Name": "그렇군",
+      "$Desc" : "아닌가?"
+    },
+    "Child_Array": [
+      {
+        "$Name": "ChildArray_Name",
+        "$Desc" : "ChildArray_Desc"
+      }
+    ]
+  },
+  {
+    "Key": 2,
+    "$Name": "SecondItem",
+    "$Desc": null,
+    "ChildDict": {
+      "$Name": "ChildDict_Name",
+      "$Desc" : "ChildDict_Desc"
+    },
+    "ChildArray": [
+      {
+        "$Name": "ChildArray_Name",
+        "$Desc" : "ChildArray_Desc"
+      }
+    ]
+  }
+]
