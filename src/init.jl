@@ -1,6 +1,6 @@
 const GAMEENV = Dict{String, Any}()
 const GAMEDATA = Dict{String, BalanceTable}()
-const MANAGERCACHE = Dict{Symbol, Dict}()
+const MANAGERCACHE = Dict{Symbol, Any}()
 
 # Currencies
 const COIN                  = Currency{:COIN}
@@ -22,6 +22,7 @@ function init()
         MANAGERCACHE[:meta] = loadmeta()
         MANAGERCACHE[:history] = init_gamedata_history(GAMEENV["history"])
         MANAGERCACHE[:validator_data] = Dict()
+        MANAGERCACHE[:patch_data_branch] = "master"
     end
     nothing
 end
@@ -31,6 +32,16 @@ function reload_meta!()
         setup_env_xlsxpath!(GAMEENV)
         gamedata_export_history("_Meta.json")
     end
+end
+function setbranch!(branch::AbstractString) 
+    MANAGERCACHE[:patch_data_branch] = branch
+    git_checkout_patchdata(branch)
+end
+function git_checkout_patchdata(branch)
+    if pwd() != GAMEENV["patch_data"]
+        cd(GAMEENV["patch_data"])
+    end
+    run(`git checkout $branch`)
 end
 
 """

@@ -17,7 +17,9 @@ function help(idx = 1)
           xl("Player"): Player.xlsx 파일만 json으로 추출합니다
           xl()        : 수정된 엑셀파일만 검색하여 json으로 추출합니다
           xl(true)    : '_Meta.json'에서 관리하는 모든 파일을 json으로 추출합니다
-          xl_backup() : 'M:/GameData'의 데이터를 'patchdata/_GameData'에 덮어 씌웁니다
+          xl_backup() : 'M:/GameData'의 데이터를 압축하여'patchdata/_GameData'에 덮어 씌웁니다
+
+          setbranch!("master"): 'xl()'이 checkout 하는 branch를 변경합니다. 
         """
         if idx == 1
             msg = intro * rand([thankyou; oneline_asciiarts]) * "\n" * basic * """\n

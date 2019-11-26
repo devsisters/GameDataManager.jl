@@ -1,7 +1,6 @@
 # 단축키
-function xl(exportall::Bool = false; branch = "master") 
-    cd(GAMEENV["patch_data"])
-    run(`git checkout $branch`)
+function xl(exportall::Bool = false; branch = MANAGERCACHE[:patch_data_branch]) 
+    git_checkout_patchdata(branch)
     
     files = exportall ? collect_auto_xlsx() : collect_modified_xlsx()
     if isempty(files)
@@ -12,9 +11,8 @@ function xl(exportall::Bool = false; branch = "master")
         @info "json 추출이 완료되었습니다 ☺"
     end
 end
-function xl(x::AbstractString; branch = "master")
-    cd(GAMEENV["patch_data"])
-    run(`git checkout $branch`)
+function xl(x::AbstractString; branch = MANAGERCACHE[:patch_data_branch])
+    git_checkout_patchdata(branch)
 
     @info "xlsx -> json 추출을 시작합니다 ⚒\n" * "-"^(displaysize(stdout)[2]-4)
     # 한개만 골라 뽑을 땐 무조건 엑셀 읽기
