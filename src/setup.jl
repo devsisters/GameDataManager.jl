@@ -64,17 +64,19 @@ function setup_env!()
     end
 end
 function _search_xlsxpath()::String
-    path = ""
-    if isdir("M:/")
-        for (root, dir, f) in walkdir("M:/")        
+    path = Sys.iswindows() ? "M:/" : "/Volumes/ShardData/MARSProject/"
+    if isdir(path)
+        for (root, dir, f) in walkdir(path)        
             i = findfirst(el -> el == "GameData", dir)
             if !isnothing(i)
                 path = joinpath(root, dir[i])
                 break
             end
         end
+        return path
+    else 
+        return ""
     end
-    return path
 end
 
 function xl_change_datapath!()
