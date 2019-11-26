@@ -191,6 +191,7 @@ module SubModuleAbility
     function validator end
     function editor! end
     function profitcoin end
+    function profitcoin2 end
     function coinproduction end
     function coincounter end
     function joycreation end
@@ -233,14 +234,14 @@ function SubModuleAbility.editor!(jwb::JSONWorkbook)
     shop_ability = []
     template = OrderedDict(
         "Group" => "", "AbilityKey" => "",
-        "Level" => 0, "Value" => 0,  
+        "Level" => 0, "Value" => 0, "Value1" => missing, "Value2" => missing, "Value3" => missing, 
         "LevelupCost" => Dict("PriceCoin" => missing, "Time" => missing), 
         "LevelupCostItem" => [])
 
     for grade in 1:5
         for a in area_per_grade[grade] # 건물 면적
             for lv in 1:6
-                # (grade + level - 1) * area * 60(1시간)
+                # ===삭제 예정
                 profit = SubModuleAbility.profitcoin(grade, lv, a)
                 ability_1 = deepcopy(template)
                 ability_1["Group"] = "ProfitCoin"
@@ -256,6 +257,18 @@ function SubModuleAbility.editor!(jwb::JSONWorkbook)
                 ability_2["Level"] = lv
                 ability_2["Value"] = coincounter
                 push!(shop_ability, ability_2)
+                # ===
+
+                profit, intervalms = SubModuleAbility.coinproduction(grade, lv, a)
+                ab = deepcopy(template)
+                ab["Group"] = "ShopCoinProduction"
+                ab["AbilityKey"] = "ShopCoinProduction_G$(grade)_$(a)"
+                ab["Level"] = lv
+                ab["Value1"] = profit
+                ab["Value2"] = intervalms
+                ab["Value3"] = profit * (lv + grade + 3) # 일단 대충
+                push!(shop_ability, ab)
+
             end
         end
     end
@@ -268,11 +281,13 @@ function SubModuleAbility.editor!(jwb::JSONWorkbook)
             for lv in 1:6
                 # (grade + level - 1) * area * 60(1시간)
                 joy = SubModuleAbility.joycreation(grade, lv, a)
-                push!(residence_ability, 
-                    OrderedDict(
-                    "Group" => "JoyCreation", "AbilityKey" => "JoyCreation_G$(grade)_$(a)",
-                    "Level" => lv, "Value" => joy, 
-                    "LevelupCost" => Pair("PriceCoin", missing), "LevelupCostItem" => []))
+                ab = deepcopy(template)
+                ab["Group"] = "JoyCreation"
+                ab["AbilityKey"] = "JoyCreation_G$(grade)_$(a)"
+                ab["Level"] = lv
+                ab["Value1"] = joy
+            
+                push!(residence_ability, ab)
             end
         end
     end
@@ -294,21 +309,73 @@ function SubModuleAbility.profitcoin(grade, level, _area)
     profit = (grade + level -1) * _area/2 * 60
     return round(Int, profit, RoundDown)
 end
-function SubModuleAbility.coinproduction(grade, level, area)
-    # (grade + level - 1) * area * 60(1시간)
-    # 면적은 무조건 2의 배수이므로 /2를 한다
-    profit = (grade + level -1) * area/2 * 60
 
-    base_amount = 1 * area/2
-    base_interval = 30
+function SubModuleAbility.profitcoin2(step, area)
+    @assert step > 0 "Level과 Grade는 모두 1 이상이어야 합니다"
 
-    amount_mult = [1., 2., 4., 5., 6., 7., 7.5, 8., 8.5, 9, 9.5, 10.]
+    base_amount = if step == 1
+                        1. * area/2 # 건물 면적은 2의 배수 
+                    else 
+                        SubModuleAbility.profitcoin2(step - 1, area)
+                    end
+    multiplier = step == 1 ? 1 : (1 + 1.5/step)
 
-    interval_modifier = [1]
-
-    return round(Int, profit, RoundDown)
+    return round(base_amount * multiplier, RoundDown; digits=3)
 end
 
+function SubModuleAbility.coinproduction(grade, level, area)
+    step = (grade + level - 1) #grade는 레벨1과 동일하게 취급
+
+    SubModuleAbility.coinproduction(step, area)
+end
+function SubModuleAbility.coinproduction(step, area)
+    base_interval = 6000
+    if step == 1
+        profit = SubModuleAbility.profitcoin2(step, area)
+        interval = base_interval * 1
+    else 
+        profit_per_min = SubModuleAbility.profitcoin2(step, area)
+        prev = SubModuleAbility.coinproduction(step-1, area)
+
+        prev_interval_mult = prev[2] / base_interval
+        
+        solution = search_optimal_divider(profit_per_min, 50)
+        @assert !isempty(solution) "[TODO] threshold를 높여서 탐색...."
+
+        x = filter(el -> el[1] >= prev_interval_mult , solution)
+        @assert !isempty(x) "[TODO] threshold를 높여서 탐색...."
+
+        if length(x) > 1
+            a = collect(values(x))[2]
+        else 
+            a = collect(values(x))[1]
+        end
+        a = rationalize(a)
+        profit = a.num
+
+        interval = a.den * base_interval
+    end
+    return profit, interval 
+end
+
+#TODO MarsBalancing 으로 옮길것
+function search_optimal_divider(origin, threahold::Integer; margin = 0.03)
+    x = broadcast(i -> origin + i, -origin*margin:0.00001:origin*margin)
+
+    ra = rationalize.(x)
+    # threshold 이하의 candidate 중에서 각각 절대값이 제일 작은거
+    solution = OrderedDict{Int, Float64}()
+    for i in 1:threahold
+        a = x[findall(x -> x.den == i, ra)]
+        if !isempty(a)
+            aidx = broadcast(el -> abs(origin - el), a)
+            amin = findmin(aidx)
+            solution[i] = a[amin[2]]
+        end
+    end
+
+    return sort(solution; by = keys)
+end
 
 function SubModuleAbility.coincounter(grade, level, _area)
     base = begin 
