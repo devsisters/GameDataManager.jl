@@ -1,0 +1,4 @@
+name = "MarsBalancing"
+uuid = "301949a3-6496-44f4-88b4-1e5e1abd79e8"
+authors = ["김용희 <yongheekim@devsisters.com>"]
+version = "0.1.0"
