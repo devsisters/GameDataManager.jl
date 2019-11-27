@@ -58,9 +58,13 @@ function XLSXBalanceTable(file::AbstractString; cacheindex = true, validation = 
     validation && validator(x)
     return x
 end
-function copy_to_cache(f)
-    cache_file = joinpath(GAMEENV["cache"], "GameData", basename(f))
-    cp(f, cache_file; force = true)
+function copy_to_cache(origin)
+    destination = replace(origin, GAMEENV["GameData"] => joinpath(GAMEENV["cache"], "GameData"))
+    dir, file = splitdir(destination)
+    if !isdir(dir)
+        mkdir(dir)
+    end
+    cp(origin, destination; force = true)
 end
 
 function JWB(file, read_from_xlsx::Bool)::JSONWorkbook
