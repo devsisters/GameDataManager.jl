@@ -8,14 +8,13 @@ end
 function joinpath_gamedata(file)
     if is_xlsxfile(file) #검색하여 폴더 위치를 기록해 둔다.
         folder = GAMEENV["xlsx"]["root"]
-        p = get!(GAMEENV["xlsx"], file, 
-                 joinpath(GAMEENV["mars-client"], folder, file))
+        p = get!(GAMEENV["xlsx"], file, joinpath(folder, file))
+
         @assert isfile(p) "$(file) 은 $(folder)에 존재하지 않는 파일입니다. 파일명을 다시 확인해 주세요"
 
     elseif endswith(file, ".json") #json은 하위폴더가 없
         folder= GAMEENV["json"]["root"]
-        p = get!(GAMEENV["json"], file, 
-                 joinpath(GAMEENV["mars-client"], folder, file))
+        p = get!(GAMEENV["json"], file, joinpath(folder, file))
         @assert isfile(p) "$(file) 은 $(folder)에 존재하지 않는 파일입니다. 파일명을 다시 확인해 주세요"
     else
         throw(AssertionError("$(file)은 지원하지 않습니다. excel 파일 혹은 .json 파일로 검색해 주세요"))
@@ -23,15 +22,7 @@ function joinpath_gamedata(file)
 
     return p
 end
-function walkdir_for_xlsx!(env)
-    for (root, dirs, files) in walkdir(env["xlsx"]["root"])
-        for f in filter(x -> (is_xlsxfile(x) && !startswith(x, "~\$")), files)
-            @assert !haskey(env["xlsx"], f) "$f 파일이 중복됩니다. 폴더가 다르더라도 파일명을 다르게 해주세요"
-            env["xlsx"][f] = replace(root, env["mars-client"]*"/" => "")
-        end
-    end
-    env
-end
+
 """
     isnull(x)
 
