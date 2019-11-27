@@ -12,7 +12,7 @@ const DEVELOPMENTPOINT      = Currency{:DEVELOPMENTPOINT}
 const TOTALDEVELOPMENTPOINT = Currency{:TOTALDEVELOPMENTPOINT}
 
 
-function init()
+function __init__()
     s = setup_env!()
 
     # push!(XLSXasJSON.DELIM, ",") XLSXasJSON 버그로 임시로 포함시킴
@@ -24,6 +24,7 @@ function init()
         MANAGERCACHE[:validator_data] = Dict()
         MANAGERCACHE[:patch_data_branch] = "master"
     end
+    help()
     nothing
 end
 function reload_meta!()

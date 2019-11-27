@@ -93,7 +93,4 @@ export GAMEENV, GAMEDATA, help, setup!,
       RewardTable, sample, expectedvalue,
       DroneDelivery, deliveryreward, deliverycost
 
-      init()
-      help()
-
 end

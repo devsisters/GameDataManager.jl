@@ -1,10 +1,9 @@
 # TODO 우선 사용자 정보만 수집
 # 나중에 점차 사용로그랑 에러로그도 수집을...
 function writelog_userinfo()
-    root = _search_xlsxpath()
+    root = GAMEENV["NetworkDrive"]
 
-    if !isempty(root)
-
+    if isdir(root)
         userinfo = OrderedDict()
         userinfo["Time"] = now()
         userinfo["OS"] = get(ENV, "OS", missing)
