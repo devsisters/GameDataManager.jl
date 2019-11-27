@@ -17,7 +17,7 @@ function __init__()
 
     # push!(XLSXasJSON.DELIM, ",") XLSXasJSON 버그로 임시로 포함시킴
     if s
-        writelog_userinfo()        
+        # writelog_userinfo()        
         # MANAGERCACHE 준비
         MANAGERCACHE[:meta] = loadmeta()
         MANAGERCACHE[:history] = init_gamedata_history(GAMEENV["history"])
