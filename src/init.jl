@@ -11,11 +11,11 @@ const SITECLEANER           = Currency{:SITECLEANER}
 const DEVELOPMENTPOINT      = Currency{:DEVELOPMENTPOINT}
 const TOTALDEVELOPMENTPOINT = Currency{:TOTALDEVELOPMENTPOINT}
 
+
 function init()
     s = setup_env!()
 
     # push!(XLSXasJSON.DELIM, ",") XLSXasJSON 버그로 임시로 포함시킴
-
     if s
         writelog_userinfo()        
         # MANAGERCACHE 준비
@@ -29,7 +29,6 @@ end
 function reload_meta!()
     if ismodified("_Meta.json")
         MANAGERCACHE[:meta] = loadmeta()
-        setup_env_xlsxpath!(GAMEENV)
         gamedata_export_history("_Meta.json")
     end
 end
@@ -75,7 +74,9 @@ function loadmeta(metafile = joinpath_gamedata("_Meta.json"))
     end
     # TODO: 이름 중복 체크하기
     function foo(d)
-        broadcast(x -> (split(x, ".")[1], x), filter(is_xlsxfile, keys(d))) |> Dict
+        files = broadcast(x -> (split(basename(x), ".")[1], x), filter(is_xlsxfile, keys(d)))
+        validate_duplicate(files)
+        Dict(files)
     end
     jsonfile = JSON.parsefile(metafile; dicttype=OrderedDict{String, Any})
 

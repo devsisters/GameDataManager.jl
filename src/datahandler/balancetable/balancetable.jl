@@ -331,10 +331,10 @@ function validate_haskey(class, a; assert=true)
     validate_subset(a, b;msg = "'$(class)'에 아래의 Key가 존재하지 않습니다", assert = assert)
 end
 
-function validate_duplicate(target; assert=true)
-    if !allunique(target)
-        duplicate = filter(el -> el[2] > 1, countmap(target))
-        msg = "[:$(target)]에서 중복된 값이 발견되었습니다"
+function validate_duplicate(lists; assert=true)
+    if !allunique(lists)
+        duplicate = filter(el -> el[2] > 1, countmap(lists))
+        msg = "[:$(lists)]에서 중복된 값이 발견되었습니다"
         if assert
             throw(AssertionError("$msg \n $(keys(duplicate))"))
         else

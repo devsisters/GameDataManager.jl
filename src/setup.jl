@@ -40,22 +40,23 @@ function setup_env!()
         GAMEENV["mars-client"] = repo
         # patch-data
         GAMEENV["patch_data"] = joinpath(GAMEENV["mars-client"], "patch-data")
+        # unity folders
         GAMEENV["ArtAssets"] = joinpath(GAMEENV["mars-client"], "unity/assets/4_ArtAssets")
+        GAMEENV["CollectionResources"] = joinpath(GAMEENV["mars-client"], "unity/Assets/1_CollectionResources")
 
         GAMEENV["GameData"] = _search_xlsxpath()
         if isempty(GAMEENV["GameData"]) 
-            m = """`M:/` 가 마운팅 되어 있지 않습니다. 
-            https://www.notion.so/devsisters/ccb5824c48544ec28c077a1f39182f01 의 메뉴얼을 참고하여 `M:/` 를 설정해 주세요
+            @warn """네트워크 폴더가 세팅 되어 있지 않습니다. 아래의 메뉴얼을 
+            아래의 페이지를 참고하여 네트워크 폴더 세팅을 해 주세요
+            https://www.notion.so/devsisters/ccb5824c48544ec28c077a1f39182f01
             """
-            @warn m
             GAMEENV["GameData"] = joinpath(GAMEENV["patch_data"], "_GameData")
         end
     
-        setup_env_xlsxpath!(GAMEENV)
-        setup_env_jsonpath!(GAMEENV)
-
-        # unity folders
-        GAMEENV["CollectionResources"] = joinpath(GAMEENV["mars-client"], "unity/Assets/1_CollectionResources")
+        # setup_env_xlsxpath!(GAMEENV)
+        # setup_env_jsonpath!(GAMEENV)
+        GAMEENV["xlsx"] = Dict("root" => GAMEENV["GameData"])
+        GAMEENV["json"] = Dict("root" => joinpath(GAMEENV["patch_data"], "BalanceTables"))
         
         # GameDataManager paths
         GAMEENV["cache"] = joinpath(GAMEENV["patch_data"], ".cache")
@@ -87,25 +88,4 @@ function xl_change_datapath!()
     GAMEENV["xlsx"]
 end
 
-function setup_env_xlsxpath!(env)
-    env["xlsx"] = Dict("root" => env["GameData"])
 
-    for (root, dirs, files) in walkdir(env["xlsx"]["root"])
-        for f in filter(x -> (is_xlsxfile(x) && !startswith(x, "~\$")), files)
-            @assert !haskey(env["xlsx"], f) "$f 파일이 중복됩니다. 폴더가 다르더라도 파일명을 다르게 해주세요"
-            env["xlsx"][f] = replace(root, env["mars-client"]*"/" => "")
-        end
-    end
-    env
-end
-function setup_env_jsonpath!(env)
-    env["json"] = Dict("root" => joinpath(env["patch_data"], "BalanceTables"))
-
-    for (root, dirs, files) in walkdir(env["json"]["root"])
-        for f in filter(x -> endswith(x, ".json"), files)
-            @assert !haskey(env["json"], f) "$f 파일이 중복됩니다. 폴더가 다르더라도 파일명을 다르게 해주세요"
-            env["json"][f] = replace(root, env["mars-client"]*"/" => "")
-        end
-    end
-    env
-end
