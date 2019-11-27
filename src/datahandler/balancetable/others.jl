@@ -95,7 +95,7 @@ function SubModuleQuest.questtrigger(x::Array{T, 1}) where T
         "BuildingSeedBuyCount"         => (:buildingkey, :equality, :number),
         "SingleKeyBuyCount"            => (:buycount, :equality, :number),
         "CompleteQuestGroup"           => (:questgroupname,))
-        
+
     ref = get(trigger, string(x[1]), missing)
 
     @assert !isnull(ref) "`$(x[1])`는 존재하지 않는 trigger입니다."
@@ -392,7 +392,7 @@ function SubModuleVillagerTalk.validator(bt)
 end
 
 function SubModuleVillagerTalk.editor!(jwb::JSONWorkbook)
-    if minimum(get.(jwb[:Dialogue], "Index", missing)) < 2 
+    if minimum(get.(jwb[:Dialogue], "Index", missing)) < 2
         throw(AssertionError("VillagerTalk 대사Index는 2부터 시작해 주세요"))
     end
     SubModuleDialogue.create_dialogue_script(jwb[:Dialogue], "Villager")
@@ -423,6 +423,29 @@ function SubModuleChore.editor!(jwb::JSONWorkbook)
     for el in data
         el["Reward"] = collect_values(el["Reward"])
         el["AssistReward"] = collect_values(el["AssistReward"])
+    end
+
+end
+
+"""
+    SubModuleGeneralSetting
+
+* GeneralSetting.xlsx 데이터를 관장함
+"""
+module SubModuleGeneralSetting
+    function editor! end
+    function validator end
+end
+using .SubModuleGeneralSetting
+
+function SubModuleGeneralSetting.validator(bt)
+
+end
+
+function SubModuleGeneralSetting.editor!(jwb::JSONWorkbook)
+    data = jwb[:ProfileImage].data
+    for el in data
+        el["ImageFileName"] = collect_values(el["ImageFileName"])
     end
 
 end
