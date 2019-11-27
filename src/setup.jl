@@ -53,8 +53,6 @@ function setup_env!()
             GAMEENV["GameData"] = joinpath(GAMEENV["patch_data"], "_GameData")
         end
     
-        # setup_env_xlsxpath!(GAMEENV)
-        # setup_env_jsonpath!(GAMEENV)
         GAMEENV["xlsx"] = Dict("root" => GAMEENV["GameData"])
         GAMEENV["json"] = Dict("root" => joinpath(GAMEENV["patch_data"], "BalanceTables"))
         
