@@ -22,6 +22,7 @@ function __init__()
         MANAGERCACHE[:meta] = loadmeta()
         MANAGERCACHE[:history] = init_gamedata_history(GAMEENV["history"])
         MANAGERCACHE[:validator_data] = Dict()
+        MANAGERCACHE[:validation] = true
         MANAGERCACHE[:patch_data_branch] = "master"
     end
     help()
@@ -36,6 +37,10 @@ end
 function setbranch!(branch::AbstractString) 
     MANAGERCACHE[:patch_data_branch] = branch
     git_checkout_patchdata(branch)
+end
+function validation!()
+    MANAGERCACHE[:validation] = !MANAGERCACHE[:validation]
+    @info "MANAGERCACHE[:validation] = $(MANAGERCACHE[:validation])"
 end
 function git_checkout_patchdata(branch)
     if pwd() != GAMEENV["patch_data"]

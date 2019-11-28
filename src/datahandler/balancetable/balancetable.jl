@@ -32,7 +32,8 @@ struct XLSXBalanceTable <: BalanceTable
     # 사용할 함수들
     cache::Union{Missing, Array{Dict, 1}}
 end
-function XLSXBalanceTable(file::AbstractString; cacheindex = true, validation = true, read_from_xlsx = false)
+function XLSXBalanceTable(file::AbstractString; read_from_xlsx = false,
+                                    cacheindex = true, validation = MANAGERCACHE[:validation])
     if ismodified(file) | read_from_xlsx
         jwb = begin 
             f = is_xlsxfile(file) ? file : MANAGERCACHE[:meta][:xlsx_shortcut][file]
@@ -55,7 +56,7 @@ function XLSXBalanceTable(file::AbstractString; cacheindex = true, validation = 
     cache = cacheindex ? index_cache.(dataframe) : missing
 
     x = XLSXBalanceTable(jwb, dataframe, cache)
-    validation && validator(x)
+    validation ? validator(x) : @warn("validation을 하지 않습니다")
     return x
 end
 function copy_to_cache(origin)
