@@ -44,15 +44,15 @@ function setup_env!()
         GAMEENV["ArtAssets"] = joinpath(GAMEENV["mars-client"], "unity/assets/4_ArtAssets")
         GAMEENV["CollectionResources"] = joinpath(GAMEENV["mars-client"], "unity/Assets/1_CollectionResources")
 
-        GAMEENV["NetworkDrive"] = Sys.iswindows() ? "M:/GameData" : "/Volumes/ShardData/MARSProject/"
-        if !isdir(GAMEENV["NetworkDrive"]) 
+        GAMEENV["NetworkFolder"] = Sys.iswindows() ? "M:/GameData" : "/Volumes/ShardData/MARSProject/GameData"
+        if !isdir(GAMEENV["NetworkFolder"]) 
             @warn """네트워크 폴더가 세팅 되어 있지 않습니다. 아래의 메뉴얼을 
             아래의 페이지를 참고하여 네트워크 폴더 세팅을 해 주세요
             https://www.notion.so/devsisters/ccb5824c48544ec28c077a1f39182f01
             """
             GAMEENV["GameData"] = joinpath(GAMEENV["patch_data"], "_GameData")
         else 
-            GAMEENV["GameData"] = GAMEENV["NetworkDrive"]
+            GAMEENV["GameData"] = GAMEENV["NetworkFolder"]
         end
 
         GAMEENV["xlsx"] = Dict("root" => GAMEENV["GameData"])
@@ -66,10 +66,10 @@ function setup_env!()
 end
 
 function xl_change_datapath!()
-    if GAMEENV["GameData"] == GAMEENV["NetworkDrive"]
+    if GAMEENV["GameData"] == GAMEENV["NetworkFolder"]
         GAMEENV["GameData"] = joinpath(GAMEENV["patch_data"], "_GameData")
     else 
-        GAMEENV["GameData"] = GAMEENV["NetworkDrive"]
+        GAMEENV["GameData"] = GAMEENV["NetworkFolder"]
     end
     # 비우기
     GAMEENV["xlsx"] = Dict("root" => GAMEENV["GameData"])
