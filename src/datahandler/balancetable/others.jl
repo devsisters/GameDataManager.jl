@@ -264,12 +264,7 @@ function SubModuleItemTable.validator(bt::XLSXBalanceTable)
     nothing
 end
 function SubModuleItemTable.editor!(jwb::JSONWorkbook)
-    jws = jwb[:BuildingSeed]
-
-    # NOTE 이런 경우가 많은데 setindex!(jws, ...) 추가 할까?
-    @inbounds for (i, el) in enumerate(jws.data)
-        el["PriceJoy"] = SubModuleItemTable.buildingseed_pricejoy(el["BuildingKey"])
-    end
+  
 
     jwb
 end
