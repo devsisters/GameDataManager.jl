@@ -286,6 +286,8 @@ function SubModuleAbility.editor!(jwb::JSONWorkbook)
                 ab["AbilityKey"] = "JoyCreation_G$(grade)_$(a)"
                 ab["Level"] = lv
                 ab["Value1"] = joy
+
+                ab["Value"] = joy # 삭제 예정
             
                 push!(residence_ability, ab)
             end
@@ -326,7 +328,7 @@ end
 function SubModuleAbility.coinproduction(grade, level, area)
     step = (grade + level - 1) #grade는 레벨1과 동일하게 취급
 
-    base_interval = 6500
+    base_interval = 60000
     if step == 1
         profit = SubModuleAbility.profitcoin2(step, area)
         profit = Int(profit)
