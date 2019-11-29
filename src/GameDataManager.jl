@@ -1,8 +1,8 @@
 module GameDataManager
 
 using Compat
-using Printf, UUIDs, Dates, Statistics
-using Random, StatsBase, Distributions
+using Printf, UUIDs, Dates, Random
+using StatsBase, Statistics
 using XLSX, JSON, XLSXasJSON
 using DataFrames, DataStructures, CSV
 using MD5
