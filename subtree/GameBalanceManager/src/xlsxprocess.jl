@@ -45,18 +45,18 @@ process!(f::WorkBook{:FileName}, jwb) 함수로 데이터를 2차가공한다
 """
 function process!(jwb::JSONWorkbook; kwargs...)::JSONWorkbook
     filename = split(basename(jwb), ".")[1]
+    T = WorkBook(filename)
 
-    # TODO 이거 편집하는 파일들만 뜨도록 macro를
+    # if hasmethod(process!, Tuple{XLSXasJSON.JSONWorkbook, T})
+    # print 메세지 편집하는 파일들만 뜨도록...
     printstyled(stderr, "  $(filename) processing... ◎﹏◎"; color = :yellow)
     jwb = process!(jwb, WorkBook(filename))
     printstyled(stderr, "\r", "  $(filename) process ", "Complete!\n"; color = :cyan)
+    # end
 
     return jwb
 end
-
-function process!(jwb, ::Type{WorkBook{T}}) where T
-    jwb
-end
+process!(jwb, ::Type{WorkBook{T}}) where T = jwb
 
 """
     process!(:Block, jwb)
