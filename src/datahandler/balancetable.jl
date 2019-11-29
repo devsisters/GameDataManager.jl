@@ -26,7 +26,7 @@ JSONWorkbook과 검색하기 위해 이를 DataFrame을 변환한 테이블을 �
               만약 data가 수정되면 반드시 construct_dataframe! 하도록 관리할 것
 # cache : 무엇 저장할지 미정
 """
-struct XLSXBalanceTable <: BalanceTable
+struct XLSXBalanceTable{FileName} <: BalanceTable
     data::JSONWorkbook
     dataframe::Array{DataFrame, 1}
     # 사용할 함수들
@@ -55,7 +55,8 @@ function XLSXBalanceTable(file::AbstractString; read_from_xlsx = false,
     dataframe = construct_dataframe(jwb)
     cache = cacheindex ? index_cache.(dataframe) : missing
 
-    x = XLSXBalanceTable(jwb, dataframe, cache)
+    filename = Symbol(split(basename(jwb), ".")[1])
+    x = XLSXBalanceTable{filename}(jwb, dataframe, cache)
     validation ? validator(x) : @warn("validation을 하지 않습니다")
     return x
 end
@@ -191,6 +192,7 @@ Base.basename(xgd::XLSXBalanceTable) = basename(xgd.data)
 Base.basename(jwb::JSONWorkbook) = basename(xlsxpath(jwb))
 Base.dirname(xgd::XLSXBalanceTable) = dirname(xgd)
 Base.dirname(jwb::JSONWorkbook) = dirname(xlsxpath(jwb))
+_filename(xgd::XLSXBalanceTable) = typeof(xgd).parameters[1]
 
 index(x::XLSXBalanceTable) = x.data.sheetindex
 cache(x::XLSXBalanceTable) = x.cache

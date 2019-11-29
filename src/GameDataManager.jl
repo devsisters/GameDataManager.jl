@@ -12,14 +12,8 @@ import XLSXasJSON.Index
 import Base: +, -, *, /, ==
 
 # BalanceTable
-include("datahandler/balancetable/balancetable.jl")
-include("datahandler/balancetable/validator.jl")
-
-include("datahandler/balancetable/others.jl")
-include("datahandler/balancetable/block.jl")
-include("datahandler/balancetable/building.jl")
-include("datahandler/balancetable/pipo.jl")
-include("datahandler/balancetable/rewardtable.jl")
+include("datahandler/balancetable.jl")
+include("datahandler/validator.jl")
 
 include("datahandler/util.jl")
 
