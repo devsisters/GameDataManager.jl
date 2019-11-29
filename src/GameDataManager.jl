@@ -13,14 +13,18 @@ import Base: +, -, *, /, ==
 
 # BalanceTable
 include("datahandler/balancetable/balancetable.jl")
+include("datahandler/balancetable/validator.jl")
+
 include("datahandler/balancetable/others.jl")
 include("datahandler/balancetable/block.jl")
 include("datahandler/balancetable/building.jl")
 include("datahandler/balancetable/pipo.jl")
 include("datahandler/balancetable/rewardtable.jl")
-include("datahandler/balancetable/dialogue.jl")
 
 include("datahandler/util.jl")
+
+include("../subtree/GameBalanceManager/src/GameBalanceManager.jl")
+using .GameBalanceManager
 
 
 #######  Simulation ENGINE #########################
