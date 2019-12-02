@@ -24,7 +24,7 @@ function buildingseed_pricejoy(key)
 #         return missing
 #     else
 #         f = string(T)
-#         ref = get!(MANAGERCACHE[:validator_data], f, JWB(f, false))[:Building]
+#         ref = get!(CACHE[:validator_data], f, JWB(f, false))[:Building]
 #         i = findfirst(el -> el["BuildingKey"] == key, ref.data)
 
 #         grade = get(ref[i], "Grade", 1)

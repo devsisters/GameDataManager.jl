@@ -33,10 +33,10 @@ struct XLSXBalanceTable{FileName} <: BalanceTable
     cache::Union{Missing, Array{Dict, 1}}
 end
 function XLSXBalanceTable(file::AbstractString; read_from_xlsx = false,
-                                    cacheindex = true, validation = MANAGERCACHE[:validation])
+                                    cacheindex = true, validation = CACHE[:validation])
     if ismodified(file) | read_from_xlsx
         jwb = begin 
-            f = is_xlsxfile(file) ? file : MANAGERCACHE[:meta][:xlsx_shortcut][file]
+            f = is_xlsxfile(file) ? file : CACHE[:meta][:xlsx_shortcut][file]
             xlsxpath = joinpath_gamedata(f)
 
             meta = getmetadata(f)
@@ -70,7 +70,7 @@ function copy_to_cache(origin)
 end
 
 function JWB(file, read_from_xlsx::Bool)::JSONWorkbook
-    f = is_xlsxfile(file) ? file : MANAGERCACHE[:meta][:xlsx_shortcut][file]
+    f = is_xlsxfile(file) ? file : CACHE[:meta][:xlsx_shortcut][file]
     
     xlsxpath = joinpath_gamedata(f)
     meta = getmetadata(f)

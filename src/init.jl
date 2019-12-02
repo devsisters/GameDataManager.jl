@@ -1,6 +1,6 @@
 const GAMEENV = Dict{String, Any}()
 const GAMEDATA = Dict{String, BalanceTable}()
-const MANAGERCACHE = Dict{Symbol, Any}()
+const CACHE = Dict{Symbol, Any}()
 
 # Currencies
 const COIN                  = Currency{:COIN}
@@ -18,29 +18,28 @@ function __init__()
     # push!(XLSXasJSON.DELIM, ",") XLSXasJSON 버그로 임시로 포함시킴
     if s
         # writelog_userinfo()        
-        # MANAGERCACHE 준비
-        MANAGERCACHE[:meta] = loadmeta()
-        MANAGERCACHE[:history] = init_gamedata_history(GAMEENV["history"])
-        MANAGERCACHE[:validator_data] = Dict()
-        MANAGERCACHE[:validation] = true
-        MANAGERCACHE[:patch_data_branch] = "master"
+        CACHE[:meta] = loadmeta()
+        CACHE[:history] = init_gamedata_history(GAMEENV["history"])
+        CACHE[:validator_data] = Dict()
+        CACHE[:validation] = true
+        CACHE[:patch_data_branch] = "master"
     end
     help()
     nothing
 end
 function reload_meta!()
     if ismodified("_Meta.json")
-        MANAGERCACHE[:meta] = loadmeta()
+        CACHE[:meta] = loadmeta()
         gamedata_export_history("_Meta.json")
     end
 end
 function setbranch!(branch::AbstractString) 
-    MANAGERCACHE[:patch_data_branch] = branch
+    CACHE[:patch_data_branch] = branch
     git_checkout_patchdata(branch)
 end
 function validation!()
-    MANAGERCACHE[:validation] = !MANAGERCACHE[:validation]
-    @info "MANAGERCACHE[:validation] = $(MANAGERCACHE[:validation])"
+    CACHE[:validation] = !CACHE[:validation]
+    @info "CACHE[:validation] = $(CACHE[:validation])"
 end
 function git_checkout_patchdata(branch)
     if pwd() != GAMEENV["patch_data"]

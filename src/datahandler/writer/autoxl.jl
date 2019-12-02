@@ -2,7 +2,7 @@
 """
 xl_auto()
 
-MANAGERCACHE[:auto]의 파일을 감시하며 파일 변경이 확인되면 xl(f)로 export 한다
+CACHE[:auto]의 파일을 감시하며 파일 변경이 확인되면 xl(f)로 export 한다
 ctrl + x 로 강제종료 되어야 하는데?
 
 TODO: 키입력으로 중단, 재실행 기능

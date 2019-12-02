@@ -157,14 +157,14 @@ end
 _Meta.json 의 내용을 불러온다
 """
 function getmetadata(f::AbstractString)
-    if haskey(MANAGERCACHE[:meta][:auto], f)
-        MANAGERCACHE[:meta][:auto][f]
+    if haskey(CACHE[:meta][:auto], f)
+        CACHE[:meta][:auto][f]
     else
-        MANAGERCACHE[:meta][:manual][f]
+        CACHE[:meta][:manual][f]
     end
 end
 function getmetadata(jwb::JSONWorkbook) 
     f = basename(xlsxpath(jwb))
-    metakey = MANAGERCACHE[:meta][:xlsx_shortcut][split(f, ".")[1]]
+    metakey = CACHE[:meta][:xlsx_shortcut][split(f, ".")[1]]
     getmetadata(metakey)
 end

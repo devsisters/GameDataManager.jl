@@ -28,31 +28,31 @@ end
 """
 function validate_haskey(class, a; assert=true)
     if class == "ItemTable"
-        jwb = get!(MANAGERCACHE[:validator_data], class, JWB(class, false))
+        jwb = get!(CACHE[:validator_data], class, JWB(class, false))
         b = vcat(map(i -> get.(jwb[i], "Key", missing), 1:length(jwb))...)
     elseif class == "Building"
         b = String[]
         for f in ("Shop", "Residence", "Sandbox", "Special")
-            jwb = get!(MANAGERCACHE[:validator_data], f, JWB(f, false))
+            jwb = get!(CACHE[:validator_data], f, JWB(f, false))
             x = get.(jwb[:Building], "BuildingKey", "")
             append!(b, x)
         end
     elseif class == "Ability"
-        jwb = get!(MANAGERCACHE[:validator_data], class, JWB(class, false))
+        jwb = get!(CACHE[:validator_data], class, JWB(class, false))
         b = unique(get.(jwb[:Level], "AbilityKey", missing))
     elseif class == "Block"
-        jwb = get!(MANAGERCACHE[:validator_data], class, JWB(class, false))
+        jwb = get!(CACHE[:validator_data], class, JWB(class, false))
         b = unique(get.(jwb[:Block], "Key", missing))
     elseif class == "BlockSet"
-        jwb = get!(MANAGERCACHE[:validator_data], "Block", JWB("Block", false))
+        jwb = get!(CACHE[:validator_data], "Block", JWB("Block", false))
         b = unique(get.(jwb[:Set], "BlockSetKey", missing))
     elseif class == "RewardTable"
-        jwb = get!(MANAGERCACHE[:validator_data], class, JWB(class, false))
-        jwb2 = get!(MANAGERCACHE[:validator_data], "BlockRewardTable", JWB("BlockRewardTable", false))
+        jwb = get!(CACHE[:validator_data], class, JWB(class, false))
+        jwb2 = get!(CACHE[:validator_data], "BlockRewardTable", JWB("BlockRewardTable", false))
 
         b = [get.(jwb[1], "RewardKey", missing); get.(jwb2[1], "RewardKey", missing)]
     elseif class == "Perk"
-        jwb = get!(MANAGERCACHE[:validator_data], "Pipo", JWB("Pipo", false))
+        jwb = get!(CACHE[:validator_data], "Pipo", JWB("Pipo", false))
         b = unique(get.(jwb[:Perk], "Key", missing))
     else
         throw(AssertionError("validate_haskey($(class), ...)은 정의되지 않았습니다")) 

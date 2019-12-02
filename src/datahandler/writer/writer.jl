@@ -1,5 +1,5 @@
 # 단축키
-function xl(exportall::Bool = false; branch = MANAGERCACHE[:patch_data_branch]) 
+function xl(exportall::Bool = false; branch = CACHE[:patch_data_branch]) 
     git_checkout_patchdata(branch)
     
     files = exportall ? collect_auto_xlsx() : collect_modified_xlsx()
@@ -11,7 +11,7 @@ function xl(exportall::Bool = false; branch = MANAGERCACHE[:patch_data_branch])
         @info "json 추출이 완료되었습니다 ☺"
     end
 end
-function xl(x::AbstractString; branch = MANAGERCACHE[:patch_data_branch])
+function xl(x::AbstractString; branch = CACHE[:patch_data_branch])
     git_checkout_patchdata(branch)
 
     @info "xlsx -> json 추출을 시작합니다 ⚒\n" * "-"^(displaysize(stdout)[2]-4)
@@ -36,7 +36,7 @@ end
 mars 메인 저장소의 '.../_META.json'에 명시된 파일만 추출가능합니다
 """
 function export_gamedata(file::AbstractString)
-    f = is_xlsxfile(file) ? file : MANAGERCACHE[:meta][:xlsx_shortcut][file]
+    f = is_xlsxfile(file) ? file : CACHE[:meta][:xlsx_shortcut][file]
 
     println("『", f, "』")
     bt = BalanceTable(f; read_from_xlsx = true, cacheindex = false)

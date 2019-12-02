@@ -12,10 +12,10 @@ function collect_modified_xlsx()
 end
 # 자동 검출하는 파일만
 function collect_auto_xlsx()
-    keys(MANAGERCACHE[:meta][:auto]) |> collect
+    keys(CACHE[:meta][:auto]) |> collect
 end
 function collect_manual_xlsx()
-    keys(MANAGERCACHE[:meta][:manual]) |> collect
+    keys(CACHE[:meta][:manual]) |> collect
 end
 function collect_all_xlsx()
     a = collect_auto_xlsx()
@@ -26,9 +26,9 @@ end
 function ismodified(f)::Bool
     file = is_xlsxfile(f) ? f : 
            is_jsonfile(f) ? f : 
-           MANAGERCACHE[:meta][:xlsx_shortcut][f]
+           CACHE[:meta][:xlsx_shortcut][f]
 
-    mtime(joinpath_gamedata(file)) > get(MANAGERCACHE[:history], file ,0.)
+    mtime(joinpath_gamedata(file)) > get(CACHE[:history], file ,0.)
 end
 
 """
@@ -38,27 +38,27 @@ gamedata_export() 로 뽑는 파일들 이력
 """
 function gamedata_export_history()
     open(GAMEENV["history"], "w") do io
-        write(io, JSON.json(MANAGERCACHE[:history]))
+        write(io, JSON.json(CACHE[:history]))
     end
 end
 function gamedata_export_history(files::Vector)
     for f in files
-        MANAGERCACHE[:history][f] = mtime(joinpath_gamedata(f))
+        CACHE[:history][f] = mtime(joinpath_gamedata(f))
     end
     gamedata_export_history()
 end
 function gamedata_export_history(f)
-    MANAGERCACHE[:history][f] = mtime(joinpath_gamedata(f))
+    CACHE[:history][f] = mtime(joinpath_gamedata(f))
     gamedata_export_history()
 end
 
 # _Meta.json에 없는 파일 제거함
 function cleanup_gamedata_export_history!()
-    a = keys(MANAGERCACHE[:meta][:auto])
-    deleted_file = setdiff(keys(MANAGERCACHE[:history]), a)
+    a = keys(CACHE[:meta][:auto])
+    deleted_file = setdiff(keys(CACHE[:history]), a)
     if length(deleted_file) > 0
         for x in deleted_file
-            pop!(MANAGERCACHE[:history], x)
+            pop!(CACHE[:history], x)
         end
         gamedata_export_history()
     end
