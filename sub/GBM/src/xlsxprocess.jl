@@ -8,40 +8,10 @@ function WorkBook(filename::AbstractString)
     WorkBook{Symbol(filename)}
 end
 
-isnull(x) = ismissing(x) | isnothing(x)
 """
-    compress!(jwb::JSONWorkbook)
-"""
-function compress!(jwb::JSONWorkbook, sheet; kwargs...)
-    compress!(jwb[sheet]; kwargs...)
-end
-"""
-    compress!(jwb::JSONWorksheet)
-모든 데이터를 한줄로 합친다
-"""
-function compress!(jws::JSONWorksheet; dropmissing = true)
-    new_data = OrderedDict()
-    vals = collect.(values.(jws.data))
-    for k in keys(jws.data[1])
-        x = map(el -> el[k], jws.data)
-        new_data[k] = dropmissing ? filter(!isnull, x) : x
-    end
-    jws.data = [new_data]
-end
+    process!(jwb::JSONWorkbook)
 
-"""
-    collect_values
-* Array{AbstractDict, 1} 에서 value만 뽑아 Array{Array{Any, 1}, 1}로 만든다 
-"""
-function collect_values(arr::AbstractArray)
-    vcat(map(el -> collect(values(el)), arr)...)
-end
-
-
-"""
-    editor!(jwb::JSONWorkbook)
-
-process!(f::WorkBook{:FileName}, jwb) 함수로 데이터를 2차가공한다
+* process!(f::WorkBook{:FileName}, jwb) 함수로 데이터를 2차가공한다
 """
 function process!(jwb::JSONWorkbook; kwargs...)::JSONWorkbook
     filename = split(basename(jwb), ".")[1]
@@ -64,26 +34,19 @@ process!(jwb, ::Type{WorkBook{T}}) where T = jwb
 function process!(jwb, ::Type{WorkBook{:Block}})
     blockset = jwb[:Set].data
 
+    # BlockSetKey 별로 Dict재 생성
     ids = unique(broadcast(el -> el["BlockSetKey"], blockset))
-    newdata = broadcast(x -> OrderedDict{String, Any}("BlockSetKey" => x), ids)
+    newdata = broadcast(x -> OrderedDict{String, Any}(), ids)
     for (i, id) in enumerate(ids)
-        origin = begin 
-            f = broadcast(el -> get(el, "BlockSetKey", 0) == id, blockset)
-            blockset[f]
-        end
-        for (j, el) in enumerate(origin)
-            if j == 1
-                for k in ["Icon", "\$Name"]
-                    newdata[i][k] = el[k]
-                    newdata[i]["Members"] = []
-                end
-            end
+        origin = filter(el -> get(el, "BlockSetKey", 0) == id, blockset)
+        
+        newdata[i] = OrderedDict(
+                "BlockSetKey" => id, "Icon" => origin[1]["Icon"],
+                "\$Name" => origin[1]["\$Name"], "Name" => origin[1]["Name"], "Members" => [])
+        for el in origin
             m = get(el, "Members", missing)
-            if isa(m, AbstractDict)
-                push!(newdata[i]["Members"], m)
-            end
+            isa(m, AbstractDict) && push!(newdata[i]["Members"], m)
         end
-  
     end
     jwb[:Set].data = newdata
     sort!(jwb[:Block], "Key")
@@ -98,17 +61,20 @@ end
 
 """
     process!(jwb, WorkBook{:Shop})
+* 건설시간, 건설비용 결정
+* 개척점수 습득량 결정
+
+    process!(jwb, WorkBook{:Residence})
+* 건설시간, 건설비용 결정
+* 개척점수 습득량 결정
+
 """
 function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Shop}}) 
     process_building!(jwb, "Shop")
 end
-"""
-    process!(jwb, WorkBook{:Residence})
-"""
 function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Residence}}) 
-    process_building!(jwb,"Residence" )
+    process_building!(jwb,"Residence")
 end
-
 function process_building!(jwb::JSONWorkbook, type)
     info = Dict()
     for row in jwb[:Building].data
@@ -118,21 +84,25 @@ function process_building!(jwb::JSONWorkbook, type)
         bd = row["BuildingKey"]
         lv = row["Level"]
         grade = info[bd]["Grade"]
-        ar = info[bd]["Condition"]["ChunkWidth"] * info[bd]["Condition"]["ChunkLength"]
+        area = info[bd]["Condition"]["ChunkWidth"] * info[bd]["Condition"]["ChunkLength"]
 
-        levelupcost = Dict("NeedTime" => buildngtime(type, grade, lv, ar),
-                           "PriceCoin" => buildngcost_coin(type, grade, lv, ar))
+        levelupcost = Dict("NeedTime" => buildngtime(type, grade, lv, area),
+                           "PriceCoin" => buildngcost_coin(type, grade, lv, area))
         row["LevelupCost"] = levelupcost
 
-        # TODO, StackItem 오브젝트를 serialize 하면 map 함수 필요 없음
-        row["LevelupCostItem"] = buildngcost_item(type, grade, lv, ar)
+        row["LevelupCostItem"] = buildngcost_item(type, grade, lv, area)
         
         row["Reward"] = convert(OrderedDict{String, Any}, row["Reward"])
-        row["Reward"]["DevelopmentPoint"] = building_developmentpoint(type, lv, ar)
+        row["Reward"]["DevelopmentPoint"] = building_developmentpoint(type, lv, area)
     end
     return jwb 
 end
+"""
+    process!(jwb, WorkBook{:Ability})
 
+* ShopCoinProduction: 건물 등급, 레벨, 면적으로 결정
+* JoyCreation: 건물 등급, 레벨, 면적으로 결정
+"""
 function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Ability}}) 
     function arearange_for_building_grade(buildingtype)
         # 등급별 면적 손으로 기입
@@ -197,52 +167,26 @@ function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Ability}})
     return jwb
 end
 
+"""
+    process!(jwb, WorkBook{:Quest})
 
-function process!(jwb::JSONWorkbook, ::Type{WorkBook{:ItemTable}}) 
-    jws = jwb[:BuildingSeed]
-    # NOTE 이런 경우가 많은데 setindex!(jws, ...) 추가 할까?
-    # @inbounds for (i, el) in enumerate(jws.data)
-    #     el["PriceJoy"] = buildingseed_pricejoy(el["BuildingKey"])
-    # end
-    return jwb
-end
+* Dialogue 시트 개별 Dialogue 파일로 생성
+"""
+function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Quest}}) 
+    collect_values!(jwb, :Member, "CompleteCondition")
+    collect_values!(jwb, :Group, ["AndCondition", "OrCondition"])
 
-function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Flag}}) 
-    jws = jwb[:BuildingUnlock]
-    for el in jws.data
-        el["Condition"] = collect_values(el["Condition"])
-    end
-    jws = jwb[:UIEnter]
-    for el in jws.data
-        el["Condition"] = collect_values(el["Condition"])
-    end
-    return jwb
-end
-
-function process!(jwb::JSONWorkbook, ::Type{WorkBook{:GeneralSetting}}) 
-    data = jwb[:ProfileImage].data
-    for el in data
-        el["ImageFileName"] = collect_values(el["ImageFileName"])
-    end
-    return jwb
-end
-
-function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Chore}}) 
-    data = jwb[:Group].data
-    for el in data
-        el["Reward"] = collect_values(el["Reward"])
-        el["AssistReward"] = collect_values(el["AssistReward"])
-    end
-    return jwb
-end
-
-function process!(jwb::JSONWorkbook, ::Type{WorkBook{:CashStore}}) 
-    jwb[:Data] = merge(jwb[:Data], jwb[:args], "ProductKey")
-    deleteat!(jwb, :args)
+    folder = joinpath(ENV["MARS-CLIENT"], "patch-data/Dialogue/MainQuest")
+    create_dialogue_script(jwb[:Dialogue], folder)
+    deleteat!(jwb, :Dialogue)
 
     return jwb
 end
+"""
+    process!(jwb, WorkBook{:VillagerTalk})
 
+* Dialogue 시트 개별 Dialogue 파일로 생성
+"""
 function process!(jwb::JSONWorkbook, ::Type{WorkBook{:VillagerTalk}}) 
     if minimum(get.(jwb[:Dialogue], "Index", missing)) < 2
         throw(AssertionError("VillagerTalk 대사Index는 2부터 시작해 주세요"))
@@ -254,49 +198,12 @@ function process!(jwb::JSONWorkbook, ::Type{WorkBook{:VillagerTalk}})
 
     return jwb
 end
-function process!(jwb::JSONWorkbook, ::Type{WorkBook{:NameGenerator}}) 
-    for s in sheetnames(jwb)
-        compress!(jwb, s)
-    end
-    return jwb
-end
 
+"""
+    process!(jwb, WorkBook{:Pipo})
 
-function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Player}}) 
-    # 레벨업 개척점수 필요량 추가
-    jws = jwb[:DevelopmentLevel]
-    @inbounds for i in 1:length(jws.data)
-        lv = jws.data[i]["Level"]
-        jws.data[i]["NeedDevelopmentPoint"] = levelup_need_developmentpoint(lv)
-    end
-
-    for sheet in [:DroneDelivery, :Chore, :Festival, :SpaceDrop]
-        jwb[:DevelopmentLevel] = merge(jwb[:DevelopmentLevel], jwb[sheet], "Level")
-        deleteat!(jwb, sheet)
-    end
-
-    return jwb
-end
-
-function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Quest}}) 
-    member = jwb[:Member].data
-    for el in member
-        el["CompleteCondition"] = collect_values(el["CompleteCondition"])
-    end
-
-    data = jwb[:Group].data
-    for el in data
-        el["AndCondition"] = collect_values(el["AndCondition"])
-        el["OrCondition"] = collect_values(el["OrCondition"])
-    end
-
-    folder = joinpath(ENV["MARS-CLIENT"], "patch-data/Dialogue/MainQuest")
-    create_dialogue_script(jwb[:Dialogue], folder)
-    deleteat!(jwb, :Dialogue)
-
-    return jwb
-end
-
+* Dialogue 시트 개별 Dialogue 파일로 생성
+"""
 function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Pipo}}) 
     folder = joinpath(ENV["MARS-CLIENT"], "patch-data/Dialogue/PipoTalk")
     create_dialogue_script(jwb[:Dialogue], folder)
@@ -305,22 +212,27 @@ function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Pipo}})
     return jwb
 end
 
-function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Work}}) 
-    jws = jwb[:Reward]
+"""
+    process!(jwb, WorkBook{:Player})
 
-    for i in 1:length(jws.data)
-        raw = jws.data[i]["Reward"]
-        jws.data[i]["Reward"] = vcat(map(el -> collect(values(el)), raw)...)
+* 계정레벨 요구 developmentpoint 책정
+"""
+function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Player}}) 
+    # 레벨업 개척점수 필요량 추가
+    jws = jwb[:DevelopmentLevel]
+    @inbounds for i in 1:length(jws.data)
+        lv = jws.data[i]["Level"]
+        jws.data[i]["NeedDevelopmentPoint"] = levelup_need_developmentpoint(lv)
     end
 
-    jws = jwb[:Event]
-    for i in 1:length(jws.data)
-        raw = jws.data[i]["RequirePipo"]
-        jws.data[i]["RequirePipo"] = vcat(map(el -> collect(values(el)), raw)...)
+    for sheet in [:DroneDelivery, :Chore, :Festival]
+        jwb[:DevelopmentLevel] = merge(jwb[:DevelopmentLevel], jwb[sheet], "Level")
+        deleteat!(jwb, sheet)
     end
 
     return jwb
 end
+
 
 function process!(jwb::JSONWorkbook, ::Type{WorkBook{:PipoDemographic}}) 
     for s in ("Gender", "Age", "Country")
@@ -340,10 +252,15 @@ function process!(jwb::JSONWorkbook, ::Type{WorkBook{:PipoDemographic}})
     return jwb
 end
 
+"""
+    process!(jwb, WorkBook{:RewardTable})
+    process!(jwb, WorkBook{:BlockRewardTable})
 
+* RewardScript Wrapping
+"""
 function process!(jwb::JSONWorkbook, ::Type{WorkBook{:RewardTable}}) 
     for i in 1:length(jwb)
-        collect_rewardscript!(jwb[i])
+        warp_rewardscript!(jwb[i])
     end
 
     append!(jwb[:Solo].data, jwb[:Box].data)
@@ -357,13 +274,13 @@ function process!(jwb::JSONWorkbook, ::Type{WorkBook{:RewardTable}})
 end
 function process!(jwb::JSONWorkbook, ::Type{WorkBook{:BlockRewardTable}}) 
     for i in 1:length(jwb)
-        collect_rewardscript!(jwb[i])
+        warp_rewardscript!(jwb[i])
     end
     sort!(jwb[:Data], "RewardKey")
 
     return jwb
 end
-function collect_rewardscript!(jws::JSONWorksheet)
+function warp_rewardscript!(jws::JSONWorksheet)
     function pull_rewardscript(x)
         origin = x["RewardScript"]["Rewards"]
         result = map(el -> [get(el, "Weight", "1"),
@@ -394,4 +311,45 @@ function collect_rewardscript!(jws::JSONWorksheet)
     end
     jws.data = new_data
     return jws
+end
+
+
+
+# 간단한 처리 
+function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Flag}}) 
+    collect_values!(jwb, :BuildingUnlock, "Condition")
+    collect_values!(jwb, :UIEnter, "Condition")
+
+    return jwb
+end
+function process!(jwb::JSONWorkbook, ::Type{WorkBook{:GeneralSetting}}) 
+    collect_values!(jwb, :ProfileImage, "ImageFileName")
+
+    return jwb
+end
+function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Chore}}) 
+    collect_values!(jwb, :Group, ["Reward", "AssistReward"])
+
+    return jwb
+end
+
+function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Work}}) 
+    collect_values!(jwb, :Reward, "Reward")
+    collect_values!(jwb, :Event, "RequirePipo")
+
+    return jwb
+end
+
+function process!(jwb::JSONWorkbook, ::Type{WorkBook{:CashStore}}) 
+    jwb[:Data] = merge(jwb[:Data], jwb[:args], "ProductKey")
+    deleteat!(jwb, :args)
+
+    return jwb
+end
+
+function process!(jwb::JSONWorkbook, ::Type{WorkBook{:NameGenerator}}) 
+    for s in sheetnames(jwb)
+        compress!(jwb, s)
+    end
+    return jwb
 end

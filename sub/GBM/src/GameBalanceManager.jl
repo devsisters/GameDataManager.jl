@@ -6,6 +6,7 @@ module GameBalanceManager
     using Caching
 
     # 엑셀을 편집
+    include("helper.jl")
     include("xlsxprocess.jl")
     include("dialogue.jl")
 
