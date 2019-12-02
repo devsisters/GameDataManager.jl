@@ -17,7 +17,7 @@ include("datahandler/validator.jl")
 
 include("datahandler/util.jl")
 
-include("../subtree/GameBalanceManager/src/GameBalanceManager.jl")
+include("../sub/GBM/src/GameBalanceManager.jl")
 using .GameBalanceManager
 
 
