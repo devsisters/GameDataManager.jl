@@ -114,8 +114,6 @@ function validate_file(root, file; msg = "가 존재하지 않습니다", assert
     end
 end
 
-
-
 """
     validator(bt::XLSXBalanceTable)
 
@@ -169,8 +167,7 @@ validator(bt::XLSXBalanceTable{:Shop}) = validator_building(bt)
 validator(bt::XLSXBalanceTable{:Residence}) = validator_building(bt)
 validator(bt::XLSXBalanceTable{:Sandbox}) = validator_building(bt)
 function validator_building(bt::XLSXBalanceTable)
-    fname = _filename(bt)
-
+    fname = _filename(bt)    
     data = get(DataFrame, bt, "Building")
     if fname != :Sandbox  
         validate_haskey("Ability", filter(!isnull, vcat(data[!, :AbilityKey]...)))
@@ -289,7 +286,7 @@ function validator(bt::XLSXBalanceTable{:RewardTable})
     df = get(DataFrame, bt, 1)
     validate_duplicate(df[!, :RewardKey])
     # 1백만 이상은 BlockRewardTable에서만 쓴다
-    @assert (SubModuleRewardTable.keyscope(maximum(df[!, :RewardKey])) == "RewardTable") "RewardTable의 RewardKey는 1,000,000 미만을 사용해 주세요."
+    @assert maximum(df[!, :RewardKey]) < 10^6 "RewardTable의 RewardKey는 1,000,000 미만을 사용해 주세요."
 
     # ItemKey 확인
     itemkeys = begin 
@@ -317,7 +314,7 @@ function validator(bt::XLSXBalanceTable{:BlockRewardTable})
     df = get(DataFrame, bt, "Data")
     validate_duplicate(df[!, :RewardKey])
     # 1백만 이상은 BlockRewardTable에서만 쓴다
-    @assert (SubModuleRewardTable.keyscope(maximum(df[!, :RewardKey])) == "BlockRewardTable") "BlockRewardTable의 RewardKey는 1,000,000 이상을 사용해 주세요."
+    @assert minimum(df[!, :RewardKey]) >= 10^6  "BlockRewardTable의 RewardKey는 1,000,000 이상을 사용해 주세요."
 
     # ItemKey 확인
     itemkeys = begin 
