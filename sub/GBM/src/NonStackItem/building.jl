@@ -69,12 +69,13 @@ function buildngcost_item(grade, level, area)
 end
 
 function building_developmentpoint(type::AbstractString, level, area)
-    # Residence는 만랩이 절반이라서 Shop 2레벨 비용의 합
+    # Residence는 만랩이 5라서 경험치를 Shop 2개레벨의 합으로 지급
     if type == "Residence" 
         base = level * 2 
         building_developmentpoint("Shop", base, area) + building_developmentpoint("Shop", base-1, area)
     else
-        round(Int, level * area/2, RoundUp) #최소면적이 1x2라서 /2
+        # 건물레벨 * 면적
+        round(Int, level * area, RoundUp)
     end
 end
 

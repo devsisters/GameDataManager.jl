@@ -125,16 +125,34 @@ function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Ability}})
 
     for grade in 1:5
         for a in area_per_grade[grade] # 건물 면적
-            for lv in 1:6
+            for lv in 1:5
                 profit, intervalms = coinproduction(grade, lv, a)
+                coincounter = profit * (lv + grade + 3) # 일단 대충
                 ab = deepcopy(template)
                 ab["Group"] = "ShopCoinProduction"
                 ab["AbilityKey"] = "ShopCoinProduction_G$(grade)_$(a)"
                 ab["Level"] = lv
                 ab["Value1"] = profit
                 ab["Value2"] = intervalms
-                ab["Value3"] = profit * (lv + grade + 3) # 일단 대충
+                ab["Value3"] = coincounter
                 push!(shop_ability, ab)
+
+                # 임시코드, 추후 삭제
+                ab2 = deepcopy(template)
+                ab2["Group"] = "ProfitCoin"
+                ab2["AbilityKey"] = "ProfitCoin_G$(grade)_$(a)"
+                ab2["Level"] = lv
+                ab2["Value"] = profit; ab2["Value1"] = profit
+                push!(shop_ability, ab2)
+
+                # 임시코드, 추후 삭제
+                ab3 = deepcopy(template)
+                ab3["Group"] = "CoinCounterCap"
+                ab3["AbilityKey"] = "CoinCounterCap_G$(grade)_$(a)"
+                ab3["Level"] = lv
+                ab3["Value"] = coincounter; ab3["Value1"] = coincounter
+                push!(shop_ability, ab3)
+
             end
         end
     end
