@@ -125,8 +125,7 @@ function xl_backup()
     origin = joinpath(GAMEENV["GameData"], f)
     target = joinpath(GAMEENV["patch_data"], "_GameData/$f")
     print("↳Move File: ", origin)
-        cp(origin, target; force = true)
-        rm(origin)
+        mv(origin, target; force = true)
     println(" => ", target)
 
 end
