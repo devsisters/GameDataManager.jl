@@ -16,7 +16,7 @@ function coinproduction(grade, level, area)
 
     progress = (grade + level - 1) #grade는 레벨1과 동일하게 취급
 
-    base_interval = 6500
+    base_interval = 60000
     if progress == 1
         profit = profitcoin(progress, area)
         profit = Int(profit)

@@ -1,4 +1,3 @@
-
 isnull(x) = ismissing(x) | isnothing(x)
 """
     compress!(jwb::JSONWorksheet)
