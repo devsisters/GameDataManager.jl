@@ -68,7 +68,7 @@ function validator_building(bt::XLSXBalanceTable)
     leveldata = get(DataFrame, bt, "Level")
 
     buildgkey_level = broadcast(row -> (row[:BuildingKey], row[:Level]), eachrow(leveldata))
-    @assert allunique(buildgkey_level) "$(basename(bt))'Level' 시트에 중복된 Level이 있습니다"
+    @assert allunique(buildgkey_level) "[Level]시트에 중복된 Level이 있습니다"
 
     path_template = joinpath(GAMEENV["patch_data"], "BuildTemplate/Buildings")
     validate_file(path_template, leveldata[!, :BuildingTemplate], ".json"; 
