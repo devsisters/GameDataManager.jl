@@ -68,14 +68,14 @@ function buildngcost_item(grade, level, area)
     return cumulated_items
 end
 
-function building_developmentpoint(type::AbstractString, level, area)
+function building_developmentpoint(type::AbstractString, level::Integer, area::Integer)
     # Residence는 만랩이 5라서 경험치를 Shop 2개레벨의 합으로 지급
     if type == "Residence" 
         base = level * 2 
         building_developmentpoint("Shop", base, area) + building_developmentpoint("Shop", base-1, area)
     else
         # 건물레벨 * 면적
-        round(Int, level * area, RoundUp)
+        round(level * area, RoundUp)
     end
 end
 
