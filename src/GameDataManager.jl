@@ -13,6 +13,7 @@ import Base: +, -, *, /, ==
 
 # BalanceTable
 include("datahandler/balancetable.jl")
+include("datahandler/common.jl")
 include("datahandler/validator.jl")
 
 include("datahandler/util.jl")
