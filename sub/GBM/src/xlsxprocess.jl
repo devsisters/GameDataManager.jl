@@ -26,7 +26,9 @@ function process!(jwb::JSONWorkbook; kwargs...)::JSONWorkbook
 
     return jwb
 end
-process!(jwb, ::Type{WorkBook{T}}) where T = jwb
+function process!(jwb, ::Type{WorkBook{T}}) where T 
+    return jwb
+end
 
 """
     process!(:Block, jwb)
@@ -125,7 +127,7 @@ function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Ability}})
 
     for grade in 1:5
         for a in area_per_grade[grade] # 건물 면적
-            for lv in 1:5
+            for lv in 1:10
                 profit, intervalms = coinproduction(grade, lv, a)
                 coincounter = profit * (lv + grade + 3) # 일단 대충
                 ab = deepcopy(template)
@@ -136,23 +138,6 @@ function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Ability}})
                 ab["Value2"] = intervalms
                 ab["Value3"] = coincounter
                 push!(shop_ability, ab)
-
-                # 임시코드, 추후 삭제
-                ab2 = deepcopy(template)
-                ab2["Group"] = "ProfitCoin"
-                ab2["AbilityKey"] = "ProfitCoin_G$(grade)_$(a)"
-                ab2["Level"] = lv
-                ab2["Value"] = profit; ab2["Value1"] = profit
-                push!(shop_ability, ab2)
-
-                # 임시코드, 추후 삭제
-                ab3 = deepcopy(template)
-                ab3["Group"] = "CoinCounterCap"
-                ab3["AbilityKey"] = "CoinCounterCap_G$(grade)_$(a)"
-                ab3["Level"] = lv
-                ab3["Value"] = coincounter; ab3["Value1"] = coincounter
-                push!(shop_ability, ab3)
-
             end
         end
     end
@@ -256,8 +241,26 @@ function process!(jwb::JSONWorkbook, ::Type{WorkBook{:PipoDemographic}})
     for s in ("Gender", "Age", "Country")
         compress!(jwb, s)
     end
+    return jwb
+end
 
-    jws = jwb["enName"]
+"""
+    process!(jwb, WorkBook{:PipoNameA ~ D})
+
+* 모든 행을 1개로 압축
+"""
+process!(jwb::JSONWorkbook, ::Type{WorkBook{:PipoNameA}}) = compress_piponame!(jwb)
+process!(jwb::JSONWorkbook, ::Type{WorkBook{:PipoNameB}}) = compress_piponame!(jwb)
+process!(jwb::JSONWorkbook, ::Type{WorkBook{:PipoNameC}}) = compress_piponame!(jwb)
+process!(jwb::JSONWorkbook, ::Type{WorkBook{:PipoNameD}}) = compress_piponame!(jwb)
+process!(jwb::JSONWorkbook, ::Type{WorkBook{:PipoNameE}}) = compress_piponame!(jwb)
+function compress_piponame!(jwb::JSONWorkbook)
+    for s in sheetnames(jwb)
+        compress_piponame!(jwb[s])
+    end
+    jwb
+end
+function compress_piponame!(jws::JSONWorksheet)
     new_data = OrderedDict()
     for k in keys(jws.data[1])
         new_data[k] = OrderedDict()
@@ -266,8 +269,6 @@ function process!(jwb::JSONWorkbook, ::Type{WorkBook{:PipoDemographic}})
         end
     end
     jws.data = [new_data]
-
-    return jwb
 end
 
 """
