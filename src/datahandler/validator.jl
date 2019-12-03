@@ -24,6 +24,10 @@ function validator(bt::XLSXBalanceTable{:Block})
     p = joinpath(GAMEENV["ArtAssets"], "GameResources/Blocks")
     validate_file(p, unique(block[!, :ArtAsset]), ".prefab", true; 
                   msg = "다음의 prefab이 존재하지 않습니다", assert = false)
+    # Luxurygrade
+    if any(ismissing.(block[!, :Verts]))
+        @warn "Verts정보가 없는 Block이 있습니다. Unity의 BlockVertexCount 내용을 엑셀에 추가해 주세요"
+    end
 
     # SubCategory Key 오류
     subcat = unique(block[!, :SubCategory])
