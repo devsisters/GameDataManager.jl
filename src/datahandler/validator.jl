@@ -236,6 +236,8 @@ function validator(bt::XLSXBalanceTable{:Quest})
     # Group시트 검사
     group = get(DataFrame, bt, "Group")
     @assert allunique(group[!, :Key]) "GroupKey는 Unique 해야 합니다"
+    @assert allunique(group[!, :Name]) "GroupName은 Unique 해야 합니다"
+
     if maximum(group[!, :Key]) > 1023 || minimum(group[!, :Key]) < 0
         throw(AssertionError("GroupKey는 0~1023만 사용 가능합니다."))
     end
@@ -254,8 +256,7 @@ function validator(bt::XLSXBalanceTable{:Quest})
     rewards = get.(member[!, :CompleteAction], "RewardKey", missing)
     validate_haskey("RewardTable", rewards)
 
-    a = unique(member[!, :GroupName])
-    validate_subset(a, group[!, :Name];msg = "존재하지 않는 GroupName 입니다")
+    validate_subset(member[!, :GroupName], group[!, :Name]; msg = "존재하지 않는 GroupName 입니다")
 
     # Dialogue 파일 유무 체크
     path_dialogue = joinpath(GAMEENV["patch_data"], "Dialogue")
