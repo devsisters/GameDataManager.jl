@@ -121,7 +121,7 @@ function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Ability}})
     shop_ability = []
     template = OrderedDict(
         "Group" => "", "AbilityKey" => "",
-        "Level" => 0, "Value" => 0, "Value1" => missing, "Value2" => missing, "Value3" => missing, 
+        "Level" => 0, "Value1" => missing, "Value2" => missing, "Value3" => missing, 
         "LevelupCost" => Dict("PriceCoin" => missing, "Time" => missing), 
         "LevelupCostItem" => [])
 
@@ -155,8 +155,6 @@ function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Ability}})
                 ab["AbilityKey"] = "JoyCreation_G$(grade)_$(a)"
                 ab["Level"] = lv
                 ab["Value1"] = joy
-
-                ab["Value"] = joy # 삭제 예정
             
                 push!(residence_ability, ab)
             end
