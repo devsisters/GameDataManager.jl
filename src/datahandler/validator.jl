@@ -57,11 +57,11 @@ end
 
 validator(bt::XLSXBalanceTable{:Shop}) = validator_building(bt)
 validator(bt::XLSXBalanceTable{:Residence}) = validator_building(bt)
-validator(bt::XLSXBalanceTable{:Sandbox}) = validator_building(bt)
+validator(bt::XLSXBalanceTable{:Attraction}) = validator_building(bt)
 function validator_building(bt::XLSXBalanceTable)
     fname = _filename(bt)    
     data = get(DataFrame, bt, "Building")
-    if fname != :Sandbox  
+    if fname != :Attraction  
         validate_haskey("Ability", filter(!isnull, vcat(data[!, :AbilityKey]...)))
 
         building_seeds = get.(data[!, :BuildCost], "NeedItemKey", missing)

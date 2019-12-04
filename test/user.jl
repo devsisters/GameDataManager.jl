@@ -122,7 +122,7 @@ end
 @testset "건물 건설" begin
     shop = get(DataFrame, ("Shop", "Building"))
     res = get(DataFrame, ("Residence", "Building"))
-    sandbox = get(DataFrame, ("Sandbox", "Building"))
+    attraction = get(DataFrame, ("Attraction", "Building"))
 
     for k in res[!, :BuildingKey]
         add!(u, BuildingSeedItem(k))

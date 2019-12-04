@@ -7,7 +7,7 @@ TODO Ability 빼기 -레벨별 동일하니 Building에 있을 필요 없다
 * Special - 특수 건물
 * Residence- 피포 보관
 * Shop-업종
-* Sandbox
+* Attraction
 """
 abstract type Building <: NonStackItem end
 function Building(x)
@@ -119,17 +119,17 @@ function Special(key)
 end
 
 """
-    Sandbox(key, level)
+Attraction(key, level)
 """
-mutable struct Sandbox <: Building
+mutable struct Attraction <: Building
     uid::UInt64
     key::String
     level::Int8
     # blueprint  건물 도면
 end
-function Sandbox(key)
-    ref = get_cachedrow("Sandbox", "Building", :BuildingKey, key)
-    Sandbox(building_uid(), key, 1)
+function Attraction(key)
+    ref = get_cachedrow("Attraction", "Building", :BuildingKey, key)
+    Attraction(building_uid(), key, 1)
 end
 
 """
@@ -150,7 +150,7 @@ end
 function buildingtype(key)
     startswith(key, "s") ? Shop :
     startswith(key, "r") ? Residence :
-    startswith(key, "b") ? Sandbox :
+    startswith(key, "a") ? Attraction :
     startswith(key, "p") ? Special : 
     key == "Home" ? Special :
     throw(KeyError(key))
@@ -229,7 +229,7 @@ function levelup!(b::T) where T <: Building
     return r
 end
 levelup!(b::Special) = b
-levelup!(b::Sandbox) = b
+levelup!(b::Attraction) = b
 
 levelup!(a::Ability) = setlevel!(a, a.level + 1)
 

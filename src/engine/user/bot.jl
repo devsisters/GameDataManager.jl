@@ -36,7 +36,7 @@ end
 #건물 크기를 반환하는 함수
 function get_buildingsize2(key)
     d = Dict{String, Any}()
-    for file in ("Special", "Shop", "Residence", "Sandbox")
+    for file in ("Special", "Shop", "Residence", "Attraction")
         ref = get(DataFrame, (file, "Building"))
         for r in eachrow(ref[!, :])
             x = r[:Condition]
@@ -124,12 +124,12 @@ function get_suitablebuilding(site_size)
     shop = get(DataFrame, ("Shop", "Building"))
     special = get(DataFrame, ("Special", "Building"))
     residence = get(DataFrame, ("Residence", "Building"))
-    sandbox = get(DataFrame, ("Sandbox", "Building"))
+    attraction = get(DataFrame, ("Attraction", "Building"))
 
     BuildingMaxLevel = get(Dict, ("GeneralSetting", 1))[1]["BuildModeEnableLevel"]
 
     #[Building Category, BuildingKey, Level, 건물 방향] 1이 남쪽, 2가 동쪽, 3이 북쪽, 4가 서쪽을 의미한다.
-    BuildingInfo = [rand(("Shop", "Special", "Residence", "Sandbox")), "BuildingKey", 1, rand(0:3)]
+    BuildingInfo = [rand(("Shop", "Special", "Residence", "Attraction")), "BuildingKey", 1, rand(0:3)]
 
     #임의로 선정된 건물 카테고리 중 임의의 건물 선정.
     if BuildingInfo[1] == "Shop"
@@ -145,8 +145,8 @@ function get_suitablebuilding(site_size)
         BuildingInfo[2] = rand(residence.BuildingKey)
         BuildingInfo[3] = rand(1:BuildingMaxLevel["Residence"])
     else
-        BuildingInfo[2] = rand(sandbox.BuildingKey)
-        BuildingInfo[3] = rand(1:BuildingMaxLevel["Sandbox"])
+        BuildingInfo[2] = rand(attraction.BuildingKey)
+        BuildingInfo[3] = rand(1:BuildingMaxLevel["Attraction"])
     end
     Building_size = get_buildingsize2(BuildingInfo[2])
 
@@ -159,7 +159,7 @@ function get_suitablebuilding(site_size)
 
     #건물 사이즈가 맞지 않다면 맞을 때 까지 다시 뽑기.
     while (!check_buildingsize(site_size, Building_size))
-        BuildingInfo = [rand(("Shop", "Special", "Residence", "Sandbox")), "BuildingKey", 1, rand(0:3)]
+        BuildingInfo = [rand(("Shop", "Special", "Residence", "Attraction")), "BuildingKey", 1, rand(0:3)]
 
         #임의로 선정된 건물 카테고리 중 임의의 건물 선정.
         if BuildingInfo[1] == "Shop"
@@ -175,8 +175,8 @@ function get_suitablebuilding(site_size)
             BuildingInfo[2] = rand(residence.BuildingKey)
             BuildingInfo[3] = rand(1:BuildingMaxLevel["Residence"])
         else
-            BuildingInfo[2] = rand(sandbox.BuildingKey)
-            BuildingInfo[3] = rand(1:BuildingMaxLevel["Sandbox"])
+            BuildingInfo[2] = rand(attraction.BuildingKey)
+            BuildingInfo[3] = rand(1:BuildingMaxLevel["Attraction"])
         end
 
         Building_size = get_buildingsize2(BuildingInfo[2])

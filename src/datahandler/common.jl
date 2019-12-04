@@ -33,7 +33,7 @@ function validate_haskey(class, a; assert=true)
         b = vcat(map(i -> get.(jwb[i], "Key", missing), 1:length(jwb))...)
     elseif class == "Building"
         b = String[]
-        for f in ("Shop", "Residence", "Sandbox", "Special")
+        for f in ("Shop", "Residence", "Attraction", "Special")
             jwb = get!(CACHE[:validator_data], f, JWB(f, false))
             x = get.(jwb[:Building], "BuildingKey", "")
             append!(b, x)

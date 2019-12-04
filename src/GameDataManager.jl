@@ -81,7 +81,7 @@ export GAMEENV, GAMEDATA, help, setup!,
           ItemCollection,
           add!, remove!, has, getitem, itemlevel, userlevel,
     # 건물
-      NonStackItem, Building, Special, Residence, Shop, Sandbox, Ability, SegmentInfo,
+      NonStackItem, Building, Special, Residence, Shop, Attraction, Ability, SegmentInfo,
                     abilitysum,
                     price, buy!, build!, levelup!, spend!,
     # 부동산 

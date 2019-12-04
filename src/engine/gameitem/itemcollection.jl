@@ -169,7 +169,7 @@ struct BuildingStorage <: AbstractGameItemStorage
     ownermid::UInt64
     shop::Array{SegmentInfo, 1}
     residence::Array{SegmentInfo, 1}
-    sandbox::Array{SegmentInfo, 1}
+    attraction::Array{SegmentInfo, 1}
     special::Array{SegmentInfo, 1}
 end
 function BuildingStorage(mid)
@@ -178,7 +178,7 @@ end
 function add!(s::BuildingStorage, seg::SegmentInfo)
     target = isa(seg.building, Shop) ? s.shop :
             isa(seg.building, Residence) ? s.residence :
-            isa(seg.building, Sandbox) ? s.sandbox :
+            isa(seg.building, Attraction) ? s.attraction :
             isa(seg.building, Special) ? s.special  :
             throw(MethodError(add!, seg.building))
 

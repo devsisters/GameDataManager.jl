@@ -48,8 +48,8 @@ function price(::Type{Special}, key::String)
 
     return ItemCollection(StackItem(ref["NeedItemKey"], ref["NeedItemCount"]), ref["PriceCoin"]*COIN)
 end
-function price(::Type{Sandbox}, key::String)
-    ref = get_cachedrow("Sandbox", "Building", :BuildingKey, key)[1]["BuildCost"]
+function price(::Type{:Attraction}, key::String)
+    ref = get_cachedrow("Attraction", "Building", :BuildingKey, key)[1]["BuildCost"]
 
     return ref["PriceCoin"]*COIN
 end
@@ -69,7 +69,7 @@ function price(b::T) where T <: Building
     return missing
 end
 price(b::Special) = missing
-price(b::Sandbox) = missing
+price(b::Attraction) = missing
 price(seg::SegmentInfo) = price(seg.building)
 
 function developmentpoint(::Type{T}, key::String, level) where T <: Building
@@ -81,4 +81,4 @@ function developmentpoint(::Type{T}, key::String, level) where T <: Building
 end
 developmentpoint(b::T) where T <: Building = developmentpoint(T, itemkeys(b), itemlevel(b))
 developmentpoint(b::Special) = missing
-developmentpoint(b::Sandbox) = missing
+developmentpoint(b::Attraction) = missing

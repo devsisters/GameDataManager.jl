@@ -73,7 +73,7 @@ function Base.show(io::IO, x::T) where T <: Building
         a != last(x.abilities) && print(io, ", ")
     end
 end
-function Base.show(io::IO, x::Sandbox)
+function Base.show(io::IO, x::Attraction)
     summary(io, x)
 end
 function Base.summary(io::IO, x::T) where T <: Building
@@ -112,7 +112,7 @@ function Base.show(io::IO, x::BuildingStorage)
     i = 1
     row_limit = 3
 
-    for field in (:shop, :residence, :sandbox, :special)
+    for field in (:shop, :residence, :attraction, :special)
         data = getfield(x, field)
         if length(data) > 0
             println(io, "↳", uppercasefirst(string(field)), " with ", length(data), " entries:")
