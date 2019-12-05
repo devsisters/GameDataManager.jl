@@ -5,14 +5,13 @@
    'grade * 90분'으로 정한다. 따라서 시간당 조이 생산량x는  
    x = (900 * 60 / (grade * 90))
 """
-function joycreation(grade, level, _area)
-    # 피포의 임시 저장량은 고정
-    joystash = 50
+function joycreation(basejoy, tenant, level, area)
+    # 피포 1인당 조이량 * 거주자 수
+    joystash = basejoy * tenant
 
-    # 레벨별 채집 소요시간 1분씩 감소 (10, 9, 8, 7, 6)
-    joy = joystash / (8 - 1*level) # 분당 생산량
-    joy = joy * grade * 60 # 피포수량 = grade, 시간당 생산량으로 환산
-    joy = joy * sqrt(_area / 2) # 조이 생산량은 면적차이의 제곱근에 비례
+    # 3^level 승으로 채집 소요시간 결정 
+    joy = joystash / (3^level) # 분당 생산량
+    joy = joy * sqrt(area / 2) # 조이 생산량은 면적차이의 제곱근에 비례
     
     return round(Int, joy, RoundDown)
 end

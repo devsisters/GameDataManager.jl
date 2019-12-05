@@ -1,18 +1,20 @@
 using Test
 using GameBalanceManager
-using GameDataManager
-
 const GBM = GameBalanceManager
-const GDM = GameDataManager
 
-GDM.validation!()
+# using GameDataManager
+# const GDM = GameDataManager
+# GDM.validation!()
 
-@testset "StackItem/coin 함수 input과 return type" begin
+@testset "StackItem/* 함수 input과 return type" begin
    
     #grade, level, area
     @test isa(GBM.profitcoin(1, 10, 2), Float64)
     @test eltype(GBM.coinproduction(1, 10, 2)) <: Integer
     @test isa(GBM.levelup_need_developmentpoint(5), Integer)
+
+    # basejoy, tenant, level, area
+    @test isa(GBM.joycreation(10, 1, 1, 2), Integer)
 end
 
 @testset "NonStackItem/building 함수 input과 return type" begin
@@ -32,7 +34,3 @@ end
     @test isa(GBM.building_developmentpoint("Residence", 9, 2), Integer)
 end
 
-
-@testset "Block.xlsx" begin
-
-end

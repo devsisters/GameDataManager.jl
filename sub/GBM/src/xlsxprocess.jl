@@ -1,3 +1,12 @@
+function read_balancetdata()
+    p = joinpath(get(ENV, "MARS-CLIENT", ""), "patch-data/BalanceTables")
+    f = joinpath(p, "zGameBalanceManager.json")
+
+    @assert isfile(f) "$(f)를 찾을 수 없습니다\nprocess!가 불가능합니다." 
+    
+    return JSON.parsefile(f)
+end
+
 """
     WorkBook{FileName}
     
@@ -7,6 +16,7 @@ struct WorkBook{FileName} end
 function WorkBook(filename::AbstractString) 
     WorkBook{Symbol(filename)}
 end
+
 
 """
     process!(jwb::JSONWorkbook)
@@ -106,17 +116,9 @@ end
 * JoyCreation: 건물 등급, 레벨, 면적으로 결정
 """
 function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Ability}}) 
-    function arearange_for_building_grade(buildingtype)
-        # 등급별 면적 손으로 기입
-        [[2,4,6,9],
-         [6,9,12,16],
-         [6,9,12,16,20,25,30],
-         [20,25,30,36],
-         [36,42,49,64]]
-    end
+    ref = read_balancetdata()
     
     jws = jwb["Level"]
-    area_per_grade = arearange_for_building_grade("Shop")
 
     shop_ability = []
     template = OrderedDict(
@@ -125,8 +127,8 @@ function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Ability}})
         "LevelupCost" => Dict("PriceCoin" => missing, "Time" => missing), 
         "LevelupCostItem" => [])
 
-    for grade in 1:5
-        for a in area_per_grade[grade] # 건물 면적
+    for (grade, area) in enumerate(ref["ShopCoinProduction"]["AreaPerGrade"])
+        for a in area
             for lv in 1:10
                 profit, intervalms = coinproduction(grade, lv, a)
                 coincounter = profit * (lv + grade + 3) # 일단 대충
@@ -141,18 +143,17 @@ function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Ability}})
             end
         end
     end
-    @assert keys(jws.data[1]) == keys(shop_ability[1]) "Column명이 일치하지 않습니다"
-    
+
     residence_ability = []
-    area_per_grade = arearange_for_building_grade("Residence")
-    for grade in 1:5
-        for a in area_per_grade[grade] # 건물 면적
-            for lv in 1:6
+    basejoystash = ref["JoyCreation"]["DefaultJoyStash"]
+    for (tenant, area) in enumerate(ref["JoyCreation"]["AreaPerTenant"])  
+        for a in area
+            for lv in 1:5
                 # (grade + level - 1) * area * 60(1시간)
-                joy = joycreation(grade, lv, a)
+                joy = joycreation(basejoystash, tenant, lv, a)
                 ab = deepcopy(template)
                 ab["Group"] = "JoyCreation"
-                ab["AbilityKey"] = "JoyCreation_G$(grade)_$(a)"
+                ab["AbilityKey"] = "JoyCreation_Tenant$(tenant)_$(a)"
                 ab["Level"] = lv
                 ab["Value1"] = joy
             
@@ -160,8 +161,6 @@ function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Ability}})
             end
         end
     end
-    @assert keys(jws.data[1]) == keys(residence_ability[1]) "Column명이 일치하지 않습니다"
-
     append!(jwb["Level"].data, shop_ability)
     append!(jwb["Level"].data, residence_ability)
 
