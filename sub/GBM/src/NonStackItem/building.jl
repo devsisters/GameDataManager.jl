@@ -11,17 +11,15 @@ function buildngtime(type::AbstractString, grade, level, area)
     end
 end
 
-function buildngcost_coin(type::AbstractString, grade, level, area)
+function buildngcost_coin(type::AbstractString, level, area)
     # Residence는 만랩이 절반이라서 Shop 2레벨 비용의 합
     if type == "Residence" 
         base = level * 2 
-        buildngcost_coin("Shop", grade, base, area) + buildngcost_coin("Shop", grade, base-1, area)
+        buildngcost_coin("Shop", base, area) + buildngcost_coin("Shop", base-1, area)
     else
-        # 2레벨에 한번씩 profit이 오른다
-        abilitylevel = div(level+1, 2)
-        p = profitcoin(grade, level, area)
+        profit_per_minute = profitcoin(level, area)
     
-        round(Int, p * (grade*1.5) * level)
+        round(Int, profit_per_minute * area * level^2)
     end
 end
 

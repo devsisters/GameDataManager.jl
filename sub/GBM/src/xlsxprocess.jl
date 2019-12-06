@@ -99,7 +99,7 @@ function process_building!(jwb::JSONWorkbook, type)
         area = info[bd]["Condition"]["ChunkWidth"] * info[bd]["Condition"]["ChunkLength"]
 
         levelupcost = Dict("NeedTime" => buildngtime(type, grade, lv, area),
-                           "PriceCoin" => buildngcost_coin(type, grade, lv, area))
+                           "PriceCoin" => buildngcost_coin(type, lv, area))
         row["LevelupCost"] = levelupcost
 
         row["LevelupCostItem"] = buildngcost_item(type, grade, lv, area)
@@ -130,15 +130,15 @@ function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Ability}})
     for (grade, area) in enumerate(ref["ShopCoinProduction"]["AreaPerGrade"])
         for a in area
             for lv in 1:10
-                profit, intervalms = coinproduction(grade, lv, a)
-                coincounter = profit * (lv + grade + 3) # 일단 대충
+                profit, intervalms = coinproduction(lv, a, ref)
+
                 ab = deepcopy(template)
                 ab["Group"] = "ShopCoinProduction"
                 ab["AbilityKey"] = "ShopCoinProduction_G$(grade)_$(a)"
                 ab["Level"] = lv
                 ab["Value1"] = profit
                 ab["Value2"] = intervalms
-                ab["Value3"] = coincounter
+                ab["Value3"] = coinstash(profit, a, lv, ref)
                 push!(shop_ability, ab)
             end
         end

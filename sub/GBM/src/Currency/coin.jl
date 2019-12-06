@@ -1,59 +1,67 @@
-profitcoin(grade, level, area) = profitcoin((grade + level - 1), area)
+# profitcoin(grade, level, area) = profitcoin((grade + level - 1), area)
 function profitcoin(progress, area)
     @assert progress > 0 "Level과 Grade는 모두 1 이상이어야 합니다"
+    
+    base = 1. * area
+    growth = 1
+    
+    if progress > 1
+        base = profitcoin(progress - 1, area)
+        growth = (1 + 1.5/progress)
+    end
 
-    base_amount = if progress == 1
-                        1. * area
-                    else 
-                        profitcoin(progress - 1, area)
-                    end
-    multiplier = progress == 1 ? 1 : (1 + 1.5/progress)
-
-    return round(base_amount * multiplier, RoundDown; digits=3)
+    return round(base * growth, RoundDown; digits=4)
+end
+function coinstash(profit, area, level, ref = read_balancetdata())
+    table = ref["ShopCoinProduction"]["1레벨_면적별코인저장량"]
+    x = table[string(area)]
+    # TODO: 고레벨에서 보정 필요
+    round(Int, x * profit * level)
 end
 
-function coinproduction(grade, level, area)
+function findnearest(A::AbstractArray, t) 
+    idx = findmin(abs.(A .- t))[2]
+    A[idx]
+end
 
-    progress = (grade + level - 1) #grade는 레벨1과 동일하게 취급
-
-    base_interval = 60000
-    if progress == 1
-        profit = profitcoin(progress, area)
-        profit = Int(profit)
-        interval = base_interval * 1
-    else 
-        profit_per_min = profitcoin(progress, area)
-        # TODO 이러니까 낭비가 심하지... 이전꺼 다 계산할 필요 없는데 
-        prev = coinproduction(grade-1, level, area)
-
-        prev_interval_mult = prev[2] / base_interval
-        
-        solution = search_optimal_divider(profit_per_min;)
-        @assert !isempty(solution) "[TODO] threshold를 높여서 탐색...."
-
-        x = filter(el -> el[1] >= prev_interval_mult , solution)
-        @assert !isempty(x) "[TODO] threshold를 높여서 탐색...."
-
-        a = begin 
-            α = collect(values(x))
-            i = iszero(rem(level, 2))     ? 1 : 
-                α[1] > prev_interval_mult ? 1 : 2
-            rationalize(α[i])
-        end
-
-        profit = a.num
-        interval = a.den * base_interval
+function coinproduction(level, area, ref = read_balancetdata())
+    profit_per_min = profitcoin(level, area)
+    
+    base_interval = ref["ShopCoinProduction"]["생산주기기준"]
+    x = begin 
+            a = ref["ShopCoinProduction"]["면적별레벨별생산주기"]
+            key = collect(keys(a))
+            idx = findfirst(el -> area < el, parse.(Int, key))
+            a[key[idx]][level]
     end
+    solution = search_denominator(profit_per_min)
+    if !haskey(solution, x) #margin을 높여가며 재탐색
+        margin = 0.04
+        for margin in 0.04:0.01:0.1
+            solution = search_denominator(profit_per_min, margin)
+            haskey(solution, x) && break
+        end
+        @assert haskey(solution, x) """search_denominator가 $level, $area, $(profit_per_min)에 대해서 찾을 수 없습니다
+        zGameDataManager의 \"면적별레벨별생산주기\"를 조정해 주세요"""
+    end
+    a = solution[x] |> rationalize
+
+    profit = a.num
+    interval = a.den * base_interval
+
     return profit, interval 
 end
 
-#=
-    search_optimal_divider(origin, margin; stopat)
+"""
+    search_denominator(origin, margin; stopat)
 
 - orgin 숫자가 margin 범위 안에서 유리수가 되는 모든 경우를 찾는다.
-TODO: 디스크캐시할 것
-=#
-@cache function search_optimal_divider(origin, margin = 0.03; stopat::Integer = 0)::AbstractDict
+- 정확한 공식은 모르겠는데 대략 1,2,4,5,8,10, 16, 20, 25, 32, 40, 50, 80
+"""
+function search_denominator(origin, margin = 0.03; kwargs...) 
+    _search_denominator(origin, margin; kwargs...)
+end
+@cache function _search_denominator(origin, margin = 0.03; stopat::Integer = 0)::AbstractDict
     solution = Dict{Int, Float64}()
 
     if stopat > 0 
@@ -66,14 +74,14 @@ TODO: 디스크캐시할 것
 
     @inbounds for i in 0:0.00001:origin*margin
         down = rationalize(origin - i)
-        if down.den <= 100000 # 이거보다 분모가 크면 무의미
+        if down.den <= 1000
             if !haskey(solution, down.den)
                 solution[down.den] = origin - i
                 down.den == stopat && break
             end
         else
             up = rationalize(origin + i)
-            if up.den <= 100000
+            if up.den <= 1000
                 if !haskey(solution, up.den)
                     solution[up.den] = origin + i
                     up.den == stopat && break
