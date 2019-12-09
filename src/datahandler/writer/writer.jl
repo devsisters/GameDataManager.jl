@@ -36,7 +36,14 @@ end
 mars 메인 저장소의 '.../_META.json'에 명시된 파일만 추출가능합니다
 """
 function export_gamedata(file::AbstractString)
-    f = is_xlsxfile(file) ? file : CACHE[:meta][:xlsx_shortcut][file]
+    f = if is_xlsxfile(file) 
+            file 
+        else 
+            if !haskey(CACHE[:meta][:xlsx_shortcut], file)
+                fuzzy_lookupname(keys(CACHE[:meta][:xlsx_shortcut]), file)
+            end
+            CACHE[:meta][:xlsx_shortcut][file]
+        end
 
     println("『", f, "』")
     bt = BalanceTable(f; read_from_xlsx = true, cacheindex = false)

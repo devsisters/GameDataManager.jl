@@ -10,8 +10,9 @@ function joinpath_gamedata(file)
         folder = GAMEENV["xlsx"]["root"]
         p = get!(GAMEENV["xlsx"], file, joinpath(folder, file))
 
-        @assert isfile(p) "$(file) 은 $(folder)에 존재하지 않는 파일입니다. 파일명을 다시 확인해 주세요"
-
+        if !isfile(p) 
+            fuzzy_lookupname(keys(CACHE[:meta][:auto]), file; msg = "$(file) 은 $(folder)에 존재하지 않습니다")
+        end
     elseif endswith(file, ".json") #json은 하위폴더가 없
         folder= GAMEENV["json"]["root"]
         p = get!(GAMEENV["json"], file, joinpath(folder, file))
@@ -57,7 +58,7 @@ function reload!(gd)
     # TODO 뭘 리로드했는지 아니면 아무것도 안했는지 로그좀...
     for k in keys(gd)
         T = endswith(k, ".json") ? JSONBalanceTable : BalanceTable
-        get(T, k;check_modified = true)
+        get(T, k;check_modified= true)
     end
 end
 
@@ -129,22 +130,25 @@ function get_cachedrow(::Type{T}, bt::BalanceTable, sheet, col, matching_value) 
         data[ind, :]
     end
 end
-function _cached_index(bt, sheet, col, value)
-    # NOTE 일단 여기에서만 사용... 나중에 엑셀파일명 틀릴때도 쓸 수 있게 빼자
-    function fuzzymatch(names, idx::AbstractString; msg = "'$(idx)'를 찾을 수 없습니다.")
-        l = Dict{AbstractString, Int}(zip(names, eachindex(names)))
-        candidates = XLSXasJSON.fuzzymatch(l, idx)
-        if isempty(candidates)
-            throw(ArgumentError(msg))
-        end
-        candidatesstr = join(string.(':', candidates), ", ", " and ")
-        throw(ArgumentError(msg * "\n혹시? $candidatesstr"))
-    end
 
+function fuzzy_lookupname(keyset, idx; kwargs...)
+    fuzzy_lookupname(collect(keyset), idx; kwargs...)
+end
+
+function fuzzy_lookupname(names::AbstractArray, idx::AbstractString; msg = "'$(idx)'를 찾을 수 없습니다.")
+    l = Dict{AbstractString, Int}(zip(names, eachindex(names)))
+    candidates = XLSXasJSON.fuzzymatch(l, idx)
+    if isempty(candidates)
+        throw(ArgumentError(msg))
+    end
+    candidatesstr = join(string.("\"", candidates, "\""), ", ", " and ")
+    throw(ArgumentError(msg * "\n혹시? $candidatesstr"))
+end
+function _cached_index(bt, sheet, col, value)
     c = cache(bt)[index(bt)[sheet]]
     address = "[$(basename(bt))]$(sheet)!\$$(col)"
     if !haskey(c, col) 
-        fuzzymatch(string.(collect(keys(c))), string(col); msg = "$(address)를 찾을 수 없습니다.")
+        fuzzy_lookupname(string.(keys(c)), string(col); msg = "$(address)를 찾을 수 없습니다.")
     end
     @assert haskey(c[col], value) "$(address) 에 $(value)가 존재하지 않습니다"
 
