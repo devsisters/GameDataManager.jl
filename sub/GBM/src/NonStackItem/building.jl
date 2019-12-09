@@ -1,11 +1,10 @@
-function buildngtime(type::AbstractString, grade, level, area)
+function buildngtime(type::AbstractString, level, area)
     # Residence는 만랩이 절반이라서 Shop 2레벨 비용의 합
     if type == "Residence" 
         base = level * 2 
-        buildngtime("Shop", grade, base, area) + buildngtime("Shop", grade, base-1, area)
+        buildngtime("Shop", base, area) + buildngtime("Shop", base-1, area)
     else
-        # 건설시간 5등급, 7레벨, 64청크가 36시간 (129600) 에 근접하도록 함수 설계
-        t = 155 * (level+grade-2)^2 + 60 * (level+grade)
+        t = 155 * (level)^2 + 60 * level
         t *= sqrt(area)
         round(Int, t)
     end

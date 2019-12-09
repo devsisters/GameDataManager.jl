@@ -1,14 +1,23 @@
-# profitcoin(grade, level, area) = profitcoin((grade + level - 1), area)
-function profitcoin(progress, area)
-    @assert progress > 0 "Level과 Grade는 모두 1 이상이어야 합니다"
+"""
+    growthrate(level)
+
+인지상 자연스러운 배율은 Integer Multiple 인데, 면적을 Integer Multiple을 하고 있으므로
+수가 너무 커지는걸 막기 위해 Level은 로그 성장률 (1+1/n)로 적용한다
+"""
+growthrate(level) = 1 + 1/(level-1)
+
+"""
+    profitcoin(level, area)
+
+면적에 Integer Multiple 성장
+레벨은 Logarithm로 성장
+"""
+function profitcoin(level, area)
+    @assert level > 0 "Level은 1이상이어야 합니다"
     
     base = 1. * area
-    growth = 1
-    
-    if progress > 1
-        base = profitcoin(progress - 1, area)
-        growth = (1 + 1.5/progress)
-    end
+    # 모든 성장률을 NaturalNumber로 한다
+    growth = level > 1 ? sum(growthrate, 2:level) : 1.
 
     return round(base * growth, RoundDown; digits=4)
 end
@@ -19,21 +28,17 @@ function coinstash(profit, area, level, ref = read_balancetdata())
     round(Int, x * profit * level)
 end
 
-function findnearest(A::AbstractArray, t) 
-    idx = findmin(abs.(A .- t))[2]
-    A[idx]
-end
-
 function coinproduction(level, area, ref = read_balancetdata())
     profit_per_min = profitcoin(level, area)
     
     base_interval = ref["ShopCoinProduction"]["생산주기기준"]
     x = begin 
             a = ref["ShopCoinProduction"]["면적별레벨별생산주기"]
-            key = collect(keys(a))
-            idx = findfirst(el -> area < el, parse.(Int, key))
-            a[key[idx]][level]
+            key = parse.(Int, collect(keys(a))) |> sort
+            idx = findfirst(el -> area <= el, key)
+            a[string(key[idx])][level]
     end
+
     solution = search_denominator(profit_per_min)
     if !haskey(solution, x) #margin을 높여가며 재탐색
         margin = 0.04
@@ -41,9 +46,12 @@ function coinproduction(level, area, ref = read_balancetdata())
             solution = search_denominator(profit_per_min, margin)
             haskey(solution, x) && break
         end
-        @assert haskey(solution, x) """search_denominator가 $level, $area, $(profit_per_min)에 대해서 찾을 수 없습니다
-        zGameDataManager의 \"면적별레벨별생산주기\"를 조정해 주세요"""
+        if !haskey(solution, x)
+            throw(AssertionError("""search_denominator가 $(x)를 $level, $area, $(profit_per_min)에 대해서 찾을 수 없습니다
+            zGameDataManager의 \"면적별레벨별생산주기\"를 조정해 주세요"""))
+        end
     end
+
     a = solution[x] |> rationalize
 
     profit = a.num
@@ -61,30 +69,20 @@ end
 function search_denominator(origin, margin = 0.03; kwargs...) 
     _search_denominator(origin, margin; kwargs...)
 end
-@cache function _search_denominator(origin, margin = 0.03; stopat::Integer = 0)::AbstractDict
+@cache function _search_denominator(origin, margin = 0.03)::AbstractDict
     solution = Dict{Int, Float64}()
-
-    if stopat > 0 
-        possibility = [1, 2, 4, 5, 8, 10, 16, 20, 25, 32, 40, 50, 80, 100, 125, 160, 200, 250, 400, 500, 625, 
-        800, 1000, 1250, 2000, 2500, 3125, 4000, 5000, 6250, 10000, 12500, 20000, 25000, 50000, 100000]
-        if !in(stopat, possibility)
-            @warn "'stopat'은 $possibility 값일 경우에만 의미가 있습니다"
-        end
-    end
 
     @inbounds for i in 0:0.00001:origin*margin
         down = rationalize(origin - i)
         if down.den <= 1000
             if !haskey(solution, down.den)
                 solution[down.den] = origin - i
-                down.den == stopat && break
             end
         else
             up = rationalize(origin + i)
             if up.den <= 1000
                 if !haskey(solution, up.den)
                     solution[up.den] = origin + i
-                    up.den == stopat && break
                 end
             end
         end

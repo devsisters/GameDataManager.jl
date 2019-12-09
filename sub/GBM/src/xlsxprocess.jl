@@ -3,8 +3,12 @@ function read_balancetdata()
     f = joinpath(p, "zGameBalanceManager.json")
 
     @assert isfile(f) "$(f)를 찾을 수 없습니다\nprocess!가 불가능합니다." 
+    cachefile = joinpath(tempdir(), "zGameBalanceManager.json")
+
+    cp(f, cachefile; force = true)
+
     
-    return JSON.parsefile(f)
+    return JSON.parsefile(cachefile)
 end
 
 """
@@ -98,7 +102,7 @@ function process_building!(jwb::JSONWorkbook, type)
         grade = info[bd]["Grade"]
         area = info[bd]["Condition"]["ChunkWidth"] * info[bd]["Condition"]["ChunkLength"]
 
-        levelupcost = Dict("NeedTime" => buildngtime(type, grade, lv, area),
+        levelupcost = Dict("NeedTime" => buildngtime(type, lv, area),
                            "PriceCoin" => buildngcost_coin(type, lv, area))
         row["LevelupCost"] = levelupcost
 
@@ -150,7 +154,7 @@ function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Ability}})
         for a in area
             for lv in 1:5
                 # (grade + level - 1) * area * 60(1시간)
-                joy = joycreation(basejoystash, tenant, lv, a)
+                joy = joycreation(tenant, lv, a)
                 ab = deepcopy(template)
                 ab["Group"] = "JoyCreation"
                 ab["AbilityKey"] = "JoyCreation_Tenant$(tenant)_$(a)"
