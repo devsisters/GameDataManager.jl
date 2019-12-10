@@ -167,6 +167,13 @@ function validator(bt::XLSXBalanceTable{:Player})
 
     p = joinpath(GAMEENV["CollectionResources"], "VillageGradeIcons")
     validate_file(p, df[!, :GradeIcon], ".png";msg = "Icon이 존재하지 않습니다")
+
+    chore_groupkeys = begin 
+        data = filter(!isnull, get.(df[!, :Chores], "Group", missing))
+        vcat(map(el -> get.(el, "Key", missing), data)...) |> unique
+    end
+    validate_haskey("Chore", chore_groupkeys)
+
     # TODO 여러 폴더 검사하는 기능 필요
     # p = joinpath(GAMEENV["CollectionResources"], "ItemIcons")
     # validate_file(p, vcat(df[!, :DisplayIcons]...), ".png", "Icon이 존재하지 않습니다")

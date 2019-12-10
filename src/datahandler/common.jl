@@ -55,6 +55,9 @@ function validate_haskey(class, a; assert=true)
     elseif class == "Perk"
         jwb = get!(CACHE[:validator_data], "Pipo", JWB("Pipo", false))
         b = unique(get.(jwb[:Perk], "Key", missing))
+    elseif class == "Chore"
+        jwb = get!(CACHE[:validator_data], "Chore", JWB("Chore", false))
+        b = unique(get.(jwb[:Group], "GroupKey", missing))
     else
         throw(AssertionError("validate_haskey($(class), ...)은 정의되지 않았습니다")) 
     end
