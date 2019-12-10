@@ -18,22 +18,29 @@ function compress!(jws::JSONWorksheet; dropmissing = true)
 end
 
 """
-    collect_values(arr::Array)
+    collect_values(row::Array)
 
 * Array{AbstractDict, 1} 에서 value만 뽑아 Array{Array{Any, 1}, 1}로 만든다 
 """
-function collect_values(arr::AbstractArray)
-    vcat(map(el -> collect(values(el)), arr)...)
+function collect_values(row::AbstractArray)
+    vcat(map(el -> collect(values(el)), row)...)
 end
+function collect_values!(arr::AbstractArray, col)
+    for row in arr
+        row[col] = collect_values(row[col])
+    end
+end
+collect_values!(arr::AbstractArray, columns::AbstractArray) = [collect_values!(arr, c) for c in columns]
+
 """
     collect_values!(jwb::JSONWorkbook, sheet, column)
 """
-function collect_values!(jwb::JSONWorkbook, sheet, column)
-    collect_values!(jwb[sheet], column)
+function collect_values!(jwb::JSONWorkbook, sheet, col)
+    collect_values!(jwb[sheet], col)
 end
-function collect_values!(jws::JSONWorksheet, column)
+function collect_values!(jws::JSONWorksheet, col)
     for row in jws.data
-        row[column] = collect_values(row[column])
+        row[col] = collect_values(row[col])
     end
 end
-collect_values!(jws::JSONWorksheet, column::AbstractArray) = [collect_values!(jws, c) for c in column]
+collect_values!(jws::JSONWorksheet, columns::AbstractArray) = [collect_values!(jws, c) for c in columns]

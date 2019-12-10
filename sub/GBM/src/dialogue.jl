@@ -12,11 +12,10 @@ function create_dialogue_script(jws::JSONWorksheet, folder)
 end
 
 function create_dialogue_script(data::AbstractArray, filename)
-    for el in data
-        el["CallOnStart"] = collect_values(el["CallOnStart"])
-        el["CallOnEnd"] = collect_values(el["CallOnEnd"])
-    end
+    collect_values!(data, "CallOnStart")
+    collect_values!(data, "CallOnEnd")
     validate_dialogue_script(data)
+    
     newdata = JSON.json(data, 2)
 
     modified = true
