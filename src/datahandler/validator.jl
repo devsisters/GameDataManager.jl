@@ -78,7 +78,7 @@ function validator_building(bt::XLSXBalanceTable)
     validate_file(path_template, leveldata[!, :BuildingTemplate], ".json"; 
                   msg = "BuildingTemolate가 존재하지 않습니다")
 
-    path_thumbnails = joinpath(GAMEENV["CollectionResources"], "BusinessBuildingThumbnails")
+    path_thumbnails = joinpath(GAMEENV["CollectionResources"], "BuildingThumbnails")
     validate_file(path_thumbnails, data[!, :Icon], ".png";msg = "Icon이 존재하지 않습니다")
     nothing
 end
