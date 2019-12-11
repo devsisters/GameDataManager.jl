@@ -11,7 +11,7 @@ function profitjoy(level, area)
 end
 
 """
-    joycreation(grade, level, area)
+    joycreation(tenant, level, area)
 
 * 현재 시간당 생산량으로 하드 코딩 되어 있음
 """

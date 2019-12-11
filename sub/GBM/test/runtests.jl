@@ -3,36 +3,28 @@ using GameBalanceManager
 using DataStructures
 const GBM = GameBalanceManager
 
+f1 = joinpath(@__DIR__, "data/zGameBalanceManager.json")
+
+@testset "테스트 데이터 확인" begin
+    @test isfile(f1)
+end
+GBM.CACHE["LoadFromJSON"] = false
+GBM.read_balancetdata(true, f1)
+
 # using GameDataManager
 # const GDM = GameDataManager
 # GDM.validation!()
 
-# TODO: 이거 test데이터로 이동 필요
-REF = OrderedDict("JoyCreation" => 
-OrderedDict("DefaultJoyStash" => 10,
-        "AreaPerTenant" => [[2, 4, 6], [6, 9], [8, 12, 16], [12, 16]]),
-        "ShopCoinProduction" => OrderedDict(
-            "면적별레벨별생산주기" => OrderedDict(
-                "10" => [1, 2, 4, 4, 4, 5, 5, 5, 8, 10],
-                "70" => [5, 5, 8, 8, 10, 10, 16, 16, 20, 25],
-                "50" => [4, 5, 5, 8, 8, 10, 10, 16, 16, 20],
-                "30" => [2, 4, 4, 5, 5, 8, 8, 10, 10, 16]),
-            "AreaPerGrade" => [[2, 4, 6, 9], [6, 9, 12, 16], [16, 20, 25, 30], [20, 25, 30, 36], [36, 42, 49, 64]],
-            "1레벨_면적별코인저장량" => OrderedDict(
-                "4" => 3,"12" => 11,"20" => 17,"2" => 2,"6" => 5,"25" => 19,"49" => 41,"42" => 37,"16" => 13,"36" => 29,"64" => 31,"9" => 7,"30" => 23),
-                "생산주기기준" => 60000))
-
 @testset "StackItem/* 함수 input과 return type" begin
-   
     #level, area
     @test isa(GBM.profitcoin(1, 2), Float64)
     @test isa(GBM.profitcoin(10, 2), Float64)
 
-    @test eltype(GBM.coinproduction(10, 2, REF)) <: Integer
-    @test isa(GBM.levelup_need_developmentpoint(5), Integer)
+    @test eltype(GBM.coinproduction(10, 2)) <: Integer
+    @test isa(GBM.userlevel_demand_developmentpoint(5), Integer)
 
-    # basejoy, tenant, level, area
-    @test isa(GBM.joycreation(10, 1, 1, 2), Integer)
+    # tenant, level, area
+    @test isa(GBM.joycreation(2, 1, 2), Integer)
 end
 
 

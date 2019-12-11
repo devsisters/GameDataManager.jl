@@ -1,9 +1,4 @@
-function developmentpoint_balancing(level, ref = read_balancetdata())
-    # Village()의 총면적 1649에서 
-    # Shop과 Residence는 각각 1649 * (6/15) ≈ 659
-    # 면적 1, level1당 1점이므로  sum(i -> i * 659, 1:10) = 36245
-    # 따라서 총점은 72490이다 (36245 + 36245) 
-
+function userlevel_demand_developmentpoint(level, ref = read_balancetdata())
     ref = ref["Player"]["developmentpoint_balancing"]
 
     bought_area = ref["레벨당구매한사이트면적"][level]

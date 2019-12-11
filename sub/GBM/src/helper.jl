@@ -1,19 +1,23 @@
-const CACHE = Dict()
+const CACHE = Dict{String, Any}("LoadFromJSON" => true)
 
 isnull(x) = ismissing(x) | isnothing(x)
 
-function read_balancetdata(reload = true)
+# TODO 자동화 테스트 하려면 reload를 전역변수 FLAG로 해야...
+function read_balancetdata(load_from_file = CACHE["LoadFromJSON"])
     p = joinpath(get(ENV, "MARS-CLIENT", ""), "patch-data/BalanceTables")
-    f = joinpath(p, "zGameBalanceManager.json")
-
-    @assert isfile(f) "$(f)를 찾을 수 없습니다\nprocess!가 불가능합니다." 
-    if reload
-        data = JSON.parsefile(f)
-        CACHE["zGameBalanceManager"] = data
-    else
-        data = get!(CACHE, "zGameBalanceManager", JSON.parsefile(f))
+    file = joinpath(p, "zGameBalanceManager.json")
+    
+    read_balancetdata(load_from_file, file)
+end
+function read_balancetdata(load_from_file::Bool, file)
+    if load_from_file
+        if isfile(file) 
+            CACHE["zGameBalanceManager"] = JSON.parsefile(file)
+        else
+            throw(AssertionError("$(file)를 찾을 수 없습니다\nprocess!가 불가능합니다."))
+        end
     end
-    return data
+    return CACHE["zGameBalanceManager"]
 end
 
 """

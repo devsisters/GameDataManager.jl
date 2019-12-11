@@ -214,7 +214,7 @@ function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Player}})
     jws = jwb[:DevelopmentLevel]
     @inbounds for i in 1:length(jws.data)
         lv = jws.data[i]["Level"]
-        jws.data[i]["NeedDevelopmentPoint"] = developmentpoint_balancing(lv, ref)
+        jws.data[i]["NeedDevelopmentPoint"] = userlevel_demand_developmentpoint(lv, ref)
     end
 
     for sheet in [:DroneDelivery, :Chore, :Festival]
