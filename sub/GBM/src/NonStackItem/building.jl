@@ -71,8 +71,7 @@ function building_developmentpoint(type::AbstractString, level::Integer, area::I
         base = level * 2 
         building_developmentpoint("Shop", base, area) + building_developmentpoint("Shop", base-1, area)
     else
-        # 건물레벨 * 면적
-        round(level * area, RoundUp)
+        return area * 2^(level-1)
     end
 end
 

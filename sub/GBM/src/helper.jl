@@ -1,4 +1,21 @@
+const CACHE = Dict()
+
 isnull(x) = ismissing(x) | isnothing(x)
+
+function read_balancetdata(reload = true)
+    p = joinpath(get(ENV, "MARS-CLIENT", ""), "patch-data/BalanceTables")
+    f = joinpath(p, "zGameBalanceManager.json")
+
+    @assert isfile(f) "$(f)를 찾을 수 없습니다\nprocess!가 불가능합니다." 
+    if reload
+        data = JSON.parsefile(f)
+        CACHE["zGameBalanceManager"] = data
+    else
+        data = get!(CACHE, "zGameBalanceManager", JSON.parsefile(f))
+    end
+    return data
+end
+
 """
     compress!(jwb::JSONWorksheet)
 

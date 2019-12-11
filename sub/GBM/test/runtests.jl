@@ -53,3 +53,13 @@ end
     @test isa(GBM.building_developmentpoint("Residence", 9, 2), Integer)
 end
 
+@testset "Shop과 Residence 사이 밸런싱" begin
+    for area in [2,4,6,9,12,16,20,25,30,36,42,49,64]
+        for level in 1:5
+            a = GBM.building_developmentpoint("Residence", level, area)
+            b = GBM.building_developmentpoint("Shop", level*2, area)
+            b += GBM.building_developmentpoint("Shop", level*2-1, area)
+            @test a == b
+        end
+    end
+end

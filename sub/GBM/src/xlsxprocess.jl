@@ -1,16 +1,3 @@
-function read_balancetdata()
-    p = joinpath(get(ENV, "MARS-CLIENT", ""), "patch-data/BalanceTables")
-    f = joinpath(p, "zGameBalanceManager.json")
-
-    @assert isfile(f) "$(f)를 찾을 수 없습니다\nprocess!가 불가능합니다." 
-    cachefile = joinpath(tempdir(), "zGameBalanceManager.json")
-
-    cp(f, cachefile; force = true)
-
-    
-    return JSON.parsefile(cachefile)
-end
-
 """
     WorkBook{FileName}
     
@@ -20,7 +7,6 @@ struct WorkBook{FileName} end
 function WorkBook(filename::AbstractString) 
     WorkBook{Symbol(filename)}
 end
-
 
 """
     process!(jwb::JSONWorkbook)
@@ -222,11 +208,13 @@ end
 * 계정레벨 요구 developmentpoint 책정
 """
 function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Player}}) 
+    ref = read_balancetdata()
+
     # 레벨업 개척점수 필요량 추가
     jws = jwb[:DevelopmentLevel]
     @inbounds for i in 1:length(jws.data)
         lv = jws.data[i]["Level"]
-        jws.data[i]["NeedDevelopmentPoint"] = levelup_need_developmentpoint(lv)
+        jws.data[i]["NeedDevelopmentPoint"] = developmentpoint_balancing(lv, ref)
     end
 
     for sheet in [:DroneDelivery, :Chore, :Festival]
