@@ -1,9 +1,5 @@
-# 설치법
-노션 메뉴얼 참조
-
-# 사용법
- * Ctrl + j + o: 단축키로 Julia 콘솔창을 열면 아래의 명령어를 사용할 수 있습니다.
-
-# 명령어
-help() 참조
+# GameDataManager
+---
+## [설치 메뉴얼](https://www.notion.so/devsisters/3D-326efdf7ec7f4c379b1d2b0144e9fd4e)
+## [사용 메뉴얼](https://www.notion.so/devsisters/GameDataManager-4a9b8e5f6f1c4f17ad117507c1762017)
 
