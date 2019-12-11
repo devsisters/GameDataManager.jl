@@ -14,14 +14,20 @@ end
 function xl(x::AbstractString; branch = CACHE[:patch_data_branch])
     git_checkout_patchdata(branch)
 
+    host = gethostname()
+
     @info "xlsx -> json 추출을 시작합니다 ⚒\n" * "-"^(displaysize(stdout)[2]-4)
+    send_message("$(host): extracting... \"$x\" ")
     # 한개만 골라 뽑을 땐 무조건 엑셀 읽기
     reload_meta!()
     export_gamedata(x)
+
+    emoji = rand() < 0.8 ? ":woman-gesturing-ok:" : ":man-gesturing-ok:"
+    send_message("$(host): Done!$(emoji)")
     @info "json 추출이 완료되었습니다 ☺"
 
     # 좀 이상하지만 가끔 버전 확인해주기
-    rand() < 0.1 && checkout_GameDataManager()
+    rand() < 0.05 && checkout_GameDataManager()
     nothing
 end
 
