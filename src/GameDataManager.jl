@@ -6,10 +6,8 @@ using StatsBase, Statistics
 using XLSX, JSON, XLSXasJSON
 using DataFrames, DataStructures, CSV
 using MD5
-using HTTP
+using LibGit2
 import XLSXasJSON.Index
-
-# using LibGit2 # Git 함수 라이브러리
 
 import Base: +, -, *, /, ==
 

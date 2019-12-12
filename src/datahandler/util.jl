@@ -257,27 +257,3 @@ function compress_continentDB(roaddb, tag = "v0.0.1";
     rm("$(filename).tar")
     rm("$(filename).tar.bz2")
 end
-
-"""
-    send_message(msg; channel, username)
-
-token: 슬랙 토큰, ENV["SLACK_CLI_TOKEN"] 없으면 그냥 안보낸다
-
-"""
-function send_message(msg::String; channel = "mars_z_julia_feed", username = "줄리아쨩")
-    token = get(ENV, "SLACK_CLI_TOKEN", "")
-    if !isempty(token)
-        r = HTTP.request("POST", "https://slack.com/api/chat.postMessage",
-                        [
-                            "Content-Type"=>"application/json; charset=utf-8",
-                            "Authorization" => "Bearer $token"
-                        ],
-                        JSON.json(Dict(
-                            "channel" => channel,
-                            "text" => msg,
-                            "as_user" => false,
-                            "username" => username
-                        )))
-    end
-    return nothing
-end 
