@@ -31,16 +31,3 @@ function checkout_GameDataManager()
     checkout_XLSXasJSON()
     nothing
 end
-
-ENV["SLACK_CLI_TOKEN"] = begin 
-    f = if Sys.iswindows()
-        "M:/Tools/GameDataManager/.slack/token"
-    else # 맥이라 가정함... 맥아니면 몰러~
-        "/Volumes/ShardData/MARSProject/Tools/GameDataManager/.slack/token"
-    end
-    if isfile(f) 
-        read("M:/Tools/GameDataManager/.slack/token", String)
-    else 
-        ""
-    end
-end
