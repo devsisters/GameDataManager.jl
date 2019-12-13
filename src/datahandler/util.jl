@@ -24,11 +24,11 @@ function help(idx = 1)
         if idx == 1
             msg = intro * rand([thankyou; oneline_asciiarts]) * "\n" * basic * """\n
             # 보조 기능
-            findblock() : 'Block'데이터와 '../4_ArtAssets/GameResources/Blocks/' 폴더를 비교하여 누락된 항목을 찾습니다.
-            get_blocks(101) : 블록Key별 '../BuildTemplate/Buildings/' 에서 사용되는 빈도를 계산합니다
-            get_buildings("sIcecream") : 건물Key별 사용되는 블록의 종류와 수량을 계산합니다.
-            help()  : 를 입력하면 도움을 드립니다!
-            md5hash()  : `help?>md5hash` 도움말 참조
+              findblock()    : 'Block'데이터와 '../4_ArtAssets/GameResources/Blocks/' 폴더를 비교하여 누락된 항목을 찾습니다.
+              get_blocks(101): 블록Key별 '../BuildTemplate/Buildings/' 에서 사용되는 빈도를 계산합니다
+              get_buildings("sIcecream"): 건물Key별 사용되는 블록의 종류와 수량을 계산합니다.
+              help()         : 를 입력하면 도움을 드립니다!
+              md5hash()      : `help?>md5hash` 도움말 참조
             """
         elseif idx == 2
             line_breaker = "-"^(displaysize(stdout)[2]-4)
@@ -36,7 +36,7 @@ function help(idx = 1)
 
             msg *= rand(oneline_asciiarts)
         end
-        @info msg
+        print_multiline(msg, "도움말")
     end
     nothing
 end
@@ -47,6 +47,22 @@ function print_write_result(path, msg = "결과는 다음과 같습니다")
     printstyled(normpath(path); color=:blue)
     print('\n')
 
+    nothing
+end
+
+function print_multiline(message, title = "NOTE")
+    msglines = split(chomp(string(message)), '\n')
+
+    for (i, el) in enumerate(msglines)
+        if i == 1 
+            printstyled(stderr, "┌ ", title, ": "; color=:green)
+        elseif i == length(msglines)
+            printstyled(stderr, "└ "; color=:green)
+        else
+            printstyled(stderr, "│ "; color=:green)
+        end
+        println(el)
+    end
     nothing
 end
 
