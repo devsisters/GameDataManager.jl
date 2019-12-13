@@ -11,7 +11,6 @@ const SITECLEANER           = Currency{:SITECLEANER}
 const DEVELOPMENTPOINT      = Currency{:DEVELOPMENTPOINT}
 const TOTALDEVELOPMENTPOINT = Currency{:TOTALDEVELOPMENTPOINT}
 
-
 function __init__()
     s = setup_env!()
 
@@ -26,26 +25,6 @@ function __init__()
     end
     help()
     nothing
-end
-function reload_meta!()
-    if ismodified("_Meta.json")
-        CACHE[:meta] = loadmeta()
-        gamedata_export_history("_Meta.json")
-    end
-end
-function setbranch!(branch::AbstractString) 
-    CACHE[:patch_data_branch] = branch
-    git_checkout_patchdata(branch)
-end
-function validation!()
-    CACHE[:validation] = !CACHE[:validation]
-    @info "CACHE[:validation] = $(CACHE[:validation])"
-end
-function git_checkout_patchdata(branch)
-    if pwd() != GAMEENV["patch_data"]
-        cd(GAMEENV["patch_data"])
-    end
-    run(`git checkout $branch`)
 end
 
 """
@@ -99,8 +78,6 @@ end
 function init_gamedata_history(file = GAMEENV["history"])
     h = isfile(file) ? JSON.parsefile(file; dicttype=Dict{String, Float64}) :
                        Dict{String, Float64}()
-    # 좀 이상하긴 한데... 가끔식 히스토리 청소해 줌
-    # rand() < 0.002 && cleanup_gamedata_export_history!()
 
     # 방금 로딩한 _Meta.json 시간
     h["_Meta.json"] = mtime(joinpath_gamedata("_Meta.json"))
@@ -109,21 +86,47 @@ function init_gamedata_history(file = GAMEENV["history"])
 end
 
 
-function checkout_GameDataManager()
-    v2 = if Sys.iswindows()
-        "M:/Tools/GameDataManager/Project.toml"
-    else # 맥이라 가정함... 맥아니면 몰러~
-        "/Volumes/ShardData/MARSProject/Tools/GameDataManager/Project.toml"
-    end
+# 안내
+function help(idx = 1)
+    intro = "GameDataManager를 이용해주셔서 "
 
-    if isfile(v2)
-        f = joinpath(@__DIR__, "../project.toml")
-        v1 = readlines(f)[4]
-        v2 = readlines(v2)[4]
-        if VersionNumber(chop(v1; head=11, tail=1)) < VersionNumber(chop(v2; head=11, tail=1))
-            @info "최신 버전의 GameDataManager가 발견 되었습니다.\nAtom을 종료 후 다시 실행해주세요"
+    thankyou = ["감사합니다", "Thank You", "Danke schön", "Grazie", "Gracias", "Merci beaucoup",
+        "ありがとうございます", "cпасибо", "谢谢你", "khop kun", "Dank je wel", "obrigado", "Tusen tack",
+        "cám ơn", "köszönöm szépen", "asante sana", "बोहोत धन्यवाद/शुक्रिया", "شكرا جزيلا", "děkuji"]
+
+    oneline_asciiarts = ["♫♪.ılılıll|̲̅̅●̲̅̅|̲̅̅=̲̅̅|̲̅̅●̲̅̅|llılılı.♫♪", "ô¿ô", "(-.-)Zzz...",
+        "☁ ▅▒░☼‿☼░▒▅ ☁","▓⚗_⚗▓","✌(◕‿-)✌", "[̲̅\$̲̅(̲̅ιοο̲̅)̲̅\$̲̅]","(‾⌣‾)♉", "d(^o^)b¸¸♬·¯·♩¸¸♪·¯·♫¸¸",
+        "▂▃▅▇█▓▒░۩۞۩        ۩۞۩░▒▓█▇▅▃▂", "█▬█ █▄█ █▬█ █▄█", "／人 ◕‿‿◕ 人＼", "இڿڰۣ-ڰۣ—",
+        "♚ ♛ ♜ ♝ ♞ ♟ ♔ ♕ ♖ ♗ ♘ ♙", "♪└(￣◇￣)┐♪└(￣◇￣)┐♪└(￣◇￣)┐♪"]
+
+    # setup! 안하면 사용 불가
+    if !isempty(GAMEENV)
+        basic ="""
+        # 기본 기능
+          xl("Player"): Player.xlsx 파일만 json으로 추출합니다
+          xl()        : 수정된 엑셀파일만 검색하여 json으로 추출합니다
+          xl(true)    : '_Meta.json'에서 관리하는 모든 파일을 json으로 추출합니다
+          xl_backup() : 'M:/GameData'의 데이터를 압축하여'patchdata/_GameData'에 덮어 씌웁니다
+
+          setbranch!("master"): 'xl()'이 checkout 하는 branch를 변경합니다. 
+          cleanup_cache!(): 로딩되어있는 GameData 캐시를 모두 삭제합니다
+        """
+        if idx == 1
+            msg = intro * rand([thankyou; oneline_asciiarts]) * "\n" * basic * """\n
+            # 보조 기능
+              findblock()    : 'Block'데이터와 '../4_ArtAssets/GameResources/Blocks/' 폴더를 비교하여 누락된 항목을 찾습니다.
+              get_blocks(101): 블록Key별 '../BuildTemplate/Buildings/' 에서 사용되는 빈도를 계산합니다
+              get_buildings("sIcecream"): 건물Key별 사용되는 블록의 종류와 수량을 계산합니다.
+              help()         : 를 입력하면 도움을 드립니다!
+              md5hash()      : `help?>md5hash` 도움말 참조
+            """
+        elseif idx == 2
+            line_breaker = "-"^(displaysize(stdout)[2]-4)
+            msg = string("json으로 변환할 파일이 없습니다 ♫\n", line_breaker, "\n", basic)
+
+            msg *= rand(oneline_asciiarts)
         end
-    else
-        @warn "M:/Tools/GameDataManager 를 찾을 수 없습니다"
+        print_section(msg, "도움말")
     end
+    nothing
 end

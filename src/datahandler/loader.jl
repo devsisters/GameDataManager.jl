@@ -1,10 +1,4 @@
-# utility functions
-is_xlsxfile(f)::Bool = (endswith(f, ".xlsx") || endswith(f, ".xlsm"))
-is_jsonfile(f)::Bool = endswith(f, ".json")
 
-function Base.readdir(dir; extension::String)
-    filter(x -> endswith(x, extension), readdir(dir))
-end
 function joinpath_gamedata(file)
     if is_xlsxfile(file) #검색하여 폴더 위치를 기록해 둔다.
         folder = GAMEENV["xlsx"]["root"]
@@ -23,14 +17,6 @@ function joinpath_gamedata(file)
 
     return p
 end
-
-"""
-    isnull(x)
-
-json에서는 'nothing'과 'missing'을 혼용하여 사용하고 있기 때문에 필요... 
-"""
-isnull(x) = ismissing(x) | isnothing(x)
-
 
 """
     cache_gamedata!(f; kwargs...)

@@ -4,23 +4,20 @@ using Compat
 using Printf, UUIDs, Dates, Random
 using StatsBase, Statistics
 using XLSX, JSON, XLSXasJSON
+import XLSXasJSON.Index
 using DataFrames, DataStructures, CSV
 using MD5
 using LibGit2
-import XLSXasJSON.Index
+
+include("../sub/GBM/src/GameBalanceManager.jl")
+using .GameBalanceManager
 
 import Base: +, -, *, /, ==
 
 # BalanceTable
 include("datahandler/balancetable.jl")
-include("datahandler/common.jl")
 include("datahandler/validator.jl")
-
 include("datahandler/util.jl")
-
-include("../sub/GBM/src/GameBalanceManager.jl")
-using .GameBalanceManager
-
 
 #######  Simulation ENGINE #########################
 include("engine/engine.jl")
@@ -41,8 +38,6 @@ include("engine/content/dronedelivery.jl")
 include("engine/content/buying.jl")
 include("engine/content/build.jl")
 
-include("engine/analyzer.jl")
-
 
 include("engine/show.jl")
 
@@ -54,6 +49,7 @@ include("datahandler/loader.jl")
 include("datahandler/writer/writer.jl")
 include("datahandler/writer/autoxl.jl")
 include("datahandler/writer/history.jl")
+include("datahandler/writer/report.jl")
 
 #######  Logger      ##########################################
 include("logger/logger.jl")
@@ -63,7 +59,8 @@ export GAMEENV, GAMEDATA, help, setup!,
        BalanceTable, XLSXBalanceTable, JSONBalanceTable, UnityBalanceTable,
        sheetnames, get_cachedrow, reload!,
        DataFrame,
-       xl, xl_change_datapath!, xl_backup, xl_auto, md5hash, setbranch!,
+       xl, xl_change_datapath!, xl_backup, xl_auto, md5hash, setbranch!, 
+       cleanup_cache!, cleanup_history!,
 
        # 유틸리티
        findblock, get_buildings, get_blocks,
