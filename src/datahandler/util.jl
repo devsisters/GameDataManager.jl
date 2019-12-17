@@ -81,7 +81,7 @@ function checkout_GameDataManager()
     end
 
     if isfile(v2)
-        f = joinpath(@__DIR__, "../project.toml")
+        f = joinpath(@__DIR__, "../../project.toml")
         v1 = readlines(f)[4]
         v2 = readlines(v2)[4]
         if VersionNumber(chop(v1; head=11, tail=1)) < VersionNumber(chop(v2; head=11, tail=1))
