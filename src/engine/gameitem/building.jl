@@ -147,7 +147,12 @@ function SegmentInfo(mid::UInt64, villageid::UInt64, key::AbstractString)
     SegmentInfo(mid, villageid, siteindex, Building(key))
 end
 
-function buildingtype(key)
+"""
+    buidligtype
+String이나 GameDataManger의 struct로 반환
+"""
+buildingtype(key) = buildingtype(Building, key)
+function buildingtype(::Type{Building}, key)
     startswith(key, "s") ? Shop :
     startswith(key, "r") ? Residence :
     startswith(key, "a") ? Attraction :
@@ -155,7 +160,14 @@ function buildingtype(key)
     key == "Home" ? Special :
     throw(KeyError(key))
 end
-
+function buildingtype(::Type{String}, key)
+    startswith(key, "s") ? "Shop" :
+    startswith(key, "r") ? "Residence" :
+    startswith(key, "a") ? "Attraction" :
+    startswith(key, "p") ? "Special" : 
+    key == "Home" ? "Special" :
+    throw(KeyError(key))
+end
 
 
 
