@@ -330,11 +330,7 @@ function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Flag}})
 
     return jwb
 end
-function process!(jwb::JSONWorkbook, ::Type{WorkBook{:GeneralSetting}}) 
-    collect_values!(jwb, :ProfileImage, "ImageFileName")
 
-    return jwb
-end
 function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Chore}}) 
     collect_values!(jwb, :Group, ["Reward", "AssistReward"])
 
@@ -356,6 +352,13 @@ function process!(jwb::JSONWorkbook, ::Type{WorkBook{:CashStore}})
 end
 
 function process!(jwb::JSONWorkbook, ::Type{WorkBook{:NameGenerator}}) 
+    for s in sheetnames(jwb)
+        compress!(jwb, s)
+    end
+    return jwb
+end
+
+function process!(jwb::JSONWorkbook, ::Type{WorkBook{:UserProfile}}) 
     for s in sheetnames(jwb)
         compress!(jwb, s)
     end
