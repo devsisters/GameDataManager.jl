@@ -164,13 +164,19 @@ function validator(bt::XLSXBalanceTable{:Block})
         msg = "[Block]시트의 다음 RecommendSubCategory가 [RecommendCategory]시트에 존재하지 않습니다", assert = false)
 
     # BlockSet 검사
-    blockset_keys = begin 
+    blockset_blocks = begin 
         df = get(DataFrame, bt, "Set")
         x = broadcast(el -> get.(el, "BlockKey", 0), df[!, :Members])
         unique(vcat(x...))
     end
-    validate_subset(blockset_keys, block[!, :Key]; msg = "다음의 Block은 존재하지 않습니다 [Set] 시트를 정리해 주세요")
+    validate_subset(blockset_blocks, block[!, :Key]; msg = "다음의 Block은 존재하지 않습니다 [Set] 시트를 정리해 주세요")
 
+    for i in indexin(blockset_blocks, block[!, :Key])     
+        if !ismissing(block[i, :DetachableFromSegment])
+            k = block[i, :Key]
+            throw(AssertionError("$(k)는 Sign이라 BlockSet에 있어서는 안됩니다"))
+        end
+    end
     nothing
 end
 
