@@ -32,7 +32,6 @@ include("engine/gameitem/arithmetic.jl")
 include("engine/gameitem/estate.jl")
 include("engine/user/flag.jl")
 include("engine/user/user.jl")
-include("engine/user/bot.jl")
 
 include("engine/content/dronedelivery.jl")
 include("engine/content/buying.jl")
@@ -66,7 +65,7 @@ export GAMEENV, GAMEDATA, help, setup!,
        findblock, get_buildings, get_blocks,
 
       # engine functions
-      User, create_bot,
+      User,
 
       GameItem, ItemCollection,
           Currency, COIN, CRY, JOY, ENERGYMIX, SITECLEANER,
