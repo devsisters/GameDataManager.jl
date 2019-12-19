@@ -416,7 +416,7 @@ function validator_questtrigger(x::Array{T, 1}) where T
         "SiteCount"                    => (:equality, :number),
         "ResidenceCount"               => (:equality, :number),
         "ShopCount"                    => (:equality, :number),
-        "SandboxCount"                 => (:equality, :number),
+        "AttractionCount"                 => (:equality, :number),
         "Coin"                         => (:equality, :number),
         "UserLevel"                    => (:equality, :number),
         "MaxSegmentLevelByUseType"     => (:number,     :equality, :number),
