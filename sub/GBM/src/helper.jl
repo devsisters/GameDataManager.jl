@@ -4,7 +4,7 @@ isnull(x) = ismissing(x) | isnothing(x)
 
 # TODO 자동화 테스트 하려면 reload를 전역변수 FLAG로 해야...
 function read_balancetdata(load_from_file = CACHE["LoadFromJSON"])
-    p = joinpath(get(ENV, "MARS-CLIENT", ""), "patch-data/BalanceTables")
+    p = joinpath(get(ENV, "MARS-CLIENT", ""), "patch-data/Tables")
     file = joinpath(p, "zGameBalanceManager.json")
     
     read_balancetdata(load_from_file, file)

@@ -56,7 +56,7 @@ function setup_env!()
         end
 
         GAMEENV["xlsx"] = Dict("root" => GAMEENV["GameData"])
-        GAMEENV["json"] = Dict("root" => joinpath(GAMEENV["patch_data"], "BalanceTables"))
+        GAMEENV["json"] = Dict("root" => joinpath(GAMEENV["patch_data"], "Tables"))
         
         # GameDataManager paths
         GAMEENV["cache"] = joinpath(GAMEENV["patch_data"], ".cache")
