@@ -128,7 +128,7 @@ end
 function validator(bt::XLSXBalanceTable{:Block})
     block = get(DataFrame, bt, "Block")
     
-    magnet_file = joinpath(GAMEENV["ArtAssets"], "Internal/BlockTemplateBalanceTable.asset")
+    magnet_file = joinpath(GAMEENV["ArtAssets"], "Internal/BlockTemplateTable.asset")
     if isfile(magnet_file)
         magnet = filter(x -> startswith(x, "  - Key:"), readlines(magnet_file))
         magnetkey = unique(broadcast(x -> split(x, "Key: ")[2], magnet))
