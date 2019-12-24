@@ -178,11 +178,11 @@ end
 * Dialogue 시트 개별 Dialogue 파일로 생성
 """
 function process!(jwb::JSONWorkbook, ::Type{WorkBook{:VillagerTalk}}) 
-    if minimum(get.(jwb[:Dialogue], "Index", missing)) < 2
-        throw(AssertionError("VillagerTalk 대사Index는 2부터 시작해 주세요"))
-    end
+    # if minimum(get.(jwb[:Dialogue], "Index", missing)) < 2
+    #     throw(AssertionError("VillagerTalk 대사Index는 2부터 시작해 주세요"))
+    # end
     folder = joinpath(ENV["MARS-CLIENT"], "patch-data/Dialogue/Villager")
-    create_dialogue_script(jwb[:Dialogue], folder)
+    create_ink_script(jwb[:Dialogue], folder)
 
     deleteat!(jwb, :Dialogue)
 
