@@ -1,7 +1,7 @@
 name = "GameBalanceManager"
 uuid = "bb77ccaf-9d50-4d58-b991-76f827c14ecc"
 authors = ["김용희 <yongheekim@devsisters.com>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 Caching = "68ad905a-5087-500a-aae7-0fd6acda2eb1"

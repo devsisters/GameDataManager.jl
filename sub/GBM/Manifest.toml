@@ -57,6 +57,9 @@ git-tree-sha1 = "b34d7cef7b337321e97d22242c3c2b91f476748e"
 uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 version = "0.21.0"
 
+[[LibGit2]]
+uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
+
 [[Libdl]]
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 
@@ -88,9 +91,17 @@ git-tree-sha1 = "0139ba59ce9bc680e2925aec5b7db79065d60556"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
 version = "0.3.10"
 
+[[Pkg]]
+deps = ["Dates", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Test", "UUIDs"]
+uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
+
 [[Printf]]
 deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+
+[[REPL]]
+deps = ["InteractiveUtils", "Markdown", "Sockets"]
+uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 
 [[Random]]
 deps = ["Serialization"]
@@ -115,6 +126,10 @@ git-tree-sha1 = "7c53c35547de1c5b9d46a4797cf6d8253807108c"
 uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
 version = "0.9.5"
 
+[[UUIDs]]
+deps = ["Random", "SHA"]
+uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
+
 [[Unicode]]
 uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 
@@ -126,14 +141,18 @@ version = "0.5.8"
 
 [[XLSXasJSON]]
 deps = ["DataStructures", "JSON", "Printf", "Test", "XLSX"]
-git-tree-sha1 = "7541968175e63c5388a5d5d3d0f0672bf8adfaa1"
-repo-rev = "master"
-repo-url = "https://github.com/devsisters/XLSXasJSON.jl"
+git-tree-sha1 = "61a7a0abb73464d34d0a074d960d34442a5bd10c"
 uuid = "8c9e00cc-ccf1-11e8-3de6-5b028f480d9e"
-version = "0.3.8"
+version = "0.1.0"
 
 [[ZipFile]]
-deps = ["BinaryProvider", "Libdl", "Printf"]
-git-tree-sha1 = "580ce62b6c14244916cc28ad54f8a2e2886f843d"
+deps = ["Libdl", "Printf", "Zlib_jll"]
+git-tree-sha1 = "5de8320a46812da1a8ca98b16a8a4546d44efa62"
 uuid = "a5390f91-8eb1-5f08-bee0-b1d1ffed6cea"
-version = "0.8.3"
+version = "0.9.0"
+
+[[Zlib_jll]]
+deps = ["Libdl", "Pkg"]
+git-tree-sha1 = "5618a43055eb09377edca21d19d0e99bce24a9c3"
+uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
+version = "1.2.11+7"
