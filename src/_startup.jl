@@ -1,13 +1,5 @@
 # must be included from startup.jl
 function checkout_GameDataManager()
-    function checkout_XLSXasJSON()
-        version = Pkg.installed()["XLSXasJSON"]
-        if version < v"0.3.8" #0.3.8 강제 업데이트
-            @info "최신 버전의 XLSXasJSON이 발견 되었습니다 업데이트를 시작합니다"
-            Pkg.update("XLSXasJSON")
-        end
-        nothing
-    end
     v1 = Pkg.installed()["GameDataManager"]
     v2 = if Sys.iswindows()
         "M:/Tools/GameDataManager/Project.toml"
@@ -27,7 +19,5 @@ function checkout_GameDataManager()
         https://www.notion.so/devsisters/ccb5824c48544ec28c077a1f39182f01
         """
     end
-    # 잠깐 쓰다가 삭제 XLSXasJSON 공식 registry에 올리면 필요 없음
-    checkout_XLSXasJSON()
     nothing
 end

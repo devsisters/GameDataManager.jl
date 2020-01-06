@@ -24,3 +24,24 @@ function joycreation(tenant, level, area)
     return round(Int, joy, RoundDown)
 end
 
+"""
+    pipo_joyproduction(level)
+
+피포레벨별 조이 생산량
+"""
+function pipo_joyproduction(level)
+    level * 2
+end
+
+"""
+    residence_joystash(level)
+
+건물레벨별 조이 저장량
+"""
+function residence_joystash(tenant, level, area)
+    base = pipo_joyproduction(level * 10)
+
+    mult = tenant * sqrt(area) / sqrt(2)
+
+    return round(Int, base * mult, RoundDown)
+end

@@ -140,20 +140,41 @@ function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Ability}})
         for a in area
             for lv in 1:5
                 # (grade + level - 1) * area * 60(1시간)
-                joy = joycreation(tenant, lv, a)
                 ab = deepcopy(template)
                 ab["Group"] = "JoyCreation"
                 ab["AbilityKey"] = "JoyCreation_Tenant$(tenant)_$(a)"
                 ab["Level"] = lv
-                ab["Value1"] = joy
-            
+                ab["Value1"] = joycreation(tenant, lv, a)
+                push!(residence_ability, ab)
+
+                ab = deepcopy(template)
+                ab["Group"] = "ResidenceJoyStash"
+                ab["AbilityKey"] = "JoyStash_Tenant$(tenant)_$(a)"
+                ab["Level"] = lv
+                ab["Value1"] = residence_joystash(tenant, lv, a)
+
                 push!(residence_ability, ab)
             end
         end
     end
+
+    # 일단 20레벨까지
+    pipo_ability = [] 
+    for lv in 1:20      
+        d = deepcopy(template)
+        d["Group"] = "PipoJoyProduction"
+        d["AbilityKey"] = "JoyProduction"
+        d["Level"] = lv
+        d["Value1"] = pipo_joyproduction(lv)
+
+        push!(pipo_ability, d)
+    end
+
     append!(jwb["Level"].data, shop_ability)
     append!(jwb["Level"].data, residence_ability)
-
+    append!(jwb["Level"].data, pipo_ability)
+    
+    @show jwb
     return jwb
 end
 
