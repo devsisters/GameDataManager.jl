@@ -276,7 +276,7 @@ version = "0.5.8"
 
 [[XLSXasJSON]]
 deps = ["DataStructures", "JSON", "Printf", "Test", "XLSX"]
-git-tree-sha1 = "b4670ddaaa5f9168d1e5dc276064784b2269ce79"
+path = "C:\\Users\\devsisters\\.julia\\dev\\XLSXasJSON"
 uuid = "8c9e00cc-ccf1-11e8-3de6-5b028f480d9e"
 version = "0.1.1"
 

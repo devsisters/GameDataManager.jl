@@ -93,8 +93,8 @@ function JWB(file, read_from_xlsx::Bool)::JSONWorkbook
                 json = JSON.parsefile(jsonfile; dicttype = OrderedDict) |> x -> convert(Array{OrderedDict, 1}, x)
                 # JSONWorksheet를 위한 가짜 meta 생성
                 # Original이랑 완벽히 일치하게 만드려면 meta만 미리 저장해두면 될 듯...
-                m = XLSXasJSON.XLSXWrapperMeta(["empty"])
-                push!(v, JSONWorksheet(xlsxpath, m, json, el[1]))
+                p = XLSXasJSON.JSONPointer[]
+                push!(v, JSONWorksheet(xlsxpath, p, json, el[1]))
             end
         end
         index = XLSXasJSON.Index(sheetnames.(v))

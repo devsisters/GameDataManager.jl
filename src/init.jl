@@ -39,9 +39,10 @@ function loadmeta(metafile = joinpath_gamedata("_Meta.json"))
         if haskey(json_row, "kwargs")
             x = get(json_row["kwargs"], sheet, x)
         end
-        NamedTuple{(:row_oriented, :start_line)}((
+        NamedTuple{(:row_oriented, :start_line, :delim)}((
                     get(x, "row_oriented", true),
-                    get(x, "start_line", 2)
+                    get(x, "start_line", 2),
+                    get(x, "delim", r";|,")
                     ))
     end
     function parse_metainfo(origin)
