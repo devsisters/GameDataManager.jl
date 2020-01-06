@@ -9,8 +9,7 @@ using DataFrames, DataStructures, CSV
 using MD5
 using LibGit2
 
-include("../sub/GBM/src/GameBalanceManager.jl")
-using .GameBalanceManager
+using GameBalanceManager
 
 import Base: +, -, *, /, ==
 
