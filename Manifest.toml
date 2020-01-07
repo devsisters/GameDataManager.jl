@@ -99,7 +99,7 @@ uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
 deps = ["Caching", "DataStructures", "JSON", "Test", "XLSXasJSON"]
 path = "C:\\Users\\devsisters\\.julia\\dev\\GameBalanceManager"
 uuid = "bb77ccaf-9d50-4d58-b991-76f827c14ecc"
-version = "0.1.1"
+version = "0.1.2"
 
 [[InteractiveUtils]]
 deps = ["Markdown"]
@@ -276,9 +276,9 @@ version = "0.5.8"
 
 [[XLSXasJSON]]
 deps = ["DataStructures", "JSON", "Printf", "Test", "XLSX"]
-path = "C:\\Users\\devsisters\\.julia\\dev\\XLSXasJSON"
+git-tree-sha1 = "7dfaa37ddd72e6dcff2a36a304fe054331355bc8"
 uuid = "8c9e00cc-ccf1-11e8-3de6-5b028f480d9e"
-version = "0.1.1"
+version = "0.1.3"
 
 [[ZipFile]]
 deps = ["Libdl", "Printf", "Zlib_jll"]
