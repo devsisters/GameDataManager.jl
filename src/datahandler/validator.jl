@@ -260,14 +260,14 @@ function validator(bt::XLSXBalanceTable{:PipoFashion})
     # jwb[:Data] = merge(jwb[:Data], jwb[:args], "ProductKey")
     root = joinpath(GAMEENV["mars-client"], "unity/Assets/4_ArtAssets/GameResources/Pipo")
 
-    df = get(DataFrame, bt, "Hair")
-    validate_file(joinpath(root, "HeadHair"), df[!, :ArtAsset], ".prefab";msg = "[Hair]에 위의 ArtAsset이 존재하지 않습니다")
+    # df = get(DataFrame, bt, "Hair")
+    # validate_file(joinpath(root, "HeadHair"), df[!, :ArtAsset], ".prefab";msg = "[Hair]에 위의 ArtAsset이 존재하지 않습니다")
 
-    df = get(DataFrame, bt, "Face")
-    for gdf in groupby(df, :Part)
-        p2 = joinpath(root, string("Head", gdf[1, :Part]))
-        validate_file(p2, string.(gdf[!, :ArtAsset]), ".prefab";msg = "[Face]에 ArtAsset이 존재하지 않습니다")
-    end
+    # df = get(DataFrame, bt, "Face")
+    # for gdf in groupby(df, :Part)
+    #     p2 = joinpath(root, string("Head", gdf[1, :Part]))
+    #     validate_file(p2, string.(gdf[!, :ArtAsset]), ".prefab";msg = "[Face]에 ArtAsset이 존재하지 않습니다")
+    # end
 
     # df = get(DataFrame, bt, "Dress")
     # TODO: root 폴더 경로가 다른데...

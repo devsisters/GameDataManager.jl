@@ -120,7 +120,6 @@ end
         sort!(k; by = length, rev = true)
         # @warn "모든 row의 column명이 일치하지 않습니다, $(k[1])"
     end
-    
     v = Array{Any, 1}(undef, length(k[1]))
     @inbounds for (i, key) in enumerate(k[1])
         v[i] = get.(jws, key, missing)
