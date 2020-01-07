@@ -60,7 +60,7 @@ function validate_haskey(class, a; assert=true)
     else
         throw(AssertionError("validate_haskey($(class), ...)은 정의되지 않았습니다")) 
     end
-
+        
     validate_subset(a, b;msg = "'$(class)'에 다음 Key가 존재하지 않습니다", assert = assert)
 end
 
@@ -77,7 +77,7 @@ function validate_duplicate(lists; assert=true)
     nothing
 end
 
-function validate_subset(a, b; msg = "다음의 멤버가 subset이 아닙니다", assert=true)
+function validate_subset(a, b; msg = "다음의 멤버가 subset이 아닙니다", assert = true)
     if !issubset(a, b)
         dif = setdiff(a, b)
         if assert
@@ -246,12 +246,12 @@ function validator(bt::XLSXBalanceTable{:DroneDelivery})
     df = get(DataFrame, bt, "Group")
     validate_haskey("RewardTable", df[!, :RewardKey])
 
-    itemkey = Int[]
+    itemkey = []
     df = get(DataFrame, bt, "Order")
     for row in eachrow(df)
         append!(itemkey, get.(row[:Items], "Key", missing))
     end
-    validate_haskey("ItemTable", unique(itemkey))
+    validate_haskey("ItemTable", filter(!ismissing, unique(itemkey)))
 
     nothing
 end
@@ -297,6 +297,8 @@ function validator(bt::XLSXBalanceTable{:Player})
         data = filter(!isnull, get.(df[!, :Chores], "Group", missing))
         vcat(map(el -> get.(el, "Key", missing), data)...) |> unique
     end
+    filter!(!isnull, chore_groupkeys)
+
     validate_haskey("Chore", chore_groupkeys)
 
     # TODO 여러 폴더 검사하는 기능 필요
