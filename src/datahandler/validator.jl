@@ -88,34 +88,32 @@ function validate_subset(a, b; msg = "다음의 멤버가 subset이 아닙니다
     end
 end
 
-function validate_file(root, files::Vector, extension = "", walksubfolder = false; kwargs...)
-    if walksubfolder
-        a = String[]
-        for (root, dir, _files) in walkdir(root)
-            append!(a, _files)
-        end
-        # TODO 어라...? 이러면 extension 없으면 작동 안함....
-        a = filter(el -> endswith(el, extension), unique(a))
-        a = chop.(a; tail = length(extension))
-
-        validate_subset(files, a; kwargs...)
-    else
-        for el in filter(!isnull, files)
-            validate_file(root, "$(el)$(extension)"; kwargs...)
+function isfile_inrepo(repo, parent_folder, files; msg = "가 존재하지 않습니다", assert = false)
+    gitls = git_ls_files(repo)
+    git_files = filter(el -> startswith(el, parent_folder) && !endswith(el, ".meta"), readlines(gitls))
+    
+    notfound = Int[]
+    for (i, f) in enumerate(files)
+        for entry in git_files
+            endswith(entry, f) && break
+            if entry == last(git_files)
+                push!(notfound, i)
+            end
         end
     end
+
+    if !isempty(notfound)
+        _files = files[notfound]
+        if assert
+            throw(AssertionError("`$_files` $msg"))
+        else
+            @warn "`$_files` $msg"
+        end
+    end
+
     nothing
 end
-function validate_file(root, file; msg = "가 존재하지 않습니다", assert = false)
-    f = joinpath(root, file)
-    if !isfile(f)
-        if assert
-            throw(AssertionError("`$f` $msg"))
-        else
-            @warn "`$f` $msg"
-        end
-    end
-end
+
 
 """
     validator(bt::XLSXBalanceTable)
@@ -128,7 +126,7 @@ end
 function validator(bt::XLSXBalanceTable{:Block})
     block = get(DataFrame, bt, "Block")
     
-    magnet_file = joinpath(GAMEENV["ArtAssets"], "Internal/BlockTemplateTable.asset")
+    magnet_file = joinpath(GAMEENV["mars_art_assets"], "Internal/BlockTemplateTable.asset")
     if isfile(magnet_file)
         magnet = filter(x -> startswith(x, "  - Key:"), readlines(magnet_file))
         magnetkey = unique(broadcast(x -> split(x, "Key: ")[2], magnet))
@@ -139,10 +137,11 @@ function validator(bt::XLSXBalanceTable{:Block})
     else
         @warn "$(magnet_file)이 존재하지 않아 magnet 정보를 검증하지 못 하였습니다"
     end
+
     # 블록 파일명
-    p = joinpath(GAMEENV["ArtAssets"], "GameResources/Blocks")
-    validate_file(p, unique(block[!, :ArtAsset]), ".prefab", true; 
-                  msg = "다음의 prefab이 존재하지 않습니다", assert = false)
+    prefabs = unique(block[!, :ArtAsset]) .* ".prefab"
+    isfile_inrepo("mars_art_assets", "GameResources/Blocks", prefabs)
+
     # Luxurygrade
     if any(ismissing.(block[!, :Verts]))
         @warn "Verts정보가 없는 Block이 있습니다. Unity의 BlockVertexCount 내용을 엑셀에 추가해 주세요"
@@ -199,12 +198,14 @@ function validator_building(bt::XLSXBalanceTable)
     buildgkey_level = broadcast(row -> (row[:BuildingKey], row[:Level]), eachrow(leveldata))
     @assert allunique(buildgkey_level) "[Level]시트에 중복된 Level이 있습니다"
 
-    path_template = joinpath(GAMEENV["patch_data"], "BuildTemplate/Buildings")
-    validate_file(path_template, leveldata[!, :BuildingTemplate], ".json"; 
+    templates = filter(!isnull, leveldata[!, :BuildingTemplate]) .* ".json"
+    isfile_inrepo("patch_data", "BuildTemplate", templates; 
                   msg = "BuildingTemolate가 존재하지 않습니다")
 
-    path_thumbnails = joinpath(GAMEENV["CollectionResources"], "BuildingThumbnails")
-    validate_file(path_thumbnails, data[!, :Icon], ".png";msg = "Icon이 존재하지 않습니다")
+    icons = data[!, :Icon] .* ".png"
+    isfile_inrepo("mars-client", "unity/Assets/1_CollectionResources", icons; 
+                    msg = "BuildingTemolate가 존재하지 않습니다")
+
     nothing
 end
 
@@ -277,12 +278,17 @@ end
 
 function validator(bt::XLSXBalanceTable{:ItemTable})
     path = joinpath(GAMEENV["CollectionResources"], "ItemIcons")
-    validate_file(path, get(DataFrame, bt, "Currency")[!, :Icon], ".png";msg = "아이템 Icon이 존재하지 않습니다")
-    validate_file(path, get(DataFrame, bt, "Normal")[!, :Icon], ".png";msg = "아이템 Icon이 존재하지 않습니다")
+    
+    for sheet in ("Currency", "Normal", "BuildingSeed")
+        icons = filter(!isnull, get(DataFrame, bt, sheet)[!, :Icon]) .* ".png"
+        isfile_inrepo("mars-client", 
+            "unity/Assets/1_CollectionResources/ItemIcons", icons; 
+            msg = "Icon이 존재하지 않습니다")
+    end
+
 
     df = get(DataFrame, bt, "BuildingSeed")
     validate_haskey("Building", df[!, :BuildingKey])
-    validate_file(path, df[!, :Icon], ".png";msg = "아이템 Icon이 존재하지 않습니다")
 
     nothing
 end
@@ -291,7 +297,11 @@ function validator(bt::XLSXBalanceTable{:Player})
     df = get(DataFrame, bt, "DevelopmentLevel")
 
     p = joinpath(GAMEENV["CollectionResources"], "VillageGradeIcons")
-    validate_file(p, df[!, :GradeIcon], ".png";msg = "Icon이 존재하지 않습니다")
+
+    icons = df[!, :GradeIcon] .* ".png"
+    isfile_inrepo("mars-client", 
+        "unity/Assets/1_CollectionResources/VillageGradeIcons", icons; 
+        msg = "Icon이 존재하지 않습니다")
 
     chore_groupkeys = begin 
         data = filter(!isnull, get.(df[!, :Chores], "Group", missing))
@@ -391,15 +401,6 @@ function validator(bt::XLSXBalanceTable{:Quest})
     validate_haskey("RewardTable", rewards)
 
     validate_subset(member[!, :GroupName], group[!, :Name]; msg = "존재하지 않는 GroupName 입니다")
-
-    # Dialogue 파일 유무 체크
-    path_dialogue = joinpath(GAMEENV["patch_data"], "Dialogue")
-    for el in member[!, :CompleteAction]
-        f = el["QuestDialogue"]
-        if !isnull(f)
-            validate_file(path_dialogue, "$(f).json";msg = "Dialogue가 존재하지 않습니다")
-        end
-    end
 
     nothing
 end

@@ -57,7 +57,7 @@ export GAMEENV, GAMEDATA, help, setup!,
        BalanceTable, XLSXBalanceTable, JSONBalanceTable, UnityBalanceTable,
        sheetnames, get_cachedrow, reload!,
        DataFrame,
-       xl, xl_change_datapath!, xl_backup, xl_auto, md5hash, setbranch!, 
+       xl, xl_change_datapath!, xl_backup, xl_auto, md5hash, set_validation!, 
        cleanup_cache!, cleanup_history!,
 
        # 유틸리티

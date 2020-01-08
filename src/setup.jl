@@ -38,10 +38,10 @@ function setup_env!()
         return false
     else
         GAMEENV["mars-client"] = repo
-        # patch-data
+        # submodules
         GAMEENV["patch_data"] = joinpath(GAMEENV["mars-client"], "patch-data")
-        # unity folders
-        GAMEENV["ArtAssets"] = joinpath(GAMEENV["mars-client"], "unity/assets/4_ArtAssets")
+        GAMEENV["mars_art_assets"] = joinpath(GAMEENV["mars-client"], "submodules/mars-art-assets")
+
         GAMEENV["CollectionResources"] = joinpath(GAMEENV["mars-client"], "unity/Assets/1_CollectionResources")
 
         GAMEENV["NetworkFolder"] = Sys.iswindows() ? "M:/GameData" : "/Volumes/ShardData/MARSProject/GameData"
@@ -78,4 +78,23 @@ function xl_change_datapath!()
     GAMEENV["xlsx"]
 end
 
+"""
+git_ls_files
+"""
+function git_ls_files()
+    (git_ls_files("mars-client", false), 
+     git_ls_files("patch_data", false),
+     git_ls_files("mars_art_assets"))
+end
+function git_ls_files(repo, wait = true)
+    #TODO commit hash가 다를경우에만 다시 하도록
+    p = GAMEENV[repo]
+    cache_folder = replace(GAMEENV["cache"], p*"/" => "")
+    f = "git_ls-files_$(basename(p)).txt"
+    
+    cd(p)
+    run(pipeline(`git ls-files`, stdout = "$cache_folder/$f"), wait = wait)
+
+    return joinpath(GAMEENV["cache"], f)
+end
 

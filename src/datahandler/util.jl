@@ -44,13 +44,11 @@ function reload_meta!()
     end
 end
 
-function setbranch!(branch::AbstractString) 
-    CACHE[:patch_data_branch] = branch
-    git_checkout_patchdata(branch)
+function set_validation!()
+    set_validation!(!CACHE[:validation])
 end
-
-function validation!()
-    CACHE[:validation] = !CACHE[:validation]
+function set_validation!(b::Bool)
+    CACHE[:validation] = b
     @info "CACHE[:validation] = $(CACHE[:validation])"
 end
 
@@ -64,6 +62,11 @@ end
 function cleanup_history!()
     rm(GAMEENV["history"])
     printstyled("  └export 히스토리를 삭제하였습니다 (◎﹏◎)"; color = :yellow)
+end
+
+function setbranch!(branch::AbstractString) 
+    CACHE[:patch_data_branch] = branch
+    git_checkout_patchdata(branch)
 end
 
 function git_checkout_patchdata(branch)

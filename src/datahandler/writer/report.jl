@@ -6,7 +6,7 @@ GAMEDATA["Block"] 과 ../4_ArtAssets/GameResources/Blocks/ 하위에 있는 .pre
 상호 누락된 파일명 리스트를 '.cache'폴더에 저장합니다
 """
 function findblock()
-    root = joinpath(GAMEENV["ArtAssets"], "GameResources/Blocks/")
+    root = joinpath(GAMEENV["mars_art_assets"], "GameResources/Blocks/")
 
     artassets = String[]
     for (folder, dir, files) in walkdir(root)
