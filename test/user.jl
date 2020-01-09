@@ -1,7 +1,7 @@
 using Test
 using GameDataManager
 
-itemtable = get(BalanceTable, "ItemTable")
+itemtable = get(Table, "ItemTable")
 
 @testset "Currency 추가 삭제" begin
     u = User()

@@ -12,7 +12,7 @@ end
 
 end
 
-@testset "history 테스트" begin
+@testset "exportlog 테스트" begin
 
 
 end

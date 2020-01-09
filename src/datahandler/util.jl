@@ -12,6 +12,15 @@ json에서는 'nothing'과 'missing'을 모두 null로 지칭하기 때문에 �
 """
 isnull(x) = ismissing(x) | isnothing(x)
 
+"""
+    @j_str(token)
+- j"/token" 사용 가능
+"""
+macro j_str(token) 
+    XLSXasJSON.JSONPointer(token) 
+end
+
+
 function print_write_result(path, msg = "결과는 다음과 같습니다")
     printstyled("$(msg)\n"; color=:green)
     print("   SAVED => ")
@@ -40,7 +49,7 @@ end
 function reload_meta!()
     if ismodified("_Meta.json")
         CACHE[:meta] = loadmeta()
-        gamedata_export_history("_Meta.json")
+        export_log("_Meta.json")
     end
 end
 
@@ -53,15 +62,15 @@ function set_validation!(b::Bool)
 end
 
 function cleanup_cache!()
-    CACHE[:validator_data] = Dict()
-    global GAMEDATA = Dict{String, BalanceTable}()
+    CACHE[:validation_table] = Dict()
+    global GAMEDATA = Dict{String, Table}()
     printstyled("  └로딩 되어있던 GAMEDATA를 모두 청소하였습니다 (◎﹏◎)"; color = :yellow)
     nothing
 end
 
-function cleanup_history!()
-    rm(GAMEENV["history"])
-    printstyled("  └export 히스토리를 삭제하였습니다 (◎﹏◎)"; color = :yellow)
+function cleanup_exportlog!()
+    rm(GAMEENV["exportlog"])
+    printstyled("  └.exportlog.json을 삭제하였습니다 (◎﹏◎)"; color = :yellow)
 end
 
 function setbranch!(branch::AbstractString) 

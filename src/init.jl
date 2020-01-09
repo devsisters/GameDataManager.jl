@@ -1,5 +1,5 @@
 const GAMEENV = Dict{String, Any}()
-const GAMEDATA = Dict{String, BalanceTable}()
+const GAMEDATA = Dict{String, Table}()
 const CACHE = Dict{Symbol, Any}()
 
 # Currencies
@@ -18,8 +18,8 @@ function __init__()
     if s
         # writelog_userinfo()        
         CACHE[:meta] = loadmeta()
-        CACHE[:history] = init_gamedata_history(GAMEENV["history"])
-        CACHE[:validator_data] = Dict()
+        CACHE[:exportlog] = init_exportlog()
+        CACHE[:validation_table] = Dict()
         CACHE[:validation] = true
         CACHE[:patch_data_branch] = "master"
         CACHE[:git] = Dict()
@@ -77,12 +77,13 @@ function loadmeta(metafile = joinpath_gamedata("_Meta.json"))
     return meta
 end
 
-function init_gamedata_history(file = GAMEENV["history"])
-    h = isfile(file) ? JSON.parsefile(file; dicttype=Dict{String, Float64}) :
-                       Dict{String, Float64}()
+function init_exportlog()
+    file = GAMEENV["exportlog"]
+    h = isfile(file) ? JSON.parsefile(file; dicttype=Dict{String, Any}) :
+                       Dict{String, Any}()
 
     # 방금 로딩한 _Meta.json 시간
-    h["_Meta.json"] = mtime(joinpath_gamedata("_Meta.json"))
+    h["_Meta.json"] = [mtime(joinpath_gamedata("_Meta.json"))]
 
     return h
 end

@@ -45,7 +45,7 @@ struct User
     end
 end
 function User()
-    ref = get(JSONBalanceTable, "zBotName.json")
+    ref = get(JSONTable, "zBotName.json")
     name = rand(ref[1]["KOR"])
     User(name)
 end

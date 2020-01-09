@@ -22,15 +22,15 @@ end
     cache_gamedata!(f; kwargs...)
 gamedata로 데이터를 불러온다
 """
-function cache_gamedata!(::Type{XLSXBalanceTable}, f; kwargs...)
+function cache_gamedata!(::Type{XLSXTable}, f; kwargs...)
     k = split(f, ".")[1]
-    GAMEDATA[k] = BalanceTable(f; kwargs...)
+    GAMEDATA[k] = Table(f; kwargs...)
     printstyled("GAMEDATA[\"$(k)\"] is cached\n"; color=:yellow) # XLSX에서 불렀는지 JSON에서 불렀는지 알 필요가 있나?
 
     return GAMEDATA[k]
 end
-function cache_gamedata!(::Type{JSONBalanceTable}, f; kwargs...)
-    GAMEDATA[f] = JSONBalanceTable(f; kwargs...)
+function cache_gamedata!(::Type{JSONTable}, f; kwargs...)
+    GAMEDATA[f] = JSONTable(f; kwargs...)
     printstyled("GAMEDATA[\"$(f)\"] is cached from Json\n"; color=:yellow)
 
     return GAMEDATA[f]
@@ -43,35 +43,35 @@ GAMEDATA 에 캐시되어있는 모든 엑셀 파일을 업데이트
 function reload!(gd)
     # TODO 뭘 리로드했는지 아니면 아무것도 안했는지 로그좀...
     for k in keys(gd)
-        T = endswith(k, ".json") ? JSONBalanceTable : BalanceTable
+        T = endswith(k, ".json") ? JSONTable : Table
         get(T, k;check_modified= true)
     end
 end
 
 """
-    get(::Type{BalanceTable}, file::AbstractString; check_modified = false)
+    get(::Type{Table}, file::AbstractString; check_modified = false)
 
-BalanceTable 데이터를 가져온다. cache 안 되어있을 경우 cache에 올린다
+Table 데이터를 가져온다. cache 안 되어있을 경우 cache에 올린다
 # KEYWORDS
 * check_modified : excel 파일의 시간을 검사하여 다를 경우 cache를 업데이트한다.
 """
-function Base.get(::Type{BalanceTable}, file::AbstractString; check_modified = false)
+function Base.get(::Type{Table}, file::AbstractString; check_modified = false)
     if !haskey(GAMEDATA, file)
-        cache_gamedata!(XLSXBalanceTable, file)
+        cache_gamedata!(XLSXTable, file)
     end
     if check_modified
         if ismodified(file) # 파일 변경 여부 체크
-            cache_gamedata!(XLSXBalanceTable, file)
+            cache_gamedata!(XLSXTable, file)
         end
     end
     bt = GAMEDATA[file]
 
     return bt
 end
-function Base.get(::Type{JSONBalanceTable}, file::AbstractString; check_modified = true)
+function Base.get(::Type{JSONTable}, file::AbstractString; check_modified = true)
     f = endswith(file, ".json") ? file : file * ".json"
     if !haskey(GAMEDATA, f)
-        cache_gamedata!(JSONBalanceTable, f)
+        cache_gamedata!(JSONTable, f)
     end
     return GAMEDATA[file]
 end
@@ -86,11 +86,11 @@ EXCEL 파일을 cache에 올리고, 해당 sheet의 데이터를 반환한다.
 get(DataFrame, ("ItemTable", "Normal"))
 """
 function Base.get(::Type{Dict}, file_sheet::Tuple; kwargs...) 
-    ref = get(BalanceTable, file_sheet[1]; kwargs...)
+    ref = get(Table, file_sheet[1]; kwargs...)
     get(Dict, ref, file_sheet[2])
 end
 function Base.get(::Type{DataFrame}, file_sheet::Tuple; kwargs...)
-    ref = get(BalanceTable, file_sheet[1]; kwargs...)
+    ref = get(Table, file_sheet[1]; kwargs...)
     get(DataFrame, ref, file_sheet[2])
 end
 """
@@ -103,11 +103,11 @@ get_cachedrow("ItemTable", "Normal", :Key, 7001)
 """
 get_cachedrow(file, sheet, col, matching_value) = get_cachedrow(Dict, file, sheet, col, matching_value)
 function get_cachedrow(::Type{T}, file, sheet, col, matching_value) where T
-    bt = get(BalanceTable, file)
+    bt = get(Table, file)
     get_cachedrow(T, bt, sheet, col, matching_value)
 end
-get_cachedrow(bt::BalanceTable, sheet, col, matching_value) = get_cachedrow(Dict, bt, sheet, col, matching_value)
-function get_cachedrow(::Type{T}, bt::BalanceTable, sheet, col, matching_value) where T
+get_cachedrow(bt::Table, sheet, col, matching_value) = get_cachedrow(Dict, bt, sheet, col, matching_value)
+function get_cachedrow(::Type{T}, bt::Table, sheet, col, matching_value) where T
     data = get(T, bt, sheet)
     ind = _cached_index(bt, sheet, col, matching_value)
     if T <: AbstractDict

@@ -1,11 +1,11 @@
 """
-    validate_general(bt::XLSXBalanceTable)
+    validate_general(bt::XLSXTable)
 모든 파일에 공용으로 적용되는 규칙
 
 **컬럼명별 검사 항목**
 * :Key 모든 데이터가 유니크해야 한다, 공백이나 탭 줄바꿈이 있으면 안된다.
 """
-function validate_general(bt::XLSXBalanceTable)
+function validate_general(bt::XLSXTable)
     function validate_Key(df)
         validate_duplicate(df[!, :Key])
         # TODO 그래서 어디서 틀린건지 위치 찍어주기
@@ -28,34 +28,35 @@ end
 """
 function validate_haskey(class, a; assert=true)
     if class == "ItemTable"
-        jwb = get!(CACHE[:validator_data], class, JWB(class, false))
+        jwb = get!(CACHE[:validation_table], class, XLSXTable(class; validation = false)).data
         b = vcat(map(i -> get.(jwb[i], "Key", missing), 1:length(jwb))...)
     elseif class == "Building"
         b = String[]
         for f in ("Shop", "Residence", "Attraction", "Special")
-            jwb = get!(CACHE[:validator_data], f, JWB(f, false))
+            jwb = get!(CACHE[:validation_table], f, XLSXTable(f; validation = false)).data
             x = get.(jwb[:Building], "BuildingKey", "")
             append!(b, x)
         end
     elseif class == "Ability"
-        jwb = get!(CACHE[:validator_data], class, JWB(class, false))
+        jwb = get!(CACHE[:validation_table], class, XLSXTable(class; validation = false)).data
         b = unique(get.(jwb[:Level], "AbilityKey", missing))
     elseif class == "Block"
-        jwb = get!(CACHE[:validator_data], class, JWB(class, false))
+        jwb = get!(CACHE[:validation_table], class, XLSXTable(class; validation = false)).data
         b = unique(get.(jwb[:Block], "Key", missing))
     elseif class == "BlockSet"
-        jwb = get!(CACHE[:validator_data], "Block", JWB("Block", false))
+        jwb = get!(CACHE[:validation_table], "Block", XLSXTable("Block"; validation = false)).data
         b = unique(get.(jwb[:Set], "BlockSetKey", missing))
     elseif class == "RewardTable"
-        jwb = get!(CACHE[:validator_data], class, JWB(class, false))
-        jwb2 = get!(CACHE[:validator_data], "BlockRewardTable", JWB("BlockRewardTable", false))
+        jwb = get!(CACHE[:validation_table], class, XLSXTable(class; validation = false)).data
+        jwb2 = get!(CACHE[:validation_table], 
+                "BlockRewardTable", XLSXTable("BlockRewardTable"; validation = false)).data
 
         b = [get.(jwb[1], "RewardKey", missing); get.(jwb2[1], "RewardKey", missing)]
     elseif class == "Perk"
-        jwb = get!(CACHE[:validator_data], "Pipo", JWB("Pipo", false))
+        jwb = get!(CACHE[:validation_table], "Pipo", XLSXTable("Pipo"; validation = false)).data
         b = unique(get.(jwb[:Perk], "Key", missing))
     elseif class == "Chore"
-        jwb = get!(CACHE[:validator_data], "Chore", JWB("Chore", false))
+        jwb = get!(CACHE[:validation_table], "Chore", XLSXTable("Chore"; validation = false)).data
         b = unique(get.(jwb[:Group], "GroupKey", missing))
     else
         throw(AssertionError("validate_haskey($(class), ...)은 정의되지 않았습니다")) 
@@ -116,14 +117,14 @@ end
 
 
 """
-    validator(bt::XLSXBalanceTable)
+    validator(bt::XLSXTable)
 
 데이터 오류를 검사 엑셀 파일별로 정의한다
 """
-function validator(bt::XLSXBalanceTable)::Nothing
+function validator(bt::XLSXTable)::Nothing
     nothing
 end
-function validator(bt::XLSXBalanceTable{:Block})
+function validator(bt::XLSXTable{:Block})
     block = get(DataFrame, bt, "Block")
     
     magnet_file = joinpath(GAMEENV["mars_art_assets"], "Internal/BlockTemplateTable.asset")
@@ -179,10 +180,10 @@ function validator(bt::XLSXBalanceTable{:Block})
     nothing
 end
 
-validator(bt::XLSXBalanceTable{:Shop}) = validator_building(bt)
-validator(bt::XLSXBalanceTable{:Residence}) = validator_building(bt)
-validator(bt::XLSXBalanceTable{:Attraction}) = validator_building(bt)
-function validator_building(bt::XLSXBalanceTable)
+validator(bt::XLSXTable{:Shop}) = validator_building(bt)
+validator(bt::XLSXTable{:Residence}) = validator_building(bt)
+validator(bt::XLSXTable{:Attraction}) = validator_building(bt)
+function validator_building(bt::XLSXTable)
     fname = _filename(bt)    
     data = get(DataFrame, bt, "Building")
     if fname != :Attraction  
@@ -209,7 +210,7 @@ function validator_building(bt::XLSXBalanceTable)
     nothing
 end
 
-function validator(bt::XLSXBalanceTable{:Ability})
+function validator(bt::XLSXTable{:Ability})
     ref = get(DataFrame, bt, "Group")
     df_level = get(DataFrame, bt, "Level")
 
@@ -223,7 +224,7 @@ function validator(bt::XLSXBalanceTable{:Ability})
     nothing
 end
 
-function validator(bt::XLSXBalanceTable{:SiteBonus})
+function validator(bt::XLSXTable{:SiteBonus})
     ref = get(DataFrame, bt, "Data")
     a = begin 
         x = ref[!, :Requirement]
@@ -236,14 +237,14 @@ function validator(bt::XLSXBalanceTable{:SiteBonus})
     nothing
 end
 
-function validator(bt::XLSXBalanceTable{:Chore})
+function validator(bt::XLSXTable{:Chore})
     df = get(DataFrame, bt, "Theme")
     validate_haskey("Perk", unique(df[!, :Perk]))
 
     nothing
 end
 
-function validator(bt::XLSXBalanceTable{:DroneDelivery})
+function validator(bt::XLSXTable{:DroneDelivery})
     df = get(DataFrame, bt, "Group")
     validate_haskey("RewardTable", df[!, :RewardKey])
 
@@ -257,7 +258,7 @@ function validator(bt::XLSXBalanceTable{:DroneDelivery})
     nothing
 end
 
-function validator(bt::XLSXBalanceTable{:PipoFashion})
+function validator(bt::XLSXTable{:PipoFashion})
     # jwb[:Data] = merge(jwb[:Data], jwb[:args], "ProductKey")
     root = joinpath(GAMEENV["mars-client"], "unity/Assets/4_ArtAssets/GameResources/Pipo")
 
@@ -276,7 +277,7 @@ function validator(bt::XLSXBalanceTable{:PipoFashion})
     nothing
 end
 
-function validator(bt::XLSXBalanceTable{:ItemTable})
+function validator(bt::XLSXTable{:ItemTable})
     path = joinpath(GAMEENV["CollectionResources"], "ItemIcons")
     
     for sheet in ("Currency", "Normal", "BuildingSeed")
@@ -293,7 +294,7 @@ function validator(bt::XLSXBalanceTable{:ItemTable})
     nothing
 end
 
-function validator(bt::XLSXBalanceTable{:Player})
+function validator(bt::XLSXTable{:Player})
     df = get(DataFrame, bt, "DevelopmentLevel")
 
     p = joinpath(GAMEENV["CollectionResources"], "VillageGradeIcons")
@@ -317,7 +318,7 @@ function validator(bt::XLSXBalanceTable{:Player})
     nothing
 end
 
-function validator(bt::XLSXBalanceTable{:RewardTable})
+function validator(bt::XLSXTable{:RewardTable})
     # 시트를 합쳐둠
     df = get(DataFrame, bt, 1)
     validate_duplicate(df[!, :RewardKey])
@@ -346,7 +347,7 @@ function validator(bt::XLSXBalanceTable{:RewardTable})
     nothing
 end
 
-function validator(bt::XLSXBalanceTable{:BlockRewardTable})
+function validator(bt::XLSXTable{:BlockRewardTable})
     df = get(DataFrame, bt, "Data")
     validate_duplicate(df[!, :RewardKey])
     # 1백만 이상은 BlockRewardTable에서만 쓴다
@@ -366,7 +367,7 @@ function validator(bt::XLSXBalanceTable{:BlockRewardTable})
 end
 
 
-function validator(bt::XLSXBalanceTable{:Flag})
+function validator(bt::XLSXTable{:Flag})
     df = get(DataFrame, bt, "BuildingUnlock")
     validate_haskey("Building", df[!, :BuildingKey])
 
@@ -376,7 +377,7 @@ function validator(bt::XLSXBalanceTable{:Flag})
     nothing
 end
 
-function validator(bt::XLSXBalanceTable{:Quest})
+function validator(bt::XLSXTable{:Quest})
     # Group시트 검사
     group = get(DataFrame, bt, "Group")
     @assert allunique(group[!, :Key]) "GroupKey는 Unique 해야 합니다"

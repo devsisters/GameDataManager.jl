@@ -13,8 +13,8 @@ using GameBalanceManager
 
 import Base: +, -, *, /, ==
 
-# BalanceTable
-include("datahandler/balancetable.jl")
+# Table
+include("datahandler/table.jl")
 include("datahandler/validator.jl")
 include("datahandler/util.jl")
 
@@ -46,7 +46,7 @@ include("datahandler/loader.jl")
 
 include("datahandler/writer/writer.jl")
 include("datahandler/writer/autoxl.jl")
-include("datahandler/writer/history.jl")
+include("datahandler/writer/exportlog.jl")
 include("datahandler/writer/report.jl")
 
 #######  Logger      ##########################################
@@ -54,14 +54,15 @@ include("logger/logger.jl")
 
 export GAMEENV, GAMEDATA, help, setup!,
        # datahandler
-       BalanceTable, XLSXBalanceTable, JSONBalanceTable, UnityBalanceTable,
+       Table, XLSXTable, JSONTable,
        sheetnames, get_cachedrow, reload!,
        DataFrame,
        xl, xl_change_datapath!, xl_backup, xl_auto, md5hash, set_validation!, 
-       cleanup_cache!, cleanup_history!,
+       cleanup_cache!, cleanup_exportlog!,
+       
 
        # 유틸리티
-       findblock, get_buildings, get_blocks,
+       @j_str, findblock, get_buildings, get_blocks,
 
       # engine functions
       User,

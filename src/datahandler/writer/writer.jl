@@ -45,9 +45,9 @@ function export_gamedata(file::AbstractString)
         end
 
     println("『", f, "』")
-    bt = BalanceTable(f; read_from_xlsx = true, cacheindex = false)
+    bt = Table(f; read_from_xlsx = true, cacheindex = false)
     write_json(bt.data)
-    gamedata_export_history(f)
+    export_log(bt)
 
     nothing
 end
@@ -55,10 +55,10 @@ function export_gamedata(files::Vector)
     if !isempty(files)
         for f in files
             println("『", f, "』")
-            bt = BalanceTable(f; read_from_xlsx = true, cacheindex = false)
+            bt = Table(f; read_from_xlsx = true, cacheindex = false)
             write_json(bt.data)
+            export_log(bt)
         end
-        gamedata_export_history(files)
     end
     nothing
 end

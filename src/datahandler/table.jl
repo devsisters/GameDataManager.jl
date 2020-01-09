@@ -1,23 +1,23 @@
 """
-    BalanceTable(f::AbstractString)
+    Table(f::AbstractString)
 mars 메인 저장소의 `.../_META.json`에 명시된 파일을 읽습니다
 
 ** Arguements **
 * validate = true : false로 하면 validation을 하지 않습니다
 """
-abstract type BalanceTable end
-function BalanceTable(file; kwargs...)
+abstract type Table end
+function Table(file; kwargs...)
     if endswith(file, ".json")
-        JSONBalanceTable(file; kwargs...)
-    elseif endswith(file, ".prefab") || endswith(file, ".asset")
-        UnityBalanceTable(file; kwargs...)
+        JSONTable(file; kwargs...)
+    # elseif endswith(file, ".prefab") || endswith(file, ".asset")
+    #     UnityTable(file; kwargs...)
     else #XLSX만 shortcut 있음. JSON은 확장자 기입 필요
-        XLSXBalanceTable(file; kwargs...)
+        XLSXTable(file; kwargs...)
     end
 end
 
 """
-    XLSXBalanceTable
+    XLSXTable
 
 JSONWorkbook과 검색하기 위해 이를 DataFrame을 변환한 테이블을 가진다 
 
@@ -26,20 +26,23 @@ JSONWorkbook과 검색하기 위해 이를 DataFrame을 변환한 테이블을 �
               만약 data가 수정되면 반드시 construct_dataframe! 하도록 관리할 것
 # cache : 무엇 저장할지 미정
 """
-struct XLSXBalanceTable{FileName} <: BalanceTable
+struct XLSXTable{FileName} <: Table
     data::JSONWorkbook
     dataframe::Array{DataFrame, 1}
     # 사용할 함수들
     cache::Union{Missing, Array{Dict, 1}}
 end
-function XLSXBalanceTable(file::AbstractString; read_from_xlsx = false,
+function XLSXTable(file::AbstractString; read_from_xlsx = false,
                                     cacheindex = true, validation = CACHE[:validation])
+    
+    f = is_xlsxfile(file) ? file : CACHE[:meta][:xlsx_shortcut][file]
+    xlsxpath = joinpath_gamedata(f)
+
+    meta = getmetadata(f)
+
     if ismodified(file) | read_from_xlsx
         jwb = begin 
-            f = is_xlsxfile(file) ? file : CACHE[:meta][:xlsx_shortcut][file]
-            xlsxpath = joinpath_gamedata(f)
 
-            meta = getmetadata(f)
             kwargs_per_sheet = Dict()
             for el in meta
                 kwargs_per_sheet[el[1]] = el[2][2]
@@ -49,15 +52,28 @@ function XLSXBalanceTable(file::AbstractString; read_from_xlsx = false,
             process!(jwb; gameenv = GAMEENV)
         end
     else
-        jwb = JWB(file, false)
+        # JSON 파일 정보를 모아 JSONWorkbook 객체를 구성한다
+        v = []
+        @assert haskey(CACHE[:exportlog], basename(f)) "xl($f)로 exportlog를 생성해 주세요"
+        exportlog = CACHE[:exportlog][basename(f)]
+
+        for el in meta # sheetindex가 xlsx과 다르다. getindex할 때 이름으로 참조할 것!
+            if endswith(lowercase(el[2][1]), ".json") 
+                jsonfile = joinpath_gamedata(el[2][1])
+                json = JSON.parsefile(jsonfile; dicttype = OrderedDict) |> x -> convert(Array{OrderedDict, 1}, x)
+                p = broadcast(XLSXasJSON.JSONPointer, exportlog[2][el[1]])
+                push!(v, JSONWorksheet(xlsxpath, p, json, el[1]))
+            end
+        end
+        index = XLSXasJSON.Index(sheetnames.(v))
+        jwb = JSONWorkbook(xlsxpath, v, index)
     end
 
     dataframe = construct_dataframe(jwb)
     cache = cacheindex ? index_cache.(dataframe) : missing
 
     filename = Symbol(split(basename(jwb), ".")[1])
-    x = XLSXBalanceTable{filename}(jwb, dataframe, cache)
-    validation ? validator(x) : @warn("validation을 하지 않습니다")
+    x = XLSXTable{filename}(jwb, dataframe, cache)
     return x
 end
 function copy_to_cache(origin)
@@ -69,42 +85,7 @@ function copy_to_cache(origin)
     cp(origin, destination; force = true)
 end
 
-function JWB(file, read_from_xlsx::Bool)::JSONWorkbook
-    f = is_xlsxfile(file) ? file : CACHE[:meta][:xlsx_shortcut][file]
-    
-    xlsxpath = joinpath_gamedata(f)
-    meta = getmetadata(f)
-    if read_from_xlsx
-        #TODO 중복 코드 제거
-        jwb = begin 
-            kwargs_per_sheet = Dict()
-            for el in meta
-                kwargs_per_sheet[el[1]] = el[2][2]
-            end
-            jwb = JSONWorkbook(copy_to_cache(xlsxpath), keys(meta), kwargs_per_sheet)
-            dummy_localizer!(jwb)
-            process!(jwb; gameenv = GAMEENV)
-        end
-    else
-        v = []
-        for el in meta # sheetindex가 xlsx과 다르다. getindex할 때 이름으로 참조할 것!
-            if endswith(lowercase(el[2][1]), ".json") 
-                jsonfile = joinpath_gamedata(el[2][1])
-                json = JSON.parsefile(jsonfile; dicttype = OrderedDict) |> x -> convert(Array{OrderedDict, 1}, x)
-                # JSONWorksheet를 위한 가짜 meta 생성
-                # Original이랑 완벽히 일치하게 만드려면 meta만 미리 저장해두면 될 듯...
-                p = XLSXasJSON.JSONPointer[]
-                push!(v, JSONWorksheet(xlsxpath, p, json, el[1]))
-            end
-        end
-        index = XLSXasJSON.Index(sheetnames.(v))
-        jwb = JSONWorkbook(xlsxpath, v, index)
-    end
-
-    return jwb
-end
-
-function construct_dataframe!(bt::XLSXBalanceTable)
+function construct_dataframe!(bt::XLSXTable)
     for (i, jws) in enumerate(bt.data)
         bt.dataframe[i] = construct_dataframe(jws)
     end
@@ -152,15 +133,15 @@ function index_cache(df::DataFrame)
 end
 
 """
-    JSONBalanceTable
+    JSONTable
 
 JSON을 쥐고 있음
 """
-struct JSONBalanceTable <: BalanceTable
+struct JSONTable <: Table
     data::Array{T, 1} where T <: AbstractDict
     filepath::AbstractString
 end
-function JSONBalanceTable(file::String)
+function JSONTable(file::String)
     @assert endswith(file, ".json") "$file 파일의 확장자가 `.json`이어야 합니다."
 
     file = joinpath_gamedata(file)
@@ -170,51 +151,42 @@ function JSONBalanceTable(file::String)
     else
         data = Dict[data]
     end
-    JSONBalanceTable(data, file)
+    JSONTable(data, file)
 end
-Base.getindex(bt::JSONBalanceTable, i) = getindex(bt.data, i)
-Base.basename(bt::JSONBalanceTable) = basename(bt.filepath)
-Base.dirname(bt::JSONBalanceTable) = dirname(bt.filepath)
-
-"""
-    UnityGameData
-unity .prefab과 .asset 파일
-"""
-struct UnityBalanceTable <: BalanceTable
-    data
-    filepath::AbstractString
-end
+Base.getindex(bt::JSONTable, i) = getindex(bt.data, i)
+Base.basename(bt::JSONTable) = basename(bt.filepath)
+Base.dirname(bt::JSONTable) = dirname(bt.filepath)
 
 
 # fallback function
-Base.basename(xgd::XLSXBalanceTable) = basename(xgd.data)
+Base.basename(xgd::XLSXTable) = basename(xgd.data)
 Base.basename(jwb::JSONWorkbook) = basename(xlsxpath(jwb))
-Base.dirname(xgd::XLSXBalanceTable) = dirname(xgd)
+Base.dirname(xgd::XLSXTable) = dirname(xgd)
 Base.dirname(jwb::JSONWorkbook) = dirname(xlsxpath(jwb))
-_filename(xgd::XLSXBalanceTable) = typeof(xgd).parameters[1]
+_filename(xgd::XLSXTable) = typeof(xgd).parameters[1]
 
-index(x::XLSXBalanceTable) = x.data.sheetindex
-cache(x::XLSXBalanceTable) = x.cache
-XLSXasJSON.sheetnames(xgd::XLSXBalanceTable) = sheetnames(xgd.data)
+index(x::XLSXTable) = x.data.sheetindex
+cache(x::XLSXTable) = x.cache
+XLSXasJSON.sheetnames(xgd::XLSXTable) = sheetnames(xgd.data)
 
-Base.get(::Type{Dict}, x::XLSXBalanceTable) = x.data
-Base.get(::Type{DataFrame}, x::XLSXBalanceTable) = x.dataframe
-function Base.get(::Type{Dict}, x::XLSXBalanceTable, sheet)
+Base.get(::Type{Dict}, x::XLSXTable) = x.data
+Base.get(::Type{DataFrame}, x::XLSXTable) = x.dataframe
+function Base.get(::Type{Dict}, x::XLSXTable, sheet)
     idx = getindex(index(x), sheet)
     getindex(x.data, idx).data
 end
-function Base.get(::Type{DataFrame}, x::XLSXBalanceTable, sheet)
+function Base.get(::Type{DataFrame}, x::XLSXTable, sheet)
     idx = getindex(index(x), sheet)
     getindex(x.dataframe, idx)
 end
 
-function Base.show(io::IO, bt::XLSXBalanceTable)
+function Base.show(io::IO, bt::XLSXTable)
     println(io, ".data ┕━")
     print(io, bt.data)
 end
 
-function Base.show(io::IO, bt::JSONBalanceTable)
-    print(io, "JSONBalanceTable: ")
+function Base.show(io::IO, bt::JSONTable)
+    print(io, "JSONTable: ")
     println(io, replace(bt.filepath, GAMEENV["xlsx"]["root"] => ".."))
 
     data = bt.data

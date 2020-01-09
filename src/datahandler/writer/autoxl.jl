@@ -13,7 +13,7 @@ xl_auto(interval = 3, timeout = 10000) = xl_auto(collect_auto_xlsx(), interval, 
     .xlsx 파일 감시를 시작합니다...
         감시 종료를 원할경우 'Ctrl + c'를 누르면 감시를 멈출 수 있습니다
     """
-    # @async로 task로 생성할 수도 있지만... history 파일을 동시 편집할 위험이 있기 때문에 @async는 사용하지 않는다
+    # @async로 task로 생성할 수도 있지만... exportlog 파일을 동시 편집할 위험이 있기 때문에 @async는 사용하지 않는다
     bars = [repeat("↗↘", 15), repeat("←↑", 10)]
     @inbounds for i in 1:timeout
         bar = bars[isodd(i)+1]
