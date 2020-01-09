@@ -22,6 +22,7 @@ function __init__()
         CACHE[:validator_data] = Dict()
         CACHE[:validation] = true
         CACHE[:patch_data_branch] = "master"
+        CACHE[:git] = Dict()
     end
     help()
     nothing

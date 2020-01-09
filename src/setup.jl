@@ -87,14 +87,34 @@ function git_ls_files()
      git_ls_files("mars_art_assets"))
 end
 function git_ls_files(repo, wait = true)
-    #TODO commit hash가 다를경우에만 다시 하도록
-    p = GAMEENV[repo]
-    cache_folder = replace(GAMEENV["cache"], p*"/" => "")
-    f = "git_ls-files_$(basename(p)).txt"
-    
-    cd(p)
-    run(pipeline(`git ls-files`, stdout = "$cache_folder/$f"), wait = wait)
+    path = GAMEENV[repo]
+    cd(path)
 
-    return joinpath(GAMEENV["cache"], f)
+    cache_folder = replace(GAMEENV["cache"], path * "/" => "")
+    out = joinpath(cache_folder, "git_ls-files_$(basename(path)).txt")
+
+    excute_command = true
+    if isfile(out)
+        hash = begin 
+            p = Pipe()
+            run(pipeline(`git rev-parse HEAD`, stdout = p))
+            close(p.in) 
+            read(p) |> String 
+        end
+    
+        open(out, "r") do io 
+            x = readuntil(io, '\n', keep = true)
+            if x == hash
+                excute_command = false
+            end
+        end
+    end
+
+    if excute_command
+        #첫줄에 hash 넣어 줌
+        run(pipeline(`git rev-parse HEAD` & `git ls-files`, stdout = out), wait = wait)
+    end
+
+    return readlines(out)
 end
 

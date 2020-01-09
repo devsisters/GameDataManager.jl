@@ -89,8 +89,8 @@ function validate_subset(a, b; msg = "다음의 멤버가 subset이 아닙니다
 end
 
 function isfile_inrepo(repo, parent_folder, files; msg = "가 존재하지 않습니다", assert = false)
-    gitls = git_ls_files(repo)
-    git_files = filter(el -> startswith(el, parent_folder) && !endswith(el, ".meta"), readlines(gitls))
+    _gitfiles = git_ls_files(repo)
+    git_files = filter(el -> startswith(el, parent_folder) && !endswith(el, ".meta"), _gitfiles)
     
     notfound = Int[]
     for (i, f) in enumerate(files)
