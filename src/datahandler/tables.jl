@@ -52,32 +52,41 @@ function XLSXTable(file::AbstractString; read_from_xlsx = false,
             process!(jwb; gameenv = GAMEENV)
         end
     else
-        # JSON 파일 정보를 모아 JSONWorkbook 객체를 구성한다
-        v = []
-        @assert haskey(CACHE[:actionlog], basename(f)) "xl($f)로 exportlog를 생성해 주세요"
-        exportlog = CACHE[:actionlog][basename(f)]
-
-        for el in meta # sheetindex가 xlsx과 다르다. getindex할 때 이름으로 참조할 것!
-            if endswith(lowercase(el[2][1]), ".json") 
-                jsonfile = joinpath_gamedata(el[2][1])
-                json = JSON.parsefile(jsonfile; dicttype = OrderedDict) |> x -> convert(Array{OrderedDict, 1}, x)
-                p = broadcast(XLSXasJSON.JSONPointer, exportlog[2][el[1]])
-                push!(v, JSONWorksheet(xlsxpath, p, json, el[1]))
-            end
-        end
-        index = XLSXasJSON.Index(sheetnames.(v))
-        jwb = JSONWorkbook(xlsxpath, v, index)
+        jwb = _jsonworkbook(xlsxpath, f)
     end
     
     actionlog(jwb)
 
     dataframe = construct_dataframe(jwb)
     cache = cacheindex ? index_cache.(dataframe) : missing
-
     filename = Symbol(split(basename(jwb), ".")[1])
-    x = XLSXTable{filename}(jwb, dataframe, cache)
-    return x
+
+    return XLSXTable{filename}(jwb, dataframe, cache)
 end
+
+function _jsonworkbook(xlsxpath, name)    
+    @assert haskey(CACHE[:actionlog], basename(name)) "xl($name)로 actionlog를 생성해 주세요"
+    actionlog = CACHE[:actionlog][basename(name)]
+    
+    sheets = JSONWorksheet[]
+    for el in getmetadata(name) # sheetindex가 xlsx과 다르다. getindex할 때 이름으로 참조할 것!
+        if endswith(lowercase(el[2][1]), ".json") 
+            jws = begin 
+                jsonfile = joinpath_gamedata(el[2][1])
+                json = JSON.parsefile(jsonfile; dicttype = OrderedDict)
+                pointers = broadcast(XLSXasJSON.JSONPointer, actionlog[2][el[1]])
+                
+                JSONWorksheet(xlsxpath, pointers, 
+                            convert(Array{OrderedDict, 1}, json), el[1])
+            end
+            push!(sheets, jws)
+        end
+    end
+    index = XLSXasJSON.Index(sheetnames.(sheets))
+    JSONWorkbook(joinpath_gamedata(name), sheets, index)
+end
+
+
 function copy_to_cache(origin)
     destination = replace(origin, GAMEENV["GameData"] => joinpath(GAMEENV["cache"], "GameData"))
     dir, file = splitdir(destination)

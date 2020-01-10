@@ -45,8 +45,8 @@ end
 actionlog(bt::Table) = actionlog(bt.data)
 
 function actionlog(jwb::JSONWorkbook)
-    fname = basename(jwb)
-    file = XLSXasJSON.xlsxpath(jwb)
+    file = replace(XLSXasJSON.xlsxpath(jwb), "\\" => "/")
+    fname = split(file, "GameData/")[2]
 
     # TODO 이부분을 XLSXasJSON에 JSONTOken을 JSON.json으로 serialize하게 추가
     pointer = Dict()
