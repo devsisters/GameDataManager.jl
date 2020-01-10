@@ -36,32 +36,36 @@ function XLSXTable(file::AbstractString; read_from_xlsx = false,
                                     cacheindex = true, validation = CACHE[:validation])
     
     f = is_xlsxfile(file) ? file : CACHE[:meta][:xlsx_shortcut][file]
+    filename = string(split(f, ".")[1])
+
     xlsxpath = joinpath_gamedata(f)
 
     meta = getmetadata(f)
 
     if ismodified(file) | read_from_xlsx
-        jwb = begin 
-
-            kwargs_per_sheet = Dict()
-            for el in meta
-                kwargs_per_sheet[el[1]] = el[2][2]
-            end            
-            jwb = JSONWorkbook(copy_to_cache(xlsxpath), keys(meta), kwargs_per_sheet)
-            dummy_localizer!(jwb)
-            process!(jwb; gameenv = GAMEENV)
-        end
+        kwargs_per_sheet = Dict()
+        for el in meta
+            kwargs_per_sheet[el[1]] = el[2][2]
+        end            
+        jwb = JSONWorkbook(copy_to_cache(xlsxpath), keys(meta), kwargs_per_sheet)
+        dummy_localizer!(jwb)
+        process!(jwb; gameenv = GAMEENV)
     else
-        jwb = _jsonworkbook(xlsxpath, f)
+        if haskey(GAMEDATA, filename)
+            jwb = GAMEDATA[filename].data
+        else
+            jwb = _jsonworkbook(xlsxpath, f)
+        end
     end
-    
     actionlog(jwb)
 
     dataframe = construct_dataframe(jwb)
     cache = cacheindex ? index_cache.(dataframe) : missing
-    filename = Symbol(split(basename(jwb), ".")[1])
+    xt = XLSXTable{Symbol(filename)}(jwb, dataframe, cache)
+    # CACHE에 저장
+    GAMEDATA[filename] = xt
 
-    return XLSXTable{filename}(jwb, dataframe, cache)
+    return xt
 end
 
 function _jsonworkbook(xlsxpath, name)    
