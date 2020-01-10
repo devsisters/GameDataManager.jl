@@ -19,7 +19,6 @@ function __init__()
         # writelog_userinfo()        
         CACHE[:meta] = loadmeta()
         CACHE[:actionlog] = init_actionlog()
-        CACHE[:validation_table] = Dict()
         CACHE[:validation] = true
         CACHE[:patch_data_branch] = "master"
         CACHE[:git] = Dict()

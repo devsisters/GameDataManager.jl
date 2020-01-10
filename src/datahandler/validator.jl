@@ -28,35 +28,34 @@ end
 """
 function validate_haskey(class, a; assert=true)
     if class == "ItemTable"
-        jwb = get!(CACHE[:validation_table], class, XLSXTable(class; validation = false)).data
+        jwb = XLSXTable(class; validation = false).data
         b = vcat(map(i -> get.(jwb[i], "Key", missing), 1:length(jwb))...)
     elseif class == "Building"
         b = String[]
         for f in ("Shop", "Residence", "Attraction", "Special")
-            jwb = get!(CACHE[:validation_table], f, XLSXTable(f; validation = false)).data
+            jwb = XLSXTable(f; validation = false).data
             x = get.(jwb[:Building], "BuildingKey", "")
             append!(b, x)
         end
     elseif class == "Ability"
-        jwb = get!(CACHE[:validation_table], class, XLSXTable(class; validation = false)).data
+        jwb = XLSXTable(class; validation = false).data
         b = unique(get.(jwb[:Level], "AbilityKey", missing))
     elseif class == "Block"
-        jwb = get!(CACHE[:validation_table], class, XLSXTable(class; validation = false)).data
+        jwb = XLSXTable(class; validation = false).data
         b = unique(get.(jwb[:Block], "Key", missing))
     elseif class == "BlockSet"
-        jwb = get!(CACHE[:validation_table], "Block", XLSXTable("Block"; validation = false)).data
+        jwb = XLSXTable("Block"; validation = false).data
         b = unique(get.(jwb[:Set], "BlockSetKey", missing))
     elseif class == "RewardTable"
-        jwb = get!(CACHE[:validation_table], class, XLSXTable(class; validation = false)).data
-        jwb2 = get!(CACHE[:validation_table], 
-                "BlockRewardTable", XLSXTable("BlockRewardTable"; validation = false)).data
+        jwb = XLSXTable(class; validation = false).data
+        jwb2 = XLSXTable("BlockRewardTable"; validation = false).data
 
         b = [get.(jwb[1], "RewardKey", missing); get.(jwb2[1], "RewardKey", missing)]
     elseif class == "Perk"
-        jwb = get!(CACHE[:validation_table], "Pipo", XLSXTable("Pipo"; validation = false)).data
+        jwb = XLSXTable("Pipo"; validation = false).data
         b = unique(get.(jwb[:Perk], "Key", missing))
     elseif class == "Chore"
-        jwb = get!(CACHE[:validation_table], "Chore", XLSXTable("Chore"; validation = false)).data
+        jwb = XLSXTable("Chore"; validation = false).data
         b = unique(get.(jwb[:Group], "GroupKey", missing))
     else
         throw(AssertionError("validate_haskey($(class), ...)은 정의되지 않았습니다")) 

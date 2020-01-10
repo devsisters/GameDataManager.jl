@@ -62,7 +62,6 @@ function set_validation!(b::Bool)
 end
 
 function cleanup_cache!()
-    CACHE[:validation_table] = Dict()
     global GAMEDATA = Dict{String, Table}()
     printstyled("  └로딩 되어있던 GAMEDATA를 모두 청소하였습니다 (◎﹏◎)"; color = :yellow)
     nothing
