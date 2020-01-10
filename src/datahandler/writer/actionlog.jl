@@ -28,7 +28,7 @@ function ismodified(f)::Bool
            is_jsonfile(f) ? f : 
            CACHE[:meta][:xlsx_shortcut][f]
 
-    mtime(joinpath_gamedata(file)) > get(CACHE[:exportlog], file ,[0.])[1]
+    mtime(joinpath_gamedata(file)) > get(CACHE[:actionlog], file ,[0.])[1]
 end
 
 """
@@ -36,18 +36,18 @@ end
 
 gamedata_export() 로 뽑는 파일들 이력
 """
-function export_log()
-    open(GAMEENV["exportlog"], "w") do io
-        write(io, JSON.json(CACHE[:exportlog]))
+function actionlog()
+    open(GAMEENV["actionlog"], "w") do io
+        write(io, JSON.json(CACHE[:actionlog]))
     end
 end
 
-function export_log(bt::Table)
-    jwb = bt.data
+actionlog(bt::Table) = actionlog(bt.data)
+
+function actionlog(jwb::JSONWorkbook)
     fname = basename(jwb)
     file = XLSXasJSON.xlsxpath(jwb)
 
-    
     # TODO 이부분을 XLSXasJSON에 JSONTOken을 JSON.json으로 serialize하게 추가
     pointer = Dict()
     for s in sheetnames(jwb)
@@ -60,19 +60,30 @@ function export_log(bt::Table)
         pointer[s] = vals
     end
 
-    CACHE[:exportlog][fname] = [mtime(file), pointer]
-    export_log()
+    CACHE[:actionlog][fname] = [mtime(file), pointer]
+    CACHE[:actionlog]["write_count"] +=1
+    write_actionlog!(5)
+end
+
+function write_actionlog!(threadhold::Int; log = CACHE[:actionlog])
+    if log["write_count"] >= threadhold
+
+        open(GAMEENV["actionlog"], "w") do io
+            write(io, JSON.json(log))
+        end
+        log["write_count"] = 0
+    end
 end
 
 # _Meta.json에 없는 파일 제거함
-function cleanup_export_log()
+function cleanup_actionlog()
     a = keys(CACHE[:meta][:auto])
-    deleted_file = setdiff(keys(CACHE[:exportlog]), a)
+    deleted_file = setdiff(keys(CACHE[:actionlog]), a)
     if length(deleted_file) > 0
         for x in deleted_file
-            pop!(CACHE[:exportlog], x)
+            pop!(CACHE[:actionlog], x)
         end
-        export_log()
+        actionlog()
     end
     nothing
 end

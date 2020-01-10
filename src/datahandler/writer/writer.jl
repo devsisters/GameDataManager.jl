@@ -47,7 +47,6 @@ function export_gamedata(file::AbstractString)
     println("『", f, "』")
     bt = Table(f; read_from_xlsx = true, cacheindex = false)
     write_json(bt.data)
-    export_log(bt)
 
     nothing
 end
@@ -57,7 +56,6 @@ function export_gamedata(files::Vector)
             println("『", f, "』")
             bt = Table(f; read_from_xlsx = true, cacheindex = false)
             write_json(bt.data)
-            export_log(bt)
         end
     end
     nothing
@@ -89,7 +87,6 @@ function write_json(jwb::JSONWorkbook)
         end
     end
 end
-
 
 
 """

@@ -14,7 +14,7 @@ using GameBalanceManager
 import Base: +, -, *, /, ==
 
 # Table
-include("datahandler/table.jl")
+include("datahandler/tables.jl")
 include("datahandler/validator.jl")
 include("datahandler/util.jl")
 
@@ -46,7 +46,7 @@ include("datahandler/loader.jl")
 
 include("datahandler/writer/writer.jl")
 include("datahandler/writer/autoxl.jl")
-include("datahandler/writer/exportlog.jl")
+include("datahandler/writer/actionlog.jl")
 include("datahandler/writer/report.jl")
 
 #######  Logger      ##########################################
@@ -58,7 +58,7 @@ export GAMEENV, GAMEDATA, help, setup!,
        sheetnames, get_cachedrow, reload!,
        DataFrame,
        xl, xl_change_datapath!, xl_backup, xl_auto, md5hash, set_validation!, 
-       cleanup_cache!, cleanup_exportlog!,
+       cleanup_cache!,
        
 
        # 유틸리티

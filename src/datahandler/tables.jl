@@ -54,8 +54,8 @@ function XLSXTable(file::AbstractString; read_from_xlsx = false,
     else
         # JSON 파일 정보를 모아 JSONWorkbook 객체를 구성한다
         v = []
-        @assert haskey(CACHE[:exportlog], basename(f)) "xl($f)로 exportlog를 생성해 주세요"
-        exportlog = CACHE[:exportlog][basename(f)]
+        @assert haskey(CACHE[:actionlog], basename(f)) "xl($f)로 exportlog를 생성해 주세요"
+        exportlog = CACHE[:actionlog][basename(f)]
 
         for el in meta # sheetindex가 xlsx과 다르다. getindex할 때 이름으로 참조할 것!
             if endswith(lowercase(el[2][1]), ".json") 
@@ -68,6 +68,8 @@ function XLSXTable(file::AbstractString; read_from_xlsx = false,
         index = XLSXasJSON.Index(sheetnames.(v))
         jwb = JSONWorkbook(xlsxpath, v, index)
     end
+    
+    actionlog(jwb)
 
     dataframe = construct_dataframe(jwb)
     cache = cacheindex ? index_cache.(dataframe) : missing

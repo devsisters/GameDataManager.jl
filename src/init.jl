@@ -18,7 +18,7 @@ function __init__()
     if s
         # writelog_userinfo()        
         CACHE[:meta] = loadmeta()
-        CACHE[:exportlog] = init_exportlog()
+        CACHE[:actionlog] = init_actionlog()
         CACHE[:validation_table] = Dict()
         CACHE[:validation] = true
         CACHE[:patch_data_branch] = "master"
@@ -77,15 +77,19 @@ function loadmeta(metafile = joinpath_gamedata("_Meta.json"))
     return meta
 end
 
-function init_exportlog()
-    file = GAMEENV["exportlog"]
-    h = isfile(file) ? JSON.parsefile(file; dicttype=Dict{String, Any}) :
-                       Dict{String, Any}()
-
-    # 방금 로딩한 _Meta.json 시간
-    h["_Meta.json"] = [mtime(joinpath_gamedata("_Meta.json"))]
-
-    return h
+function init_actionlog()
+    file = GAMEENV["actionlog"]
+    if isfile(file) 
+        log = JSON.parsefile(file; dicttype=Dict{String, Any})
+    else 
+        log = Dict{String, Any}()
+        # 방금 로딩한 _Meta.json 시간
+        log["write_count"] = 0
+        log["_Meta.json"] = [mtime(joinpath_gamedata("_Meta.json"))]
+        write_actionlog!(0; log = log)
+    end
+    
+    return log
 end
 
 

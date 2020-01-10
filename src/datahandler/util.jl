@@ -69,7 +69,7 @@ function cleanup_cache!()
 end
 
 function cleanup_exportlog!()
-    rm(GAMEENV["exportlog"])
+    rm(GAMEENV["actionlog"])
     printstyled("  └.exportlog.json을 삭제하였습니다 (◎﹏◎)"; color = :yellow)
 end
 

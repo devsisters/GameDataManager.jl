@@ -60,7 +60,7 @@ function setup_env!()
         
         # GameDataManager paths
         GAMEENV["cache"] = joinpath(GAMEENV["patch_data"], ".cache")
-        GAMEENV["exportlog"] = joinpath(GAMEENV["cache"], ".exportlog.json")
+        GAMEENV["actionlog"] = joinpath(GAMEENV["cache"], "actionlog.json")
         return true
     end
 end
