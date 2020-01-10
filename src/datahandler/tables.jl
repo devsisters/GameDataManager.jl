@@ -32,7 +32,7 @@ struct XLSXTable{FileName} <: Table
     # 사용할 함수들
     cache::Union{Missing, Array{Dict, 1}}
 end
-function XLSXTable(file::AbstractString; read_from_xlsx = false,
+function XLSXTable(file::AbstractString; force_xlsx = false,
                                     cacheindex = true, validation = CACHE[:validation])
     
     f = is_xlsxfile(file) ? file : CACHE[:meta][:xlsx_shortcut][file]
@@ -42,7 +42,7 @@ function XLSXTable(file::AbstractString; read_from_xlsx = false,
 
     meta = getmetadata(f)
 
-    if ismodified(file) | read_from_xlsx
+    if ismodified(file) | force_xlsx
         kwargs_per_sheet = Dict()
         for el in meta
             kwargs_per_sheet[el[1]] = el[2][2]
