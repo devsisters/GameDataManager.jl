@@ -49,7 +49,7 @@ end
 function reload_meta!()
     if ismodified("_Meta.json")
         CACHE[:meta] = loadmeta()
-        export_log("_Meta.json")
+        actionlog("_Meta.json")
     end
 end
 

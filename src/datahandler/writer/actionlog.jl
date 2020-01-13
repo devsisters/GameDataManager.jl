@@ -43,7 +43,6 @@ function actionlog()
 end
 
 actionlog(bt::Table) = actionlog(bt.data)
-
 function actionlog(jwb::JSONWorkbook)
     file = replace(XLSXasJSON.xlsxpath(jwb), "\\" => "/")
     fname = split(file, "GameData/")[2]
@@ -64,6 +63,17 @@ function actionlog(jwb::JSONWorkbook)
     CACHE[:actionlog]["write_count"] +=1
     write_actionlog!(5)
 end
+function actionlog(file)
+    path = joinpath_gamedata("_Meta.json") 
+    if is_xlsxfile(file)
+        @warn "$file의 액션 로그가 생성되지 않았습니다."
+    else
+        CACHE[:actionlog][file] = [mtime(file)]
+    end
+    CACHE[:actionlog]["write_count"] +=1
+    write_actionlog!(5)
+end
+
 
 function write_actionlog!(threadhold::Int; log = CACHE[:actionlog])
     if log["write_count"] >= threadhold
