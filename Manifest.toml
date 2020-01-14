@@ -99,7 +99,7 @@ uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
 deps = ["Caching", "DataStructures", "JSON", "Test", "XLSXasJSON"]
 path = "C:\\Users\\devsisters\\.julia\\dev\\GameBalanceManager"
 uuid = "bb77ccaf-9d50-4d58-b991-76f827c14ecc"
-version = "0.1.4"
+version = "0.1.5"
 
 [[InteractiveUtils]]
 deps = ["Markdown"]
