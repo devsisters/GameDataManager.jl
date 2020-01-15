@@ -44,7 +44,7 @@ function setup_env!()
 
         GAMEENV["CollectionResources"] = joinpath(GAMEENV["mars-client"], "unity/Assets/1_CollectionResources")
 
-        GAMEENV["NetworkFolder"] = Sys.iswindows() ? "M:/GameData" : "/Volumes/ShardData/MARSProject/GameData"
+        GAMEENV["NetworkFolder"] = Sys.iswindows() ? "M:/" : "/Volumes/ShardData/MARSProject/"
         if !isdir(GAMEENV["NetworkFolder"]) 
             @warn """네트워크 폴더가 세팅 되어 있지 않습니다. 아래의 메뉴얼을 
             아래의 페이지를 참고하여 네트워크 폴더 세팅을 해 주세요
@@ -52,7 +52,8 @@ function setup_env!()
             """
             GAMEENV["GameData"] = joinpath(GAMEENV["patch_data"], "_GameData")
         else 
-            GAMEENV["GameData"] = GAMEENV["NetworkFolder"]
+            GAMEENV["GameData"] = joinpath(GAMEENV["NetworkFolder"], "GameData")
+            GAMEENV["Dialogue"] = joinpath(GAMEENV["NetworkFolder"], "Dialogue")
         end
 
         GAMEENV["xlsx"] = Dict("root" => GAMEENV["GameData"])
@@ -66,10 +67,10 @@ function setup_env!()
 end
 
 function xl_change_datapath!()
-    if GAMEENV["GameData"] == GAMEENV["NetworkFolder"]
+    if startswith(GAMEENV["GameData"], GAMEENV["NetworkFolder"])
         GAMEENV["GameData"] = joinpath(GAMEENV["patch_data"], "_GameData")
     else 
-        GAMEENV["GameData"] = GAMEENV["NetworkFolder"]
+        GAMEENV["GameData"] = joinpath(GAMEENV["NetworkFolder"], "GameData")
     end
     # 비우기
     GAMEENV["xlsx"] = Dict("root" => GAMEENV["GameData"])

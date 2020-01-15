@@ -117,19 +117,21 @@ function md5hash(f)
     bytes2hex(md5(read(joinpath_gamedata(f), String)))
 end
 
-function xl_backup()
-    # 네트워크에 있는 XLSX 파일들을 가져옵니다. 
+function backup()
+    # 네트워크의 게임 데이터를 백업합니다
     @assert startswith(GAMEENV["GameData"], "M") "네트워크에 연결할 수 없어 XLSX 데이터 백업이 불가능 합니다"
 
-    exe7z = joinpath(Base.Sys.BINDIR, "..", "libexec", "7z.exe")
-    cd(GAMEENV["GameData"])
-    f = "GameData.zip"
-    run(`$exe7z a -r $f`)
-    
-    origin = joinpath(GAMEENV["GameData"], f)
-    target = joinpath(GAMEENV["patch_data"], "_GameData/$f")
-    print("↳Move File: ", origin)
-        mv(origin, target; force = true)
-    println(" => ", target)
+    for folder in ("GameData", "Dialogue")
+        exe7z = joinpath(Base.Sys.BINDIR, "..", "libexec", "7z.exe")
+        cd(GAMEENV[folder])
+        f = "$folder.zip"
+        run(`$exe7z a -r $f`)
+        
+        origin = joinpath(GAMEENV[folder], f)
+        target = joinpath(GAMEENV["patch_data"], "_Backup/$f")
+        print("↳Move File: ", origin)
+            mv(origin, target; force = true)
+        println(" => ", target)
+    end
 
 end

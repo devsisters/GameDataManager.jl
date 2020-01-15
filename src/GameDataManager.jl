@@ -48,6 +48,7 @@ include("datahandler/writer/writer.jl")
 include("datahandler/writer/autoxl.jl")
 include("datahandler/writer/actionlog.jl")
 include("datahandler/writer/report.jl")
+include("datahandler/writer/ink.jl")
 
 #######  Logger      ##########################################
 include("logger/logger.jl")
@@ -59,6 +60,7 @@ export GAMEENV, GAMEDATA, help, setup!,
        DataFrame,
        xl, xl_change_datapath!, xl_backup, xl_auto, md5hash, set_validation!, 
        cleanup_cache!,
+       ink,
        
 
        # 유틸리티
