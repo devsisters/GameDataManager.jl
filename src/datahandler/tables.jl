@@ -34,12 +34,9 @@ struct XLSXTable{FileName} <: Table
 end
 function XLSXTable(file::AbstractString; force_xlsx = false,
                                     cacheindex = true, validation = CACHE[:validation])
-    
     f = is_xlsxfile(file) ? file : CACHE[:meta][:xlsx_shortcut][file]
     filename = string(split(f, ".")[1])
-
     xlsxpath = joinpath_gamedata(f)
-
     meta = getmetadata(f)
 
     if ismodified(file) | force_xlsx
@@ -61,14 +58,18 @@ function XLSXTable(file::AbstractString; force_xlsx = false,
 
     dataframe = construct_dataframe(jwb)
     cache = cacheindex ? index_cache.(dataframe) : missing
-    # CACHE에 저장
-    GAMEDATA[filename] = XLSXTable{Symbol(filename)}(jwb, dataframe, cache)
+
+    table = XLSXTable{Symbol(filename)}(jwb, dataframe, cache)
+    if validation 
+        validator(table)
+    end
+    GAMEDATA[filename] = table
 
     return GAMEDATA[filename]
 end
 
 function _jsonworkbook(xlsxpath, name)    
-    @assert haskey(CACHE[:actionlog], basename(name)) "xl($name)로 actionlog를 생성해 주세요"
+    @assert haskey(CACHE[:actionlog], basename(name)) "'xl(\"$(basename(name))\")'으로 actionlog를 생성해 주세요"
     actionlog = CACHE[:actionlog][basename(name)]
     
     sheets = JSONWorksheet[]

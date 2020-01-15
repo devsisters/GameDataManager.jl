@@ -61,7 +61,7 @@ function actionlog(jwb::JSONWorkbook)
 
     CACHE[:actionlog][fname] = [mtime(file), pointer]
     CACHE[:actionlog]["write_count"] +=1
-    write_actionlog!(5)
+    write_actionlog!(2)
 end
 function actionlog(file)
     path = joinpath_gamedata("_Meta.json") 
@@ -71,7 +71,7 @@ function actionlog(file)
         CACHE[:actionlog][file] = [mtime(file)]
     end
     CACHE[:actionlog]["write_count"] +=1
-    write_actionlog!(5)
+    write_actionlog!(2)
 end
 
 
