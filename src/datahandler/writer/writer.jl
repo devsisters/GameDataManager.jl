@@ -35,14 +35,25 @@ end
 mars 메인 저장소의 '.../_META.json'에 명시된 파일만 추출가능합니다
 """
 function export_gamedata(file::AbstractString)
-    f = if is_xlsxfile(file) 
-            file 
-        else 
-            if !haskey(CACHE[:meta][:xlsx_shortcut], file)
-                fuzzy_lookupname(keys(CACHE[:meta][:xlsx_shortcut]), file)
+    if is_xlsxfile(file) 
+        f = file 
+    else 
+        hay = keys(CACHE[:meta][:xlsx_shortcut])
+        if !in(hay, file)
+            needle = file
+            for h in hay
+                if lowercase(h) == lowercase(file)
+                    # 소문자일 경우 처리 해줌
+                    needle = h
+                    break
+                end
             end
-            CACHE[:meta][:xlsx_shortcut][file]
+            if needle == file
+                fuzzy_lookupname(hay, file)
+            end
         end
+        f = CACHE[:meta][:xlsx_shortcut][needle]
+    end
 
     println("『", f, "』")
     bt = Table(f; force_xlsx = true, cacheindex = false)
