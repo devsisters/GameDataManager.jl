@@ -61,11 +61,10 @@ function XLSXTable(file::AbstractString; force_xlsx = false,
 
     dataframe = construct_dataframe(jwb)
     cache = cacheindex ? index_cache.(dataframe) : missing
-    xt = XLSXTable{Symbol(filename)}(jwb, dataframe, cache)
     # CACHE에 저장
-    GAMEDATA[filename] = xt
+    GAMEDATA[filename] = XLSXTable{Symbol(filename)}(jwb, dataframe, cache)
 
-    return xt
+    return GAMEDATA[filename]
 end
 
 function _jsonworkbook(xlsxpath, name)    
@@ -159,14 +158,16 @@ end
 function JSONTable(file::String)
     @assert endswith(file, ".json") "$file 파일의 확장자가 `.json`이어야 합니다."
 
-    file = joinpath_gamedata(file)
-    data = JSON.parsefile(file; dicttype=OrderedDict)
+    f = joinpath_gamedata(file)
+    data = JSON.parsefile(f; dicttype=OrderedDict)
     if isa(data, Array)
         data = convert(Vector{OrderedDict}, data)
     else
         data = Dict[data]
     end
-    JSONTable(data, file)
+    GAMEDATA[file] = JSONTable(data, file)
+
+    return GAMEDATA[file]
 end
 Base.getindex(bt::JSONTable, i) = getindex(bt.data, i)
 Base.basename(bt::JSONTable) = basename(bt.filepath)

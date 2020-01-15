@@ -19,24 +19,6 @@ function joinpath_gamedata(file)
 end
 
 """
-    cache_gamedata!(f; kwargs...)
-gamedata로 데이터를 불러온다
-"""
-function cache_gamedata!(::Type{XLSXTable}, f; kwargs...)
-    k = split(f, ".")[1]
-    GAMEDATA[k] = Table(f; kwargs...)
-    printstyled("GAMEDATA[\"$(k)\"] is cached\n"; color=:yellow) # XLSX에서 불렀는지 JSON에서 불렀는지 알 필요가 있나?
-
-    return GAMEDATA[k]
-end
-function cache_gamedata!(::Type{JSONTable}, f; kwargs...)
-    GAMEDATA[f] = JSONTable(f; kwargs...)
-    printstyled("GAMEDATA[\"$(f)\"] is cached from Json\n"; color=:yellow)
-
-    return GAMEDATA[f]
-end
-
-"""
     reload!()
 GAMEDATA 에 캐시되어있는 모든 엑셀 파일을 업데이트
 """
@@ -57,11 +39,11 @@ Table 데이터를 가져온다. cache 안 되어있을 경우 cache에 올린�
 """
 function Base.get(::Type{Table}, file::AbstractString; check_modified = false)
     if !haskey(GAMEDATA, file)
-        cache_gamedata!(XLSXTable, file)
+        XLSXTable(file)
     end
     if check_modified
         if ismodified(file) # 파일 변경 여부 체크
-            cache_gamedata!(XLSXTable, file)
+            XLSXTable(file)
         end
     end
     bt = GAMEDATA[file]
@@ -71,7 +53,7 @@ end
 function Base.get(::Type{JSONTable}, file::AbstractString; check_modified = true)
     f = endswith(file, ".json") ? file : file * ".json"
     if !haskey(GAMEDATA, f)
-        cache_gamedata!(JSONTable, f)
+        JSONTable(f)
     end
     return GAMEDATA[file]
 end
