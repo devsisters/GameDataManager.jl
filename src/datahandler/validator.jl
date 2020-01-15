@@ -345,6 +345,16 @@ function validator(bt::XLSXTable{:RewardTable})
 
     nothing
 end
+function break_rewardscript(item)
+    weight = parse(Int, item[1])
+    if length(item) < 4
+        x = (item[2], parse(Int, item[3]))
+    else
+        x = (item[2], parse(Int, item[3]), parse(Int, item[4]))
+    end
+    return weight, Tuple(x)
+end
+
 
 function validator(bt::XLSXTable{:BlockRewardTable})
     df = get(DataFrame, bt, "Data")
