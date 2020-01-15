@@ -58,7 +58,7 @@ export GAMEENV, GAMEDATA, help, setup!,
        Table, XLSXTable, JSONTable,
        sheetnames, get_cachedrow, reload!,
        DataFrame,
-       xl, xl_change_datapath!, xl_backup, xl_auto, md5hash, set_validation!, 
+       xl, xl_change_datapath!, backup, xl_auto, md5hash, set_validation!, 
        cleanup_cache!,
        ink,
        
