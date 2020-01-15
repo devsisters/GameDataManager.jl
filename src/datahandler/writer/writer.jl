@@ -39,8 +39,8 @@ function export_gamedata(file::AbstractString)
         f = file 
     else 
         hay = keys(CACHE[:meta][:xlsx_shortcut])
-        if !in(hay, file)
-            needle = file
+        needle = file
+        if !in(file, hay)
             for h in hay
                 if lowercase(h) == lowercase(file)
                     # 소문자일 경우 처리 해줌
