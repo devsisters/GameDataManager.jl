@@ -18,27 +18,6 @@ include("datahandler/tables.jl")
 include("datahandler/validator.jl")
 include("datahandler/util.jl")
 
-#######  Simulation ENGINE #########################
-include("engine/engine.jl")
-include("engine/gameitem/monetary.jl")
-include("engine/gameitem/stackitem.jl")
-include("engine/gameitem/building.jl") # NonStackItem
-include("engine/gameitem/rewardscript.jl")
-include("engine/gameitem/itemcollection.jl")
-include("engine/gameitem/guid.jl")
-include("engine/gameitem/arithmetic.jl")
-
-include("engine/gameitem/estate.jl")
-include("engine/user/flag.jl")
-include("engine/user/user.jl")
-
-include("engine/content/dronedelivery.jl")
-include("engine/content/buying.jl")
-include("engine/content/build.jl")
-
-
-include("engine/show.jl")
-
 #######  DataHandler      ##########################################
 include("init.jl")
 include("setup.jl")
@@ -50,7 +29,7 @@ include("datahandler/writer/actionlog.jl")
 include("datahandler/writer/report.jl")
 include("datahandler/writer/ink.jl")
 
-#######  Logger      ##########################################
+#######  TODO: Logger      ##########################################
 include("logger/logger.jl")
 
 export GAMEENV, GAMEDATA, help, setup!,
@@ -62,32 +41,7 @@ export GAMEENV, GAMEDATA, help, setup!,
        cleanup_cache!,
        ink,
        
-
        # 유틸리티
-       @j_str, findblock, get_buildings, get_blocks,
-
-      # engine functions
-      User,
-
-      GameItem, ItemCollection,
-          Currency, COIN, CRY, JOY, ENERGYMIX, SITECLEANER,
-                    DEVELOPMENTPOINT, TOTALDEVELOPMENTPOINT,
-          VillageToken,
-          StackItem, NormalItem,
-          BuildingSeedItem, BlockItem,
-          itemkeys, itemvalues, issamekey,
-          ItemCollection,
-          add!, remove!, has, getitem, itemlevel, userlevel,
-    # 건물
-      NonStackItem, Building, Special, Residence, Shop, Attraction, Ability, SegmentInfo,
-                    abilitysum,
-                    price, buy!, build!, levelup!, spend!,
-    # 부동산 
-      Village, PrivateSite, 
-            areas,
-
-    # 콘텐츠
-      RewardTable, sample, expectedvalue,
-      DroneDelivery, deliveryreward, deliverycost
+       @j_str, findblock, get_buildings, get_blocks
 
 end

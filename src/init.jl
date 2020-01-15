@@ -2,15 +2,6 @@ const GAMEENV = Dict{String, Any}()
 const GAMEDATA = Dict{String, Table}()
 const CACHE = Dict{Symbol, Any}()
 
-# Currencies
-const COIN                  = Currency{:COIN}
-const JOY                   = Currency{:JOY}
-const CRY                   = Currency{:CRY}
-const ENERGYMIX             = Currency{:ENERGYMIX}
-const SITECLEANER           = Currency{:SITECLEANER}
-const DEVELOPMENTPOINT      = Currency{:DEVELOPMENTPOINT}
-const TOTALDEVELOPMENTPOINT = Currency{:TOTALDEVELOPMENTPOINT}
-
 function __init__()
     s = setup_env!()
 
