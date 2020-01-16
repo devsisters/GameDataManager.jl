@@ -68,12 +68,12 @@ function XLSXTable(file::AbstractString; force_xlsx = false,
     return GAMEDATA[filename]
 end
 
-function _jsonworkbook(xlsxpath, name)    
-    @assert haskey(CACHE[:actionlog], basename(name)) "'xl(\"$(basename(name))\")'으로 actionlog를 생성해 주세요"
-    actionlog = CACHE[:actionlog][basename(name)]
+function _jsonworkbook(xlsxpath, file)   
+    @assert haskey(CACHE[:actionlog], file) "'xl(\"$(basename(file))\")'으로 actionlog를 생성해 주세요"
+    actionlog = CACHE[:actionlog][file]
     
     sheets = JSONWorksheet[]
-    for el in getmetadata(name) # sheetindex가 xlsx과 다르다. getindex할 때 이름으로 참조할 것!
+    for el in getmetadata(file) # sheetindex가 xlsx과 다르다. getindex할 때 이름으로 참조할 것!
         if endswith(lowercase(el[2][1]), ".json") 
             jws = begin 
                 jsonfile = joinpath_gamedata(el[2][1])
@@ -87,7 +87,7 @@ function _jsonworkbook(xlsxpath, name)
         end
     end
     index = XLSXasJSON.Index(sheetnames.(sheets))
-    JSONWorkbook(joinpath_gamedata(name), sheets, index)
+    JSONWorkbook(joinpath_gamedata(file), sheets, index)
 end
 
 
@@ -170,14 +170,14 @@ function JSONTable(file::String)
 
     return GAMEDATA[file]
 end
-Base.getindex(bt::JSONTable, i) = getindex(bt.data, i)
-Base.basename(bt::JSONTable) = basename(bt.filepath)
-Base.dirname(bt::JSONTable) = dirname(bt.filepath)
-
-
 # fallback function
+Base.getindex(bt::Table, i) = getindex(bt.data, i)
+
+Base.basename(bt::JSONTable) = basename(bt.filepath)
 Base.basename(xgd::XLSXTable) = basename(xgd.data)
 Base.basename(jwb::JSONWorkbook) = basename(xlsxpath(jwb))
+
+Base.dirname(bt::JSONTable) = dirname(bt.filepath)
 Base.dirname(xgd::XLSXTable) = dirname(xgd)
 Base.dirname(jwb::JSONWorkbook) = dirname(xlsxpath(jwb))
 _filename(xgd::XLSXTable) = typeof(xgd).parameters[1]
