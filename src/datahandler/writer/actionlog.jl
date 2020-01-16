@@ -76,10 +76,10 @@ end
 function write_actionlog!(threadhold::Int; log = CACHE[:actionlog])
     if log["write_count"] >= threadhold
 
+        log["write_count"] = 0
         open(GAMEENV["actionlog"], "w") do io
             write(io, JSON.json(log))
         end
-        log["write_count"] = 0
     end
 end
 
