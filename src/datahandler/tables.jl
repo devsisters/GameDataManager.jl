@@ -59,9 +59,9 @@ function XLSXTable(file::AbstractString; force_xlsx = false,
     dataframe = construct_dataframe(jwb)
     cache = cacheindex ? index_cache.(dataframe) : missing
 
-    table = XLSXTable{Symbol(filename)}(jwb, dataframe, cache)
+    table = XLSXTable{Symbol(basename(filename))}(jwb, dataframe, cache)
     if validation 
-        validator(table)
+        validate(table)
     end
     GAMEDATA[filename] = table
 

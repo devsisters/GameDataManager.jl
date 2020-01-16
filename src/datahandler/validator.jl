@@ -1,3 +1,4 @@
+# TODO Validator Submodue로 담기
 """
     validate_general(bt::XLSXTable)
 모든 파일에 공용으로 적용되는 규칙
@@ -5,11 +6,9 @@
 **컬럼명별 검사 항목**
 * :Key 모든 데이터가 유니크해야 한다, 공백이나 탭 줄바꿈이 있으면 안된다.
 """
-function validate_general(bt::XLSXTable)
+function validate(bt::XLSXTable)::Nothing
     function validate_Key(df)
         validate_duplicate(df[!, :Key])
-        # TODO 그래서 어디서 틀린건지 위치 찍어주기
-        @assert !isa(eltype(df[!, :Key]), Union) "DataType이 틀린 Key가 존재합니다"
 
         check = broadcast(x -> isa(x, String) ? occursin(r"(\s)|(\t)|(\n)", x) : false, df[!, :Key])
         @assert !any(check) "Key에는 공백, 줄바꿈, 탭이 들어갈 수 없습니다 \n $(df[!, :Key][check])"
@@ -18,9 +17,16 @@ function validate_general(bt::XLSXTable)
     for df in get(DataFrame, bt)
         hasproperty(df, :Key) && validate_Key(df)
     end
+    _validate(bt)
+end
+"""
+    validator(bt::XLSXTable)
+
+데이터 오류를 검사 엑셀 파일별로 정의한다
+"""
+function _validate(bt::XLSXTable)::Nothing
     nothing
 end
-
 """
     validate_haskey(class, a; assert=true)
 
@@ -114,16 +120,13 @@ function isfile_inrepo(repo, parent_folder, files; msg = "가 존재하지 않�
     nothing
 end
 
-
 """
-    validator(bt::XLSXTable)
-
-데이터 오류를 검사 엑셀 파일별로 정의한다
+    Block.xlsx
+== 검사 항목
+1. 
+2. 
 """
-function validator(bt::XLSXTable)::Nothing
-    nothing
-end
-function validator(bt::XLSXTable{:Block})
+function _validate(bt::XLSXTable{:Block})
     block = get(DataFrame, bt, "Block")
     
     magnet_file = joinpath(GAMEENV["mars_art_assets"], "Internal/BlockTemplateTable.asset")
@@ -179,10 +182,10 @@ function validator(bt::XLSXTable{:Block})
     nothing
 end
 
-validator(bt::XLSXTable{:Shop}) = validator_building(bt)
-validator(bt::XLSXTable{:Residence}) = validator_building(bt)
-validator(bt::XLSXTable{:Attraction}) = validator_building(bt)
-function validator_building(bt::XLSXTable)
+_validate(bt::XLSXTable{:Shop}) = _validate_building(bt)
+_validate(bt::XLSXTable{:Residence}) = _validate_building(bt)
+_validate(bt::XLSXTable{:Attraction}) = _validate_building(bt)
+function _validate_building(bt::XLSXTable)
     fname = _filename(bt)    
     data = get(DataFrame, bt, "Building")
     if fname != :Attraction  
@@ -209,7 +212,7 @@ function validator_building(bt::XLSXTable)
     nothing
 end
 
-function validator(bt::XLSXTable{:Ability})
+function _validate(bt::XLSXTable{:Ability})
     ref = get(DataFrame, bt, "Group")
     df_level = get(DataFrame, bt, "Level")
 
@@ -223,7 +226,7 @@ function validator(bt::XLSXTable{:Ability})
     nothing
 end
 
-function validator(bt::XLSXTable{:SiteBonus})
+function _validate(bt::XLSXTable{:SiteBonus})
     ref = get(DataFrame, bt, "Data")
     a = begin 
         x = ref[!, :Requirement]
@@ -236,14 +239,14 @@ function validator(bt::XLSXTable{:SiteBonus})
     nothing
 end
 
-function validator(bt::XLSXTable{:Chore})
+function _validate(bt::XLSXTable{:Chore})
     df = get(DataFrame, bt, "Theme")
     validate_haskey("Perk", unique(df[!, :Perk]))
 
     nothing
 end
 
-function validator(bt::XLSXTable{:DroneDelivery})
+function _validate(bt::XLSXTable{:DroneDelivery})
     df = get(DataFrame, bt, "Group")
     validate_haskey("RewardTable", df[!, :RewardKey])
 
@@ -257,7 +260,7 @@ function validator(bt::XLSXTable{:DroneDelivery})
     nothing
 end
 
-function validator(bt::XLSXTable{:PipoFashion})
+function _validate(bt::XLSXTable{:PipoFashion})
     # jwb[:Data] = merge(jwb[:Data], jwb[:args], "ProductKey")
     root = joinpath(GAMEENV["mars-client"], "unity/Assets/4_ArtAssets/GameResources/Pipo")
 
@@ -276,7 +279,7 @@ function validator(bt::XLSXTable{:PipoFashion})
     nothing
 end
 
-function validator(bt::XLSXTable{:ItemTable})
+function _validate(bt::XLSXTable{:ItemTable})
     path = joinpath(GAMEENV["CollectionResources"], "ItemIcons")
     
     for sheet in ("Currency", "Normal", "BuildingSeed")
@@ -293,7 +296,7 @@ function validator(bt::XLSXTable{:ItemTable})
     nothing
 end
 
-function validator(bt::XLSXTable{:Player})
+function _validate(bt::XLSXTable{:Player})
     df = get(DataFrame, bt, "DevelopmentLevel")
 
     p = joinpath(GAMEENV["CollectionResources"], "VillageGradeIcons")
@@ -317,7 +320,7 @@ function validator(bt::XLSXTable{:Player})
     nothing
 end
 
-function validator(bt::XLSXTable{:RewardTable})
+function _validate(bt::XLSXTable{:RewardTable})
     # 시트를 합쳐둠
     df = get(DataFrame, bt, 1)
     validate_duplicate(df[!, :RewardKey])
@@ -356,7 +359,7 @@ function break_rewardscript(item)
 end
 
 
-function validator(bt::XLSXTable{:BlockRewardTable})
+function _validate(bt::XLSXTable{:BlockRewardTable})
     df = get(DataFrame, bt, "Data")
     validate_duplicate(df[!, :RewardKey])
     # 1백만 이상은 BlockRewardTable에서만 쓴다
@@ -376,17 +379,17 @@ function validator(bt::XLSXTable{:BlockRewardTable})
 end
 
 
-function validator(bt::XLSXTable{:Flag})
+function _validate(bt::XLSXTable{:Flag})
     df = get(DataFrame, bt, "BuildingUnlock")
     validate_haskey("Building", df[!, :BuildingKey])
 
     for i in 1:size(df, 1)
-        validator_questtrigger.(df[i, :Condition])
+        _validate_questtrigger.(df[i, :Condition])
     end
     nothing
 end
 
-function validator(bt::XLSXTable{:Quest})
+function _validate(bt::XLSXTable{:Quest})
     # Group시트 검사
     group = get(DataFrame, bt, "Group")
     @assert allunique(group[!, :Key]) "GroupKey는 Unique 해야 합니다"
@@ -397,8 +400,8 @@ function validator(bt::XLSXTable{:Quest})
     end
     # Trigger 정합성 검사
     for i in 1:size(group, 1)
-        validator_questtrigger.(group[i, :OrCondition])
-        validator_questtrigger.(group[i, :AndCondition])
+        _validate_questtrigger.(group[i, :OrCondition])
+        _validate_questtrigger.(group[i, :AndCondition])
     end
 
     # Main시트 검사
@@ -417,14 +420,14 @@ end
 
 """
 
-    validator_questtrigger(arr::Array)
+    _validate_questtrigger(arr::Array)
 
 https://www.notion.so/devsisters/b5ea3e51ae584f4491b40b7f47273f49
 https://docs.google.com/document/d/1yvzWjz_bziGhCH6TdDUh0nXAB2J1uuHiYSPV9SyptnA/edit
 
 * 사용 가능한 trigger인지, 변수가 올바른 형태인지 체크한다
 """
-function validator_questtrigger(x::Array{T, 1}) where T
+function _validate_questtrigger(x::Array{T, 1}) where T
     trigger = Dict(
         "SiteCount"                    => (:equality, :number),
         "ResidenceCount"               => (:equality, :number),
