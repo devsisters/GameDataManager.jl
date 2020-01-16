@@ -74,12 +74,12 @@ function init_actionlog()
         log = JSON.parsefile(file; dicttype=Dict{String, Any})
     else 
         log = Dict{String, Any}()
-        # 방금 로딩한 _Meta.json 시간
-        log["write_count"] = 0
-        log["_Meta.json"] = [mtime(joinpath_gamedata("_Meta.json"))]
-        write_actionlog!(0; log = log)
     end
-    
+    # 방금 로딩한 _Meta.json 시간
+    log["write_count"] = 0
+    log["_Meta.json"] = [mtime(joinpath_gamedata("_Meta.json"))]
+    write_actionlog!(0; log = log)
+
     return log
 end
 

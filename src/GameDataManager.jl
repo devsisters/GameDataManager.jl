@@ -9,8 +9,6 @@ using LibGit2
 
 using GameBalanceManager
 
-import Base: +, -, *, /, ==
-
 # Table
 include("datahandler/tables.jl")
 include("datahandler/validator.jl")

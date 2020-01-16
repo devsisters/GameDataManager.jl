@@ -64,7 +64,6 @@ function actionlog(jwb::JSONWorkbook)
     write_actionlog!(2)
 end
 function actionlog(file)
-    path = joinpath_gamedata("_Meta.json") 
     if is_xlsxfile(file)
         @warn "$file의 액션 로그가 생성되지 않았습니다."
     else
@@ -73,7 +72,6 @@ function actionlog(file)
     CACHE[:actionlog]["write_count"] +=1
     write_actionlog!(2)
 end
-
 
 function write_actionlog!(threadhold::Int; log = CACHE[:actionlog])
     if log["write_count"] >= threadhold
