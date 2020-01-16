@@ -1,8 +1,6 @@
 module GameDataManager
 
-using Compat
-using Printf, UUIDs, Dates, Random
-using StatsBase, Statistics
+using Printf
 using XLSX, JSON, XLSXasJSON
 import XLSXasJSON.Index
 using DataFrames, DataStructures, CSV
