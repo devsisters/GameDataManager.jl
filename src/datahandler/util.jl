@@ -12,15 +12,6 @@ json에서는 'nothing'과 'missing'을 모두 null로 지칭하기 때문에 �
 """
 isnull(x) = ismissing(x) | isnothing(x)
 
-"""
-    @j_str(token)
-- j"/token" 사용 가능
-"""
-macro j_str(token) 
-    XLSXasJSON.JSONPointer(token) 
-end
-
-
 function print_write_result(path, msg = "결과는 다음과 같습니다")
     printstyled("$(msg)\n"; color=:green)
     print("   SAVED => ")

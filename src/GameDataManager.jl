@@ -2,7 +2,7 @@ module GameDataManager
 
 using Printf
 using XLSX, JSON, XLSXasJSON
-import XLSXasJSON.Index
+import XLSXasJSON: Index, @j_str
 using DataFrames, DataStructures, CSV
 using MD5
 using LibGit2
