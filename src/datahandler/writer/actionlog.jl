@@ -65,7 +65,7 @@ function actionlog(jwb::JSONWorkbook)
 end
 function actionlog(file)
     if is_xlsxfile(file)
-        @warn "$file의 액션 로그가 생성되지 않았습니다."
+        @warn "$(file)의 액션 로그가 생성되지 않았습니다."
     else
         CACHE[:actionlog][file] = [mtime(file)]
     end
