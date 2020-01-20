@@ -44,6 +44,8 @@ function XLSXTable(file::AbstractString; force_xlsx = false,
     xlsxpath = joinpath_gamedata(f)
     meta = getmetadata(f)
 
+    # NOTE: DataFrame 떼기 전까지 임시로 이걸로 처리
+    jwb = nothing
     if ismodified(file) | force_xlsx
         kwargs_per_sheet = Dict()
         for el in meta
@@ -53,22 +55,23 @@ function XLSXTable(file::AbstractString; force_xlsx = false,
         dummy_localizer!(jwb)
         process!(jwb; gameenv = GAMEENV)
     else
-        if haskey(GAMEDATA, filename)
-            jwb = GAMEDATA[filename].data
-        else
+        if !haskey(GAMEDATA, filename)
             jwb = _jsonworkbook(xlsxpath, f)
         end
     end
-    actionlog(jwb)
 
-    dataframe = construct_dataframe(jwb)
-    cache = cacheindex ? index_cache.(dataframe) : missing
+    if !isnothing(jwb)
+        actionlog(jwb)
 
-    table = XLSXTable{Symbol(basename(filename))}(jwb, dataframe, cache)
-    if validation 
-        validate(table)
+        dataframe = construct_dataframe(jwb)
+        cache = cacheindex ? index_cache.(dataframe) : missing
+
+        table = XLSXTable{Symbol(basename(filename))}(jwb, dataframe, cache)
+        if validation 
+            validate(table)
+        end
+        GAMEDATA[filename] = table
     end
-    GAMEDATA[filename] = table
 
     return GAMEDATA[filename]
 end
