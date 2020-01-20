@@ -1,7 +1,8 @@
 # TODO 폴더 단위로 export 히스토리 관리하며 작업
 function ink(source = GAMEENV["Dialogue"])
-    exe = joinpath(dirname(pathof(GameDataManager)), "../deps/usr/bin/inklecate.exe")
+    exe = joinpath(dirname(pathof(GameDataManager)), "../deps/ink/inklecate.exe")
 
+    #TODO 변경된 파일만 뽑기
     targets = []
     for (root, dirs, files) in walkdir(source)
 
@@ -19,9 +20,11 @@ function ink(source = GAMEENV["Dialogue"])
 
     end
     # TODO log 남기기
-    errlog = joinpath(GAMEENV["cache"], "ink_errorlog.txt")
-    log = joinpath(GAMEENV["cache"], "ink_elog.txt")
+    # errlog = joinpath(GAMEENV["cache"], "ink_errorlog.txt")
+    # log = joinpath(GAMEENV["cache"], "ink_elog.txt")
+    for x in targets
+        @async run(x)
+    end
 
-    run(pipeline(targets...); wait = false)
     nothing
 end
