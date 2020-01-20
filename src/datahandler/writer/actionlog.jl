@@ -60,7 +60,7 @@ function actionlog(jwb::JSONWorkbook)
     end
 
     CACHE[:actionlog][fname] = [mtime(file), pointer]
-    CACHE[:actionlog]["write_count"] +=1
+    CACHE[:actionlog]["write_count"] = get(CACHE[:actionlog], "write_count", 0) + 1
     write_actionlog!(2)
 end
 function actionlog(file)
@@ -69,12 +69,12 @@ function actionlog(file)
     else
         CACHE[:actionlog][file] = [mtime(file)]
     end
-    CACHE[:actionlog]["write_count"] +=1
+    CACHE[:actionlog]["write_count"] = get(CACHE[:actionlog], "write_count", 0) + 1
     write_actionlog!(2)
 end
 
 function write_actionlog!(threadhold::Int; log = CACHE[:actionlog])
-    if log["write_count"] >= threadhold
+    if get(log, "write_count", 0) >= threadhold
 
         log["write_count"] = 0
         open(GAMEENV["actionlog"], "w") do io
