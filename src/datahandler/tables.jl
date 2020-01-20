@@ -1,9 +1,19 @@
 """
-    Table(f::AbstractString)
-mars 메인 저장소의 `.../_META.json`에 명시된 파일을 읽습니다
+    Table(f::AbstractString; kwargs...)
+mars 프로젝트에서 사용하는 '.xlsx'과 '.json'을 읽습니다
+
+** Constructors ** 
+===
+``` julia
+Table("ItemTable") # XLSX파일
+Table("zGameBalanceManager.json") #JSON파일
+```
 
 ** Arguements **
-* validate = true : false로 하면 validation을 하지 않습니다
+====
+* 'force_xlsx'=false : true로하면 강제로 xlsx파일에서 읽어옵니다  
+* 'validate'=true : false로 하면 validation 하지않습니다
+
 """
 abstract type Table end
 function Table(file; kwargs...)
@@ -20,11 +30,6 @@ end
     XLSXTable
 
 JSONWorkbook과 검색하기 위해 이를 DataFrame을 변환한 테이블을 가진다 
-
-# data : JSONWOrkbook 
-# dataframe : JSONWOrkbook의 모든 JSONWorksheet를 DataFrame으로 변환한다.
-              만약 data가 수정되면 반드시 construct_dataframe! 하도록 관리할 것
-# cache : 무엇 저장할지 미정
 """
 struct XLSXTable{FileName} <: Table
     data::JSONWorkbook
