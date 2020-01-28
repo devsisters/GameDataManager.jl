@@ -30,7 +30,7 @@ function checkout_GameDataManager()
     function install_mars_package(package_name)
         if !haskey(Pkg.installed(), package_name)
             dir = network_folder()
-            Pkg.add(joinpath(dir, package_name))     
+            Pkg.add(PackageSpec(path=joinpath(dir, package_name)))
         else 
             checkout_mars_package(package_name)
         end
