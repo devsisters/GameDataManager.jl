@@ -35,7 +35,7 @@ function checkout_GameDataManager()
             checkout_mars_package(package_name)
         end
     end
-    install_mars_package("GameAssetBase")
+    install_mars_package("GameItemBase")
     
     checkout_mars_package("GameBalanceManager")
     checkout_mars_package("GameDataManager")
