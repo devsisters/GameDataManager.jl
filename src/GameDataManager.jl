@@ -1,6 +1,7 @@
 module GameDataManager
 
 using Printf
+using StatsBase
 using XLSX, JSON, XLSXasJSON
 import XLSXasJSON: Index, @j_str
 using DataFrames, DataStructures, CSV

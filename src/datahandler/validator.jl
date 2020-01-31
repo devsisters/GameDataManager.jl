@@ -101,7 +101,7 @@ function isfile_inrepo(repo, parent_folder, files; msg = "가 존재하지 않�
     notfound = Int[]
     for (i, f) in enumerate(files)
         for entry in git_files
-            endswith(entry, f) && break
+            endswith(entry, string(f)) && break
             if entry == last(git_files)
                 push!(notfound, i)
             end
@@ -283,7 +283,7 @@ function _validate(bt::XLSXTable{:ItemTable})
     path = joinpath(GAMEENV["CollectionResources"], "ItemIcons")
     
     for sheet in ("Currency", "Normal", "BuildingSeed")
-        icons = filter(!isnull, get(DataFrame, bt, sheet)[!, :Icon]) .* ".png"
+        icons = get(DataFrame, bt, sheet)[!, :Icon] .* ".png"
         isfile_inrepo("mars-client", 
             "unity/Assets/1_CollectionResources/ItemIcons", icons; 
             msg = "Icon이 존재하지 않습니다")
