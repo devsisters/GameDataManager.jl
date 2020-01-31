@@ -45,6 +45,12 @@ git-tree-sha1 = "3819f476b6b37ef8ea837070ed831b4ebadfa1e9"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
 version = "3.2.0"
 
+[[CurrenciesBase]]
+deps = ["Dates", "FixedPointDecimals", "Test"]
+git-tree-sha1 = "822c93db371991f30c0005b8ce879d70db8fa838"
+uuid = "a33ca353-0707-5c2b-b398-646075a850cd"
+version = "0.1.0"
+
 [[DataAPI]]
 git-tree-sha1 = "674b67f344687a88310213ddfa8a2b3c76cc4252"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
@@ -58,9 +64,9 @@ version = "0.20.0"
 
 [[DataStructures]]
 deps = ["InteractiveUtils", "OrderedCollections"]
-git-tree-sha1 = "f784254f428fb8fd7ac15982e5862a38a44523d3"
+git-tree-sha1 = "b7720de347734f4716d1815b00ce5664ed6bbfd4"
 uuid = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
-version = "0.17.7"
+version = "0.17.9"
 
 [[DataValueInterfaces]]
 git-tree-sha1 = "bfc1187b79289637fa0ef6d4436ebdfe6905cbd6"
@@ -91,15 +97,29 @@ git-tree-sha1 = "2cd6e2e7965934f72cb80251f760228e2264bab3"
 uuid = "48062228-2e41-5def-b9a4-89aafe57970f"
 version = "0.7.0"
 
+[[FixedPointDecimals]]
+deps = ["Printf", "Test"]
+git-tree-sha1 = "b17a731934600b835150b7882238e7f06f8be368"
+uuid = "fb4d412d-6eee-574d-9565-ede6634db7b0"
+version = "0.3.0"
+
 [[Future]]
 deps = ["Random"]
 uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
 
 [[GameBalanceManager]]
-deps = ["Caching", "DataStructures", "JSON", "Test", "XLSXasJSON"]
+deps = ["Caching", "CurrenciesBase", "DataStructures", "Dates", "GameItemBase", "JSON", "Test", "XLSXasJSON"]
 path = "C:\\Users\\devsisters\\.julia\\dev\\GameBalanceManager"
 uuid = "bb77ccaf-9d50-4d58-b991-76f827c14ecc"
-version = "0.1.6"
+version = "0.1.9"
+
+[[GameItemBase]]
+deps = ["CurrenciesBase", "Printf", "Random", "StatsBase", "UUIDs", "XLSXasJSON"]
+git-tree-sha1 = "6ca1522f00aca4b0ef9eff4dd018405f5f695362"
+repo-rev = "master"
+repo-url = "C:\\Users\\devsisters\\.julia\\dev\\GameItemBase"
+uuid = "5bad4de0-7d96-491e-9f11-736efa64e4f5"
+version = "0.1.1"
 
 [[InteractiveUtils]]
 deps = ["Markdown"]
@@ -130,9 +150,9 @@ uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 
 [[Libiconv_jll]]
 deps = ["Libdl", "Pkg"]
-git-tree-sha1 = "48563fe30f00c9d4a4d61891e71df389bf901142"
+git-tree-sha1 = "802f5b23c846cb4ed568cae0bfb0ce0d2ba1926d"
 uuid = "94ce4f54-9a6c-5748-9c1c-f9c7231a4531"
-version = "1.16.0+0"
+version = "1.16.0+1"
 
 [[LinearAlgebra]]
 deps = ["Libdl"]
@@ -233,6 +253,12 @@ uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 deps = ["LinearAlgebra", "SparseArrays"]
 uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
+[[StatsBase]]
+deps = ["DataAPI", "DataStructures", "LinearAlgebra", "Missings", "Printf", "Random", "SortingAlgorithms", "SparseArrays", "Statistics"]
+git-tree-sha1 = "c53e809e63fe5cf5de13632090bc3520649c9950"
+uuid = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
+version = "0.32.0"
+
 [[TableTraits]]
 deps = ["IteratorInterfaceExtensions"]
 git-tree-sha1 = "b1ad568ba658d8cbb3b892ed5380a6f3e781a81e"
@@ -288,12 +314,12 @@ version = "2.9.9+1"
 
 [[ZipFile]]
 deps = ["Libdl", "Printf", "Zlib_jll"]
-git-tree-sha1 = "5de8320a46812da1a8ca98b16a8a4546d44efa62"
+git-tree-sha1 = "8748302cfdec02c4ae9c97b112cf10003f7f767f"
 uuid = "a5390f91-8eb1-5f08-bee0-b1d1ffed6cea"
-version = "0.9.0"
+version = "0.9.1"
 
 [[Zlib_jll]]
 deps = ["Libdl", "Pkg"]
-git-tree-sha1 = "5618a43055eb09377edca21d19d0e99bce24a9c3"
+git-tree-sha1 = "fd36a6739e256527287c5444960d0266712cd49e"
 uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
-version = "1.2.11+7"
+version = "1.2.11+8"
