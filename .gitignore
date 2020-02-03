@@ -1,5 +1,6 @@
-# Excel temporary
-~$*.xlsx*
+# Common Temp Flies
+~$*
 
-# 로컬 폴더
-.cache/*
+# VSCode Generated
+*.vscode
+
