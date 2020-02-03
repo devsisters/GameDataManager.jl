@@ -11,9 +11,9 @@ version = "0.5.8"
 
 [[CSV]]
 deps = ["CategoricalArrays", "DataFrames", "Dates", "FilePathsBase", "Mmap", "Parsers", "PooledArrays", "Tables", "Unicode", "WeakRefStrings"]
-git-tree-sha1 = "027b8d04a1983153ecbcf8f905e926bf01c078e8"
+git-tree-sha1 = "fe9b828d5e7b55431d75d6d180ef843d69dea048"
 uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
-version = "0.5.22"
+version = "0.5.23"
 
 [[Caching]]
 deps = ["CodecBzip2", "CodecZlib", "DataStructures", "MacroTools", "Random", "Serialization", "Test", "TranscodingStreams"]
@@ -111,15 +111,15 @@ uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
 deps = ["Caching", "CurrenciesBase", "DataStructures", "Dates", "GameItemBase", "JSON", "Test", "XLSXasJSON"]
 path = "C:\\Users\\devsisters\\.julia\\dev\\GameBalanceManager"
 uuid = "bb77ccaf-9d50-4d58-b991-76f827c14ecc"
-version = "0.1.9"
+version = "0.1.10"
 
 [[GameItemBase]]
-deps = ["CurrenciesBase", "Printf", "Random", "StatsBase", "UUIDs", "XLSXasJSON"]
-git-tree-sha1 = "6ca1522f00aca4b0ef9eff4dd018405f5f695362"
+deps = ["CurrenciesBase", "JSON", "Printf", "Random", "StatsBase", "UUIDs", "XLSXasJSON"]
+git-tree-sha1 = "9e3a37e8e6157a5c0ff6404352fc49d64d001c6e"
 repo-rev = "master"
 repo-url = "C:\\Users\\devsisters\\.julia\\dev\\GameItemBase"
 uuid = "5bad4de0-7d96-491e-9f11-736efa64e4f5"
-version = "0.1.1"
+version = "0.1.2"
 
 [[InteractiveUtils]]
 deps = ["Markdown"]
@@ -194,9 +194,9 @@ version = "1.1.0"
 
 [[Parsers]]
 deps = ["Dates", "Test"]
-git-tree-sha1 = "0139ba59ce9bc680e2925aec5b7db79065d60556"
+git-tree-sha1 = "d112c19ccca00924d5d3a38b11ae2b4b268dda39"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "0.3.10"
+version = "0.3.11"
 
 [[Pkg]]
 deps = ["Dates", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Test", "UUIDs"]
@@ -301,10 +301,10 @@ uuid = "fdbf4ff8-1666-58a4-91e7-1b58723a45e0"
 version = "0.5.8"
 
 [[XLSXasJSON]]
-deps = ["DataStructures", "JSON", "Printf", "XLSX"]
-git-tree-sha1 = "8644f045b640ec862f4555de7a1e8f276f80777d"
+deps = ["DataStructures", "JSON", "Printf", "REPL", "XLSX"]
+git-tree-sha1 = "75adfed8a8cf573b8a6af500728b6d3616811c41"
 uuid = "8c9e00cc-ccf1-11e8-3de6-5b028f480d9e"
-version = "0.1.7"
+version = "0.2.0"
 
 [[XML2_jll]]
 deps = ["Libdl", "Libiconv_jll", "Pkg", "Zlib_jll"]
