@@ -76,7 +76,7 @@ function validate_duplicate(lists; keycheck = false, assert=true)
 end
 
 function validate_subset(a, b; msg = "다음의 멤버가 subset이 아닙니다", assert = true)
-    if !issubset(a, b)
+    if !issubset(skipmissing(a), skipmissing(b))
         dif = setdiff(a, b)
         if assert
             throw(AssertionError("$msg\n$(dif)"))
@@ -321,27 +321,21 @@ function validate(bt::XLSXTable{:RewardTable})
     # 1백만 이상은 BlockRewardTable에서만 쓴다
     @assert maximum(df[!, :RewardKey]) < 10^6 "RewardTable의 RewardKey는 1,000,000 미만을 사용해 주세요."
 
-    # ItemKey 확인
-    itemkeys = begin 
-        x = map(el -> el["Rewards"], df[!, :RewardScript])
-        x = vcat(vcat(x...)...) # Array 2개에 쌓여 있으니 두번 해체
-        rewards = break_rewardscript.(x)
-
-        itemkeys = Array{Any}(undef, length(rewards))
-        for (i, el) in enumerate(rewards)
-            itemtype = el[2][1]
-            if itemtype == "Item" || itemtype == "BuildingSeed"
-                itemkeys[i] = el[2][2]
-            else
-                itemkeys[i] = itemtype
-            end
-        end
-        unique(itemkeys)
-    end
-    validate_haskey("ItemTable", itemkeys)
+    validate_rewardscript_itemid(bt.data[1][:, j"/RewardScript"])
 
     nothing
 end
+function validate(bt::XLSXTable{:BlockRewardTable})
+    df = get(DataFrame, bt, "Data")
+    validate_duplicate(df[!, :RewardKey])
+    # 1백만 이상은 BlockRewardTable에서만 쓴다
+    @assert minimum(df[!, :RewardKey]) >= 10^6  "BlockRewardTable의 RewardKey는 1,000,000 이상을 사용해 주세요."
+
+    validate_rewardscript_itemid(bt.data[1][:, j"/RewardScript"])
+
+    nothing
+end
+
 function break_rewardscript(item)
     weight = parse(Int, item[1])
     if length(item) < 4
@@ -352,24 +346,35 @@ function break_rewardscript(item)
     return weight, Tuple(x)
 end
 
-
-function validate(bt::XLSXTable{:BlockRewardTable})
-    df = get(DataFrame, bt, "Data")
-    validate_duplicate(df[!, :RewardKey])
-    # 1백만 이상은 BlockRewardTable에서만 쓴다
-    @assert minimum(df[!, :RewardKey]) >= 10^6  "BlockRewardTable의 RewardKey는 1,000,000 이상을 사용해 주세요."
-
-    # ItemKey 확인
-    itemkeys = begin 
-        x = map(el -> el["Rewards"], df[!, :RewardScript])
-        x = vcat(vcat(x...)...) # Array 2개에 쌓여 있으니 두번 해체
-        rewards = break_rewardscript.(x)
-
-        unique(map(el -> el[2][2], rewards))
+function validate_rewardscript_itemid(data)
+    function rewardscript_ids(rewards)
+        # https://docs.google.com/document/d/1h_7ZD75s0xKl4if8AeV5PuulmDfcQ_MMeDWHytV36FY/edit
+        # 의 Kind별로 저장
+        d = Dict("BuidlingSeed" => [], "Item" => [], "Block" => [], "BlockSet" => [])
+        for el in rewards
+            kind = el[2][1]
+            id = el[2][2]
+            if haskey(d, kind)
+                push!(d[kind], id)
+            end
+        end
+        return d
     end
-    validate_haskey("BlockSet", itemkeys)
-
-    nothing
+    rewards = begin 
+        x = map(el -> el["Rewards"], data)
+        x = vcat(vcat(x...)...) # Array 2개에 쌓여 있으니 두번 해체
+        break_rewardscript.(x)
+    end
+    for el in rewardscript_ids(rewards)
+        if !isempty(el[2])
+            if el[1] == "Item" || el[1] == "BuidlingSeed"
+                target = "ItemTable"
+            else 
+                target = el[1]
+            end
+            validate_haskey(target, unique(el[2]))
+        end
+    end
 end
 
 
