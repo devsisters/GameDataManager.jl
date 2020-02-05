@@ -57,24 +57,7 @@ function Base.get(::Type{JSONTable}, file::AbstractString; check_modified = true
     end
     return GAMEDATA[file]
 end
-"""
-    get(DataFrame, file_sheet::Tuple)
-    get(Dict, (file_sheet::Tuple))
-* file_sheet = (파일명, 시트명)
 
-EXCEL 파일을 cache에 올리고, 해당 sheet의 데이터를 반환한다.
-    
-# EXAMPLE
-get(DataFrame, ("ItemTable", "Normal"))
-"""
-function Base.get(::Type{Dict}, file_sheet::Tuple; kwargs...) 
-    ref = get(Table, file_sheet[1]; kwargs...)
-    get(Dict, ref, file_sheet[2])
-end
-function Base.get(::Type{DataFrame}, file_sheet::Tuple; kwargs...)
-    ref = get(Table, file_sheet[1]; kwargs...)
-    get(DataFrame, ref, file_sheet[2])
-end
 """
     get_cachedrow(file, sheet, col, matching_value)
 
@@ -85,18 +68,13 @@ get_cachedrow("ItemTable", "Normal", :Key, 7001)
 """
 get_cachedrow(file, sheet, col, matching_value) = get_cachedrow(Dict, file, sheet, col, matching_value)
 function get_cachedrow(::Type{T}, file, sheet, col, matching_value) where T
-    bt = get(Table, file)
+    bt = Table(file)
     get_cachedrow(T, bt, sheet, col, matching_value)
 end
-get_cachedrow(bt::Table, sheet, col, matching_value) = get_cachedrow(Dict, bt, sheet, col, matching_value)
-function get_cachedrow(::Type{T}, bt::Table, sheet, col, matching_value) where T
-    data = get(T, bt, sheet)
+function get_cachedrow(bt::Table, sheet, col, matching_value)
+    data = bt[sheet]
     ind = _cached_index(bt, sheet, col, matching_value)
-    if T <: AbstractDict
-        data[ind]
-    else
-        data[ind, :]
-    end
+    data[ind]
 end
 
 function fuzzy_lookupname(keyset, idx; kwargs...)
