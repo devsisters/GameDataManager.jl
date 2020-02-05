@@ -207,12 +207,18 @@ function validate_building(bt::XLSXTable)
 end
 
 function validate(bt::XLSXTable{:Ability})
-    ref = get(DataFrame, bt, "Group")
-    df_level = get(DataFrame, bt, "Level")
+    group = bt[:Group]
+    level = bt[:Level]
 
-    validate_subset(unique(df_level[!, :Group]), ref[!, :GroupKey];msg = "존재하지 않는 Ability Group입니다")
+    validate_subset(unique(level[:, j"/Group"]), 
+                    group[:, j"/GroupKey"]; msg = "존재하지 않는 Ability Group입니다")
 
-    key_level = broadcast(x -> (x[:AbilityKey], x[:Level]), eachrow(df_level))
+    # AbilityKey 글자수 제한 30
+    for k in unique(level[:, j"/AbilityKey"])
+        @assert length(k) <= 30 "AbilityKey의 글자수는 30자 이하여야 합니다 '$k' 변경해주세요"
+    end
+
+    key_level = broadcast(x -> (x[j"/AbilityKey"], x[j"/Level"]), level)
     if !allunique(key_level)
         dup = filter(el -> el[2] > 1, countmap(key_level))
         throw(AssertionError("다음의 Ability, Level이 중복되었습니다\n$(dup)"))
@@ -221,9 +227,9 @@ function validate(bt::XLSXTable{:Ability})
 end
 
 function validate(bt::XLSXTable{:SiteBonus})
-    ref = get(DataFrame, bt, "Data")
+    ref = bt[:Data]
     a = begin 
-        x = ref[!, :Requirement]
+        x = ref[:, j"/Requirement"]
         x = map(el -> get.(el, "Buildings", [""]), x)
         x = vcat(vcat(x...)...)
         unique(x)
@@ -234,22 +240,20 @@ function validate(bt::XLSXTable{:SiteBonus})
 end
 
 function validate(bt::XLSXTable{:Chore})
-    df = get(DataFrame, bt, "Theme")
-    validate_haskey("Perk", unique(df[!, :Perk]))
+    ref = bt[:Theme]
+    validate_haskey("Perk", unique(ref[:, j"/Perk"]))
 
     nothing
 end
 
 function validate(bt::XLSXTable{:DroneDelivery})
-    df = get(DataFrame, bt, "Group")
-    validate_haskey("RewardTable", df[!, :RewardKey])
+    ref = bt[:Group]
+    validate_haskey("RewardTable", ref[:, j"/RewardKey"])
 
     itemkey = []
-    df = get(DataFrame, bt, "Order")
-    for row in eachrow(df)
-        append!(itemkey, get.(row[:Items], "Key", missing))
-    end
-    validate_haskey("ItemTable", filter(!ismissing, unique(itemkey)))
+    ref = bt[:Order][:, j"/Items"]
+    itemkeys = map(el -> get.(el, "Key", missing), ref)
+    validate_haskey("ItemTable", vcat(unique(itemkeys)...))
 
     nothing
 end
@@ -291,47 +295,44 @@ function validate(bt::XLSXTable{:ItemTable})
 end
 
 function validate(bt::XLSXTable{:Player})
-    df = get(DataFrame, bt, "DevelopmentLevel")
+    ref = bt[:DevelopmentLevel]
 
     p = joinpath(GAMEENV["CollectionResources"], "VillageGradeIcons")
 
-    icons = df[!, :GradeIcon] .* ".png"
+    icons = ref[:, j"/GradeIcon"] .* ".png"
     isfile_inrepo("mars-client", 
         "unity/Assets/1_CollectionResources/VillageGradeIcons", icons; 
         msg = "Icon이 존재하지 않습니다")
 
     chore_groupkeys = begin 
-        data = filter(!isnull, get.(df[!, :Chores], "Group", missing))
+        data = filter(!isnull, get.(ref[:, j"/Chores"], "Group", missing))
         vcat(map(el -> get.(el, "Key", missing), data)...) |> unique
     end
     filter!(!isnull, chore_groupkeys)
 
     validate_haskey("Chore", chore_groupkeys)
 
-    # TODO 여러 폴더 검사하는 기능 필요
-    # p = joinpath(GAMEENV["CollectionResources"], "ItemIcons")
-    # validate_file(p, vcat(df[!, :DisplayIcons]...), ".png", "Icon이 존재하지 않습니다")
     nothing
 end
 
 function validate(bt::XLSXTable{:RewardTable})
     # 시트를 합쳐둠
-    df = get(DataFrame, bt, 1)
-    validate_duplicate(df[!, :RewardKey])
+    ref = bt[1]
+    validate_duplicate(ref[:, j"/RewardKey"])
     # 1백만 이상은 BlockRewardTable에서만 쓴다
-    @assert maximum(df[!, :RewardKey]) < 10^6 "RewardTable의 RewardKey는 1,000,000 미만을 사용해 주세요."
+    @assert maximum(ref[:, j"/RewardKey"]) < 10^6 "RewardTable의 RewardKey는 1,000,000 미만을 사용해 주세요."
 
-    validate_rewardscript_itemid(bt.data[1][:, j"/RewardScript"])
+    validate_rewardscript_itemid(ref[:, j"/RewardScript"])
 
     nothing
 end
 function validate(bt::XLSXTable{:BlockRewardTable})
-    df = get(DataFrame, bt, "Data")
-    validate_duplicate(df[!, :RewardKey])
+    ref = bt[1]
+    validate_duplicate(ref[:, j"/RewardKey"])
     # 1백만 이상은 BlockRewardTable에서만 쓴다
-    @assert minimum(df[!, :RewardKey]) >= 10^6  "BlockRewardTable의 RewardKey는 1,000,000 이상을 사용해 주세요."
+    @assert minimum(ref[:, j"/RewardKey"]) >= 10^6  "BlockRewardTable의 RewardKey는 1,000,000 이상을 사용해 주세요."
 
-    validate_rewardscript_itemid(bt.data[1][:, j"/RewardScript"])
+    validate_rewardscript_itemid(ref[:, j"/RewardScript"])
 
     nothing
 end
@@ -379,40 +380,40 @@ end
 
 
 function validate(bt::XLSXTable{:Flag})
-    df = get(DataFrame, bt, "BuildingUnlock")
-    validate_haskey("Building", df[!, :BuildingKey])
+    ref = bt[:BuildingUnlock]
+    validate_haskey("Building", ref[:, j"/BuildingKey"])
 
-    for i in 1:size(df, 1)
-        validate_questtrigger.(df[i, :Condition])
+    for row in ref
+        validate_questtrigger.(row["Condition"])
     end
     nothing
 end
 
 function validate(bt::XLSXTable{:Quest})
     # Group시트 검사
-    group = get(DataFrame, bt, "Group")
-    @assert allunique(group[!, :Key]) "GroupKey는 Unique 해야 합니다"
-    @assert allunique(group[!, :Name]) "GroupName은 Unique 해야 합니다"
-
-    if maximum(group[!, :Key]) > 1023 || minimum(group[!, :Key]) < 0
+    group = bt["Group"]
+    @assert allunique(group[:, j"/Key"]) "GroupKey는 Unique 해야 합니다"
+    @assert allunique(group[:, j"/Name"]) "GroupName은 Unique 해야 합니다"
+    
+    if maximum(group[:, j"/Key"]) > 1023 || minimum(group[:, j"/Key"]) < 0
         throw(AssertionError("GroupKey는 0~1023만 사용 가능합니다."))
     end
     # Trigger 정합성 검사
-    for i in 1:size(group, 1)
-        validate_questtrigger.(group[i, :OrCondition])
-        validate_questtrigger.(group[i, :AndCondition])
+    for row in group
+        validate_questtrigger.(row["OrCondition"])
+        validate_questtrigger.(row["AndCondition"])
     end
 
     # Main시트 검사
-    member = get(DataFrame, bt, "Member")
-    if maximum(member[!, :MemberKey]) > 9 || minimum(member[!, :MemberKey]) < 1
+    member = bt["Member"]
+    if maximum(member[:, j"/MemberKey"]) > 9 || minimum(member[:, j"/MemberKey"]) < 1
         throw(AssertionError("MemberKey는 1~9만 사용 가능합니다."))
     end
     # RewardKey 존재 여부
-    rewards = get.(member[!, :CompleteAction], "RewardKey", missing)
+    rewards = get.(member[:, j"/CompleteAction"], "RewardKey", missing)
     validate_haskey("RewardTable", rewards)
 
-    validate_subset(member[!, :GroupName], group[!, :Name]; msg = "존재하지 않는 GroupName 입니다")
+    validate_subset(member[:, j"/GroupName"], group[:, j"/Name"]; msg = "존재하지 않는 GroupName 입니다")
 
     nothing
 end
@@ -450,7 +451,7 @@ function validate_questtrigger(x::Array{T, 1}) where T
         "CompleteQuestGroup"           => (:questgroupname,))
 
     ref = get(trigger, string(x[1]), missing)
-
+    
     @assert !isnull(ref) "`$(x[1])`는 존재하지 않는 trigger입니다."
     @assert length(ref) == length(x[2:end]) "$(x) 변수의 수가 다릅니다"
 
