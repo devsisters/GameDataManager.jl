@@ -448,6 +448,7 @@ function validate_questtrigger(x::Array{T, 1}) where T
         "JoyCollecting"                => (:equality, :number),
         "BuildingSeedBuyCount"         => (:buildingkey, :equality, :number),
         "SingleKeyBuyCount"            => (:buycount, :equality, :number),
+        "EneriumDecompositionCount"    => (:equality, :number),
         "CompleteQuestGroup"           => (:questgroupname,))
 
     ref = get(trigger, string(x[1]), missing)
@@ -473,7 +474,7 @@ function validate_questtrigger(x::Array{T, 1}) where T
                 validate_haskey("ItemTable", [parse(Int, el)])
                 true
             elseif checker == :buycount
-                in(el, ("EnergyMix", "SiteCleaner"))
+                el == "SiteCleaner"
             elseif checker == :questgroupname
                 # TODO
                 true
