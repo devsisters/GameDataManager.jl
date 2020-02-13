@@ -53,7 +53,7 @@ end
 function get_buildings(;kwargs...)
     bdkeys = []
     for t in ("Shop", "Residence", "Special")
-        append!(bdkeys, get(DataFrame, (t, "Building"))[!, :BuildingKey])
+        append!(bdkeys, Table(t)["Building"][:, j"/BuildingKey"])
     end
 
     file = joinpath(GAMEENV["cache"], "get_buildings.tsv")
@@ -74,11 +74,22 @@ end
 building_key 건물에 사용된 Block의 종류와 수량을 확인합니다
 """
 function get_buildings(key, savetsv = true; delim = '\t')
+    function buildingtype(key)
+        startswith(key, "s") ? "Shop" :
+        startswith(key, "r") ? "Residence" :
+        startswith(key, "a") ? "Attraction" :
+        startswith(key, "p") ? "Special" : 
+        key == "Home" ? "Special" :
+        throw(KeyError(key))
+    end
     templates = begin 
-        t = string(buildingtype(key))
-        ref = get_cachedrow(DataFrame, t, "Level", :BuildingKey, key)
-        x = unique(ref[!, :BuildingTemplate])
-        convert(Vector{String}, filter(!isnull, x))
+        t = buildingtype(key)
+
+        ref = Table(t)["Level"]
+        ref = filter(el -> el["BuildingKey"] == key, ref.data)
+        
+        x = unique(get.(ref, "BuildingTemplate", missing))
+        filter(!isnull, x)
     end
 
     report = String[]

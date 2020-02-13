@@ -194,17 +194,6 @@ index(x::XLSXTable) = x.data.sheetindex
 cache(x::XLSXTable) = x.cache
 XLSXasJSON.sheetnames(xgd::XLSXTable) = sheetnames(xgd.data)
 
-Base.get(::Type{Dict}, x::XLSXTable) = x.data
-Base.get(::Type{DataFrame}, x::XLSXTable) = x.dataframe
-function Base.get(::Type{Dict}, x::XLSXTable, sheet)
-    idx = getindex(index(x), sheet)
-    getindex(x.data, idx).data
-end
-function Base.get(::Type{DataFrame}, x::XLSXTable, sheet)
-    idx = getindex(index(x), sheet)
-    getindex(x.dataframe, idx)
-end
-
 function Base.show(io::IO, bt::XLSXTable)
     println(io, ".data ┕━")
     print(io, bt.data)

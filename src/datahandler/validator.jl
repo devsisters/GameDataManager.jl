@@ -181,25 +181,25 @@ validate(bt::XLSXTable{:Residence}) = validate_building(bt)
 validate(bt::XLSXTable{:Attraction}) = validate_building(bt)
 function validate_building(bt::XLSXTable)
     fname = _filename(bt)    
-    data = get(DataFrame, bt, "Building")
+    data = bt["Building"]
     if fname != :Attraction  
-        validate_haskey("Ability", filter(!isnull, vcat(data[!, :AbilityKey]...)))
+        validate_haskey("Ability", filter(!isnull, vcat(data[:, j"/AbilityKey"]...)))
 
-        building_seeds = get.(data[!, :BuildCost], "NeedItemKey", missing)
+        building_seeds = get.(data[:, j"/BuildCost"], "NeedItemKey", missing)
         validate_haskey("ItemTable", building_seeds)
     end
 
     # Level 시트
-    leveldata = get(DataFrame, bt, "Level")
-
-    buildgkey_level = broadcast(row -> (row[:BuildingKey], row[:Level]), eachrow(leveldata))
+    leveldata = bt["Level"]
+    
+    buildgkey_level = broadcast(row -> (row["BuildingKey"], row["Level"]), leveldata)
     @assert allunique(buildgkey_level) "[Level]시트에 중복된 Level이 있습니다"
 
-    templates = filter(!isnull, leveldata[!, :BuildingTemplate]) .* ".json"
+    templates = filter(!isnull, leveldata[:, j"/BuildingTemplate"]) .* ".json"
     isfile_inrepo("patch_data", "BuildTemplate", templates; 
                   msg = "BuildingTemolate가 존재하지 않습니다")
 
-    icons = data[!, :Icon] .* ".png"
+    icons = data[:, j"/Icon"] .* ".png"
     isfile_inrepo("mars-client", "unity/Assets/1_CollectionResources", icons; 
                     msg = "BuildingTemolate가 존재하지 않습니다")
 
