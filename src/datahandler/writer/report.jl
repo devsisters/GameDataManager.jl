@@ -17,7 +17,7 @@ function findblock()
         end
     end
 
-    artasset_on_xls = get(DataFrame, ("Block", "Block"))[!, :ArtAsset]
+    artasset_on_xls = Table("Block")["Block"][:, j"/ArtAsset"]
 
     a = setdiff(artassets, artasset_on_xls)
     b = setdiff(artasset_on_xls, artassets)
