@@ -119,15 +119,15 @@ end
 2. 
 """
 function validate(bt::XLSXTable{:Block})
-    block = get(DataFrame, bt, "Block")
+    block = bt["Block"]
 
-    validate_duplicate(block[!, :Key]; keycheck = true, assert = true)
+    validate_duplicate(block[:, j"/Key"]; keycheck = true, assert = true)
     
     magnet_file = joinpath(GAMEENV["mars_art_assets"], "Internal/BlockTemplateTable.asset")
     if isfile(magnet_file)
         magnet = filter(x -> startswith(x, "  - Key:"), readlines(magnet_file))
         magnetkey = unique(broadcast(x -> split(x, "Key: ")[2], magnet))
-        missing_key = setdiff(unique(block[!, :TemplateKey]), magnetkey)
+        missing_key = setdiff(unique(block[:, j"/TemplateKey"]), magnetkey)
         if !isempty(missing_key)
             @warn "다음 Block TemplateKey가 $(magnet_file)에 없습니다 \n $(missing_key)"
         end
@@ -136,40 +136,40 @@ function validate(bt::XLSXTable{:Block})
     end
 
     # 블록 파일명
-    prefabs = unique(block[!, :ArtAsset]) .* ".prefab"
+    prefabs = unique(block[:, j"/ArtAsset"]) .* ".prefab"
     isfile_inrepo("mars_art_assets", "GameResources/Blocks", prefabs)
 
     # Luxurygrade
-    if any(ismissing.(block[!, :Verts]))
+    if any(ismissing.(block[:, j"/Verts"]))
         @warn "Verts정보가 없는 Block이 있습니다. Unity의 BlockVertexCount 내용을 엑셀에 추가해 주세요"
     end
 
     # SubCategory Key 오류
-    subcat = unique(block[!, :SubCategory])
-    parent = get(DataFrame, bt, "Sub")[!, :CategoryKey]
+    subcat = unique(block[:, j"/SubCategory"])
+    parent = bt["Sub"][:, j"/CategoryKey"]
     validate_subset(subcat, parent; 
         msg = "[Main]시트의 다음 SubCategory는 [Sub]시트에 존재하지 않습니다", assert = false)
 
     # 추천카테고리 탭 건물Key
-    rc = get(DataFrame, bt, "RecommendCategory")
-    validate_haskey("Building", rc[!, :BuildingKey]; assert = false)
+    rc = bt["RecommendCategory"]
+    validate_haskey("Building", rc[:, j"/BuildingKey"]; assert = false)
 
-    recom = filter(!isnull, unique(vcat(block[!, :RecommendSubCategory]...)))
-    parent = vcat(rc[!, :RecommendSubCategory]...)
+    recom = filter(!isnull, unique(vcat(block[:, j"/RecommendSubCategory"]...)))
+    parent = vcat(rc[:, j"/RecommendSubCategory"]...)
     validate_subset(recom, parent; 
         msg = "[Block]시트의 다음 RecommendSubCategory가 [RecommendCategory]시트에 존재하지 않습니다", assert = false)
 
     # BlockSet 검사
     blockset_blocks = begin 
-        df = get(DataFrame, bt, "Set")
-        x = broadcast(el -> get.(el, "BlockKey", 0), df[!, :Members])
+        jws = bt["Set"]
+        x = broadcast(el -> get.(el, "BlockKey", 0), jws[:, j"/Members"])
         unique(vcat(x...))
     end
-    validate_subset(blockset_blocks, block[!, :Key]; msg = "다음의 Block은 존재하지 않습니다 [Set] 시트를 정리해 주세요")
+    validate_subset(blockset_blocks, block[:, j"/Key"]; msg = "다음의 Block은 존재하지 않습니다 [Set] 시트를 정리해 주세요")
 
-    for i in indexin(blockset_blocks, block[!, :Key])     
-        if !ismissing(block[i, :DetachableFromSegment])
-            k = block[i, :Key]
+    for i in indexin(blockset_blocks, block[:, j"/Key"])     
+        if get(block[i], "DetachableFromSegment", false)
+            k = block[i]["Key"]
             throw(AssertionError("$(k)는 Sign이라 BlockSet에 있어서는 안됩니다"))
         end
     end
@@ -281,15 +281,13 @@ function validate(bt::XLSXTable{:ItemTable})
     path = joinpath(GAMEENV["CollectionResources"], "ItemIcons")
     
     for sheet in ("Currency", "Normal", "BuildingSeed")
-        icons = get(DataFrame, bt, sheet)[!, :Icon] .* ".png"
+        icons = bt[sheet][:, j"/Icon"] .* ".png"
         isfile_inrepo("mars-client", 
             "unity/Assets/1_CollectionResources/ItemIcons", icons; 
             msg = "Icon이 존재하지 않습니다")
     end
 
-
-    df = get(DataFrame, bt, "BuildingSeed")
-    validate_haskey("Building", df[!, :BuildingKey])
+    validate_haskey("Building", bt["BuildingSeed"][:, j"/BuildingKey"])
 
     nothing
 end
