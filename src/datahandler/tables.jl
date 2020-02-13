@@ -35,18 +35,19 @@ struct XLSXTable{FileName} <: Table
     data::JSONWorkbook
     dataframe::Array{DataFrame, 1}
     # 사용할 함수들
-    cache::Union{Missing, Array{Dict, 1}}
+    # cache::Union{Missing, Array{Dict, 1}}
 end
 function XLSXTable(file::AbstractString; force_xlsx = false,
-                                    cacheindex = true, validation = CACHE[:validation])
+                                    validation = CACHE[:validation])
     f = is_xlsxfile(file) ? file : CACHE[:meta][:xlsx_shortcut][file]
     filename = string(split(f, ".")[1])
     xlsxpath = joinpath_gamedata(f)
-    meta = getmetadata(f)
 
     # NOTE: DataFrame 떼기 전까지 임시로 이걸로 처리
     jwb = nothing
     if ismodified(file) | force_xlsx
+        meta = getmetadata(f)
+
         kwargs_per_sheet = Dict()
         for el in meta
             kwargs_per_sheet[el[1]] = el[2][2]
@@ -64,9 +65,8 @@ function XLSXTable(file::AbstractString; force_xlsx = false,
         actionlog(jwb)
 
         dataframe = construct_dataframe(jwb)
-        cache = cacheindex ? index_cache.(dataframe) : missing
 
-        table = XLSXTable{Symbol(basename(filename))}(jwb, dataframe, cache)
+        table = XLSXTable{Symbol(basename(filename))}(jwb, dataframe)
         if validation 
             validate(table)
         end

@@ -18,65 +18,6 @@ function joinpath_gamedata(file)
     return p
 end
 
-"""
-    reload!()
-GAMEDATA 에 캐시되어있는 모든 엑셀 파일을 업데이트
-"""
-function reload!(gd)
-    # TODO 뭘 리로드했는지 아니면 아무것도 안했는지 로그좀...
-    for k in keys(gd)
-        T = endswith(k, ".json") ? JSONTable : Table
-        get(T, k;check_modified= true)
-    end
-end
-
-"""
-    get(::Type{Table}, file::AbstractString; check_modified = false)
-
-Table 데이터를 가져온다. cache 안 되어있을 경우 cache에 올린다
-# KEYWORDS
-* check_modified : excel 파일의 시간을 검사하여 다를 경우 cache를 업데이트한다.
-"""
-function Base.get(::Type{Table}, file::AbstractString; check_modified = false)
-    if !haskey(GAMEDATA, file)
-        XLSXTable(file)
-    end
-    if check_modified
-        if ismodified(file) # 파일 변경 여부 체크
-            XLSXTable(file)
-        end
-    end
-    bt = GAMEDATA[file]
-
-    return bt
-end
-function Base.get(::Type{JSONTable}, file::AbstractString; check_modified = true)
-    f = endswith(file, ".json") ? file : file * ".json"
-    if !haskey(GAMEDATA, f)
-        JSONTable(f)
-    end
-    return GAMEDATA[file]
-end
-
-"""
-    get_cachedrow(file, sheet, col, matching_value)
-
-엑셀 sheet의 column 값이 matching_value인 row를 모두 반환합니다
-
-# EXAMPLE
-get_cachedrow("ItemTable", "Normal", :Key, 7001)
-"""
-get_cachedrow(file, sheet, col, matching_value) = get_cachedrow(Dict, file, sheet, col, matching_value)
-function get_cachedrow(::Type{T}, file, sheet, col, matching_value) where T
-    bt = Table(file)
-    get_cachedrow(T, bt, sheet, col, matching_value)
-end
-function get_cachedrow(bt::Table, sheet, col, matching_value)
-    data = bt[sheet]
-    ind = _cached_index(bt, sheet, col, matching_value)
-    data[ind]
-end
-
 function fuzzy_lookupname(keyset, idx; kwargs...)
     fuzzy_lookupname(collect(keyset), idx; kwargs...)
 end
@@ -89,16 +30,6 @@ function fuzzy_lookupname(names::AbstractArray, idx::AbstractString; msg = "'$(i
     end
     candidatesstr = join(string.("\"", candidates, "\""), ", ", " and ")
     throw(ArgumentError(msg * "\n혹시? $candidatesstr"))
-end
-function _cached_index(bt, sheet, col, value)
-    c = cache(bt)[index(bt)[sheet]]
-    address = "[$(basename(bt))]$(sheet)!\$$(col)"
-    if !haskey(c, col) 
-        fuzzy_lookupname(string.(keys(c)), string(col); msg = "$(address)를 찾을 수 없습니다.")
-    end
-    @assert haskey(c[col], value) "$(address) 에 $(value)가 존재하지 않습니다"
-
-    return c[col][value]
 end
 
 """
