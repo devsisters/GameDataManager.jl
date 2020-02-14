@@ -114,8 +114,8 @@ function help(idx = 1)
               findblock()    : 'Block'데이터와 '../4_ArtAssets/GameResources/Blocks/' 폴더를 비교하여 누락된 항목을 찾습니다.
               get_blocks(101): 블록Key별 '../BuildTemplate/Buildings/' 에서 사용되는 빈도를 계산합니다
               get_buildings("sIcecream"): 건물Key별 사용되는 블록의 종류와 수량을 계산합니다.
-              help()         : 를 입력하면 도움을 드립니다!
               md5hash()      : `help?>md5hash` 도움말 참조
+              help()         : 를 입력하면 도움을 드립니다!
             """
         elseif idx == 2
             line_breaker = "-"^(displaysize(stdout)[2]-4)
