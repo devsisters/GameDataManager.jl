@@ -63,7 +63,7 @@ end
 모든건물에 사용된 Block의 종류와 수량을 확인합니다
 
 """
-function get_buildings(savetsv = true)
+function get_buildings(savetsv::Bool = true)
     data = Dict()
     for t in ("Shop", "Residence", "Special")
         bks = Table(t)["Building"][:, j"/BuildingKey"]
@@ -95,7 +95,7 @@ end
 
 building_key 건물에 사용된 Block의 종류와 수량을 확인합니다
 """
-function get_buildings(key, savetsv = true)
+function get_buildings(key::AbstractString, savetsv = true)
     files = begin 
         t = buildingtype(key)
         ref = Table(t)["Level"] |> x -> filter(el -> el["BuildingKey"] == key, x.data)
@@ -132,7 +132,7 @@ end
 
 블록 Key별로 사용된 BuildTempalte과 수량을 확인합니다
 """
-function get_blocks(savetsv::Bool = true; delim = '\t')
+function get_blocks(savetsv::Bool = true)
     root = joinpath(GAMEENV["json"]["root"], "../BuildTemplate/Buildings")
     templates = Dict{String, Any}()
 
@@ -157,21 +157,22 @@ function get_blocks(savetsv::Bool = true; delim = '\t')
             d2[block_key][f] = blocks[block_key]
         end
     end 
-    report = String[]
-    for kv in d2
-        block_key = string(kv[1])
-        push!(report, string(block_key, delim) * join(keys(kv[2]), delim))
-        push!(report, string(block_key, delim) * join(values(kv[2]), delim))
-    end
 
     if savetsv
         file = joinpath(GAMEENV["cache"], "get_blocks.tsv")
+
         open(file, "w") do io
-            write(io, join(report, '\n'))
+            for kv in d2 
+                block_key = string(kv[1])
+                write(io, string(block_key, '\t') * join(keys(kv[2]), '\t'))
+                write(io ,"\n")
+                write(io, string(block_key, '\t') * join(values(kv[2]), '\t'))
+                write(io ,"\n")
+            end
         end
         print_write_result(file, "Block별 사용된 빈도는 다음과 같습니다")
     else
-        return report
+        return d2
     end
 end 
 
@@ -180,15 +181,23 @@ end
 
 블록 block_key가 사용된 BuildTempalte과 수량을 확인합니다
 """
-function get_blocks(key; kwargs...)
-    report = get_blocks(false; kwargs...)
-    filter!(el -> startswith(el, string(key)), report)
+function get_blocks(key)
+    data = get_blocks(false)
+    filter!(el -> el[1] == key, data)
 
-    @assert !isempty(report) "'$key' Block이 사용된 건물은 없습니다"
-  
-    file = joinpath(GAMEENV["cache"], "get_blocks_$key.tsv")
-    open(file, "w") do io
-        write(io, join(report, '\n'))
+    if isempty(data) 
+        throw(AssertionError("'$key' Block이 사용된 건물은 없습니다"))
+    else
+        file = joinpath(GAMEENV["cache"], "get_blocks_$key.tsv")
+        open(file, "w") do io
+            for kv in data 
+                block_key = string(kv[1])
+                write(io, string(block_key, '\t') * join(keys(kv[2]), '\t'))
+                write(io ,"\n")
+                write(io, string(block_key, '\t') * join(values(kv[2]), '\t'))
+                write(io ,"\n")
+            end    
+        end
+        print_write_result(file, "'$key' Block이 사용된 건물은 다음과 같습니다")
     end
-    print_write_result(file, "'$key' Block이 사용된 건물은 다음과 같습니다")
 end

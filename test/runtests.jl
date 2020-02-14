@@ -2,7 +2,6 @@ using Test
 using GameDataManager
 using XLSXasJSON
 
-GDM = GameDataManager
+include("report.jl")
 
-# include("datahandler.jl")
 # include("building.jl")
