@@ -1,3 +1,16 @@
+"""
+    buildingtype
+
+BuildingKey의 prefix 규칙으로 타입을 반환
+"""
+function buildingtype(key)
+    startswith(key, "s") ? "Shop" :
+    startswith(key, "r") ? "Residence" :
+    startswith(key, "a") ? "Attraction" :
+    startswith(key, "p") ? "Special" : 
+    key == "Home" ? "Special" :
+    throw(KeyError(key))
+end
 
 """
     findblock()
@@ -50,22 +63,31 @@ end
 모든건물에 사용된 Block의 종류와 수량을 확인합니다
 
 """
-function get_buildings(;kwargs...)
-    bdkeys = []
+function get_buildings(savetsv = true)
+    data = Dict()
     for t in ("Shop", "Residence", "Special")
-        append!(bdkeys, Table(t)["Building"][:, j"/BuildingKey"])
-    end
-
-    file = joinpath(GAMEENV["cache"], "get_buildings.tsv")
-    open(file, "w") do io
-        for el in bdkeys
-            report = get_buildings(el, false;kwargs...)
-            if !isempty(report)
-                write(io, join(report, '\n'), "\n\n")
-            end
+        bks = Table(t)["Building"][:, j"/BuildingKey"]
+        for k in bks 
+            data[k] = get_buildings(k, false)
         end
     end
-    print_write_result(file, "각 건물에 사용된 Block들은 다음과 같습니다")
+
+    if savetsv
+        file = joinpath(GAMEENV["cache"], "get_buildings.tsv")
+        open(file, "w") do io
+            for building in data
+                for el in building[2]
+                    write(io, string(el[1], '\t') * join(keys(el[2]), '\t'))
+                    write(io ,"\n")
+                    write(io, string(el[1], '\t') * join(values(el[2]), '\t'))
+                    write(io, "\n")
+                end
+            end
+        end
+        print_write_result(file, "각 건물에 사용된 Block들은 다음과 같습니다")
+    else 
+        return data
+    end
 end
 
 """
@@ -73,44 +95,33 @@ end
 
 building_key 건물에 사용된 Block의 종류와 수량을 확인합니다
 """
-function get_buildings(key, savetsv = true; delim = '\t')
-    function buildingtype(key)
-        startswith(key, "s") ? "Shop" :
-        startswith(key, "r") ? "Residence" :
-        startswith(key, "a") ? "Attraction" :
-        startswith(key, "p") ? "Special" : 
-        key == "Home" ? "Special" :
-        throw(KeyError(key))
-    end
-    templates = begin 
+function get_buildings(key, savetsv = true)
+    files = begin 
         t = buildingtype(key)
-
-        ref = Table(t)["Level"]
-        ref = filter(el -> el["BuildingKey"] == key, ref.data)
-        
+        ref = Table(t)["Level"] |> x -> filter(el -> el["BuildingKey"] == key, x.data)
         x = unique(get.(ref, "BuildingTemplate", missing))
         filter(!isnull, x)
     end
 
-    report = String[]
-    for el in templates
-        blocks = count_buildingtemplate_blocks(el)
-        push!(report, string(key, delim, el, delim) * join(keys(blocks), delim))
-        push!(report, string(key, delim, el, delim) * join(values(blocks), delim))
-    end
+    counting = Dict(zip(files, count_buildtemplate.(files)))
 
     if savetsv
         file = joinpath(GAMEENV["cache"], "get_buildings_$key.tsv")
         open(file, "w") do io
-            write(io, join(report, '\n'))
+            for el in counting
+                write(io, string(el[1], delim) * join(keys(el[2]), '\t'))
+                write(io ,"\n")
+                write(io, string(el[1], delim) * join(values(el[2]), '\t'))
+                write(io, "\n")
+            end
         end
         print_write_result(file, "'$key'건물에 사용된 Block들은 다음과 같습니다")
     else
-        return report
+        return counting
     end
 end
 
-function count_buildingtemplate_blocks(f::AbstractString)
+function count_buildtemplate(f)
     root = joinpath(GAMEENV["json"]["root"], "../BuildTemplate/Buildings")
     x = joinpath(root, "$(f).json") |> JSON.parsefile
     countmap(map(x -> x["BlockKey"], x["Blocks"]))
