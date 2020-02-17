@@ -109,9 +109,9 @@ function get_buildings(key::AbstractString, savetsv = true)
         file = joinpath(GAMEENV["cache"], "get_buildings_$key.tsv")
         open(file, "w") do io
             for el in counting
-                write(io, string(el[1], delim) * join(keys(el[2]), '\t'))
+                write(io, string(el[1], '\t') * join(keys(el[2]), '\t'))
                 write(io ,"\n")
-                write(io, string(el[1], delim) * join(values(el[2]), '\t'))
+                write(io, string(el[1], '\t') * join(values(el[2]), '\t'))
                 write(io, "\n")
             end
         end
