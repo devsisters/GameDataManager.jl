@@ -1,7 +1,7 @@
 name = "GameDataManager"
 uuid = "88844230-ccf1-11e8-233b-3f48c6dac397"
 authors = ["김용희 <yongheekim@devsisters.com>"]
-version = "1.2.3"
+version = "1.2.4"
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
@@ -15,8 +15,6 @@ MD5 = "6ac74813-4b46-53a4-afec-0b5dc9d7885c"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 Tar = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 XLSX = "fdbf4ff8-1666-58a4-91e7-1b58723a45e0"
 XLSXasJSON = "8c9e00cc-ccf1-11e8-3de6-5b028f480d9e"
-
-[extras]
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

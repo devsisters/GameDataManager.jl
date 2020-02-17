@@ -1,4 +1,4 @@
-name: Run CI on master
+name: CI on GameDataManager
 
 on:
   push:
@@ -41,8 +41,6 @@ jobs:
       - uses: julia-actions/setup-julia@latest
         with:
           version: ${{ matrix.julia-version }}
-      - name: add Test 
-        run: julia -e 'using Pkg; Pkg.add("Test")'
       - name: add GameItemBase 
         run: julia -e 'using Pkg; Pkg.add(PackageSpec(url="/home/runner/work/GameDataManager.jl/GameDataManager.jl/GameItemBase"))'
       - name: add GameBalanceManager
