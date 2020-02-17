@@ -16,28 +16,28 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-        name: clone GameItemBase
+        name: checkout GameItemBase
         with:
           repository: devsisters/GameItemBase.jl
           token: ${{ secrets.JuliaCI }}
           path: GameItemBase
       - uses: actions/checkout@v2
-        name: clone GameBalanceManager
+        name: checkout GameBalanceManager
         with:
           repository: devsisters/GameBalanceManager.jl
           token: ${{ secrets.JuliaCI }}
           path: GameBalanceManager
       - uses: actions/checkout@v2
-        name: clone GameDataManager
+        name: checkout GameDataManager
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           path: GameDataManager
       - uses: actions/checkout@v2
-        name: clone mars-patch-data
+        name: checkout mars-patch-data
         with:
           repository: devsisters/mars-patch-data
           token: ${{ secrets.JuliaCI }}
-          path: GameDataManager/test/patch-data
+          path: patch-data
       - uses: julia-actions/setup-julia@latest
         with:
           version: ${{ matrix.julia-version }}
