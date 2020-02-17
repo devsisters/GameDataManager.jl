@@ -4,7 +4,7 @@ using Printf
 using StatsBase
 using XLSX, JSON, XLSXasJSON
 import XLSXasJSON: Index, @j_str
-using DataFrames, DataStructures, CSV
+using DataStructures
 using Tar
 using MD5
 using LibGit2
@@ -34,7 +34,6 @@ export GAMEENV, GAMEDATA, help, setup!,
        # datahandler
        Table,
        sheetnames, 
-       DataFrame,
        xl, xl_change_datapath!, backup, xl_auto, md5hash, set_validation!, 
        cleanup_cache!,
        ink,

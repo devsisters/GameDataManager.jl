@@ -29,11 +29,11 @@ end
 """
     XLSXTable
 
-JSONWorkbook과 검색하기 위해 이를 DataFrame을 변환한 테이블을 가진다 
+JSONWorkbook과 기타 메타 데이터
 """
 struct XLSXTable{FileName} <: Table
     data::JSONWorkbook
-    dataframe::Array{DataFrame, 1}
+    dataframe::Array{Any, 1} #삭제예정
     # 사용할 함수들
     # cache::Union{Missing, Array{Dict, 1}}
 end
@@ -43,7 +43,6 @@ function XLSXTable(file::AbstractString; force_xlsx = false,
     filename = string(split(f, ".")[1])
     xlsxpath = joinpath_gamedata(f)
 
-    # NOTE: DataFrame 떼기 전까지 임시로 이걸로 처리
     jwb = nothing
     if ismodified(file) | force_xlsx
         meta = getmetadata(f)
@@ -64,7 +63,7 @@ function XLSXTable(file::AbstractString; force_xlsx = false,
     if !isnothing(jwb)
         actionlog(jwb)
 
-        dataframe = construct_dataframe(jwb)
+        dataframe = Any[]
 
         table = XLSXTable{Symbol(basename(filename))}(jwb, dataframe)
         if validation 
@@ -108,52 +107,6 @@ function copy_to_cache(origin)
     cp(origin, destination; force = true)
 end
 
-function construct_dataframe!(bt::XLSXTable)
-    for (i, jws) in enumerate(bt.data)
-        bt.dataframe[i] = construct_dataframe(jws)
-    end
-    return bt
-end
-function construct_dataframe(jwb::JSONWorkbook)
-    map(i -> construct_dataframe(jwb[i]), 1:length(jwb))
-end
-@inline function construct_dataframe(jws::JSONWorksheet)
-    k = unique(keys.(jws))
-
-    if length(k) > 1 
-        sort!(k; by = length, rev = true)
-        # @warn "모든 row의 column명이 일치하지 않습니다, $(k[1])"
-    end
-    v = Array{Any, 1}(undef, length(k[1]))
-    @inbounds for (i, key) in enumerate(k[1])
-        v[i] = get.(jws, key, missing)
-    end
-
-    return DataFrame(v, Symbol.(k[1]))
-end
-
-function index_cache(df::DataFrame)
-    function collect_index(k, criteria)
-        idx = collect(1:size(df, 1))
-        tf = (df[!, k] .== criteria)
-        if !isa(tf, BitArray)
-            tf = map(x -> isnull(x) ? false : x, tf)
-        end
-        idx[tf]
-    end
-    cache = Dict{Symbol, Dict}()
-    for k in names(df)
-        # Integer나 String 타입일 경우에만 생성, 
-        # 일단 Union{String, Missing} Union{Integer, Missing}도 생성하지 않는다
-        if eltype(df[!, k]) <: AbstractString || eltype(df[!, k]) <: Integer
-            uks = unique(df[!, k])
-            cache[k] = map(x -> Pair(x, collect_index(k, x)), uks) |> Dict
-        else
-            cache[k] = Dict()
-        end
-    end
-    return cache
-end
 
 """
     JSONTable
