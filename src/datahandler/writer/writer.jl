@@ -132,17 +132,16 @@ function backup()
     # 네트워크의 게임 데이터를 백업합니다
     @assert startswith(GAMEENV["GameData"], "M") "네트워크에 연결할 수 없어 XLSX 데이터 백업이 불가능 합니다"
 
+    println("M:/GameData와 M:/Dialogue를 백업합니다")
     for folder in ("GameData", "Dialogue")
-        exe7z = joinpath(Base.Sys.BINDIR, "..", "libexec", "7z.exe")
-        cd(GAMEENV[folder])
-        f = "$folder.zip"
-        run(`$exe7z a -r $f`)
-        
-        origin = joinpath(GAMEENV[folder], f)
-        target = joinpath(GAMEENV["patch_data"], "_Backup/$f")
-        print("↳Move File: ", origin)
-            mv(origin, target; force = true)
-        println(" => ", target)
+        # predicate = path -> (println(path); endswith(path, r".xlsx|.xlsm|.ink"))
+
+        f = "$folder.tar"
+        tarball = Tar.create(GAMEENV[folder], 
+                        joinpath(GAMEENV["patch_data"], "_Backup/$f"))
+
+        print(" $folder => ")
+        printstyled(tarball, "\n"; color=:blue)
     end
 
 end

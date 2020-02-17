@@ -53,7 +53,7 @@ function XLSXTable(file::AbstractString; force_xlsx = false,
             kwargs_per_sheet[el[1]] = el[2][2]
         end            
         jwb = JSONWorkbook(copy_to_cache(xlsxpath), keys(meta), kwargs_per_sheet)
-        dummy_localizer!(jwb)
+        GameBalanceManager.dummy_localizer!(jwb)
         process!(jwb; gameenv = GAMEENV)
     else
         if !haskey(GAMEDATA, filename)
@@ -213,38 +213,10 @@ function Base.show(io::IO, bt::JSONTable)
     end
 end
 
-############################################################################
-# Localizer
-# TODO: GameLocalizer로 옮길 것
-############################################################################
 """
-    dummy_localizer
-진짜 로컬라이저 만들기 전에 우선 \$으로 시작하는 컬럼명만 복제해서 2개로 만듬
-"""
-dummy_localizer(x) = x
-function dummy_localizer!(jwb::JSONWorkbook)
-    for s in sheetnames(jwb)
-        jwb[s].data = dummy_localizer.(jwb[s].data)
-    end
-    return jwb
-end
-function dummy_localizer(x::T) where {T <: AbstractDict}
-    for k in keys(x)
-        if startswith(string(k), "\$")
-            k2 = string(chop(k, head=1, tail=0))
-            x[k2] = x[k]
-        else
-            x[k] = dummy_localizer(x[k])
-        end
-    end
-    return x
-end
+    vlookup()
 
-function dummy_localizer(x::AbstractArray)
-    for (i, el) in enumerate(x)
-        if isa(el, AbstractDict)
-            x[i] = dummy_localizer(el)
-        end
-    end
-    return x
+"""
+function vlookup(jws::JSONWorkbook)
+    
 end
