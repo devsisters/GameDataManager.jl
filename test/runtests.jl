@@ -5,6 +5,9 @@ using GameDataManager
 if Sys.isunix() 
     #= TODO현재 validation 끄고 있음!!
     validation로 하려면  mars-client를 clone 떠야 하는데... =#
+    println.(readdir(@__DIR__))
+    println.(readdir(joinpath(@__DIR__, "patch-data")))
+
     GameDataManager.init_test(joinpath(@__DIR__, "patch-data"))
 end
 
