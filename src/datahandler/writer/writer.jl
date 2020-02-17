@@ -1,5 +1,5 @@
 # 단축키
-function xl(exportall::Bool = false; branch = CACHE[:patch_data_branch]) 
+function xl(exportall::Bool = false) 
     # git_checkout_patchdata(branch)
     
     files = exportall ? collect_auto_xlsx() : collect_modified_xlsx()
@@ -11,7 +11,7 @@ function xl(exportall::Bool = false; branch = CACHE[:patch_data_branch])
         @info "json 추출이 완료되었습니다 ☺"
     end
 end
-function xl(x::AbstractString; branch = CACHE[:patch_data_branch])
+function xl(x::AbstractString)
     
     @info "xlsx -> json 추출을 시작합니다 ⚒\n" * "-"^(displaysize(stdout)[2]-4)
     reload_meta!()
