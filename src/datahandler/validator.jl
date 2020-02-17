@@ -182,13 +182,10 @@ validate(bt::XLSXTable{:Attraction}) = validate_building(bt)
 function validate_building(bt::XLSXTable)
     fname = _filename(bt)    
     data = bt["Building"]
-    if fname != :Attraction  
-        validate_haskey("Ability", filter(!isnull, vcat(data[:, j"/AbilityKey"]...)))
-
-        building_seeds = get.(data[:, j"/BuildCost"], "NeedItemKey", missing)
-        validate_haskey("ItemTable", building_seeds)
-    end
-
+        
+    validate_haskey("Ability", filter(!isnull, vcat(data[:, j"/AbilityKey"]...)))
+    building_seeds = get.(data[:, j"/BuildCost"], "NeedItemKey", missing)
+    validate_haskey("ItemTable", building_seeds)
     # Level 시트
     leveldata = bt["Level"]
     
@@ -286,8 +283,6 @@ function validate(bt::XLSXTable{:ItemTable})
             "unity/Assets/1_CollectionResources/ItemIcons", icons; 
             msg = "Icon이 존재하지 않습니다")
     end
-
-    validate_haskey("Building", bt["BuildingSeed"][:, j"/BuildingKey"])
 
     nothing
 end
