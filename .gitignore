@@ -4,3 +4,5 @@
 # VSCode Generated
 *.vscode
 
+# test data
+/test/patch-data
