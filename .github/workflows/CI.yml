@@ -41,11 +41,13 @@ jobs:
       - uses: julia-actions/setup-julia@latest
         with:
           version: ${{ matrix.julia-version }}
-      - name: install GameItemBase 
+      - name: add Test 
+        run: julia -e 'using Pkg; Pkg.add("Test")'
+      - name: add GameItemBase 
         run: julia -e 'using Pkg; Pkg.add(PackageSpec(url="/home/runner/work/GameDataManager.jl/GameDataManager.jl/GameItemBase"))'
-      - name: install GameBalanceManager
+      - name: add GameBalanceManager
         run: julia -e 'using Pkg; Pkg.add(PackageSpec(url="/home/runner/work/GameDataManager.jl/GameDataManager.jl/GameBalanceManager"))'
-      - name: install GameDataManager
+      - name: add GameDataManager
         run: julia -e 'using Pkg; Pkg.add(PackageSpec(url="/home/runner/work/GameDataManager.jl/GameDataManager.jl/GameDataManager"))'
       - name: runtest
         run: julia -e 'using Pkg; Pkg.test("GameDataManager")'
