@@ -17,3 +17,7 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 Tar = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
 XLSX = "fdbf4ff8-1666-58a4-91e7-1b58723a45e0"
 XLSXasJSON = "8c9e00cc-ccf1-11e8-3de6-5b028f480d9e"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+Tar = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
