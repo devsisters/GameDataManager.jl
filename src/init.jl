@@ -5,7 +5,6 @@ const CACHE = Dict{Symbol, Any}()
 function __init__()
     s = setup_env!()
 
-    # push!(XLSXasJSON.DELIM, ",") XLSXasJSON 버그로 임시로 포함시킴
     if s
         # writelog_userinfo()        
         CACHE[:meta] = loadmeta()
@@ -13,8 +12,20 @@ function __init__()
         CACHE[:validation] = true
         CACHE[:patch_data_branch] = "master"
         CACHE[:git] = Dict()
+        help()
     end
-    help()
+    nothing
+end
+
+function init_test(patch_data)
+    s = setup_testenv!(patch_data)
+    if s
+        CACHE[:meta] = loadmeta()
+        CACHE[:actionlog] = init_actionlog()
+        CACHE[:validation] = false
+        CACHE[:patch_data_branch] = "master"
+        CACHE[:git] = Dict()
+    end
     nothing
 end
 

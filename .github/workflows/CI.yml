@@ -1,0 +1,51 @@
+name: Run CI on master
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        julia-version: [1.3.0]
+        julia-arch: [x64]
+        os: [ubuntu-latest]
+
+    steps:
+      - uses: actions/checkout@v2
+        name: clone GameItemBase
+        with:
+          repository: devsisters/GameItemBase.jl
+          token: ${{ secrets.JuliaCI }}
+          path: GameItemBase
+      - uses: actions/checkout@v2
+        name: clone GameBalanceManager
+        with:
+          repository: devsisters/GameBalanceManager.jl
+          token: ${{ secrets.JuliaCI }}
+          path: GameBalanceManager
+      - uses: actions/checkout@v2
+        name: clone GameDataManager
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          path: GameDataManager
+      - uses: actions/checkout@v2
+        name: clone mars-patch-data
+        with:
+          repository: devsisters/mars-patch-data
+          token: ${{ secrets.JuliaCI }}
+          path: GameDataManager/test/patch-data
+      - uses: julia-actions/setup-julia@latest
+        with:
+          version: ${{ matrix.julia-version }}
+      - name: install GameItemBase 
+        run: julia -e 'using Pkg; Pkg.add(PackageSpec(url="/home/runner/work/GameDataManager.jl/GameDataManager.jl/GameItemBase"))'
+      - name: install GameBalanceManager
+        run: julia -e 'using Pkg; Pkg.add(PackageSpec(url="/home/runner/work/GameDataManager.jl/GameDataManager.jl/GameBalanceManager"))'
+      - name: install GameDataManager
+        run: julia -e 'using Pkg; Pkg.add(PackageSpec(url="/home/runner/work/GameDataManager.jl/GameDataManager.jl/GameDataManager"))'
+      - name: runtest
+        run: julia -e 'using Pkg; Pkg.test("GameDataManager")'
