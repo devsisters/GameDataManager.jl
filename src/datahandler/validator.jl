@@ -148,7 +148,7 @@ function validate(bt::XLSXTable{:Block})
     subcat = unique(block[:, j"/SubCategory"])
     parent = bt["Sub"][:, j"/CategoryKey"]
     validate_subset(subcat, parent; 
-        msg = "[Main]시트의 다음 SubCategory는 [Sub]시트에 존재하지 않습니다", assert = false)
+        msg = "[Block]시트의 '기본탭'의 내용이 [Sub]시트의 'CategoryKey'에 존재하지 않습니다", assert = false)
 
     # 추천카테고리 탭 건물Key
     rc = bt["RecommendCategory"]
@@ -157,7 +157,7 @@ function validate(bt::XLSXTable{:Block})
     recom = filter(!isnull, unique(vcat(block[:, j"/RecommendSubCategory"]...)))
     parent = vcat(rc[:, j"/RecommendSubCategory"]...)
     validate_subset(recom, parent; 
-        msg = "[Block]시트의 다음 RecommendSubCategory가 [RecommendCategory]시트에 존재하지 않습니다", assert = false)
+        msg = "[Block]시트의 '추천탭'의 내용이 [RecommendCategory]시트의 '추천탭'에 존재하지 않습니다", assert = false)
 
     # BlockSet 검사
     blockset_blocks = begin 
