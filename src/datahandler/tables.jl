@@ -6,7 +6,7 @@ mars 프로젝트에서 사용하는 '.xlsx'과 '.json'을 읽습니다
 ===
 ``` julia
 Table("ItemTable") # XLSX파일
-Table("zGameBalanceManager.json") #JSON파일
+Table("zGameBalanceManager.json") #JSON파일은 확장자 명시
 ```
 
 ** Arguements **
@@ -19,9 +19,7 @@ abstract type Table end
 function Table(file; kwargs...)
     if endswith(file, ".json")
         JSONTable(file; kwargs...)
-    # elseif endswith(file, ".prefab") || endswith(file, ".asset")
-    #     UnityTable(file; kwargs...)
-    else #XLSX만 shortcut 있음. JSON은 확장자 기입 필요
+    else
         XLSXTable(file; kwargs...)
     end
 end
@@ -41,7 +39,6 @@ function XLSXTable(file::AbstractString; force_xlsx = false,
                                     validation = CACHE[:validation])
     f = is_xlsxfile(file) ? file : CACHE[:meta][:xlsx_shortcut][file]
     filename = string(split(f, ".")[1])
-    xlsxpath = joinpath_gamedata(f)
 
     jwb = nothing
     if ismodified(file) | force_xlsx
@@ -51,12 +48,12 @@ function XLSXTable(file::AbstractString; force_xlsx = false,
         for el in meta
             kwargs_per_sheet[el[1]] = el[2][2]
         end            
-        jwb = JSONWorkbook(copy_to_cache(xlsxpath), keys(meta), kwargs_per_sheet)
+        jwb = JSONWorkbook(copy_to_cache(joinpath_gamedata(f)), keys(meta), kwargs_per_sheet)
         GameBalanceManager.dummy_localizer!(jwb)
         process!(jwb; gameenv = GAMEENV)
     else
         if !haskey(GAMEDATA, filename)
-            jwb = _jsonworkbook(xlsxpath, f)
+            jwb = _jsonworkbook(joinpath_gamedata(f), f)
         end
     end
 
@@ -173,8 +170,8 @@ end
 https://support.office.com/en-us/article/xlookup-function-b7fd680e-6d10-43e6-84f9-88eae8bf5929
 
 ## Arguements
-operator: 비교 함수 `==`, `<=`, `>=` 사용 가능
-find_mode: 'findfirst', 'findlast', 'findall' 사용 가능
+- operator: 비교 함수 `==`, `<=`, `>=` 사용 가능
+- find_mode: `findfirst`, `findlast`, `findall` 사용 가능
 
 """
 function xlookup(jws::JSONWorksheet, value, 
@@ -190,7 +187,7 @@ function xlookup(jws::JSONWorksheet, value,
     @assert haskey(jws, return_col) "$(return_col)은 존재하지 않습니다"
 
     idx = find_mode(el -> operator(el[lookup_col], value), jws.data)
-    
+
     if isnothing(idx)
         missing 
     else
