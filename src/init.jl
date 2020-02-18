@@ -12,7 +12,9 @@ function __init__()
         CACHE[:validation] = true
         CACHE[:patch_data_branch] = "master"
         CACHE[:git] = Dict()
-        help()
+        if !endswith(get(ENV, "LOGONSERVER" ,""), "YONGHEEKIM")
+            help()
+        end
     end
     nothing
 end
