@@ -73,7 +73,7 @@ version = "0.3.0"
 deps = ["Caching", "CurrenciesBase", "DataStructures", "Dates", "GameItemBase", "JSON", "Test", "Unitful", "XLSXasJSON"]
 path = "C:\\Users\\devsisters\\.julia\\dev\\GameBalanceManager"
 uuid = "bb77ccaf-9d50-4d58-b991-76f827c14ecc"
-version = "0.1.13"
+version = "0.1.14"
 
 [[GameItemBase]]
 deps = ["CurrenciesBase", "JSON", "Printf", "Random", "StatsBase", "UUIDs", "XLSXasJSON"]
@@ -230,9 +230,9 @@ version = "0.5.8"
 
 [[XLSXasJSON]]
 deps = ["DataStructures", "JSON", "Printf", "REPL", "XLSX"]
-git-tree-sha1 = "38ed4915d3d8b3a57b916597755032eb41fc217b"
+git-tree-sha1 = "adfae72d7f08351f545c41dbf6d364acc277b50d"
 uuid = "8c9e00cc-ccf1-11e8-3de6-5b028f480d9e"
-version = "0.2.1"
+version = "0.2.2"
 
 [[XML2_jll]]
 deps = ["Libdl", "Libiconv_jll", "Pkg", "Zlib_jll"]
