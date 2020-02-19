@@ -116,9 +116,9 @@ function help(idx = 1)
           xl()        : 수정된 엑셀파일만 검색하여 json으로 추출합니다
           xl(true)    : '_Meta.json'에서 관리하는 모든 파일을 json으로 추출합니다
           ink()       : 'M:/Dialogue'의 모든 ink 파일을 .json로 추출합니다
-          
           backup()    : 'M:/GameData'와 'M:/Dialogue'의 데이터를 압축하여'patchdata/_Backup'에 덮어 씌웁니다
-          setbranch!("master"): 'xl()'이 checkout 하는 branch를 변경합니다. 
+          
+          set_validation!(): 데이터 오류검사를 하지 않도록 설정합니다 
           cleanup_cache!(): 로딩되어있는 GameData 캐시를 모두 삭제합니다
         """
         if idx == 1
