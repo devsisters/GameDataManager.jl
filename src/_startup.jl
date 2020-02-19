@@ -27,16 +27,8 @@ function checkout_GameDataManager()
             end
         end
     end
-    function install_mars_package(package_name)
-        if !haskey(Pkg.installed(), package_name)
-            dir = network_folder()
-            Pkg.add(PackageSpec(path=joinpath(dir, package_name)))
-        else 
-            checkout_mars_package(package_name)
-        end
-    end
-    install_mars_package("GameItemBase")
-    
+
+    checkout_mars_package("GameItemBase")
     checkout_mars_package("GameBalanceManager")
     checkout_mars_package("GameDataManager")
 

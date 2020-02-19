@@ -32,10 +32,10 @@ include("logger/logger.jl")
 
 export GAMEENV, GAMEDATA, help, setup!,
        # datahandler
-       Table,
-       sheetnames, xlookup,
-       xl, xl_change_datapath!, backup, xl_auto, md5hash, set_validation!, 
-       cleanup_cache!,
+       Table, xlookup,
+       sheetnames,
+       xl, xl_change_datapath!, backup, xl_auto, md5hash, 
+       set_validation!, cleanup_cache!,
        ink,
        
        # 유틸리티
