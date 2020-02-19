@@ -174,13 +174,13 @@ https://support.office.com/en-us/article/xlookup-function-b7fd680e-6d10-43e6-84f
 - find_mode: `findfirst`, `findlast`, `findall` 사용 가능
 
 """
-function xlookup(jws::JSONWorksheet, value, 
+function xlookup(value, jws::JSONWorksheet, 
                     lookup_col, return_col; kwargs...)
-    xlookup(jws, value, XLSXasJSON.JSONPointer(lookup_col), XLSXasJSON.JSONPointer(return_col); kwargs...)
+    xlookup(value, jws, XLSXasJSON.JSONPointer(lookup_col), XLSXasJSON.JSONPointer(return_col); kwargs...)
 end
 
-function xlookup(jws::JSONWorksheet, value, 
-                    lookup_col::XLSXasJSON.JSONPointer, return_col::XLSXasJSON.JSONPointer; 
+function xlookup(value, 
+    jws::JSONWorksheet, lookup_col::XLSXasJSON.JSONPointer, return_col::XLSXasJSON.JSONPointer; 
     find_mode::Function = findfirst, operator::Function = isequal)
 
     @assert haskey(jws, lookup_col) "$(lookup_col)은 존재하지 않습니다"
