@@ -11,8 +11,8 @@ Table("zGameBalanceManager.json") #JSON파일은 확장자 명시
 
 ** Arguements **
 ====
-* 'force_xlsx'=false : true로하면 강제로 xlsx파일에서 읽어옵니다  
-* 'validate'=true : false로 하면 validation 하지않습니다
+* 'readfrom' : `:NEW`, `:XLSX`, `:JSON `
+* 'validate' : false로 하면 validation 하지않습니다
 
 """
 abstract type Table end
@@ -28,20 +28,42 @@ end
     XLSXTable
 
 JSONWorkbook과 기타 메타 데이터
+
+# Arguements
+===
+**readfrom** 
+- `:NEW`  - xlsx파일이 편집된 경우에는 엑셀, 아니면 JSON
+  `:XLSX` - 무조건 XLSX을 읽는다
+  `:JSON` - 무조건 JSON을 읽는다
 """
 struct XLSXTable{FileName} <: Table
+    hash::UInt64
     data::JSONWorkbook
-    dataframe::Array{Any, 1} #삭제예정
-    # 사용할 함수들
     # cache::Union{Missing, Array{Dict, 1}}
 end
-function XLSXTable(file::AbstractString; force_xlsx = false,
-                                    validation = CACHE[:validation])
-    f = is_xlsxfile(file) ? file : CACHE[:meta][:xlsx_shortcut][file]
-    filename = string(split(f, ".")[1])
+function XLSXTable(jwb::JSONWorkbook, validation::Bool)
+    f = split(basename(xlsxpath(jwb)), ".")[1] |> string
+    
+    actionlog(jwb)
+    GAMEDATA[f] = XLSXTable{Symbol(f)}(hash(jwb), jwb)
+    if validation 
+        validate(GAMEDATA[f])
+    end
 
-    jwb = nothing
-    if ismodified(file) | force_xlsx
+    return GAMEDATA[f]
+end
+
+function XLSXTable(file::AbstractString; validation = CACHE[:validation],
+                                            readfrom::Symbol = :NEW)
+
+    f = is_xlsxfile(file) ? file : CACHE[:meta][:xlsx_shortcut][file]
+
+    @assert in(readfrom, (:NEW, :XLSX, :JSON)) "'readfrom'은 ':NEW', ':XLSX', ':JSON' 중 1개만 사용할 수 있습니다"
+    if readfrom == :NEW
+        readfrom = ismodified(file) ? :XLSX : :JSON
+    end 
+
+    if readfrom == :XLSX
         meta = getmetadata(f)
 
         kwargs_per_sheet = Dict()
@@ -49,27 +71,23 @@ function XLSXTable(file::AbstractString; force_xlsx = false,
             kwargs_per_sheet[el[1]] = el[2][2]
         end            
         jwb = JSONWorkbook(copy_to_cache(joinpath_gamedata(f)), keys(meta), kwargs_per_sheet)
-        GameBalanceManager.dummy_localizer!(jwb)
+        localizer!(jwb)
         process!(jwb; gameenv = GAMEENV)
-    else
-        if !haskey(GAMEDATA, filename)
+
+        table = XLSXTable(jwb, validation)
+
+    elseif readfrom == :JSON
+        k = string(split(basename(f), ".")[1])
+
+        if !haskey(GAMEDATA, k)
             jwb = _jsonworkbook(joinpath_gamedata(f), f)
+            table = XLSXTable(jwb, validation)
+        else 
+            table = GAMEDATA[k]
         end
     end
 
-    if !isnothing(jwb)
-        actionlog(jwb)
-
-        dataframe = Any[]
-
-        table = XLSXTable{Symbol(basename(filename))}(jwb, dataframe)
-        if validation 
-            validate(table)
-        end
-        GAMEDATA[filename] = table
-    end
-
-    return GAMEDATA[filename]
+    return table
 end
 
 function _jsonworkbook(xlsxpath, file)   
@@ -138,7 +156,7 @@ Base.basename(jwb::JSONWorkbook) = basename(xlsxpath(jwb))
 Base.dirname(bt::JSONTable) = dirname(bt.filepath)
 Base.dirname(xgd::XLSXTable) = dirname(xgd)
 Base.dirname(jwb::JSONWorkbook) = dirname(xlsxpath(jwb))
-_filename(xgd::XLSXTable) = typeof(xgd).parameters[1]
+_filename(xgd::XLSXTable{NAME}) where NAME = NAME
 
 index(x::XLSXTable) = x.data.sheetindex
 cache(x::XLSXTable) = x.cache

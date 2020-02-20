@@ -56,7 +56,7 @@ function export_gamedata(file::AbstractString)
     end
 
     println("『", f, "』")
-    bt = Table(f; force_xlsx = true)
+    bt = Table(f; readfrom = :XLSX)
     write_json(bt.data)
 
     nothing
@@ -65,7 +65,7 @@ function export_gamedata(files::Vector)
     if !isempty(files)
         for f in files
             println("『", f, "』")
-            bt = Table(f; force_xlsx = true)
+            bt = Table(f; readfrom = :XLSX)
             write_json(bt.data)
         end
     end

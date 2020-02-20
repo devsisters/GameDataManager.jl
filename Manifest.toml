@@ -73,7 +73,7 @@ version = "0.3.0"
 deps = ["Caching", "CurrenciesBase", "DataStructures", "Dates", "GameItemBase", "JSON", "Test", "Unitful", "XLSXasJSON"]
 path = "C:\\Users\\devsisters\\.julia\\dev\\GameBalanceManager"
 uuid = "bb77ccaf-9d50-4d58-b991-76f827c14ecc"
-version = "0.1.16"
+version = "0.1.18"
 
 [[GameItemBase]]
 deps = ["CurrenciesBase", "JSON", "Printf", "Random", "StatsBase", "UUIDs", "XLSXasJSON"]
