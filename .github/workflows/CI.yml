@@ -3,7 +3,7 @@ name: CI on GameDataManager
 on:
   push:
     branches:
-      - develop
+      - master
 
 jobs:
   test:
@@ -42,10 +42,10 @@ jobs:
         with:
           version: ${{ matrix.julia-version }}
       - name: add GameItemBase 
-        run: julia -e 'using Pkg; Pkg.add(PackageSpec(url="/home/runner/work/GameDataManager.jl/GameDataManager.jl/GameItemBase"))'
+        run: julia -e 'using Pkg; Pkg.add(PackageSpec(url="$(ENV["GITHUB_WORKSPACE"])/GameItemBase"))'
       - name: add GameBalanceManager
-        run: julia -e 'using Pkg; Pkg.add(PackageSpec(url="/home/runner/work/GameDataManager.jl/GameDataManager.jl/GameBalanceManager"))'
+        run: julia -e 'using Pkg; Pkg.add(PackageSpec(url="$(ENV["GITHUB_WORKSPACE"])/GameBalanceManager"))'
       - name: add GameDataManager
-        run: julia -e 'using Pkg; Pkg.add(PackageSpec(url="/home/runner/work/GameDataManager.jl/GameDataManager.jl/GameDataManager"))'
+        run: julia -e 'using Pkg; Pkg.add(PackageSpec(url="$(ENV["GITHUB_WORKSPACE"])/GameDataManager"))'
       - name: runtest
         run: julia -e 'using Pkg; Pkg.test("GameDataManager")'

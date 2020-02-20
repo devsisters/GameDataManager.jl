@@ -19,7 +19,7 @@ function __init__()
     nothing
 end
 
-function init_test(patch_data)
+function init_forCI(patch_data)
     s = setup_testenv!(patch_data)
     if s
         CACHE[:meta] = loadmeta()
