@@ -134,10 +134,10 @@ function backup()
 
     println("M:/GameData와 M:/Dialogue를 백업합니다")
     for folder in ("GameData", "Dialogue")
-        # predicate = path -> (println(path); endswith(path, r".xlsx|.xlsm|.ink"))
+        predicate = path -> (isdir(path) || endswith(path, r".xlsx|.xlsm|.ink"))
 
         f = "$folder.tar"
-        tarball = Tar.create(GAMEENV[folder], 
+        tarball = Tar.create(predicate, GAMEENV[folder], 
                         joinpath(GAMEENV["patch_data"], "_Backup/$f"))
 
         print(" $folder => ")
