@@ -66,30 +66,6 @@ function setup_env!()
         return true
     end
 end
-function setup_testenv!(patch_data)
-    # submodules
-    GAMEENV["patch_data"] = patch_data
-    GAMEENV["mars_art_assets"] = missing
-    GAMEENV["CollectionResources"] = missing
-
-    GAMEENV["NetworkFolder"] = missing
-    GAMEENV["GameData"] = joinpath(GAMEENV["patch_data"], "_Backup/GameData")
-    GAMEENV["Dialogue"] = joinpath(GAMEENV["patch_data"], "_Backup/Dialogue")
-
-    tar = joinpath(GAMEENV["patch_data"], "_Backup/GameData.tar")
-    @assert isfile(tar) "GameData를 찾을 수 없습니다"
-    
-    Tar.extract(tar, GAMEENV["GameData"])
-
-    GAMEENV["xlsx"] = Dict("root" => GAMEENV["GameData"])
-    GAMEENV["json"] = Dict("root" => joinpath(GAMEENV["patch_data"], "Tables"))
-    
-    # GameDataManager paths
-    GAMEENV["cache"] = joinpath(GAMEENV["patch_data"], ".cache")
-    GAMEENV["actionlog"] = joinpath(GAMEENV["cache"], "actionlog.json")
-    
-    return true 
-end
 
 function xl_change_datapath!()
     if startswith(GAMEENV["GameData"], GAMEENV["NetworkFolder"])

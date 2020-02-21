@@ -37,7 +37,7 @@ jobs:
         with:
           repository: devsisters/mars-patch-data
           token: ${{ secrets.JuliaCI }}
-          path: patch-data
+          path: mars-client/patch-data
       - uses: julia-actions/setup-julia@latest
         with:
           version: ${{ matrix.julia-version }}

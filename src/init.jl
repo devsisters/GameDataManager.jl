@@ -3,6 +3,16 @@ const GAMEDATA = Dict{String, Table}()
 const CACHE = Dict{Symbol, Any}()
 
 function __init__()
+    if haskey(ENV, "GITHUB_WORKSPACE")
+        ENV["MARS-CLIENT"] = joinpath(ENV["GITHUB_WORKSPACE"], "mars-client")
+        datapath = joinpath(ENV["MARS-CLIENT"], "patch-data/_Backup")
+        
+        tar = joinpath(ENV["GITHUB_WORKSPACE"], "mars-client/patch-data/_Backup/GameData.tar")
+        @assert isfile(tar) "GameData를 찾을 수 없습니다"
+        
+        Tar.extract(tar, datapath)
+    
+    end
     s = setup_env!()
 
     if s
@@ -15,18 +25,6 @@ function __init__()
         if !endswith(get(ENV, "LOGONSERVER" ,""), "YONGHEEKIM")
             help()
         end
-    end
-    nothing
-end
-
-function init_forCI(patch_data)
-    s = setup_testenv!(patch_data)
-    if s
-        CACHE[:meta] = loadmeta()
-        CACHE[:actionlog] = init_actionlog()
-        CACHE[:validation] = false
-        CACHE[:patch_data_branch] = "master"
-        CACHE[:git] = Dict()
     end
     nothing
 end
