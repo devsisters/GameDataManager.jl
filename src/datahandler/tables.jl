@@ -33,8 +33,8 @@ JSONWorkbook과 기타 메타 데이터
 ===
 **readfrom** 
 - `:NEW`  - xlsx파일이 편집된 경우에는 엑셀, 아니면 JSON
-  `:XLSX` - 무조건 XLSX을 읽는다
-  `:JSON` - 무조건 JSON을 읽는다
+- `:XLSX` - 무조건 XLSX을 읽는다
+- `:JSON` - 무조건 JSON을 읽는다
 """
 struct XLSXTable{FileName} <: Table
     chksum::UInt64

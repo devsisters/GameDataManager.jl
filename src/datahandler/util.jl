@@ -64,18 +64,6 @@ function cleanup_exportlog!()
     printstyled("  └.exportlog.json을 삭제하였습니다 (◎﹏◎)"; color = :yellow)
 end
 
-function setbranch!(branch::AbstractString) 
-    CACHE[:patch_data_branch] = branch
-    git_checkout_patchdata(branch)
-end
-
-function git_checkout_patchdata(branch)
-    if pwd() != GAMEENV["patch_data"]
-        cd(GAMEENV["patch_data"])
-    end
-    run(`git checkout $branch`)
-end
-
 function checkout_GameDataManager()
     v2 = if Sys.iswindows()
         "M:/Tools/GameDataManager/Project.toml"

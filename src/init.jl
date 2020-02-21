@@ -7,11 +7,10 @@ function __init__()
         ENV["MARS-CLIENT"] = joinpath(ENV["GITHUB_WORKSPACE"], "mars-client")
         patchdata = joinpath(ENV["MARS-CLIENT"], "patch-data")
         
-        tar = joinpath(patchdata, "_Backup/GameData.tar")
-        @assert isfile(tar) "GameData를 찾을 수 없습니다"
+        tarfile = joinpath(patchdata, "_Backup/GameData.tar")
+        @assert isfile(tarfile) "GameData를 찾을 수 없습니다"
         
-        Tar.extract(tar, joinpath(patchdata, "_Backup/GameData"))
-    
+        Tar.extract(tarfile, joinpath(patchdata, "_Backup/GameData"))
     end
     s = setup_env!()
 
@@ -20,7 +19,6 @@ function __init__()
         CACHE[:meta] = loadmeta()
         CACHE[:actionlog] = init_actionlog()
         CACHE[:validation] = true
-        CACHE[:patch_data_branch] = "master"
         CACHE[:git] = Dict()
         if !endswith(get(ENV, "LOGONSERVER" ,""), "YONGHEEKIM")
             help()
@@ -41,27 +39,23 @@ function loadmeta(metafile = joinpath_gamedata("_Meta.json"))
         if haskey(json_row, "kwargs")
             x = get(json_row["kwargs"], sheet, x)
         end
-        NamedTuple{(:row_oriented, :start_line, :delim, :squeeze)}((
-                    get(x, "row_oriented", true),
-                    get(x, "start_line", 2),
-                    get(x, "delim", r";|,"),
-                    get(x, "squeeze", false)
-                    ))
+        NT = (row_oriented = get(x, "row_oriented", true),
+              start_line   = get(x, "start_line", 2),
+              delim        = get(x, "delim", r";|,"),
+              squeeze      = get(x, "squeeze", false))
     end
     function parse_metainfo(origin)
         d = OrderedDict{String, Any}()
         for el in origin
             xl = string(el["xlsx"])
             d[xl] = Dict()
-            # d[xl] = el[:sheets]
             for (sheet, json) in el["sheets"]
                 d[xl][sheet] = (json, get_kwargs(el, sheet))
             end
         end
         d
     end
-    # TODO: 이름 중복 체크하기
-    function foo(d)
+    function create_shortcut(d)
         files = broadcast(x -> (split(basename(x), ".")[1], x), filter(is_xlsxfile, keys(d)))
         validate_duplicate(files)
         Dict(files)
@@ -72,7 +66,7 @@ function loadmeta(metafile = joinpath_gamedata("_Meta.json"))
     # xl()로 자동 추출하는 파일
     meta[:auto] = parse_metainfo(jsonfile["auto"])
     meta[:manual] = parse_metainfo(jsonfile["manual"])
-    meta[:xlsx_shortcut] = merge(foo(meta[:auto]), foo(meta[:manual]))
+    meta[:xlsx_shortcut] = merge(create_shortcut(meta[:auto]), create_shortcut(meta[:manual]))
 
     println("_Meta.json 로딩이 완료되었습니다", "."^max(6, displaysize(stdout)[2]-34))
 
@@ -91,7 +85,6 @@ function init_actionlog()
 
     return log
 end
-
 
 # 안내
 function help(idx = 1)
