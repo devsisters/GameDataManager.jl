@@ -7,7 +7,7 @@ using GameDataManager
     @test set_validation!(false) == false
 end
 # include("table.jl")
-@testset "XLSX -> JSON 테스트 without validation" begin 
+@testset "Table 함수 테스트 without validation" begin 
     files = GameDataManager.collect_auto_xlsx()
 
     for f in files
@@ -29,8 +29,6 @@ end
 
 end
 
-
-
 @testset "get_blocks" begin 
     data = get_blocks(false)
     @test issubset(keys(data), Table("Block")["Block"][:, j"/Key"])
@@ -39,18 +37,19 @@ end
 @testset "get_buildings" begin 
     data = get_buildings(false)
 
-    p_keys = Table("Special")["Building"][:, j"/BuildingKey"]
-    s_keys = Table("Shop")["Building"][:, j"/BuildingKey"]
-    r_keys = Table("Residence")["Building"][:, j"/BuildingKey"]
-    a_keys = Table("Attraction")["Building"][:, j"/BuildingKey"]
-
-    @test issubset(keys(data), [p_keys; s_keys; r_keys; a_keys])
-    
-    for _keys in (p_keys, s_keys, r_keys, a_keys)
+    for t in ("Special", "Shop", "Residence")
+        _keys = Table(t)["Building"][:, j"/BuildingKey"]
         for k in _keys
-            templates = xlookup(k, Table("Shop")["Level"], j"/BuildingKey", j"/BuildingTemplate"; find_mode = findall)
-            filter(!GameDataManager.isnull, templates)
-            @test collect(keys(data[k])) == filter(!GameDataManager.isnull, templates)
+            templates = xlookup(k, Table(t)["Level"], j"/BuildingKey", j"/BuildingTemplate"; find_mode = findall)
+            sort!(filter!(!GameDataManager.isnull, templates))
+            @test sort(collect(keys(data[k]))) == templates
         end
     end
+end
+
+@testset "기타 기능" begin 
+    # 캐시 청소
+    @test isempty(GAMEDATA) == false
+    cleanup_cache!()
+    @test isempty(GAMEDATA)
 end
