@@ -19,18 +19,38 @@ end
 
 @testset "xlookup 기능" begin 
     @test xlookup("Coin", Table("ItemTable")["Currency"], j"/Key", j"/$Name") == "코인"
+    @test GameDataManager.isnull(xlookup("이런거없어", Table("ItemTable")["Currency"], j"/Key", j"/$Name"))
+
     @test xlookup("sIcecream", Table("Shop")["Building"], j"/BuildingKey", j"/$Name") == "아이스크림 가게"
-end
 
-@testset "findblock" begin 
+    # find_mode findlast, findall
 
-
-end
-
-
-@testset "findblock" begin 
-
+    # operator <=, >=
 
 end
 
-@show ENV
+
+
+@testset "get_blocks" begin 
+    data = get_blocks(false)
+    @test issubset(keys(data), Table("Block")["Block"][:, j"/Key"])
+end
+
+@testset "get_buildings" begin 
+    data = get_buildings(false)
+
+    p_keys = Table("Special")["Building"][:, j"/BuildingKey"]
+    s_keys = Table("Shop")["Building"][:, j"/BuildingKey"]
+    r_keys = Table("Residence")["Building"][:, j"/BuildingKey"]
+    a_keys = Table("Attraction")["Building"][:, j"/BuildingKey"]
+
+    @test issubset(keys(data), [p_keys; s_keys; r_keys; a_keys])
+    
+    for _keys in (p_keys, s_keys, r_keys, a_keys)
+        for k in _keys
+            templates = xlookup(k, Table("Shop")["Level"], j"/BuildingKey", j"/BuildingTemplate"; find_mode = findall)
+            filter(!GameDataManager.isnull, templates)
+            @test collect(keys(data[k])) == filter(!GameDataManager.isnull, templates)
+        end
+    end
+end

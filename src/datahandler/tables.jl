@@ -37,7 +37,7 @@ JSONWorkbook과 기타 메타 데이터
   `:JSON` - 무조건 JSON을 읽는다
 """
 struct XLSXTable{FileName} <: Table
-    hash::UInt64
+    chksum::UInt64
     data::JSONWorkbook
     # cache::Union{Missing, Array{Dict, 1}}
 end
@@ -207,8 +207,11 @@ function xlookup(value,
     idx = find_mode(el -> operator(el[lookup_col], value), jws.data)
 
     if isnothing(idx)
-        missing 
+        r = nothing 
+    elseif isempty(idx)
+        r = Any[]
     else
-        jws[idx, return_col]
+        r = jws[idx, return_col]
     end
+    return r
 end
