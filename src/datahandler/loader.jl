@@ -45,7 +45,7 @@ function getmetadata(f::AbstractString)
     end
 end
 function getmetadata(jwb::JSONWorkbook) 
-    f = split(basename(xlsxpath(jwb)), ".")[1] |> string
+    f = splitext(basename(jwb))[1] |> string
 
     metakey = CACHE[:meta][:xlsx_shortcut][f]
     getmetadata(metakey)

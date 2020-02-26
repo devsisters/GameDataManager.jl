@@ -56,7 +56,7 @@ function loadmeta(metafile = joinpath_gamedata("_Meta.json"))
         d
     end
     function create_shortcut(d)
-        files = broadcast(x -> (split(basename(x), ".")[1], x), filter(is_xlsxfile, keys(d)))
+        files = broadcast(x -> (splitext(basename(x))[1], x), filter(is_xlsxfile, keys(d)))
         validate_duplicate(files)
         Dict(files)
     end

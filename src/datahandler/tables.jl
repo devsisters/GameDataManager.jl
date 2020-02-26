@@ -42,7 +42,7 @@ struct XLSXTable{FileName} <: Table
     # cache::Union{Missing, Array{Dict, 1}}
 end
 function XLSXTable(jwb::JSONWorkbook, validation::Bool)
-    f = split(basename(xlsxpath(jwb)), ".")[1] |> string
+    f = splitext(basename(jwb))[1] |> string
     
     actionlog(jwb)
     GAMEDATA[f] = XLSXTable{Symbol(f)}(hash(jwb), jwb)
@@ -77,7 +77,7 @@ function XLSXTable(file::AbstractString; validation = CACHE[:validation],
         table = XLSXTable(jwb, validation)
 
     elseif readfrom == :JSON
-        k = string(split(basename(f), ".")[1])
+        k = splitext(basename(f))[1]
 
         if !haskey(GAMEDATA, k)
             jwb = _jsonworkbook(joinpath_gamedata(f), f)
