@@ -2,9 +2,9 @@ function setup!(marsrepo)
     git_config = joinpath(marsrepo, ".git/config")
     # 진짜 주소맞는지 볼 필요는 없겠지...
     # s = read(joinpath(marsrepo, ".git/config"), String) 
-    if !isfile(git_config) 
-        throw(AssertionError("\"$marsrepo\" 경로가 올바르지 않습니다\n올바른 'mars-client'의 경로를 입력해 주세요"))
-    end
+    # if !isfile(git_config) 
+    #     throw(AssertionError("\"$marsrepo\" 경로가 올바르지 않습니다\n올바른 'mars-client'의 경로를 입력해 주세요"))
+    # end
 
     marsrepo = replace(marsrepo, "\\" => "/")
     f = joinpath(DEPOT_PATH[1], "config/juno_startup.jl")
@@ -65,6 +65,23 @@ function setup_env!()
         GAMEENV["actionlog"] = joinpath(GAMEENV["cache"], "actionlog.json")
         return true
     end
+end
+
+function extract_backupdata()
+    patchdata = joinpath(ENV["MARS-CLIENT"], "patch-data")
+    tarfile = joinpath(patchdata, "_Backup/GameData.tar")
+    target = joinpath(patchdata, "_Backup/GameData")
+
+    @assert isfile(tarfile) "GameData를 찾을 수 없습니다"
+    if isdir(target)
+        @warn "$(target)의 모든 데이터를 삭제합니다"
+        rm(target,recursive=true)
+        sleep(0.5)
+    end
+    Tar.extract(tarfile, target)
+    print(" Extract => ")
+    printstyled(normpath(target); color=:blue)
+
 end
 
 function xl_change_datapath!()

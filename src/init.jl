@@ -5,12 +5,8 @@ const CACHE = Dict{Symbol, Any}()
 function __init__()
     if haskey(ENV, "GITHUB_WORKSPACE")
         ENV["MARS-CLIENT"] = joinpath(ENV["GITHUB_WORKSPACE"], "mars-client")
-        patchdata = joinpath(ENV["MARS-CLIENT"], "patch-data")
         
-        tarfile = joinpath(patchdata, "_Backup/GameData.tar")
-        @assert isfile(tarfile) "GameData를 찾을 수 없습니다"
-        
-        Tar.extract(tarfile, joinpath(patchdata, "_Backup/GameData"))
+        extract_backupdata()
     end
     s = setup_env!()
 
