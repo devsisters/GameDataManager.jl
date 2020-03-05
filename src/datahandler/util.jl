@@ -64,21 +64,47 @@ function cleanup_exportlog!()
     printstyled("  └.exportlog.json을 삭제하였습니다 (◎﹏◎)"; color = :yellow)
 end
 
-function checkout_GameDataManager()
-    v2 = if Sys.iswindows()
-        "M:/Tools/GameDataManager/Project.toml"
-    else # 맥이라 가정함... 맥아니면 몰러~
-        "/Volumes/ShardData/MARSProject/Tools/GameDataManager/Project.toml"
-    end
-
-    if isfile(v2)
-        f = joinpath(@__DIR__, "../../project.toml")
-        v1 = readlines(f)[4]
-        v2 = readlines(v2)[4]
-        if VersionNumber(chop(v1; head=11, tail=1)) < VersionNumber(chop(v2; head=11, tail=1))
-            @info "최신 버전의 GameDataManager가 발견 되었습니다.\nAtom을 종료 후 다시 실행해주세요"
+function lookfor_xlsx(file)
+    if is_xlsxfile(file) 
+        f = file 
+    else 
+        hay = keys(CACHE[:meta][:xlsx_shortcut])
+        needle = file
+        if !in(file, hay)
+            for h in hay
+                if lowercase(h) == lowercase(file)
+                    # 소문자일 경우 처리 해줌
+                    needle = h
+                    break
+                end
+            end
+            if needle == file
+                fuzzy_lookupname(hay, file)
+            end
         end
-    else
-        @warn "M:/Tools/GameDataManager 를 찾을 수 없습니다"
+        f = CACHE[:meta][:xlsx_shortcut][needle]
     end
+    return f
+end
+
+function openxl(file::AbstractString)
+    f = lookfor_xlsx(file) |> joinpath_gamedata
+    if isfile(f)
+        run(`cmd /C start $f`; wait = false)
+    else 
+        @warn "$(f)에 접근할 수 없습니다"
+    end
+end
+
+function xl(x::AbstractString)
+    
+    @info "xlsx -> json 추출을 시작합니다 ⚒\n" * "-"^(displaysize(stdout)[2]-4)
+    reload_meta!()
+    export_gamedata(x)
+    @info "json 추출이 완료되었습니다 ☺"
+    
+    # git_checkout_patchdata(branch)
+    # 좀 이상하지만 가끔 버전 확인해주기
+    rand() < 0.05 && checkout_GameDataManager()
+    nothing
 end

@@ -18,9 +18,6 @@ function xl(x::AbstractString)
     export_gamedata(x)
     @info "json 추출이 완료되었습니다 ☺"
     
-    # git_checkout_patchdata(branch)
-    # 좀 이상하지만 가끔 버전 확인해주기
-    rand() < 0.05 && checkout_GameDataManager()
     nothing
 end
 
@@ -35,25 +32,7 @@ end
 mars 메인 저장소의 '.../_META.json'에 명시된 파일만 추출가능합니다
 """
 function export_gamedata(file::AbstractString)
-    if is_xlsxfile(file) 
-        f = file 
-    else 
-        hay = keys(CACHE[:meta][:xlsx_shortcut])
-        needle = file
-        if !in(file, hay)
-            for h in hay
-                if lowercase(h) == lowercase(file)
-                    # 소문자일 경우 처리 해줌
-                    needle = h
-                    break
-                end
-            end
-            if needle == file
-                fuzzy_lookupname(hay, file)
-            end
-        end
-        f = CACHE[:meta][:xlsx_shortcut][needle]
-    end
+    f = lookfor_xlsx(file)
 
     println("『", f, "』")
     bt = Table(f; readfrom = :XLSX)

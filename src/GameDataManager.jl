@@ -34,7 +34,7 @@ export GAMEENV, GAMEDATA, help, setup!,
        # datahandler
        Table, xlookup,
        sheetnames,
-       xl, xl_change_datapath!, backup, xl_auto, md5hash, 
+       xl, xl_change_datapath!, backup, xl_auto, md5hash, openxl,
        set_validation!, cleanup_cache!,
        ink,
        

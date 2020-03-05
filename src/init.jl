@@ -99,7 +99,8 @@ function help(idx = 1)
     if !isempty(GAMEENV)
         basic ="""
         # 기본 기능
-          xl("Player"): Player.xlsx 파일만 json으로 추출합니다
+          xl("Block")    : Block.xlsx 파일만 json으로 추출합니다
+          openxl("block"): Office를 실행하여 Block.xlsx을 엽니다
           xl()        : 수정된 엑셀파일만 검색하여 json으로 추출합니다
           xl(true)    : '_Meta.json'에서 관리하는 모든 파일을 json으로 추출합니다
           ink()       : 'M:/Dialogue'의 모든 ink 파일을 .json로 추출합니다
