@@ -99,25 +99,26 @@ function help(idx = 1)
     if !isempty(GAMEENV)
         basic ="""
         # 기본 기능
-          xl("Block")    : Block.xlsx 파일만 json으로 추출합니다
-          openxl("block"): Office를 실행하여 Block.xlsx을 엽니다
-          xl()        : 수정된 엑셀파일만 검색하여 json으로 추출합니다
-          xl(true)    : '_Meta.json'에서 관리하는 모든 파일을 json으로 추출합니다
-          ink()       : 'M:/Dialogue'의 모든 ink 파일을 .json로 추출합니다
-          backup()    : 'M:/GameData'와 'M:/Dialogue'의 데이터를 압축하여'patchdata/_Backup'에 덮어 씌웁니다
-          
-          set_validation!(): 데이터 오류검사를 하지 않도록 설정합니다 
-          cleanup_cache!(): 로딩되어있는 GameData 캐시를 모두 삭제합니다
+            backup()    : 'M:/GameData'와 'M:/Dialogue'의 데이터를 압축하여'patchdata/_Backup'에 덮어 씌웁니다
+            ink()       : 'M:/Dialogue'의 모든 ink 파일을 .json로 추출합니다
+            xl()        : 수정된 엑셀파일만 검색하여 json으로 추출합니다
+            xl(true)    : '_Meta.json'에서 관리하는 모든 파일을 json으로 추출합니다
+
+            openxl("block"): Office를 실행하여 Block.xlsx을 엽니다
+            xl("Block")    : Block.xlsx 파일만 json으로 추출합니다
         """
         if idx == 1
-            msg = intro * rand([thankyou; oneline_asciiarts]) * "\n" * basic * """\n
+            extra = """
             # 보조 기능
-              findblock()    : 'Block'데이터와 '../4_ArtAssets/GameResources/Blocks/' 폴더를 비교하여 누락된 항목을 찾습니다.
-              get_blocks(101): 블록Key별 '../BuildTemplate/Buildings/' 에서 사용되는 빈도를 계산합니다
-              get_buildings("sIcecream"): 건물Key별 사용되는 블록의 종류와 수량을 계산합니다.
-              md5hash()      : `help?>md5hash` 도움말 참조
-              help()         : 를 입력하면 도움을 드립니다!
+                set_validation!(): 데이터 오류검사를 하지 않도록 설정합니다 
+                cleanup_cache!() : 로딩되어있는 GameData 캐시를 모두 삭제합니다\n
+
+                get_buildings("sIcecream"): 건물Key별 사용되는 블록의 종류와 수량을 계산합니다.
+                get_blocks(101): 블록Key별 '../BuildTemplate/Buildings/' 에서 사용되는 빈도를 계산합니다
+                findblock()    : 'Block'데이터와 '../4_ArtAssets/GameResources/Blocks/' 폴더를 비교하여 누락된 항목을 찾습니다.
             """
+
+            msg = intro * rand([thankyou; oneline_asciiarts]) * "\n" * extra * basic
         elseif idx == 2
             line_breaker = "-"^(displaysize(stdout)[2]-4)
             msg = string("json으로 변환할 파일이 없습니다 ♫\n", line_breaker, "\n", basic)
