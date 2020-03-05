@@ -89,9 +89,14 @@ end
 
 function openxl(file::AbstractString)
     f = lookfor_xlsx(file) |> joinpath_gamedata
-    if isfile(f)
-        run(`cmd /C start $f`; wait = false)
-    else 
-        @warn "$(f)에 접근할 수 없습니다"
+    if Sys.iswindows()
+        if isfile(f)
+            run(`cmd /C start $f`; wait = false)
+        else 
+            @warn "$(f)에 접근할 수 없습니다"
+        end
+    else
+        @warn "맥이나 리눅스에서는 지원하지 않는 함수입니다."
     end
+    nothing
 end
