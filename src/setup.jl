@@ -46,12 +46,20 @@ function setup_env!()
 
         GAMEENV["NetworkFolder"] = Sys.iswindows() ? "M:/" : "/Volumes/ShardData/MARSProject/"
         if !isdir(GAMEENV["NetworkFolder"]) 
-            @warn """네트워크 폴더가 세팅 되어 있지 않습니다. 아래의 메뉴얼을 
-            아래의 페이지를 참고하여 네트워크 폴더 세팅을 해 주세요
-            https://www.notion.so/devsisters/ccb5824c48544ec28c077a1f39182f01
-            """
-            GAMEENV["GameData"] = joinpath(GAMEENV["patch_data"], "_Backup/GameData")
-            GAMEENV["Dialogue"] = joinpath(GAMEENV["patch_data"], "_Backup/Dialogue")
+
+            if Sys.iswindows()
+                run(`cmd /C net use M: \\\\nas.devscake.com\\ShardData\\MarsProject`)
+                
+                GAMEENV["GameData"] = joinpath(GAMEENV["NetworkFolder"], "GameData")
+                GAMEENV["Dialogue"] = joinpath(GAMEENV["NetworkFolder"], "Dialogue")
+            else 
+                @warn """네트워크 폴더가 세팅 되어 있지 않습니다. 아래의 메뉴얼을 
+                아래의 페이지를 참고하여 네트워크 폴더 세팅을 해 주세요
+                https://www.notion.so/devsisters/ccb5824c48544ec28c077a1f39182f01
+                """
+                GAMEENV["GameData"] = joinpath(GAMEENV["patch_data"], "_Backup/GameData")
+                GAMEENV["Dialogue"] = joinpath(GAMEENV["patch_data"], "_Backup/Dialogue")
+            end
         else 
             GAMEENV["GameData"] = joinpath(GAMEENV["NetworkFolder"], "GameData")
             GAMEENV["Dialogue"] = joinpath(GAMEENV["NetworkFolder"], "Dialogue")
