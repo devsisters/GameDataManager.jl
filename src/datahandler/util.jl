@@ -95,16 +95,3 @@ function openxl(file::AbstractString)
         @warn "$(f)에 접근할 수 없습니다"
     end
 end
-
-function xl(x::AbstractString)
-    
-    @info "xlsx -> json 추출을 시작합니다 ⚒\n" * "-"^(displaysize(stdout)[2]-4)
-    reload_meta!()
-    export_gamedata(x)
-    @info "json 추출이 완료되었습니다 ☺"
-    
-    # git_checkout_patchdata(branch)
-    # 좀 이상하지만 가끔 버전 확인해주기
-    rand() < 0.05 && checkout_GameDataManager()
-    nothing
-end

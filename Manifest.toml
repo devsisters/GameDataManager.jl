@@ -47,15 +47,17 @@ version = "0.3.0"
 
 [[GameBalanceManager]]
 deps = ["CurrenciesBase", "DataStructures", "Dates", "GameItemBase", "JSON", "Memoize", "Parameters", "Test", "Unitful", "XLSXasJSON"]
-path = "C:\\Users\\devsisters\\.julia\\dev\\GameBalanceManager"
+git-tree-sha1 = "2f6165b619ebba6cc059555f76b4cdde1d7a3f8d"
+repo-rev = "master"
+repo-url = "https://github.com/devsisters/GameBalanceManager.jl"
 uuid = "bb77ccaf-9d50-4d58-b991-76f827c14ecc"
-version = "0.2.0"
+version = "0.2.1"
 
 [[GameItemBase]]
 deps = ["CurrenciesBase", "JSON", "Printf", "Random", "StatsBase", "UUIDs", "XLSXasJSON"]
-git-tree-sha1 = "9fffb7d8b94d0bc2f3498e18561bfb4b0ea360d5"
+git-tree-sha1 = "8268d9acdb6fd6d579ced6e48a31adb708543bb9"
 repo-rev = "master"
-repo-url = "C:\\Users\\devsisters\\.julia\\dev\\GameItemBase"
+repo-url = "https://github.com/devsisters/GameItemBase.jl.git"
 uuid = "5bad4de0-7d96-491e-9f11-736efa64e4f5"
 version = "0.1.6"
 
@@ -133,9 +135,9 @@ version = "0.12.0"
 
 [[Parsers]]
 deps = ["Dates", "Test"]
-git-tree-sha1 = "d112c19ccca00924d5d3a38b11ae2b4b268dda39"
+git-tree-sha1 = "0c16b3179190d3046c073440d94172cfc3bb0553"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "0.3.11"
+version = "0.3.12"
 
 [[Pkg]]
 deps = ["Dates", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Test", "UUIDs"]
