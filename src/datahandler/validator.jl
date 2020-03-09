@@ -390,6 +390,9 @@ function validate(bt::XLSXTable{:Quest})
     if maximum(member[:, j"/MemberKey"]) > 9 || minimum(member[:, j"/MemberKey"]) < 1
         throw(AssertionError("MemberKey는 1~9만 사용 가능합니다."))
     end
+    for row in member
+        validate_questtrigger.(row["CompleteCondition"])
+    end
     # RewardKey 존재 여부
     rewards = get.(member[:, j"/CompleteAction"], "RewardKey", missing)
     validate_haskey("RewardTable", rewards)
@@ -430,7 +433,9 @@ function validate_questtrigger(x::Array{T, 1}) where T
         "BuildingSeedBuyCount"         => (:buildingkey, :equality, :number),
         "SingleKeyBuyCount"            => (:buycount, :equality, :number),
         "EneriumDecompositionCount"    => (:equality, :number),
-        "CompleteQuestGroup"           => (:questgroupname,))
+        "CompleteQuestGroup"           => (:questgroupname,),
+        "PrefabPointer"           => (:prefabpointerkey, :equality,:number)
+        )
 
     ref = get(trigger, string(x[1]), missing)
     
@@ -456,9 +461,10 @@ function validate_questtrigger(x::Array{T, 1}) where T
                 true
             elseif checker == :buycount
                 el == "SiteCleaner"
-            elseif checker == :questgroupname
-                # TODO
+            elseif checker == :questgroupname # TODO
                 true
+            elseif checker == :prefabpointerkey #TODO
+                true 
             else
                 throw(ArgumentError(string(checker, "가 validate_questtrigger에 정의되지 않았습니다.")))
             end
