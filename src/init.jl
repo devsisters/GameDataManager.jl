@@ -125,7 +125,7 @@ function help(idx = 1)
 
             msg *= rand(oneline_asciiarts)
         end
-        print_section(msg, "도움말")
+        print_section(msg, "도움말"; color = :green)
     end
     nothing
 end

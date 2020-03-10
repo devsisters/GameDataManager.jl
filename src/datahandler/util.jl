@@ -12,27 +12,23 @@ json에서는 'nothing'과 'missing'을 모두 null로 지칭하기 때문에 �
 """
 isnull(x) = ismissing(x) | isnothing(x)
 
-function print_write_result(path, msg = "결과는 다음과 같습니다")
-    printstyled("$(msg)\n"; color=:green)
-    print("   SAVED => ")
-    printstyled(normpath(path); color=:blue)
-    print('\n')
+function print_write_result(path, msg = "다음과 같습니다")
+    print_section("$(msg)\n   SAVED => $(normpath(path))", "계산결과"; color=:green)
 
     nothing
 end
 
-function print_section(message, title = "NOTE")
+function print_section(message, title = "NOTE"; color = :normal)
     msglines = split(chomp(string(message)), '\n')
 
     for (i, el) in enumerate(msglines)
-        if i == 1 
-            printstyled(stderr, "┌ ", title, ": "; color=:green)
-        elseif i == length(msglines)
-            printstyled(stderr, "└ "; color=:green)
-        else
-            printstyled(stderr, "│ "; color=:green)
-        end
-        println(el)
+        prefix = length(msglines) == 1 ? "[ $title: " :
+                                i == 1 ? "┌ $title: " :
+                                el == last(msglines) ? "└ " : "│ "
+
+        printstyled(stderr, prefix; color=color)
+        print(stderr, el)
+        el != last(msglines) && print(stderr,  '\n')
     end
     nothing
 end
