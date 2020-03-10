@@ -265,12 +265,18 @@ end
 function validate(bt::XLSXTable{:ItemTable})
     path = joinpath(GAMEENV["CollectionResources"], "ItemIcons")
     
-    for sheet in ("Currency", "Normal", "BuildingSeed")
+    # NOTE:
+    # 구현은 key가 아이템 Kind전체에 대해 Unique할 필요는 없지만 관리 편의를 위해 동일 Key 사용을 금지한다
+    itemkeys = []
+    for sheet in ("Currency", "Normal", "BuildingSeed", "BlockPackage")
+        append!(itemkeys, bt[sheet][:, j"/Key"])
+
         icons = bt[sheet][:, j"/Icon"] .* ".png"
         isfile_inrepo("mars-client", 
             "unity/Assets/1_CollectionResources/ItemIcons", icons; 
-            msg = "Icon이 존재하지 않습니다")
+            msg = "$(sheet)아이템 Icon이 존재하지 않습니다")
     end
+    validate_duplicate(itemkeys)
 
     nothing
 end
@@ -401,6 +407,20 @@ function validate(bt::XLSXTable{:Quest})
 
     nothing
 end
+
+
+function validate(bt::XLSXTable{:Store})
+    jws = bt["BlockPackage"]
+    validate_haskey("ItemTable", jws[:, j"/BlockPackageKey"])
+    for row in jws
+        # Type이 Server면 별도로 검사 필요
+        if row[j"/OpenCondition/Type"] == "User"
+            validate_questtrigger.(row[j"/OpenCondition/And"])
+        end
+    end
+    nothing
+end
+
 
 """
 
