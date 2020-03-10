@@ -35,7 +35,7 @@ end
 end
 
 @testset "get_buildings" begin 
-    data = get_buildings(false)
+    data = get_buildings(false; include_artasset = false)
 
     for t in ("Special", "Shop", "Residence")
         _keys = Table(t)["Building"][:, j"/BuildingKey"]

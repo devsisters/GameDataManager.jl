@@ -62,8 +62,11 @@ end
 
 모든건물에 사용된 Block의 종류와 수량을 확인합니다
 
+** Arguments
+include_artasset: 'true'일 경우 Block데이터의 ArtAsset정보를 포함합니다
+
 """
-function get_buildings(savetsv::Bool = true)
+function get_buildings(savetsv::Bool = true; include_artasset = true)
     data = Dict()
     for t in ("Shop", "Residence", "Special")
         bks = Table(t)["Building"][:, j"/BuildingKey"]
@@ -71,16 +74,25 @@ function get_buildings(savetsv::Bool = true)
             data[k] = get_buildings(k, false)
         end
     end
-
+    ref = if include_artasset 
+        x = Table("Block"; readfrom=:JSON)
+        key = x["Block"][:, j"/Key"]
+        artasset = x["Block"][:, j"/ArtAsset"]
+        Dict(zip(key, artasset))
+    else 
+        nothing 
+    end
     if savetsv
         file = joinpath(GAMEENV["cache"], "get_buildings.tsv")
         open(file, "w") do io
             for building in data
                 for el in building[2]
-                    write(io, string(el[1], '\t') * join(keys(el[2]), '\t'))
-                    write(io ,"\n")
-                    write(io, string(el[1], '\t') * join(values(el[2]), '\t'))
-                    write(io, "\n")
+                    filename = string(el[1])
+                    write(io, filename, '\t', join(keys(el[2]), '\t'), '\n')
+                    write(io, filename, '\t', join(values(el[2]), '\t'), '\n')
+                    if include_artasset
+                        write(io, filename, '\t', join(broadcast(x -> ref[x], keys(el[2])), '\t'), '\n')
+                    end
                 end
             end
         end
@@ -109,10 +121,9 @@ function get_buildings(key::AbstractString, savetsv = true)
         file = joinpath(GAMEENV["cache"], "get_buildings_$key.tsv")
         open(file, "w") do io
             for el in counting
-                write(io, string(el[1], '\t') * join(keys(el[2]), '\t'))
-                write(io ,"\n")
-                write(io, string(el[1], '\t') * join(values(el[2]), '\t'))
-                write(io, "\n")
+                filename = string(el[1])
+                write(io, filename, '\t', join(keys(el[2]), '\t'), '\n')
+                write(io, filename, '\t', join(values(el[2]), '\t'), '\n')
             end
         end
         print_write_result(file, "'$key'건물에 사용된 Block들은 다음과 같습니다")
