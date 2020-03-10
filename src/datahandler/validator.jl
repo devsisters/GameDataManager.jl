@@ -416,7 +416,7 @@ function validate_questtrigger(x::Array{T, 1}) where T
         "SiteCount"                    => (:equality, :number),
         "ResidenceCount"               => (:equality, :number),
         "ShopCount"                    => (:equality, :number),
-        "AttractionCount"                 => (:equality, :number),
+        "AttractionCount"              => (:equality, :number),
         "Coin"                         => (:equality, :number),
         "UserLevel"                    => (:equality, :number),
         "MaxSegmentLevelByUseType"     => (:number,     :equality, :number),
@@ -434,7 +434,7 @@ function validate_questtrigger(x::Array{T, 1}) where T
         "SingleKeyBuyCount"            => (:buycount, :equality, :number),
         "EneriumDecompositionCount"    => (:equality, :number),
         "CompleteQuestGroup"           => (:questgroupname,),
-        "PrefabPointer"           => (:prefabpointerkey, :equality,:number)
+        "PrefabPointer"                => (:prefabpointerkey, :equality,:number)
         )
 
     ref = get(trigger, string(x[1]), missing)
