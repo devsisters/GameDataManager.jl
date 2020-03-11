@@ -19,42 +19,45 @@ GAMEDATA["Block"] 과 ../4_ArtAssets/GameResources/Blocks/ 하위에 있는 .pre
 상호 누락된 파일명 리스트를 '.cache'폴더에 저장합니다
 """
 function findblock()
-    root = joinpath(GAMEENV["mars_art_assets"], "GameResources/Blocks/")
+    prefabs = begin 
+        gitfiles = git_ls_files("mars_art_assets")
+        p = filter(x -> 
+            startswith(x, "GameResources/Blocks") && endswith(x, ".prefab"), gitfiles)
+        chop.(basename.(p);tail=7)
+    end
+    xls = Table("Block")["Block"][:, j"/ArtAsset"]
 
-    artassets = String[]
-    for (folder, dir, files) in walkdir(root)
-        prefabs = filter(x -> endswith(x, ".prefab"), files)
-        if !isempty(prefabs)
-            x = getindex.(split.(collect(prefabs), "."), 1)
-            append!(artassets, x)
+    a = setdiff(prefabs, xls)
+    b = setdiff(xls, prefabs)
+    if isempty(a) && isempty(b)
+        msg = "'Block.xlsx'과 ArtAsset의 파일이 정확히 일치합니다👏"
+        print_section(msg; color = :green)
+    else 
+        msg = "다음의 데이터가 일치하지 않습니다"
+        file = joinpath(GAMEENV["cache"], "findblock.csv")
+        open(file, "w") do io
+            if !isempty(a)
+                msg_a = "$(length(a))개가 ArtAsset파일은 있지만 Block.xlsx에는 없습니다"
+                msg = msg *"\n" *msg_a
+
+                write(io, msg_a, '\n')
+                [write(io, string(el), '\n') for el in a]
+            end 
+            if !isempty(b)
+                msg_b = "$(length(a))개가 Block.xlsx에는 있지만 ArtAsset파일은 없습니다"
+                msg = msg *"\n" *msg_b
+
+                write(io, '\n', msg_b, '\n')
+                [write(io, string(el), '\n') for el in b]
+            end
         end
+        print_section(msg * """\n
+        .'../GameResources/Blocks/'폴더와 'Block.xlsx'을 비교한 보고서입니다
+            SAVED => $file""";color = :cyan)
+
     end
 
-    artasset_on_xls = Table("Block")["Block"][:, j"/ArtAsset"]
-
-    a = setdiff(artassets, artasset_on_xls)
-    b = setdiff(artasset_on_xls, artassets)
-    msg_a = "## ArtAsset은 있지만 BlockData는 없는 $(length(a))개\n"
-    msg_b = "## BlockData는 있지만 ArtAsset은 없는 $(length(b))개\n"
-
-    file = joinpath(GAMEENV["cache"], "findblock.txt")
-    open(file, "w") do io
-           write(io, msg_a)
-           [write(io, el, "\n") for el in a]
-
-           write(io, "\n", msg_b)
-           [write(io, el, "\n") for el in b]
-       end
-
-    # 요약 정보
-    p = normpath("$(GAMEENV["mars-client"])/unity/Assets")
-    x = replace(normpath(root), p => "..")
-
-    printstyled("'$x'폴더와 Block데이터를 비교하여 다음 파일에 저장했습니다\n"; color=:green)
-    print("    ", msg_a)
-    print("    ", msg_b)
-    print("   SAVED => ")
-    printstyled(normpath(file); color=:blue) # 왜 Atom에서 클릭 안됨???
+    nothing
 end
 
 """
@@ -149,12 +152,10 @@ function get_blocks(savetsv::Bool = true)
 
     for (folder, dir, files) in walkdir(root)
         jsonfiles = filter(x -> endswith(x, ".json"), files)
-        if !isempty(jsonfiles)
-            for f in jsonfiles
-                file = joinpath(folder, f)
-                k = chop(replace(file, root => ""); tail = 5)
-                templates[k] = JSON.parsefile(file)
-            end
+        for f in jsonfiles
+            file = joinpath(folder, f)
+            k = chop(replace(file, root => ""); tail = 5)
+            templates[k] = JSON.parsefile(file)
         end
     end
 
@@ -175,10 +176,8 @@ function get_blocks(savetsv::Bool = true)
         open(file, "w") do io
             for kv in d2 
                 block_key = string(kv[1])
-                write(io, string(block_key, '\t') * join(keys(kv[2]), '\t'))
-                write(io ,"\n")
-                write(io, string(block_key, '\t') * join(values(kv[2]), '\t'))
-                write(io ,"\n")
+                write(io, string(block_key), '\t', join(keys(kv[2]), '\t'), '\n')
+                write(io, string(block_key), '\t', join(values(kv[2]), '\t'), '\n')
             end
         end
         print_write_result(file, "Block별 사용된 빈도는 다음과 같습니다")
@@ -192,7 +191,7 @@ end
 
 블록 block_key가 사용된 BuildTempalte과 수량을 확인합니다
 """
-function get_blocks(key)
+function get_blocks(key::AbstractString)
     data = get_blocks(false)
     filter!(el -> el[1] == key, data)
 
