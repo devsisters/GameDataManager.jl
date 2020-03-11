@@ -13,7 +13,7 @@ json에서는 'nothing'과 'missing'을 모두 null로 지칭하기 때문에 �
 isnull(x) = ismissing(x) | isnothing(x)
 
 function print_write_result(path, msg = "다음과 같습니다")
-    print_section("$(msg)\n   SAVED => $(normpath(path))", "계산결과"; color=:green)
+    print_section("$(msg)\n   SAVED => $(normpath(path))", "연산결과"; color=:green)
 
     nothing
 end

@@ -74,33 +74,37 @@ function get_buildings(savetsv::Bool = true; include_artasset = true)
     for t in ("Shop", "Residence", "Special")
         bks = Table(t)["Building"][:, j"/BuildingKey"]
         for k in bks 
-            data[k] = get_buildings(k, false)
+            data[k] = get_buildings(k, false; include_artasset = include_artasset)
         end
     end
-    ref = if include_artasset 
-        x = Table("Block"; readfrom=:JSON)
-        key = x["Block"][:, j"/Key"]
-        artasset = x["Block"][:, j"/ArtAsset"]
-        Dict(zip(key, artasset))
-    else 
-        nothing 
-    end
+
     if savetsv
         file = joinpath(GAMEENV["cache"], "get_buildings.tsv")
         open(file, "w") do io
-            for building in data
-                for el in building[2]
-                    filename = string(el[1])
-                    write(io, filename, '\t', join(keys(el[2]), '\t'), '\n')
-                    write(io, filename, '\t', join(values(el[2]), '\t'), '\n')
-                    if include_artasset
-                        write(io, filename, '\t', join(broadcast(x -> ref[x], keys(el[2])), '\t'), '\n')
+            for row in data 
+                write(io, "'$(row[1])'의 블록 사용량\n")
+                templates = unique(getindex.(row[2], 1))
+                for template in unique(getindex.(row[2], 1))
+                    this = filter(el -> el[1] == template, row[2])
+                    for block in this 
+                        write(io, template, "\t")
+                        write(io, join(block[2:end], "\t"), '\n')
                     end
+                    write(io, '\n')
                 end
             end
+            # TODO 이건 kward로할지... 생각좀
+            # write(io, join(header, '\t'), '\n')
+            # for row in data
+            #     write(io, "'$(row[1])'의 블록 사용량\n")
+            #     for el in row[2]
+            #         write(io, join(el, '\t'), '\n')
+            #     end
+            #     write(io, '\n')
+            # end
         end
         print_write_result(file, "각 건물에 사용된 Block들은 다음과 같습니다")
-    else 
+    else
         return data
     end
 end
@@ -110,28 +114,54 @@ end
 
 building_key 건물에 사용된 Block의 종류와 수량을 확인합니다
 """
-function get_buildings(key::AbstractString, savetsv = true)
-    files = begin 
+function get_buildings(key::AbstractString, savetsv = true; include_artasset = true)
+    templates = begin 
         t = buildingtype(key)
         ref = Table(t)["Level"] |> x -> filter(el -> el["BuildingKey"] == key, x.data)
         x = unique(get.(ref, "BuildingTemplate", missing))
         filter(!isnull, x)
     end
 
-    counting = Dict(zip(files, count_buildtemplate.(files)))
+    ref = include_artasset ? Table("Block"; readfrom=:JSON)["Block"] : missing
 
+    counting = Dict(zip(templates, count_buildtemplate.(templates)))
+
+    if include_artasset 
+        header = ["Template" "BlockKey" "Quantity" "ArtAsset"]
+    else 
+        header = ["Template" "BlockKey" "Quantity"]
+    end
+    data = []
+    for f in templates 
+        counting = count_buildtemplate(f)
+        for el in counting 
+            # Header랑 동일 배열
+            if include_artasset 
+                x = [f el[1] el[2] memoize_xlookup(el[1], ref, j"/Key", j"/ArtAsset")]
+            else 
+                x = [f el[1] el[2]]
+            end 
+            push!(data, x)
+        end
+    end
+    
     if savetsv
         file = joinpath(GAMEENV["cache"], "get_buildings_$key.tsv")
         open(file, "w") do io
-            for el in counting
-                filename = string(el[1])
-                write(io, filename, '\t', join(keys(el[2]), '\t'), '\n')
-                write(io, filename, '\t', join(values(el[2]), '\t'), '\n')
+            write(io, "'$(key)'의 블록 사용량\n")
+            write(io, join(header, '\t'), '\n')
+
+            for template in unique(getindex.(data, 1))
+                this = filter(el -> el[1] == template, data)
+                for row in this 
+                    write(io, join(row, '\t'), '\n')
+                end
+                write(io, '\n')
             end
         end
         print_write_result(file, "'$key'건물에 사용된 Block들은 다음과 같습니다")
     else
-        return counting
+        return data
     end
 end
 
