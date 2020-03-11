@@ -196,11 +196,6 @@ function xlookup(value, jws::JSONWorksheet,
                     lookup_col, return_col; kwargs...)
     xlookup(value, jws, XLSXasJSON.JSONPointer(lookup_col), XLSXasJSON.JSONPointer(return_col); kwargs...)
 end
-@memoize Dict function memoize_xlookup(args...;kwargs...)
-    xlookup(args...;kwargs...)
-end
-
-
 function xlookup(value, 
     jws::JSONWorksheet, lookup_col::XLSXasJSON.JSONPointer, return_col::XLSXasJSON.JSONPointer; 
     find_mode::Function = findfirst, operator::Function = isequal)
@@ -218,4 +213,8 @@ function xlookup(value,
         r = jws[idx, return_col]
     end
     return r
+end
+
+@memoize Dict function memoize_xlookup(args...;kwargs...)
+    xlookup(args...;kwargs...)
 end
