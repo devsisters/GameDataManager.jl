@@ -6,6 +6,7 @@ using XLSX, JSON, XLSXasJSON
 import XLSXasJSON: Index, @j_str
 using DataStructures
 using Tar
+using Memoization
 using MD5
 using LibGit2
 

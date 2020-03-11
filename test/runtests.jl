@@ -19,6 +19,8 @@ end
 
 @testset "xlookup 기능" begin 
     @test xlookup("Coin", Table("ItemTable")["Currency"], j"/Key", j"/$Name") == "코인"
+    @test GameDataManager.memoize_xlookup("Coin", Table("ItemTable")["Currency"], j"/Key", j"/$Name") == "코인"
+
     @test GameDataManager.isnull(xlookup("이런거없어", Table("ItemTable")["Currency"], j"/Key", j"/$Name"))
 
     @test xlookup("sIcecream", Table("Shop")["Building"], j"/BuildingKey", j"/$Name") == "아이스크림 가게"
