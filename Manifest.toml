@@ -46,12 +46,12 @@ uuid = "fb4d412d-6eee-574d-9565-ede6634db7b0"
 version = "0.3.0"
 
 [[GameBalanceManager]]
-deps = ["CurrenciesBase", "DataStructures", "Dates", "GameItemBase", "JSON", "Memoize", "Parameters", "Test", "Unitful", "XLSXasJSON"]
-git-tree-sha1 = "5106aa2f37a2bdf028dc0abcbac13cbcb03af526"
+deps = ["CurrenciesBase", "DataStructures", "Dates", "GameItemBase", "JSON", "Memoization", "Parameters", "Test", "Unitful", "XLSXasJSON"]
+git-tree-sha1 = "029257c0f44363c9852a58352abb23afb5187479"
 repo-rev = "master"
 repo-url = "https://github.com/devsisters/GameBalanceManager.jl"
 uuid = "bb77ccaf-9d50-4d58-b991-76f827c14ecc"
-version = "0.2.2"
+version = "0.2.3"
 
 [[GameItemBase]]
 deps = ["CurrenciesBase", "JSON", "Printf", "Random", "StatsBase", "UUIDs", "XLSXasJSON"]
@@ -111,12 +111,6 @@ deps = ["MacroTools"]
 git-tree-sha1 = "eece658cd9a0ea5a50e9a2996a71fd9fb51b3710"
 uuid = "6fafb56a-5788-4b4e-91ca-c0cea6611c73"
 version = "0.1.3"
-
-[[Memoize]]
-deps = ["MacroTools"]
-git-tree-sha1 = "62c5ae937a0d28704de3c300ae022e17a8903802"
-uuid = "c03570c3-d221-55d1-a50c-7939bbd78826"
-version = "0.4.3"
 
 [[Missings]]
 deps = ["DataAPI"]
