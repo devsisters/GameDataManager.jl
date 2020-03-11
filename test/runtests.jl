@@ -37,14 +37,20 @@ end
 end
 
 @testset "get_buildings" begin 
-    data = get_buildings(false; include_artasset = false)
+    data = get_buildings(false; include_artasset = true)
 
+    block_sheet = Table("Block"; readfrom=:JSON)["Block"]
     for t in ("Special", "Shop", "Residence")
         _keys = Table(t)["Building"][:, j"/BuildingKey"]
         for k in _keys
             templates = xlookup(k, Table(t)["Level"], j"/BuildingKey", j"/BuildingTemplate"; find_mode = findall)
             sort!(filter!(!GameDataManager.isnull, templates))
-            @test sort(collect(keys(data[k]))) == templates
+            @test sort(unique(getindex.(data[k], 1))) == templates
+
+            block_key = getindex.(data[k], 2)
+            a = map(x -> GameDataManager.memoize_xlookup(x, block_sheet, j"/Key", j"/ArtAsset"), block_key)
+            b = getindex.(data[k], 4) 
+            @test a == b 
         end
     end
 end
