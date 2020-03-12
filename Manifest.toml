@@ -47,11 +47,11 @@ version = "0.3.0"
 
 [[GameBalanceManager]]
 deps = ["CurrenciesBase", "DataStructures", "Dates", "GameItemBase", "JSON", "Memoization", "Parameters", "Test", "Unitful", "XLSXasJSON"]
-git-tree-sha1 = "029257c0f44363c9852a58352abb23afb5187479"
+git-tree-sha1 = "502c375d5a3b4e3134cb791db404e7bd5b3f752b"
 repo-rev = "master"
 repo-url = "https://github.com/devsisters/GameBalanceManager.jl"
 uuid = "bb77ccaf-9d50-4d58-b991-76f827c14ecc"
-version = "0.2.3"
+version = "0.2.4"
 
 [[GameItemBase]]
 deps = ["CurrenciesBase", "JSON", "Printf", "Random", "StatsBase", "UUIDs", "XLSXasJSON"]
