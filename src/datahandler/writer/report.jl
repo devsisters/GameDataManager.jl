@@ -104,6 +104,7 @@ function get_buildings(savetsv::Bool = true; include_artasset = true)
             # end
         end
         print_write_result(file, "각 건물에 사용된 Block들은 다음과 같습니다")
+        cleanup_cache!()
     else
         return data
     end
@@ -144,7 +145,7 @@ function get_buildings(key::AbstractString, savetsv = true; include_artasset = t
             push!(data, x)
         end
     end
-    
+
     if savetsv
         file = joinpath(GAMEENV["cache"], "get_buildings_$key.tsv")
         open(file, "w") do io
@@ -160,6 +161,7 @@ function get_buildings(key::AbstractString, savetsv = true; include_artasset = t
             end
         end
         print_write_result(file, "'$key'건물에 사용된 Block들은 다음과 같습니다")
+        cleanup_cache!()
     else
         return data
     end
@@ -211,6 +213,9 @@ function get_blocks(savetsv::Bool = true)
             end
         end
         print_write_result(file, "Block별 사용된 빈도는 다음과 같습니다")
+        #= https://devsisters.slack.com/archives/CTS8TK7GQ/p1583999904192000
+        BuildTemplate JSON파일 IO 쓰기권한 오류가 이걸로 해결 된다고 함 =#
+        cleanup_cache!()
     else
         return d2
     end
@@ -221,7 +226,7 @@ end
 
 블록 block_key가 사용된 BuildTempalte과 수량을 확인합니다
 """
-function get_blocks(key::AbstractString)
+function get_blocks(key::Integer)
     data = get_blocks(false)
     filter!(el -> el[1] == key, data)
 
@@ -232,12 +237,13 @@ function get_blocks(key::AbstractString)
         open(file, "w") do io
             for kv in data 
                 block_key = string(kv[1])
-                write(io, string(block_key, '\t') * join(keys(kv[2]), '\t'))
-                write(io ,"\n")
-                write(io, string(block_key, '\t') * join(values(kv[2]), '\t'))
-                write(io ,"\n")
+                write(io, block_key, '\t' * join(keys(kv[2]), '\t'), '\n')
+                write(io, block_key, '\t' * join(values(kv[2]), '\t'), '\n')
             end    
         end
         print_write_result(file, "'$key' Block이 사용된 건물은 다음과 같습니다")
     end
+    #= https://devsisters.slack.com/archives/CTS8TK7GQ/p1583999904192000
+    BuildTemplate JSON파일 IO 쓰기권한 오류가 이걸로 해결 된다고 함 =#
+    cleanup_cache!()
 end

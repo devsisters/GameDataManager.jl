@@ -50,8 +50,10 @@ function set_validation!(b::Bool)
 end
 
 function cleanup_cache!()
-    global GAMEDATA = Dict{String, Table}()
-    printstyled("  └로딩 되어있던 GAMEDATA를 모두 청소하였습니다 (◎﹏◎)"; color = :yellow)
+    for k in keys(GAMEDATA)
+        delete!(GAMEDATA, k)
+    end
+    printstyled("  └로딩 되어있던 GAMEDATA를 모두 청소하였습니다 (◎﹏◎)\n"; color = :yellow)
     nothing
 end
 
