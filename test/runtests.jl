@@ -7,14 +7,24 @@ using GameDataManager
     @test set_validation!(false) == false
 end
 # include("table.jl")
-@testset "Table 함수 테스트 without validation" begin 
+@testset "XLSXTable 함수 without validation" begin
     files = GameDataManager.collect_auto_xlsx()
 
     for f in files
-        data = Table(f;readfrom = :XLSX)
+        data = Table(f; validataion = false)
 
         @test isa(data, GameDataManager.XLSXTable)
     end
+end
+# TODO art-asset 리포가 없어서 수행 불가
+@testset "XLSXTable 함수 with validation" begin 
+#     files = GameDataManager.collect_auto_xlsx()
+
+#     for f in files
+#         data = Table(f;readfrom = :JSON, validataion = true)
+
+#         @test isa(data, GameDataManager.XLSXTable)
+#     end
 end
 
 @testset "xlookup 기능" begin 
@@ -25,39 +35,45 @@ end
 
     @test xlookup("sIcecream", Table("Shop")["Building"], j"/BuildingKey", j"/$Name") == "아이스크림 가게"
 
-    # find_mode findlast, findall
+    # find_mode test
+    lookup_findall = xlookup("Wall", Table("Block")["Block"], j"/SubCategory", j"/Key"; find_mode = findall)
+    lookup_findfirst = xlookup("Wall", Table("Block")["Block"], j"/SubCategory", j"/Key"; find_mode = findfirst)
+    lookup_findlast = xlookup("Wall", Table("Block")["Block"], j"/SubCategory", j"/Key"; find_mode = findlast)
+
+    @test isa(lookup_findall, Array)
+    @test lookup_findall[1] == lookup_findfirst
+    @test lookup_findall[end] == lookup_findlast
 
     # operator <=, >=
+    @test xlookup(2, Table("Block")["Block"], j"/Key", j"/Key"; operator = <) == 1
+    @test xlookup(2, Table("Block")["Block"], j"/Key", j"/Key"; operator = <=) == 2
+    @test xlookup(900000009, Table("Block")["Block"], j"/Key", j"/ArtAsset"; operator = >) == "error_cube"
+    @test xlookup(900000009, Table("Block")["Block"], j"/Key", j"/ArtAsset"; operator = >=) == "Test_ZfightingBuilding_prefab"
 
 end
 
-@testset "get_blocks" begin 
-    data = get_blocks(false)
-    @test issubset(keys(data), Table("Block")["Block"][:, j"/Key"])
+@testset "get_blocks - BuildingTemplate별 Block 사용량" begin 
+    get_blocks()
+    @test isfile(joinpath(GAMEENV["cache"], "get_blocks.tsv"))
+
+    x = get_blocks(false)
+    ref = Table("Block"; readfrom=:JSON, validation=false)["Block"]
+    @test issubset(keys(x), ref[:, j"/Key"])
 end
 
-@testset "get_buildings" begin 
-    data = get_buildings(false; include_artasset = true)
-
-    block_sheet = Table("Block"; readfrom=:JSON)["Block"]
-    for t in ("Special", "Shop", "Residence")
-        _keys = Table(t)["Building"][:, j"/BuildingKey"]
-        for k in _keys
-            templates = xlookup(k, Table(t)["Level"], j"/BuildingKey", j"/BuildingTemplate"; find_mode = findall)
-            sort!(filter!(!GameDataManager.isnull, templates))
-            @test sort(unique(getindex.(data[k], 1))) == templates
-
-            block_key = getindex.(data[k], 2)
-            a = map(x -> GameDataManager.memoize_xlookup(x, block_sheet, j"/Key", j"/ArtAsset"), block_key)
-            b = getindex.(data[k], 4) 
-            @test a == b 
-        end
+@testset "get_buildings - 건물별 BuildingTemplate에서 Block 사용량" begin 
+    get_buildings()
+    @test isfile(joinpath(GAMEENV["cache"], "get_buildings.tsv"))
+    
+    x = get_buildings(false)
+    for k in keys(x)
+        @test haskey(Building, k)
     end
 end
 
 @testset "기타 기능" begin 
     # 캐시 청소
-    @test isempty(GAMEDATA) == false
+    @test !isempty(GAMEDATA)
     cleanup_cache!()
     @test isempty(GAMEDATA)
 end
