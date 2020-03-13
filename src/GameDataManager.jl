@@ -28,9 +28,6 @@ include("datahandler/writer/actionlog.jl")
 include("datahandler/writer/report.jl")
 include("datahandler/writer/ink.jl")
 
-#######  TODO: Logger      ##########################################
-include("logger/logger.jl")
-
 export GAMEENV, GAMEDATA, help, setup!,
        # datahandler
        Table, xlookup,

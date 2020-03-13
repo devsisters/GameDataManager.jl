@@ -11,7 +11,6 @@ function __init__()
     s = setup_env!()
 
     if s
-        # writelog_userinfo()        
         CACHE[:meta] = loadmeta()
         CACHE[:actionlog] = init_actionlog()
         CACHE[:validation] = true
