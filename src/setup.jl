@@ -41,36 +41,46 @@ function setup_env!()
         # submodules
         GAMEENV["patch_data"] = joinpath(GAMEENV["mars-client"], "patch-data")
         GAMEENV["mars_art_assets"] = joinpath(GAMEENV["mars-client"], "submodules/mars-art-assets")
+        
+        # GameDataManager paths
+        GAMEENV["cache"] = joinpath(GAMEENV["patch_data"], ".cache")
+        GAMEENV["actionlog"] = joinpath(GAMEENV["cache"], "actionlog.json")
 
         GAMEENV["CollectionResources"] = joinpath(GAMEENV["mars-client"], "unity/Assets/1_CollectionResources")
 
         GAMEENV["NetworkFolder"] = Sys.iswindows() ? "M:/" : "/Volumes/ShardData/MARSProject/"
-        if !isdir(GAMEENV["NetworkFolder"]) 
 
+        # Window라면 네트워크 드라이브 연결을 시도한다
+        if !isdir(GAMEENV["NetworkFolder"]) 
             if Sys.iswindows()
-                run(`cmd /C net use M: \\\\nas.devscake.com\\ShardData\\MarsProject`)
-                
-                GAMEENV["GameData"] = joinpath(GAMEENV["NetworkFolder"], "GameData")
-                GAMEENV["Dialogue"] = joinpath(GAMEENV["NetworkFolder"], "Dialogue")
-            else 
-                @warn """네트워크 폴더가 세팅 되어 있지 않습니다. 아래의 메뉴얼을 
-                아래의 페이지를 참고하여 네트워크 폴더 세팅을 해 주세요
-                https://www.notion.so/devsisters/ccb5824c48544ec28c077a1f39182f01
-                """
-                GAMEENV["GameData"] = joinpath(GAMEENV["patch_data"], "_Backup/GameData")
-                GAMEENV["Dialogue"] = joinpath(GAMEENV["patch_data"], "_Backup/Dialogue")
+                tempfile = joinpath(GAMEENV["cache"], "net_use.txt")
+                run(pipeline(`net use`, stdout = tempfile))
+
+                stdout = read(tempfile, String)
+                # nas.devscake.com 세팅이 있었다면 재 연결 시도
+                if occursin("nas.devscake.com", stdout)
+                    run(`cmd /C net use M: \\\\nas.devscake.com\\ShardData\\MarsProject`)
+                    
+                    GAMEENV["GameData"] = joinpath(GAMEENV["NetworkFolder"], "GameData")
+                    GAMEENV["Dialogue"] = joinpath(GAMEENV["NetworkFolder"], "Dialogue")
+
+                end
+                rm(tempfile)
             end
-        else 
-            GAMEENV["GameData"] = joinpath(GAMEENV["NetworkFolder"], "GameData")
-            GAMEENV["Dialogue"] = joinpath(GAMEENV["NetworkFolder"], "Dialogue")
+        end 
+
+        if !isdir(GAMEENV["NetworkFolder"]) 
+            @warn """네트워크 폴더가 세팅 되어 있지 않습니다. 아래의 메뉴얼을 
+            아래의 페이지를 참고하여 네트워크 폴더 세팅을 해 주세요
+            https://www.notion.so/devsisters/ccb5824c48544ec28c077a1f39182f01
+            """
+            GAMEENV["GameData"] = joinpath(GAMEENV["patch_data"], "_Backup/GameData")
+            GAMEENV["Dialogue"] = joinpath(GAMEENV["patch_data"], "_Backup/Dialogue")
         end
 
         GAMEENV["xlsx"] = Dict("root" => GAMEENV["GameData"])
         GAMEENV["json"] = Dict("root" => joinpath(GAMEENV["patch_data"], "Tables"))
         
-        # GameDataManager paths
-        GAMEENV["cache"] = joinpath(GAMEENV["patch_data"], ".cache")
-        GAMEENV["actionlog"] = joinpath(GAMEENV["cache"], "actionlog.json")
         return true
     end
 end
