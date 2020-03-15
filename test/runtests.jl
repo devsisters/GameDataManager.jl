@@ -11,7 +11,7 @@ end
     files = GameDataManager.collect_auto_xlsx()
 
     for f in files
-        data = Table(f; validataion = false)
+        data = Table(f; validation = false)
 
         @test isa(data, GameDataManager.XLSXTable)
     end
