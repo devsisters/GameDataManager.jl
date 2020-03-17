@@ -138,7 +138,7 @@ function get_buildings(key::AbstractString, savetsv = true; include_artasset = t
         for el in counting 
             # Header랑 동일 배열
             if include_artasset 
-                x = [f el[1] el[2] memoize_xlookup(el[1], ref, j"/Key", j"/ArtAsset")]
+                x = [f el[1] el[2] xlookup(el[1], ref, j"/Key", j"/ArtAsset")]
             else 
                 x = [f el[1] el[2]]
             end 

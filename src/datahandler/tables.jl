@@ -192,11 +192,15 @@ https://support.office.com/en-us/article/xlookup-function-b7fd680e-6d10-43e6-84f
 - find_mode: `findfirst`, `findlast`, `findall` 사용 가능
 
 """
-function xlookup(value, jws::JSONWorksheet, 
-                    lookup_col, return_col; kwargs...)
-    xlookup(value, jws, XLSXasJSON.JSONPointer(lookup_col), XLSXasJSON.JSONPointer(return_col); kwargs...)
+@memoize Dict function xlookup(args...;kwargs...)
+    _xlookup(args...;kwargs...)
 end
-function xlookup(value, 
+
+function _xlookup(value, jws::JSONWorksheet, 
+                    lookup_col, return_col; kwargs...)
+    _xlookup(value, jws, XLSXasJSON.JSONPointer(lookup_col), XLSXasJSON.JSONPointer(return_col); kwargs...)
+end
+function _xlookup(value, 
     jws::JSONWorksheet, lookup_col::XLSXasJSON.JSONPointer, return_col::XLSXasJSON.JSONPointer; 
     find_mode::Function = findfirst, operator::Function = isequal)
 
@@ -215,6 +219,3 @@ function xlookup(value,
     return r
 end
 
-@memoize Dict function memoize_xlookup(args...;kwargs...)
-    xlookup(args...;kwargs...)
-end
