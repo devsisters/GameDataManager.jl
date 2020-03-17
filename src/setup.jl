@@ -60,10 +60,6 @@ function setup_env!()
                 # nas.devscake.com 세팅이 있었다면 재 연결 시도
                 if occursin("nas.devscake.com", stdout)
                     run(`cmd /C net use M: \\\\nas.devscake.com\\ShardData\\MarsProject`)
-                    
-                    GAMEENV["GameData"] = joinpath(GAMEENV["NetworkFolder"], "GameData")
-                    GAMEENV["Dialogue"] = joinpath(GAMEENV["NetworkFolder"], "Dialogue")
-
                 end
                 rm(tempfile)
             end
@@ -76,6 +72,9 @@ function setup_env!()
             """
             GAMEENV["GameData"] = joinpath(GAMEENV["patch_data"], "_Backup/GameData")
             GAMEENV["Dialogue"] = joinpath(GAMEENV["patch_data"], "_Backup/Dialogue")
+        else 
+            GAMEENV["GameData"] = joinpath(GAMEENV["NetworkFolder"], "GameData")
+            GAMEENV["Dialogue"] = joinpath(GAMEENV["NetworkFolder"], "Dialogue")
         end
 
         GAMEENV["xlsx"] = Dict("root" => GAMEENV["GameData"])
