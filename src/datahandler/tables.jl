@@ -63,14 +63,8 @@ function XLSXTable(file::AbstractString; validation = CACHE[:validation],
         readfrom = ismodified(file) ? :XLSX : :JSON
     end 
 
-    if readfrom == :XLSX
-        meta = getmetadata(f)
-
-        kwargs_per_sheet = Dict()
-        for el in meta
-            kwargs_per_sheet[el[1]] = el[2][2]
-        end            
-        jwb = JSONWorkbook(copy_to_cache(joinpath_gamedata(f)), keys(meta), kwargs_per_sheet)
+    if readfrom == :XLSX        
+        jwb = _xlsxworkbook(f)
         localizer!(jwb)
         process!(jwb; gameenv = GAMEENV)
 
@@ -90,9 +84,22 @@ function XLSXTable(file::AbstractString; validation = CACHE[:validation],
     return table
 end
 
+function _xlsxworkbook(f)
+    meta = getmetadata(f)
+
+    kwargs_per_sheet = Dict()
+    for el in meta
+        kwargs_per_sheet[el[1]] = el[2][2]
+    end            
+    JSONWorkbook(copy_to_cache(joinpath_gamedata(f)), keys(meta), kwargs_per_sheet)
+end
+
 function _jsonworkbook(xlsxpath, file)   
-    @assert haskey(CACHE[:actionlog], file) "'xl(\"$(basename(file))\")'으로 actionlog를 생성해 주세요"
-    actionlog = CACHE[:actionlog][file]
+    if !haskey(CACHE[:actionlog], file) 
+        print("\t...'xl(\"$(basename(file))\")'의 actionlog를 생성합니다")
+        actionlog(_xlsxworkbook(file))
+    end
+    al = CACHE[:actionlog][file]
     
     sheets = JSONWorksheet[]
     for el in getmetadata(file) # sheetindex가 xlsx과 다르다. getindex할 때 이름으로 참조할 것!
@@ -100,7 +107,7 @@ function _jsonworkbook(xlsxpath, file)
             jws = begin 
                 jsonfile = joinpath_gamedata(el[2][1])
                 json = JSON.parsefile(jsonfile; dicttype = OrderedDict)
-                pointers = broadcast(XLSXasJSON.JSONPointer, actionlog[2][el[1]])
+                pointers = broadcast(XLSXasJSON.JSONPointer, al[2][el[1]])
                 
                 JSONWorksheet(xlsxpath, pointers, 
                             convert(Array{OrderedDict, 1}, json), el[1])
