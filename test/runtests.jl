@@ -45,7 +45,7 @@ end
 
     # operator <=, >=
     @test xlookup(2, Table("Block")["Block"], j"/Key", j"/Key"; operator = <) == 1
-    @test xlookup(2, Table("Block")["Block"], j"/Key", j"/Key"; operator = <=) == 2
+    @test xlookup(100, Table("Block")["Block"], j"/Key", j"/Key"; operator = >) > 1
     @test xlookup(900000009, Table("Block")["Block"], j"/Key", j"/ArtAsset"; operator = >) == "error_cube"
     @test xlookup(900000009, Table("Block")["Block"], j"/Key", j"/ArtAsset"; operator = >=) == "Test_ZfightingBuilding_prefab"
 
@@ -66,7 +66,7 @@ end
     
     x = get_buildings(false)
     for k in keys(x)
-        @test haskey(Building, k)
+        @test haskey(GameDataManager.Building, k)
     end
 end
 
