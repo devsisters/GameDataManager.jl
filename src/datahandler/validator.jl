@@ -97,7 +97,8 @@ end
 function isfile_inrepo(repo, parent_folder, files; msg = "가 존재하지 않습니다", assert = false)
     _gitfiles = git_ls_files(repo)
     git_files = filter(el -> startswith(el, parent_folder) && !endswith(el, ".meta"), _gitfiles)
-    
+    @assert !isempty(git_files) "'$repo/$parent_folder'경로가 존재하지 않습니다"
+
     notfound = Int[]
     for (i, f) in enumerate(files)
         for entry in git_files
@@ -200,9 +201,9 @@ function validate_building(bt::XLSXTable)
     buildgkey_level = broadcast(row -> (row["BuildingKey"], row["Level"]), leveldata)
     validate_duplicate(buildgkey_level; assert = true, msg = "[Level]시트에 중복된 Level이 있습니다")
 
+    # TODO 이거 안됨!! 버그 고칠 것
     templates = filter(!isnull, leveldata[:, j"/BuildingTemplate"]) .* ".json"
-    isfile_inrepo("patch_data", "BuildTemplate", templates; 
-                  msg = "BuildingTemolate가 존재하지 않습니다")
+    isfile_inrepo("patch_data", "BuildTemplate/Buildings", templates)
 
     icons = data[:, j"/Icon"] .* ".png"
     isfile_inrepo("mars-client", "unity/Assets/1_CollectionResources", icons; 
@@ -281,6 +282,7 @@ function validate(bt::XLSXTable{:ItemTable})
             "unity/Assets/1_CollectionResources/ItemIcons", icons; 
             msg = "$(sheet)아이템 Icon이 존재하지 않습니다")
     end
+    isfile_inrepo("patch_data", "BuildTemplate/BlockPackages", bt["BlockPackage"][:, j"/BuildingTemplete"] .* ".json")
     validate_duplicate(itemkeys)
 
     nothing
