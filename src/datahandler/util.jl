@@ -50,9 +50,9 @@ function set_validation!(b::Bool)
 end
 
 function cleanup_cache!()
-    for k in keys(GAMEDATA)
-        delete!(GAMEDATA, k)
-    end
+    empty!(GAMEDATA)
+    Memoization.empty_all_caches!()
+
     printstyled("  └로딩 되어있던 GAMEDATA를 모두 청소하였습니다 (◎﹏◎)\n"; color = :yellow)
     nothing
 end
