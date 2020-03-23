@@ -50,10 +50,18 @@ function validate_haskey(class, a; assert=true)
     validate_subset(a, b;msg = "'$(class)'에 다음 Key가 존재하지 않습니다", assert = assert)
 end
 
-function validate_duplicate(lists; keycheck = false, assert=true)
+"""
+    validate_duplicate(lists; assert = false, keycheck = false)
+
+# Arguments
+===
+assert   : 
+keycheck : Key 타입일 경우 공백 검사
+"""
+function validate_duplicate(lists; assert=true, keycheck = false, 
+                            msg = "[:$(lists)]에서 중복된 값이 발견되었습니다")
     if !allunique(lists)
         duplicate = filter(el -> el[2] > 1, countmap(lists))
-        msg = "[:$(lists)]에서 중복된 값이 발견되었습니다"
         if assert
             throw(AssertionError("$msg \n $(keys(duplicate))"))
         else
@@ -190,7 +198,7 @@ function validate_building(bt::XLSXTable)
     leveldata = bt["Level"]
     
     buildgkey_level = broadcast(row -> (row["BuildingKey"], row["Level"]), leveldata)
-    @assert allunique(buildgkey_level) "[Level]시트에 중복된 Level이 있습니다"
+    validate_duplicate(buildgkey_level; assert = true, msg = "[Level]시트에 중복된 Level이 있습니다")
 
     templates = filter(!isnull, leveldata[:, j"/BuildingTemplate"]) .* ".json"
     isfile_inrepo("patch_data", "BuildTemplate", templates; 
@@ -216,10 +224,7 @@ function validate(bt::XLSXTable{:Ability})
     end
 
     key_level = broadcast(x -> (x[j"/AbilityKey"], x[j"/Level"]), level)
-    if !allunique(key_level)
-        dup = filter(el -> el[2] > 1, countmap(key_level))
-        throw(AssertionError("다음의 Ability, Level이 중복되었습니다\n$(dup)"))
-    end
+    validate_duplicate(key_level; assert = true, msg = "[Level] 다음의 AbilityKey의 Level이 중복 되었습니다")
     nothing
 end
 
@@ -379,9 +384,9 @@ end
 function validate(bt::XLSXTable{:Quest})
     # Group시트 검사
     group = bt["Group"]
-    @assert allunique(group[:, j"/Key"]) "GroupKey는 Unique 해야 합니다"
-    @assert allunique(group[:, j"/Name"]) "GroupName은 Unique 해야 합니다"
-    
+
+    validate_duplicate(group[:, j"/Key"]; assert=true)
+    validate_duplicate(group[:, j"/Name"]; assert=true)
     if maximum(group[:, j"/Key"]) > 1023 || minimum(group[:, j"/Key"]) < 0
         throw(AssertionError("GroupKey는 0~1023만 사용 가능합니다."))
     end
