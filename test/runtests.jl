@@ -1,6 +1,8 @@
 using Test
 using GameDataManager
 
+include("gameitembase.jl")
+
 # 깃허브 액션 세팅  
 @testset "테스트 환경 확인" begin 
     @test isfile(GameDataManager.joinpath_gamedata("_Meta.json"))
