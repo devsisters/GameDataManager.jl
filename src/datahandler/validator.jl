@@ -43,6 +43,9 @@ function validate_haskey(class, a; assert=true)
     elseif class == "Chore"
         jwb = XLSXTable("Chore"; validation = false).data
         b = unique(get.(jwb[:Group], "GroupKey", missing))
+    elseif class == "QuestGroup"
+        jwb = XLSXTable("Quest"; validation = false).data
+        b = unique(get.(jwb[:Group], "Name", missing))
     else
         throw(AssertionError("validate_haskey($(class), ...)은 정의되지 않았습니다")) 
     end
@@ -362,7 +365,7 @@ function validate_rewardscript_itemid(data)
     end
     for el in rewardscript_ids(rewards)
         if !isempty(el[2])
-            if el[1] == "Item" || el[1] == "BuidlingSeed"
+            if el[1] == "Item"
                 target = "ItemTable"
             else 
                 target = el[1]
@@ -460,7 +463,7 @@ function validate_questtrigger(x::Array{T, 1}) where T
         "BuildingSeedBuyCount"         => (:buildingkey, :equality, :number),
         "SingleKeyBuyCount"            => (:buycount, :equality, :number),
         "EneriumDecompositionCount"    => (:equality, :number),
-        "CompleteQuestGroup"           => (:questgroupname,),
+        "CompleteQuestGroup"           => (:questgroupname, ),
         "PrefabPointer"                => (:prefabpointerkey, :equality,:number)
         )
 
@@ -489,6 +492,7 @@ function validate_questtrigger(x::Array{T, 1}) where T
             elseif checker == :buycount
                 el == "SiteCleaner"
             elseif checker == :questgroupname # TODO
+                validate_haskey("QuestGroup", [el])
                 true
             elseif checker == :prefabpointerkey #TODO
                 true 
