@@ -1,16 +1,13 @@
 # must be included from startup.jl
 function checkout_GameDataManager()
-    function network_folder()
-        if Sys.iswindows()
-            "G:/공유 드라이브/프로젝트 MARS/PatchDataOrigin/.tools/"
-        else # 맥이라 가정함... 맥아니면 몰러~
-            "/Volumes/GoogleDrive/공유 드라이브/프로젝트 MARS/PatchDataOrigin/.tools"
-        end
+    function network_folder_tools()
+        root = Sys.iswindows() ? "G:/" : "/Volumes/GoogleDrive/"
+        joinpath(root, "공유 드라이브/프로젝트 MARS/PatchDataOrigin/.tools")
     end
     function checkout_mars_package(package_name)
         v1 = get(Pkg.installed(), package_name, missing)
         if !ismissing(v1)
-            dir = network_folder()
+            dir = network_folder_tools()
             v2 = joinpath(dir, "$package_name/Project.toml")
     
             if isfile(v2)
