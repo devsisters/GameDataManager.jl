@@ -151,9 +151,10 @@ function validate(bt::XLSXTable{:Block})
     prefabs = unique(block[:, j"/ArtAsset"]) .* ".prefab"
     isfile_inrepo("mars_art_assets", "GameResources/Blocks", prefabs)
 
-    # Luxurygrade
-    if any(ismissing.(block[:, j"/Verts"]))
-        @warn "Verts정보가 없는 Block이 있습니다. Unity의 BlockVertexCount 내용을 엑셀에 추가해 주세요"
+    verts = get.(block, "Verts", missing)
+    if any(ismissing.(verts))
+        missing_blocks = block[findall(ismissing, verts), j"/Key"]
+        @warn "다음 Block의 Vert 정보가 없습니다. Unity의 BlockVertexCount 내용을 엑셀에 추가해 주세요\n$(missing_blocks)"
     end
 
     # SubCategory Key 오류
