@@ -111,10 +111,10 @@ end
 
 function backup()
     # 네트워크의 게임 데이터를 백업합니다
-    @assert startswith(GAMEENV["GameData"], "M") "네트워크에 연결할 수 없어 XLSX 데이터 백업이 불가능 합니다"
+    @assert startswith(GAMEENV["XLSXTable"], "M") "네트워크에 연결할 수 없어 XLSX 데이터 백업이 불가능 합니다"
 
-    println("M:/GameData와 M:/Dialogue를 백업합니다")
-    for folder in ("GameData", "Dialogue")
+    println("../XLSXTable과 ../InkDialogue를 백업합니다")
+    for folder in ("XLSXTable", "InkDialogue")
         predicate = path -> (isdir(path) || endswith(path, r".xlsx|.xlsm|.ink"))
 
         f = "$folder.tar"

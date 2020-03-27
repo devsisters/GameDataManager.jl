@@ -48,36 +48,22 @@ function setup_env!()
 
         GAMEENV["CollectionResources"] = joinpath(GAMEENV["mars-client"], "unity/Assets/1_CollectionResources")
 
-        GAMEENV["NetworkFolder"] = Sys.iswindows() ? "M:/" : "/Volumes/ShardData/MARSProject/"
+        GAMEENV["NetworkFolder"] = Sys.iswindows() ? "G:/공유 드라이브/프로젝트 MARS/PatchDataOrigin" : "/Volumes/GoogleDrive/공유 드라이브/프로젝트 MARS/PatchDataOrigin"
 
         # Window라면 네트워크 드라이브 연결을 시도한다
         if !isdir(GAMEENV["NetworkFolder"]) 
-            if Sys.iswindows()
-                tempfile = joinpath(GAMEENV["cache"], "net_use.txt")
-                run(pipeline(`net use`, stdout = tempfile))
-
-                stdout = read(tempfile, String)
-                # nas.devscake.com 세팅이 있었다면 재 연결 시도
-                if occursin("nas.devscake.com", stdout)
-                    run(`cmd /C net use M: \\\\nas.devscake.com\\ShardData\\MarsProject`)
-                end
-                rm(tempfile)
-            end
-        end 
-
-        if !isdir(GAMEENV["NetworkFolder"]) 
-            @warn """네트워크 폴더가 세팅 되어 있지 않습니다. 아래의 메뉴얼을 
-            아래의 페이지를 참고하여 네트워크 폴더 세팅을 해 주세요
-            https://www.notion.so/devsisters/ccb5824c48544ec28c077a1f39182f01
+            @warn """구글 파일 스트림이 세팅 되어 있지 않습니다.
+            아래의 페이지를 참고하여 구글 파일 스트림을 세팅해 주세요
+            https://www.notion.so/devsisters/23b9438b634a4ec2ad59804ec2a51a12
             """
-            GAMEENV["GameData"] = joinpath(GAMEENV["patch_data"], "_Backup/GameData")
-            GAMEENV["Dialogue"] = joinpath(GAMEENV["patch_data"], "_Backup/Dialogue")
+            GAMEENV["XLSXTable"] = joinpath(GAMEENV["patch_data"], "_Backup/XLSXTable")
+            GAMEENV["InkDialogue"] = joinpath(GAMEENV["patch_data"], "_Backup/InkDialogue")
         else 
-            GAMEENV["GameData"] = joinpath(GAMEENV["NetworkFolder"], "GameData")
-            GAMEENV["Dialogue"] = joinpath(GAMEENV["NetworkFolder"], "Dialogue")
+            GAMEENV["XLSXTable"] = joinpath(GAMEENV["NetworkFolder"], "XLSXTable")
+            GAMEENV["InkDialogue"] = joinpath(GAMEENV["NetworkFolder"], "InkDialogue")
         end
 
-        GAMEENV["xlsx"] = Dict("root" => GAMEENV["GameData"])
+        GAMEENV["xlsx"] = Dict("root" => GAMEENV["XLSXTable"])
         GAMEENV["json"] = Dict("root" => joinpath(GAMEENV["patch_data"], "Tables"))
         
         return true
@@ -86,8 +72,8 @@ end
 
 function extract_backupdata()
     patchdata = joinpath(ENV["MARS-CLIENT"], "patch-data")
-    tarfile = joinpath(patchdata, "_Backup/GameData.tar")
-    target = joinpath(patchdata, "_Backup/GameData")
+    tarfile = joinpath(patchdata, "_Backup/XLSXTable.tar")
+    target = joinpath(patchdata, "_Backup/XLSXTable")
 
     @assert isfile(tarfile) "GameData를 찾을 수 없습니다"
     if isdir(target)
@@ -102,14 +88,14 @@ function extract_backupdata()
 end
 
 function xl_change_datapath!()
-    if startswith(GAMEENV["GameData"], GAMEENV["NetworkFolder"])
-        GAMEENV["GameData"] = joinpath(GAMEENV["patch_data"], "_GameData")
+    if startswith(GAMEENV["XLSXTable"], GAMEENV["NetworkFolder"])
+        GAMEENV["XLSXTable"] = joinpath(GAMEENV["patch_data"], "_Backup/XLSXTable")
     else 
-        GAMEENV["GameData"] = joinpath(GAMEENV["NetworkFolder"], "GameData")
+        GAMEENV["XLSXTable"] = joinpath(GAMEENV["NetworkFolder"], "XLSXTable")
     end
     # 비우기
-    GAMEENV["xlsx"] = Dict("root" => GAMEENV["GameData"])
-    @info ".xlsx 파일 참조 경로를 " * GAMEENV["GameData"] * "로 변경하였습니다."
+    GAMEENV["xlsx"] = Dict("root" => GAMEENV["XLSXTable"])
+    @info ".xlsx 파일 참조 경로를 " * GAMEENV["XLSXTable"] * "로 변경하였습니다."
 
     GAMEENV["xlsx"]
 end

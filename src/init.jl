@@ -98,8 +98,8 @@ function help(idx = 1)
     if !isempty(GAMEENV)
         basic ="""
         # 기본 기능
-            backup()    : 'M:/GameData'와 'M:/Dialogue'의 데이터를 압축하여'patchdata/_Backup'에 덮어 씌웁니다
-            ink()       : 'M:/Dialogue'의 모든 ink 파일을 .json로 추출합니다
+            backup()    : '../XLSXTable'와 '../InkDialogue'의 데이터를 압축하여'patchdata/_Backup'에 덮어 씌웁니다
+            ink()       : '../InkDialogue''의 모든 ink 파일을 .json로 추출합니다
             xl()        : 수정된 엑셀파일만 검색하여 json으로 추출합니다
             xl(true)    : '_Meta.json'에서 관리하는 모든 파일을 json으로 추출합니다
 

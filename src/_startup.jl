@@ -2,9 +2,9 @@
 function checkout_GameDataManager()
     function network_folder()
         if Sys.iswindows()
-            "M:/Tools"
+            "G:/공유 드라이브/프로젝트 MARS/PatchDataOrigin/.tools/"
         else # 맥이라 가정함... 맥아니면 몰러~
-            "/Volumes/ShardData/MARSProject/Tools"
+            "/Volumes/GoogleDrive/공유 드라이브/프로젝트 MARS/PatchDataOrigin/.tools"
         end
     end
     function checkout_mars_package(package_name)

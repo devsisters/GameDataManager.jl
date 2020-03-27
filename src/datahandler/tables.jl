@@ -121,7 +121,7 @@ end
 
 
 function copy_to_cache(origin)
-    destination = replace(origin, GAMEENV["GameData"] => joinpath(GAMEENV["cache"], "GameData"))
+    destination = replace(origin, GAMEENV["XLSXTable"] => joinpath(GAMEENV["cache"], "XLSXTable"))
     dir, file = splitdir(destination)
     if !isdir(dir)
         mkdir(dir)
