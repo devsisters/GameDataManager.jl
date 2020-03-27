@@ -1,6 +1,6 @@
 # 단축키
 function xl(exportall::Bool = false) 
-    # git_checkout_patchdata(branch)
+    reload_meta!()
     
     files = exportall ? collect_auto_xlsx() : collect_modified_xlsx()
     if isempty(files)
