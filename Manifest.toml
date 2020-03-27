@@ -21,9 +21,9 @@ version = "1.1.0"
 
 [[DataStructures]]
 deps = ["InteractiveUtils", "OrderedCollections"]
-git-tree-sha1 = "b7720de347734f4716d1815b00ce5664ed6bbfd4"
+git-tree-sha1 = "5a431d46abf2ef2a4d5d00bd0ae61f651cf854c8"
 uuid = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
-version = "0.17.9"
+version = "0.17.10"
 
 [[Dates]]
 deps = ["Printf"]
@@ -47,19 +47,19 @@ version = "0.3.0"
 
 [[GameBalanceManager]]
 deps = ["CurrenciesBase", "DataStructures", "Dates", "GameItemBase", "JSON", "Memoization", "Parameters", "Test", "Unitful", "XLSXasJSON"]
-git-tree-sha1 = "502c375d5a3b4e3134cb791db404e7bd5b3f752b"
+git-tree-sha1 = "5545c968f89b2313f00be0434feb075639898fbb"
 repo-rev = "master"
 repo-url = "https://github.com/devsisters/GameBalanceManager.jl"
 uuid = "bb77ccaf-9d50-4d58-b991-76f827c14ecc"
-version = "0.2.4"
+version = "0.2.7"
 
 [[GameItemBase]]
-deps = ["CurrenciesBase", "JSON", "Printf", "Random", "StatsBase", "UUIDs", "XLSXasJSON"]
-git-tree-sha1 = "8268d9acdb6fd6d579ced6e48a31adb708543bb9"
+deps = ["CurrenciesBase", "DataStructures", "JSON", "Printf", "Random", "StatsBase", "UUIDs", "XLSXasJSON"]
+git-tree-sha1 = "e0e1c8853f118b4bc4de0b6b882f35ad32fd6e83"
 repo-rev = "master"
 repo-url = "https://github.com/devsisters/GameItemBase.jl.git"
 uuid = "5bad4de0-7d96-491e-9f11-736efa64e4f5"
-version = "0.1.6"
+version = "0.2.1"
 
 [[InteractiveUtils]]
 deps = ["Markdown"]
@@ -97,10 +97,10 @@ uuid = "6ac74813-4b46-53a4-afec-0b5dc9d7885c"
 version = "0.2.1"
 
 [[MacroTools]]
-deps = ["DataStructures", "Markdown", "Random"]
-git-tree-sha1 = "07ee65e03e28ca88bc9a338a3726ae0c3efaa94b"
+deps = ["Markdown", "Random"]
+git-tree-sha1 = "f7d2e3f654af75f01ec49be82c231c382214223a"
 uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
-version = "0.5.4"
+version = "0.5.5"
 
 [[Markdown]]
 deps = ["Base64"]
@@ -180,9 +180,9 @@ uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [[StatsBase]]
 deps = ["DataAPI", "DataStructures", "LinearAlgebra", "Missings", "Printf", "Random", "SortingAlgorithms", "SparseArrays", "Statistics"]
-git-tree-sha1 = "be5c7d45daa449d12868f4466dbf5882242cf2d9"
+git-tree-sha1 = "a6102b1f364befdb05746f386b67c6b7e3262c45"
 uuid = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
-version = "0.32.1"
+version = "0.33.0"
 
 [[Tar]]
 git-tree-sha1 = "43d1de882b37b644804e5ad4ab030a8a0d49cca4"

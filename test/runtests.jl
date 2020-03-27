@@ -20,13 +20,13 @@ end
 end
 # TODO art-asset 리포가 없어서 수행 불가
 @testset "XLSXTable 함수 with validation" begin 
-#     files = GameDataManager.collect_auto_xlsx()
+    # files = GameDataManager.collect_auto_xlsx()
 
-#     for f in files
-#         data = Table(f;readfrom = :JSON, validataion = true)
+    # for f in files
+    #     data = Table(f;readfrom = :JSON, validataion = true)
 
-#         @test isa(data, GameDataManager.XLSXTable)
-#     end
+    #     @test isa(data, GameDataManager.XLSXTable)
+    # end
 end
 
 @testset "xlookup 기능" begin 

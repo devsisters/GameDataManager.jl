@@ -74,16 +74,33 @@ end
     end
 end
 
+# 유저 정보 유지
+@testset "SiteCleaner 구매" begin
+    u = User()
+    @test get(u, COIN) == zero(COIN)
+    @test get(u, SITECLEANER) == zero(SITECLEANER)
+    for i in 1:1000
+        price = GameItemBase.sitecleaner_price(u)
+        
+        add!(u, price)
+        
+        @test GameItemBase.buysitecleaner!(u, 1) == false 
+
+
+    end
+end
 @testset "EnergyMix 구매" begin
     u = User()
-   
+    v = u.villagerecordset[1]
+    for i in 1:1000
+        p = GameItemBase.decomposeenerium_price(u)
+        @test GameItemBase.decomposeenerium!(u, v) == false
+        # add!(u, p)
+        # @test GameItemBase.decomposeenerium!(u, v)
+
+    end
 end
 
-# 유저 정보 유지
-u = User(); 
-@testset "SiteCleaner 구매" begin
-
-end
 
 @testset "SiteCleaner 사용" begin
  
