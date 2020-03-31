@@ -1,30 +1,48 @@
-# TODO 폴더 단위로 export 히스토리 관리하며 작업
-function ink(source = GAMEENV["InkDialogue"])
+"""
+    ink()
+
+'../InkDialogue'의 모든 하위폴더의 '.ink' 파일 중 수정된 파일을 찾아 json으로 변환합니다
+"""
+ink(everything::Bool = false) = convert_ink(GAMEENV["InkDialogue"], everything)
+"""
+    ink(subfolder, everything = false)
+
+'../InkDialogue/(subfolder)'의 '.ink' 파일을 json으로 변환합니다
+
+## Arguments
+everything : 'true'면 모든 ink파일을 변환합니다
+"""
+function ink(subfolder, everything::Bool = false) 
+    convert_ink(joinpath(GAMEENV["InkDialogue"], subfolder), everything)
+end
+function convert_ink(root, everything)
     exe = joinpath(dirname(pathof(GameDataManager)), "../deps/ink/inklecate.exe")
+    
+    targets = collect_ink(root, everything)
+    output_folder = joinpath(GAMEENV["patch_data"], "Dialogue")
 
-    #TODO 변경된 파일만 뽑기
-    targets = []
-    for (root, dirs, files) in walkdir(source)
+    if !isempty(targets)
+        print_section("ink -> json 변환을 시작합니다 ⚒\n" * "-"^(displaysize(stdout)[2]-4); color = :cyan)
+    else 
+        print_section("\"$(normpath(root))\"에는 변환할 ink 파일이 없습니다"; color = :yellow)
+    end
 
-        output_path = replace(root, source => 
-        joinpath(GAMEENV["patch_data"], "Dialogue"))
+    for input in targets 
+        # Template 파일은 _으로 시작
+        if !startswith(basename(input), "_")
+            output = replace(chop(input, head=0, tail=4), GAMEENV["InkDialogue"] => output_folder)
+            cmd = `$exe -o "$output.json" "$input"`
 
-        for f in filter(el -> endswith(el, ".ink"), files)
-            if !startswith(f, "_")
-                input = joinpath(root, f)
-                output = joinpath(output_path, replace(f, ".ink" => ".json"))
-                cmd = `$exe -o $output $input`
-                push!(targets, cmd)
-            end
+            print(" SAVE => ")
+            printstyled(normpath(output), ".json\n"; color=:blue)
+
+            run(cmd)
+            inklog(input)
         end
-
     end
-    # TODO log 남기기
-    # errlog = joinpath(GAMEENV["cache"], "ink_errorlog.txt")
-    # log = joinpath(GAMEENV["cache"], "ink_elog.txt")
-    for x in targets
-        @async run(x)
+    if !isempty(targets)
+        write_inklog!()
+        print_section("ink 추출이 완료되었습니다 ☺", "DONE"; color = :cyan)
     end
-
     nothing
 end

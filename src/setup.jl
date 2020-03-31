@@ -45,6 +45,7 @@ function setup_env!()
         # GameDataManager paths
         GAMEENV["cache"] = joinpath(GAMEENV["patch_data"], ".cache")
         GAMEENV["xlsxlog"] = joinpath(GAMEENV["cache"], "xlsxlog.json")
+        GAMEENV["inklog"] = joinpath(GAMEENV["cache"], "inklog.json")
 
         GAMEENV["CollectionResources"] = joinpath(GAMEENV["mars-client"], "unity/Assets/1_CollectionResources")
 

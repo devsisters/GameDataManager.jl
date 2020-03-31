@@ -81,6 +81,16 @@ function init_xlsxlog()
     return log
 end
 
+function init_inklog()
+    file = GAMEENV["inklog"]
+    if isfile(file) 
+        log = JSON.parsefile(file; dicttype=Dict{String, Float64})
+    else 
+        log = Dict{String, Float64}()
+    end
+    return log
+end
+
 # 안내
 function help(idx = 1)
     intro = "GameDataManager를 이용해주셔서 "
@@ -99,7 +109,9 @@ function help(idx = 1)
         basic ="""
         # 기본 기능
             backup()    : '../XLSXTable'와 '../InkDialogue'의 데이터를 압축하여'patchdata/_Backup'에 덮어 씌웁니다
-            ink()       : '../InkDialogue''의 모든 ink 파일을 .json로 추출합니다
+            ink()       : '../InkDialogue'의 수정된 .ink를 .json로 변환합니다
+            ink(true)       : '../InkDialogue'의 모든 .ink를 .json로 변환합니다
+            ink("Villager") : '../InkDialogue/Villager'의 수정된 .ink를 .json으로 변환합니다
             xl()        : 수정된 엑셀파일만 검색하여 json으로 추출합니다
             xl(true)    : '_Meta.json'에서 관리하는 모든 파일을 json으로 추출합니다
 

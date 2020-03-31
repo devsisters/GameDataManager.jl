@@ -1,3 +1,7 @@
+#########################################################################
+##  XLSX파일을 위한 기능
+##
+########################################################################
 """
     collect_modified_xlsx()
 
@@ -24,36 +28,20 @@ function collect_all_xlsx()
 end
 
 function ismodified(f)::Bool
-    file = is_xlsxfile(f) ? f : 
-           is_jsonfile(f) ? f : 
-           CACHE[:meta][:xlsx_shortcut][f]
-
-    mtime(joinpath_gamedata(file)) > get(CACHE[:xlsxlog], file ,[0.])[1]
-end
-
-"""
-
-"""
-function collect_modified_ink()
-
-    for (root, dirs, files) in walkdir(GAMEENV["InkDialogue"])
-        for f in files 
-
-        end
+    if is_xlsxfile(f) | is_jsonfile(f)
+        t = mtime(joinpath_gamedata(f)) 
+        t_log = get(CACHE[:xlsxlog], f ,[0.])[1]
+    elseif is_inkfile(f)
+        @assert isfile(f) "\"$(f)\"가 존재하지 않습니다"
+        t = mtime(f)
+        log = get!(CACHE, :inklog, init_inklog())
+        t_log = get(log, basename(f) ,0.)
+    else #xlsx shortcut 
+        f = CACHE[:meta][:xlsx_shortcut][f]
+        t = mtime(joinpath_gamedata(f)) 
+        t_log = get(CACHE[:xlsxlog], f ,[0.])[1]
     end
-end
-
-
-
-"""
-xlsxlog()
-
-gamedata_export() 로 뽑는 파일들 이력
-"""
-function xlsxlog()
-    open(GAMEENV["xlsxlog"], "w") do io
-        write(io, JSON.json(CACHE[:xlsxlog]))
-    end
+    return t > t_log
 end
 
 xlsxlog(bt::Table) = xlsxlog(bt.data)
@@ -75,19 +63,11 @@ function xlsxlog(jwb::JSONWorkbook)
 
     CACHE[:xlsxlog][fname] = [mtime(file), pointer]
     CACHE[:xlsxlog]["write_count"] = get(CACHE[:xlsxlog], "write_count", 0) + 1
-    write_xlsxlog!(2)
-end
-function xlsxlog(file)
-    if is_xlsxfile(file)
-        @warn "$(file)의 액션 로그가 생성되지 않았습니다."
-    else
-        CACHE[:xlsxlog][file] = [mtime(joinpath_gamedata(file))]
-    end
-    CACHE[:xlsxlog]["write_count"] = get(CACHE[:xlsxlog], "write_count", 0) + 1
-    write_xlsxlog!(2)
+    write_xlsxlog!(5)
 end
 
-function write_xlsxlog!(threadhold::Int; log = CACHE[:xlsxlog])
+function write_xlsxlog!(threadhold::Int)
+    log = CACHE[:xlsxlog]
     if get(log, "write_count", 0) >= threadhold
 
         log["write_count"] = 0
@@ -97,6 +77,7 @@ function write_xlsxlog!(threadhold::Int; log = CACHE[:xlsxlog])
     end
 end
 
+
 # _Meta.json에 없는 파일 제거함
 function cleanup_xlsxlog()
     a = keys(CACHE[:meta][:auto])
@@ -105,7 +86,44 @@ function cleanup_xlsxlog()
         for x in deleted_file
             pop!(CACHE[:xlsxlog], x)
         end
-        xlsxlog()
     end
     nothing
+end
+
+#########################################################################
+##  Ink파일을 위한 기능
+##
+########################################################################
+"""
+
+"""
+function collect_ink(rootfolder, everything = false)
+    targets = String[]
+    for (root, dirs, files) in walkdir(rootfolder)
+        for f in filter(x -> !startswith(x, "_"), files) 
+            ink = joinpath(root, f)
+            if everything
+                push!(targets, joinpath(root, f))
+            else 
+                if ismodified(ink)
+                    push!(targets, joinpath(root, f))
+                end
+            end
+        end
+    end
+    return targets
+end
+"""
+    inklog()
+
+'ink'파일을 json으로 추출한 이력
+"""
+function inklog(file)
+    CACHE[:inklog][basename(file)] = mtime(file)
+end
+
+function write_inklog!()
+    open(GAMEENV["inklog"], "w") do io
+        write(io, JSON.json(CACHE[:inklog]))
+    end
 end

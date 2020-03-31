@@ -11,7 +11,7 @@ function joinpath_gamedata(file)
                 fuzzy_lookupname(keys(CACHE[:meta][:auto]), file; msg = "$(file)이름이 올바르지 않습니다")
             end
         end
-    elseif endswith(file, ".json") #json은 하위폴더가 없
+    elseif is_jsonfile(file) #Tables/json은 하위폴더가 없다
         folder= GAMEENV["json"]["root"]
         p = get!(GAMEENV["json"], file, joinpath(folder, file))
         @assert isfile(p) "$(file) 은 $(folder)에 존재하지 않는 파일입니다. 파일명을 다시 확인해 주세요"

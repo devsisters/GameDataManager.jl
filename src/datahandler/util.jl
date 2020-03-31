@@ -1,6 +1,8 @@
 # utility functions
 is_xlsxfile(f)::Bool = (endswith(f, ".xlsx") || endswith(f, ".xlsm"))
 is_jsonfile(f)::Bool = endswith(f, ".json")
+is_inkfile(f)::Bool = endswith(f, ".ink")
+
 
 function Base.readdir(dir; extension::String)
     filter(x -> endswith(x, extension), readdir(dir))
@@ -34,9 +36,10 @@ function print_section(message, title = "NOTE"; color = :normal)
 end
 
 function reload_meta!()
-    if ismodified("_Meta.json")
+    f = "_Meta.json"
+    if ismodified(f)
         CACHE[:meta] = loadmeta()
-        xlsxlog("_Meta.json")
+        CACHE[:xlsxlog][f] = [mtime(joinpath_gamedata(f))]
     end
 end
 
