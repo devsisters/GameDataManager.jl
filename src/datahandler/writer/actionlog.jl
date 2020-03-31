@@ -28,22 +28,36 @@ function ismodified(f)::Bool
            is_jsonfile(f) ? f : 
            CACHE[:meta][:xlsx_shortcut][f]
 
-    mtime(joinpath_gamedata(file)) > get(CACHE[:actionlog], file ,[0.])[1]
+    mtime(joinpath_gamedata(file)) > get(CACHE[:xlsxlog], file ,[0.])[1]
 end
 
 """
-    export_log()
 
-gamedata_export() 로 뽑는 파일들 이력
 """
-function actionlog()
-    open(GAMEENV["actionlog"], "w") do io
-        write(io, JSON.json(CACHE[:actionlog]))
+function collect_modified_ink()
+
+    for (root, dirs, files) in walkdir(GAMEENV["InkDialogue"])
+        for f in files 
+
+        end
     end
 end
 
-actionlog(bt::Table) = actionlog(bt.data)
-function actionlog(jwb::JSONWorkbook)
+
+
+"""
+xlsxlog()
+
+gamedata_export() 로 뽑는 파일들 이력
+"""
+function xlsxlog()
+    open(GAMEENV["xlsxlog"], "w") do io
+        write(io, JSON.json(CACHE[:xlsxlog]))
+    end
+end
+
+xlsxlog(bt::Table) = xlsxlog(bt.data)
+function xlsxlog(jwb::JSONWorkbook)
     file = replace(XLSXasJSON.xlsxpath(jwb), "\\" => "/")
     fname = split(file, "XLSXTable/")[2]
 
@@ -59,39 +73,39 @@ function actionlog(jwb::JSONWorkbook)
         pointer[s] = vals
     end
 
-    CACHE[:actionlog][fname] = [mtime(file), pointer]
-    CACHE[:actionlog]["write_count"] = get(CACHE[:actionlog], "write_count", 0) + 1
-    write_actionlog!(2)
+    CACHE[:xlsxlog][fname] = [mtime(file), pointer]
+    CACHE[:xlsxlog]["write_count"] = get(CACHE[:xlsxlog], "write_count", 0) + 1
+    write_xlsxlog!(2)
 end
-function actionlog(file)
+function xlsxlog(file)
     if is_xlsxfile(file)
         @warn "$(file)의 액션 로그가 생성되지 않았습니다."
     else
-        CACHE[:actionlog][file] = [mtime(joinpath_gamedata(file))]
+        CACHE[:xlsxlog][file] = [mtime(joinpath_gamedata(file))]
     end
-    CACHE[:actionlog]["write_count"] = get(CACHE[:actionlog], "write_count", 0) + 1
-    write_actionlog!(2)
+    CACHE[:xlsxlog]["write_count"] = get(CACHE[:xlsxlog], "write_count", 0) + 1
+    write_xlsxlog!(2)
 end
 
-function write_actionlog!(threadhold::Int; log = CACHE[:actionlog])
+function write_xlsxlog!(threadhold::Int; log = CACHE[:xlsxlog])
     if get(log, "write_count", 0) >= threadhold
 
         log["write_count"] = 0
-        open(GAMEENV["actionlog"], "w") do io
+        open(GAMEENV["xlsxlog"], "w") do io
             write(io, JSON.json(log))
         end
     end
 end
 
 # _Meta.json에 없는 파일 제거함
-function cleanup_actionlog()
+function cleanup_xlsxlog()
     a = keys(CACHE[:meta][:auto])
-    deleted_file = setdiff(keys(CACHE[:actionlog]), a)
+    deleted_file = setdiff(keys(CACHE[:xlsxlog]), a)
     if length(deleted_file) > 0
         for x in deleted_file
-            pop!(CACHE[:actionlog], x)
+            pop!(CACHE[:xlsxlog], x)
         end
-        actionlog()
+        xlsxlog()
     end
     nothing
 end

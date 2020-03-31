@@ -44,7 +44,7 @@ end
 function XLSXTable(jwb::JSONWorkbook, validation::Bool)
     f = splitext(basename(jwb))[1] |> string
     
-    actionlog(jwb)
+    xlsxlog(jwb)
     GAMEDATA[f] = XLSXTable{Symbol(f)}(hash(jwb), jwb)
     if validation 
         validate(GAMEDATA[f])
@@ -95,11 +95,11 @@ function _xlsxworkbook(f)
 end
 
 function _jsonworkbook(xlsxpath, file)   
-    if !haskey(CACHE[:actionlog], file) 
-        print("\t...'xl(\"$(basename(file))\")'의 actionlog를 생성합니다")
-        actionlog(_xlsxworkbook(file))
+    if !haskey(CACHE[:xlsxlog], file) 
+        print("\t...'xl(\"$(basename(file))\")'의 xlsxlog 생성합니다")
+        xlsxlog(_xlsxworkbook(file))
     end
-    al = CACHE[:actionlog][file]
+    al = CACHE[:xlsxlog][file]
     
     sheets = JSONWorksheet[]
     for el in getmetadata(file) # sheetindex가 xlsx과 다르다. getindex할 때 이름으로 참조할 것!

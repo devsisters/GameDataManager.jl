@@ -36,7 +36,7 @@ end
 function reload_meta!()
     if ismodified("_Meta.json")
         CACHE[:meta] = loadmeta()
-        actionlog("_Meta.json")
+        xlsxlog("_Meta.json")
     end
 end
 
@@ -58,7 +58,7 @@ function cleanup_cache!()
 end
 
 function cleanup_exportlog!()
-    rm(GAMEENV["actionlog"])
+    rm(GAMEENV["xlsxlog"])
     printstyled("  └.exportlog.json을 삭제하였습니다 (◎﹏◎)"; color = :yellow)
 end
 

@@ -12,7 +12,7 @@ function __init__()
 
     if s
         CACHE[:meta] = loadmeta()
-        CACHE[:actionlog] = init_actionlog()
+        CACHE[:xlsxlog] = init_xlsxlog()
         CACHE[:validation] = true
         CACHE[:git] = Dict()
         if !endswith(get(ENV, "LOGONSERVER" ,""), "YONGHEEKIM")
@@ -68,8 +68,8 @@ function loadmeta(metafile = joinpath_gamedata("_Meta.json"))
     return meta
 end
 
-function init_actionlog()
-    file = GAMEENV["actionlog"]
+function init_xlsxlog()
+    file = GAMEENV["xlsxlog"]
     if isfile(file) 
         log = JSON.parsefile(file; dicttype=Dict{String, Any})
     else 
