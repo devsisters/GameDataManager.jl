@@ -40,7 +40,7 @@ function setup_env!()
         GAMEENV["mars-client"] = repo
         # submodules
         GAMEENV["patch_data"] = joinpath(GAMEENV["mars-client"], "patch-data")
-        GAMEENV["mars_art_assets"] = joinpath(GAMEENV["mars-client"], "submodules/mars-art-assets")
+        GAMEENV["mars_art_assets"] = joinpath(GAMEENV["mars-client"], "unity/Assets/4_ArtAssets")
         
         # GameDataManager paths
         GAMEENV["cache"] = joinpath(GAMEENV["patch_data"], ".cache")
