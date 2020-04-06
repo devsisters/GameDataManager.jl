@@ -92,7 +92,7 @@ function openxl(file::AbstractString)
     f = lookfor_xlsx(file) |> joinpath_gamedata
     if Sys.iswindows()
         if isfile(f)
-            run(`cmd /C start $f`; wait = false)
+            run(`powershell start \"$f\"`; wait = false)
         else 
             @warn "$(f)에 접근할 수 없습니다"
         end
