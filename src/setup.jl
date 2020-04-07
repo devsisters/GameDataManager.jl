@@ -1,10 +1,8 @@
-function setup!(marsrepo)
-    git_config = joinpath(marsrepo, ".git/config")
-    # 진짜 주소맞는지 볼 필요는 없겠지...
-    # s = read(joinpath(marsrepo, ".git/config"), String) 
-    # if !isfile(git_config) 
-    #     throw(AssertionError("\"$marsrepo\" 경로가 올바르지 않습니다\n올바른 'mars-client'의 경로를 입력해 주세요"))
-    # end
+function setup!(marsrepo = get(ENV, "MARS-CLIENT", ""))
+    gitfolder = joinpath(marsrepo, ".git")
+    if !isdir(gitfolder) 
+        throw(AssertionError("\"$marsrepo\" 경로가 올바르지 않습니다\n올바른 'mars-client'저장소 경로를 입력해 주세요"))
+    end
 
     marsrepo = replace(marsrepo, "\\" => "/")
     f = joinpath(DEPOT_PATH[1], "config/juno_startup.jl")
@@ -16,6 +14,7 @@ function setup!(marsrepo)
     end
     let 
         using Pkg
+        Pkg.setprotocol!(domain = "github.com", protocol = "ssh")
         checkout_GameDataManager()
     end
     using GameDataManager
