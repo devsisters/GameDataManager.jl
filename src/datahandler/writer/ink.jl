@@ -16,7 +16,7 @@ function ink(subfolder, everything::Bool = false)
     convert_ink(joinpath(GAMEENV["InkDialogue"], subfolder), everything)
 end
 function convert_ink(root, everything)
-    exe = joinpath(dirname(pathof(GameDataManager)), "../deps/ink/inklecate.exe")
+    inklecate = joinpath(dirname(pathof(GameDataManager)), "../deps/ink/inklecate.exe")
     
     targets = collect_ink(root, everything)
     output_folder = joinpath(GAMEENV["patch_data"], "Dialogue")
@@ -31,8 +31,12 @@ function convert_ink(root, everything)
         # Template 파일은 _으로 시작
         if !startswith(basename(input), "_")
             output = replace(chop(input, head=0, tail=4), GAMEENV["InkDialogue"] => output_folder)
-            cmd = `$exe -o "$output.json" "$input"`
-
+            if Sys.iswindows()
+                cmd = `$inklecate -o "$output.json" "$input"`
+            else 
+                unityembeded = "/Applications/Unity/Hub/Editor/2019.3.7f1/Unity.app/Contents/MonoBleedingEdge/bin/mono"
+                cmd = `$unityembeded $inklecate -o “$output.json” “$input”`
+            end
             print(" SAVE => ")
             printstyled(normpath(output), ".json\n"; color=:blue)
 
