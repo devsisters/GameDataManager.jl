@@ -1,17 +1,15 @@
-function setup!(marsrepo = get(ENV, "MARS-CLIENT", ""))
+function setup!(marsrepo = get(ENV, "MARS_CLIENT", ""))
     gitfolder = joinpath(marsrepo, ".git")
     if !isdir(gitfolder) 
-        throw(AssertionError("\"$marsrepo\" 경로가 올바르지 않습니다\n올바른 'mars-client'저장소 경로를 입력해 주세요"))
+        throw(AssertionError(""" \"mars-client\"저장소 경로를 찾을 수 없습니다.
+        https://www.notion.so/devsisters/d0467b863a8444df951225ab59fa9fa2 가이드를 참고하여
+        'setup.sh'를 실행해 주세요."""))
     end
 
     marsrepo = replace(marsrepo, "\\" => "/")
     f = joinpath(DEPOT_PATH[1], "config/juno_startup.jl")
     startup = """
-    ENV["MARS-CLIENT"] = \"$marsrepo\"
-    ENV["GAMEDATAMANAGER"] = Base.find_package("GameDataManager")
-    if !isnothing(ENV["GAMEDATAMANAGER"])
-        include(joinpath(dirname(ENV["GAMEDATAMANAGER"]), "_startup.jl"))
-    end
+    include(joinpath(dirname(Base.find_package("GameDataManager")), "_startup.jl"))
     let 
         using Pkg
         Pkg.setprotocol!(domain = "github.com", protocol = "ssh")
@@ -21,7 +19,7 @@ function setup!(marsrepo = get(ENV, "MARS-CLIENT", ""))
     """    
     write(f, startup)
 
-    @info "$(f) 를 성공적으로 생성하였습니다\n\tAtom을 종료 후 다시 시작해 주세요."
+    @info "\"$(f)\"을 성공적으로 생성하였습니다\n\tAtom을 종료 후 다시 시작해 주세요."
 end
 
 """
@@ -31,9 +29,9 @@ setup_env()
 
 """
 function setup_env!()
-    repo = get(ENV, "MARS-CLIENT", missing)
+    repo = get(ENV, "MARS_CLIENT", missing)
     if ismissing(repo) 
-        @warn "mars-client를 찾을 수 없습니다. \nsetup!(\"C:/mars-client경로\")를 실행한 후 다시 시작해 주세요."
+        @warn "mars-client를 찾을 수 없습니다.\n https://www.notion.so/devsisters/d0467b863a8444df951225ab59fa9fa2 가이드를 참고하여\n'setup.sh'를 실행해 주세요."
         return false
     else
         GAMEENV["mars-client"] = repo
@@ -71,7 +69,7 @@ function setup_env!()
 end
 
 function extract_backupdata()
-    patchdata = joinpath(ENV["MARS-CLIENT"], "patch-data")
+    patchdata = joinpath(ENV["MARS_CLIENT"], "patch-data")
     tarfile = joinpath(patchdata, "_Backup/XLSXTable.tar")
     target = joinpath(patchdata, "_Backup/XLSXTable")
 
@@ -104,37 +102,32 @@ end
 git_ls_files
 """
 function git_ls_files()
-    (git_ls_files("mars-client", false), 
-     git_ls_files("patch_data", false),
+    (git_ls_files("mars-client"), 
+     git_ls_files("patch_data"),
      git_ls_files("mars_art_assets"))
 end
-function git_ls_files(repo, wait = true)
+function git_ls_files(repo)
     path = GAMEENV[repo]
     cd(path)
 
     cache_folder = replace(GAMEENV["cache"], path * "/" => "")
-    out = joinpath(cache_folder, "git_ls-files_$(basename(path)).txt")
+    out = joinpath(cache_folder, "git_ls-files_$repo.txt")
 
-    excute_command = true
+    # HEAD가 다를 때만 git ls-files 실행
+    reload = true
     if isfile(out)
-        hash = begin 
-            p = Pipe()
-            run(pipeline(`git rev-parse HEAD`, stdout = p))
-            close(p.in) 
-            read(p) |> String 
-        end
-    
+        hash =  read(`git rev-parse HEAD`, String)
+        
         open(out, "r") do io 
             x = readuntil(io, '\n', keep = true)
             if x == hash
-                excute_command = false
+                reload = false
             end
         end
     end
 
-    if excute_command
-        #첫줄에 hash 넣어 줌
-        run(pipeline(`git rev-parse HEAD` & `git ls-files`, stdout = out), wait = wait)
+    if reload
+        run(pipeline(`git rev-parse HEAD` & `git ls-files`, stdout = out))
     end
 
     return readlines(out)

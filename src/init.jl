@@ -4,7 +4,7 @@ const CACHE = Dict{Symbol, Any}()
 
 function __init__()
     if haskey(ENV, "GITHUB_WORKSPACE")
-        ENV["MARS-CLIENT"] = joinpath(ENV["GITHUB_WORKSPACE"], "mars-client")
+        ENV["MARS_CLIENT"] = joinpath(ENV["GITHUB_WORKSPACE"], "mars-client")
         
         extract_backupdata()
     end
