@@ -18,7 +18,7 @@ function checkout_GameDataManager()
             v1 = get(Pkg.installed(), pkgname, missing)
             project = Pkg.TOML.parsefile(projecttoml)
 
-            v2 = project["version"]
+            v2 = VersionNumber(project["version"])
             
             if v1 < v2 # Pkg 업데이트
                 target = joinpath(tempdir(), "$pkgname")
