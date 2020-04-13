@@ -3,7 +3,8 @@ function setup!(marsrepo = get(ENV, "MARS_CLIENT", ""))
     if !isdir(gitfolder) 
         throw(AssertionError(""" \"mars-client\"저장소 경로를 찾을 수 없습니다.
         https://www.notion.so/devsisters/d0467b863a8444df951225ab59fa9fa2 가이드를 참고하여
-        'setup.sh'를 실행해 주세요."""))
+        'setup.sh'를 실행하고 컴퓨터를 재시작 해 주세요.
+        """))
     end
 
     marsrepo = replace(marsrepo, "\\" => "/")
@@ -30,7 +31,10 @@ setup_env()
 function setup_env!()
     repo = get(ENV, "MARS_CLIENT", missing)
     if ismissing(repo) 
-        @warn "mars-client를 찾을 수 없습니다.\nhttps://www.notion.so/devsisters/d0467b863a8444df951225ab59fa9fa2 가이드를 참고하여\n'setup.sh'를 실행해 주세요."
+        @warn """ \"mars-client\"저장소 경로를 찾을 수 없습니다.
+        https://www.notion.so/devsisters/d0467b863a8444df951225ab59fa9fa2 가이드를 참고하여
+        'setup.sh'를 실행하고 컴퓨터를 재시작 해 주세요.
+        """
         return false
     else
         GAMEENV["mars-client"] = repo
