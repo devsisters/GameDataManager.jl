@@ -31,7 +31,7 @@ setup_env()
 function setup_env!()
     repo = get(ENV, "MARS_CLIENT", missing)
     if ismissing(repo) 
-        @warn "mars-client를 찾을 수 없습니다.\n https://www.notion.so/devsisters/d0467b863a8444df951225ab59fa9fa2 가이드를 참고하여\n'setup.sh'를 실행해 주세요."
+        @warn "mars-client를 찾을 수 없습니다.\nhttps://www.notion.so/devsisters/d0467b863a8444df951225ab59fa9fa2 가이드를 참고하여\n'setup.sh'를 실행해 주세요."
         return false
     else
         GAMEENV["mars-client"] = repo
@@ -54,14 +54,13 @@ function setup_env!()
             아래의 페이지를 참고하여 구글 파일 스트림을 세팅해 주세요
             https://www.notion.so/devsisters/23b9438b634a4ec2ad59804ec2a51a12
             """
-            GAMEENV["XLSXTable"] = joinpath(GAMEENV["patch_data"], "_Backup/XLSXTable")
-            GAMEENV["InkDialogue"] = joinpath(GAMEENV["patch_data"], "_Backup/InkDialogue")
-        else 
-            GAMEENV["XLSXTable"] = joinpath(GAMEENV["NetworkFolder"], "XLSXTable")
-            GAMEENV["InkDialogue"] = joinpath(GAMEENV["NetworkFolder"], "InkDialogue")
-        end
+            GAMEENV["xlsx"] = Dict("root" => joinpath(GAMEENV["patch_data"], "_Backup/XLSXTable"))
+            GAMEENV["ink"] = Dict("root" => joinpath(GAMEENV["patch_data"], "_Backup/InkDialogue"))
 
-        GAMEENV["xlsx"] = Dict("root" => GAMEENV["XLSXTable"])
+        else 
+            GAMEENV["xlsx"] = Dict("root" => joinpath(GAMEENV["NetworkFolder"], "XLSXTable"))
+            GAMEENV["ink"] = Dict("root" => joinpath(GAMEENV["NetworkFolder"], "InkDialogue"))
+        end
         GAMEENV["json"] = Dict("root" => joinpath(GAMEENV["patch_data"], "Tables"))
         
         return true
@@ -85,21 +84,10 @@ function extract_backupdata()
 
 end
 
-function xl_change_datapath!()
-    if startswith(GAMEENV["XLSXTable"], GAMEENV["NetworkFolder"])
-        GAMEENV["XLSXTable"] = joinpath(GAMEENV["patch_data"], "_Backup/XLSXTable")
-    else 
-        GAMEENV["XLSXTable"] = joinpath(GAMEENV["NetworkFolder"], "XLSXTable")
-    end
-    # 비우기
-    GAMEENV["xlsx"] = Dict("root" => GAMEENV["XLSXTable"])
-    @info ".xlsx 파일 참조 경로를 " * GAMEENV["XLSXTable"] * "로 변경하였습니다."
-
-    GAMEENV["xlsx"]
-end
-
 """
-git_ls_files
+    git_ls_files(repo)
+
+mars-client와 submodules들의 현재 커밋의 'git-ls-files' 리스트를 저장합니다
 """
 function git_ls_files()
     (git_ls_files("mars-client"), 

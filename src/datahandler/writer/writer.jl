@@ -111,14 +111,14 @@ end
 
 function backup()
     # 네트워크의 게임 데이터를 백업합니다
-    @assert startswith(GAMEENV["XLSXTable"], "G") "네트워크에 연결할 수 없어 XLSX 데이터 백업이 불가능 합니다"
+    @assert startswith(GAMEENV["xlsx"]["root"], "G") "네트워크에 연결할 수 없어 XLSX 데이터 백업이 불가능 합니다"
 
     println("../XLSXTable과 ../InkDialogue를 백업합니다")
-    for folder in ("XLSXTable", "InkDialogue")
+    for folder in ("xlsx", "ink")
         predicate = path -> (isdir(path) || endswith(path, r".xlsx|.xlsm|.ink"))
 
         f = "$folder.tar"
-        tarball = Tar.create(predicate, GAMEENV[folder], 
+        tarball = Tar.create(predicate, GAMEENV[folder]["root"], 
                         joinpath(GAMEENV["patch_data"], "_Backup/$f"))
 
         print(" $folder => ")

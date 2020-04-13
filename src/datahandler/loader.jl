@@ -15,6 +15,11 @@ function joinpath_gamedata(file)
         folder= GAMEENV["json"]["root"]
         p = get!(GAMEENV["json"], file, joinpath(folder, file))
         @assert isfile(p) "$(file) 은 $(folder)에 존재하지 않는 파일입니다. 파일명을 다시 확인해 주세요"
+    elseif is_inkfile(file)
+        folder= GAMEENV["ink"]["root"]
+        p = joinpath(folder, file)
+
+        @show isfile(p)
     else
         throw(AssertionError("$(file)은 지원하지 않습니다. excel 파일 혹은 .json 파일로 검색해 주세요"))
     end
