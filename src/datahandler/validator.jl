@@ -26,6 +26,9 @@ function validate_haskey(class, a; assert=true)
     elseif class == "Ability"
         jwb = XLSXTable(class; validation = false).data
         b = unique(get.(jwb[:Level], "AbilityKey", missing))
+    elseif class == "AbilityGroup"
+        jwb = XLSXTable("Ability"; validation = false).data
+        b = unique(get.(jwb[:Group], "GroupKey", missing))
     elseif class == "Block"
         jwb = XLSXTable(class; validation = false).data
         b = unique(get.(jwb[:Block], "Key", missing))
@@ -46,6 +49,9 @@ function validate_haskey(class, a; assert=true)
     elseif class == "QuestGroup"
         jwb = XLSXTable("Quest"; validation = false).data
         b = unique(get.(jwb[:Group], "Name", missing))
+    elseif class == "PrefabPointer"
+        jwb = XLSXTable("PrefabPointer"; validation = false).data
+        b = unique(get.(jwb[:Data], "Key", missing))
     else
         throw(AssertionError("validate_haskey($(class), ...)은 정의되지 않았습니다")) 
     end
@@ -382,7 +388,7 @@ function validate(bt::XLSXTable{:Flag})
     validate_haskey("Building", ref[:, j"/BuildingKey"])
 
     for row in ref
-        validate_questtrigger.(row["Condition"])
+        validate_usercondition.(row["Condition"])
     end
     nothing
 end
@@ -396,10 +402,11 @@ function validate(bt::XLSXTable{:Quest})
     if maximum(group[:, j"/Key"]) > 1023 || minimum(group[:, j"/Key"]) < 0
         throw(AssertionError("GroupKey는 0~1023만 사용 가능합니다."))
     end
+    CACHE[:usercondition] = parse_usercondition_trigger(bt["Condition"])
     # Trigger 정합성 검사
     for row in group
-        validate_questtrigger.(row["OrCondition"])
-        validate_questtrigger.(row["AndCondition"])
+        validate_usercondition.(row["OrCondition"])
+        validate_usercondition.(row["AndCondition"])
     end
 
     # Main시트 검사
@@ -408,7 +415,7 @@ function validate(bt::XLSXTable{:Quest})
         throw(AssertionError("MemberKey는 1~9만 사용 가능합니다."))
     end
     for row in member
-        validate_questtrigger.(row["CompleteCondition"])
+        validate_usercondition.(row["CompleteCondition"])
     end
     # RewardKey 존재 여부
     rewards = get.(member[:, j"/CompleteAction"], "RewardKey", missing)
@@ -426,84 +433,56 @@ function validate(bt::XLSXTable{:Store})
     for row in jws
         # Type이 Server면 별도로 검사 필요
         if row[j"/OpenCondition/Type"] == "User"
-            validate_questtrigger.(row[j"/OpenCondition/And"])
+            validate_usercondition.(row[j"/OpenCondition/And"])
         end
     end
     nothing
 end
 
-
-"""
-
-    validate_questtrigger(arr::Array)
-
-https://www.notion.so/devsisters/b5ea3e51ae584f4491b40b7f47273f49
-https://docs.google.com/document/d/1yvzWjz_bziGhCH6TdDUh0nXAB2J1uuHiYSPV9SyptnA/edit
-
-* 사용 가능한 trigger인지, 변수가 올바른 형태인지 체크한다
-"""
-function validate_questtrigger(x::Array{T, 1}) where T
-    trigger = Dict(
-        "SiteCount"                    => (:equality, :number),
-        "ResidenceCount"               => (:equality, :number),
-        "ShopCount"                    => (:equality, :number),
-        "AttractionCount"              => (:equality, :number),
-        "Coin"                         => (:equality, :number),
-        "UserLevel"                    => (:equality, :number),
-        "MaxSegmentLevelByUseType"     => (:number,     :equality, :number),
-        "MaxSegmentLevelByBuildingKey" => (:buildingkey,:equality, :number),
-        "OwnedItem"                    => (:itemkey,    :equality, :number),
-        "CoinCollecting"               => (:equality,   :number),
-        "CoinPurchasing"               => (:equality, :number),
-        "AbilityLevel"                 => (:abilitykey, :equality, :number),
-        "OwnedPipoCount"               => (:equality, :number),
-        "CompletePartTime"             => (:equality, :number),
-        "CompleteDelivery"             => (:equality, :number),
-        "CompleteBlockEdit"            => (:equality, :number),
-        "JoyCollecting"                => (:equality, :number),
-        "BuildingSeedBuyCount"         => (:buildingkey, :equality, :number),
-        "SingleKeyBuyCount"            => (:buycount, :equality, :number),
-        "EneriumDecompositionCount"    => (:equality, :number),
-        "CompleteQuestGroup"           => (:questgroupname, ),
-        "PrefabPointer"                => (:prefabpointerkey, :equality,:number)
-        )
-
-    ref = get(trigger, string(x[1]), missing)
-    
-    @assert !isnull(ref) "`$(x[1])`는 존재하지 않는 trigger입니다."
-    @assert length(ref) == length(x[2:end]) "$(x) 변수의 수가 다릅니다"
-
-    for (i, el) in enumerate(x[2:end])
-        b = false
-        checker = ref[i]
-        # TODO validate_haskey 로 변경
-        b = if checker == :equality
-                in(el, ("<","<=","=",">=",">"))
-            elseif checker == :number
-                all(isdigit.(collect(el)))
-            elseif checker == :buildingkey
-                validate_haskey("Building", [el])
-                true
-            elseif checker == :abilitykey
-                validate_haskey("Ability", [el])
-                true
-            elseif checker == :itemkey
-                validate_haskey("ItemTable", [parse(Int, el)])
-                true
-            elseif checker == :buycount
-                el == "SiteCleaner"
-            elseif checker == :questgroupname # TODO
-                validate_haskey("QuestGroup", [el])
-                true
-            elseif checker == :prefabpointerkey #TODO
-                true 
-            else
-                throw(ArgumentError(string(checker, "가 validate_questtrigger에 정의되지 않았습니다.")))
+function parse_usercondition_trigger()
+    ref = Table("Quest"; readfrom=:JSON)["Condition"]
+end
+function parse_usercondition_trigger(ref)
+    d = Dict()
+    # Condition 리스트 생성
+    for row in ref
+        k = row["Key"]
+        d[k] = []
+        for p in skipmissing(row["#Param"])
+            if startswith(p, "r\"")
+                x = Regex(chop(p, head=2, tail=1))
+            elseif startswith(p, "::")
+                x = Symbol(chop(p, head=2, tail=0))
+            else 
+                x = split(p, ",")
             end
-
-        @assert b "$(x), $(el)이 trigger 조건에 부합하지 않습니다"
+            push!(d[k], x)
+        end
     end
-
-    nothing
+    return d
 end
 
+function validate_usercondition(x::Array{T, 1}) where T
+    ref = get!(CACHE, :usercondition, parse_usercondition_trigger())
+
+    param = ref[x[1]]
+
+    for (i, checker) in enumerate(param)
+        subject = x[i+1]
+        b = if isa(checker, Array)
+            in(subject, checker)
+        elseif isa(checker, Regex)
+            # 있으면 안되는걸 정규식으로 기입
+            !occursin(checker, subject)
+        elseif isa(checker, Symbol)
+            validate_haskey(string(checker), [subject])
+            true
+        else
+            throw(ArgumentError("$(checker)가 parse_usercondition_trigger에서 정의되지 않았습니다."))
+        end
+
+        @assert b "$(x)의 $(subject)이 trigger 조건에 부합하지 않습니다"
+    end
+   
+    nothing
+end
