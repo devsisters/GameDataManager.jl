@@ -3,7 +3,7 @@
 
 '../InkDialogue'의 모든 하위폴더의 '.ink' 파일 중 수정된 파일을 찾아 json으로 변환합니다
 """
-ink(everything::Bool = false) = convert_ink(GAMEENV["InkDialogue"], everything)
+ink(everything::Bool = false) = convert_ink(GAMEENV["ink"]["root"], everything)
 """
     ink(subfolder, everything = false)
 
@@ -13,7 +13,7 @@ ink(everything::Bool = false) = convert_ink(GAMEENV["InkDialogue"], everything)
 everything : 'true'면 모든 ink파일을 변환합니다
 """
 function ink(subfolder, everything::Bool = false) 
-    convert_ink(joinpath(GAMEENV["InkDialogue"], subfolder), everything)
+    convert_ink(joinpath(GAMEENV["ink"]["root"], subfolder), everything)
 end
 function convert_ink(root, everything)
     inklecate = joinpath(dirname(pathof(GameDataManager)), "../deps/ink/inklecate.exe")
@@ -30,7 +30,14 @@ function convert_ink(root, everything)
     for input in targets 
         # Template 파일은 _으로 시작
         if !startswith(basename(input), "_")
-            output = replace(chop(input, head=0, tail=4), GAMEENV["InkDialogue"] => output_folder)
+            output = replace(chop(input, head=0, tail=4), GAMEENV["ink"]["root"] => output_folder)
+
+            invalid_functions = validate_ink(input)
+            if !isempty(invalid_functions)
+                print("      TODO: validate_ink // ")
+                println(invalid_functions[1]) 
+            end
+
             if Sys.iswindows()
                 cmd = `$inklecate -o "$output.json" "$input"`
             else 
@@ -49,4 +56,24 @@ function convert_ink(root, everything)
         print_section("ink 추출이 완료되었습니다 ☺", "DONE"; color = :cyan)
     end
     nothing
+end
+
+"""
+    validate_ink(file)
+
+#TODO
+- valida 하지 않은 함수만 모아서 line 번호와 함께 반환할 것
+"""
+function validate_ink(file::AbstractString)
+    io = read(file, String)
+    # @ ......;  함수들
+    custom_functions = eachmatch(r"\@(.*?)(?=[\t|\r|\n|;])", io)
+
+    report = []
+    for el in custom_functions
+        s = el.captures[1]
+        func = split(s, r"\s")
+        push!(report, [join(func, ", ")])
+    end
+    return report
 end
