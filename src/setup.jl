@@ -12,7 +12,6 @@ function setup!(marsrepo = get(ENV, "MARS_CLIENT", ""))
     include(joinpath(dirname(Base.find_package("GameDataManager")), "_startup.jl"))
     let 
         using Pkg
-        Pkg.setprotocol!(domain = "github.com", protocol = "ssh")
         checkout_GameDataManager()
     end
     using GameDataManager
