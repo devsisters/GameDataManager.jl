@@ -8,15 +8,16 @@ function setup!(marsrepo = get(ENV, "MARS_CLIENT", ""))
 
     marsrepo = replace(marsrepo, "\\" => "/")
     f = joinpath(DEPOT_PATH[1], "config/juno_startup.jl")
-    startup = """
-    include(joinpath(dirname(Base.find_package("GameDataManager")), "_startup.jl"))
-    let 
-        using Pkg
-        checkout_GameDataManager()
+    open(f, "w") do io 
+            write(io, """
+        include(joinpath(dirname(Base.find_package("GameDataManager")), "_startup.jl"))
+        let 
+            using Pkg
+            checkout_GameDataManager()
+        end
+        using GameDataManager
+        """)
     end
-    using GameDataManager
-    """    
-    write(f, startup)
 
     @info "\"$(f)\"을 성공적으로 생성하였습니다\n\tAtom을 종료 후 다시 시작해 주세요."
 end
