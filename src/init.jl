@@ -1,6 +1,10 @@
 const GAMEENV = Dict{String, Any}()
 const GAMEDATA = Dict{String, Table}()
-const CACHE = Dict{Symbol, Any}()
+const CACHE = Dict{Symbol, Any}(
+        :meta => missing,
+        :xlsxlog => missing,
+        :validation => true, 
+        :git => Dict())
 
 function __init__()
     if haskey(ENV, "GITHUB_WORKSPACE")
@@ -18,11 +22,8 @@ function __init__()
             setup!()
             write(logfile, JSON.json(Dict()))
         end
-
         CACHE[:meta] = loadmeta()
         CACHE[:xlsxlog] = init_xlsxlog()
-        CACHE[:validation] = true
-        CACHE[:git] = Dict()
         help()
     end
     nothing

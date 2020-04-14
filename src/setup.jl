@@ -83,7 +83,7 @@ function extract_backupdata()
     end
     Tar.extract(tarfile, target)
     print(" Extract => ")
-    printstyled(normpath(target); color=:blue)
+    printstyled(normpath(target), "\n"; color=:blue)
 
 end
 
@@ -119,8 +119,9 @@ function git_ls_files(repo)
 
     if reload
         run(pipeline(`git rev-parse HEAD` & `git ls-files`, stdout = out))
-    end
+        delete!(CACHE[:git], repo)
+    end 
 
-    return readlines(out)
+    return get!(CACHE[:git], repo, readlines(out))
 end
 
