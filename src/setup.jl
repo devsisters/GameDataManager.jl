@@ -97,30 +97,35 @@ function git_ls_files()
      git_ls_files("mars_art_assets"))
 end
 function git_ls_files(repo)
-    path = GAMEENV[repo]
-    cd(path)
+    githubCI = haskey(ENV, "GITHUB_WORKSPACE")
+    if githubCI # GithubCI에서는 미리 복사해둔 로그파일 사용
+        filelog = joinpath(dirname(pathof(GameDataManager)), "../test/validation/git_ls-files_$repo.txt")
+    else
+        path = GAMEENV[repo]
+        cd(path)
 
-    cache_folder = replace(GAMEENV["cache"], path * "/" => "")
-    out = joinpath(cache_folder, "git_ls-files_$repo.txt")
+        cache_folder = replace(GAMEENV["cache"], path * "/" => "")
+        filelog = joinpath(cache_folder, "git_ls-files_$repo.txt")
 
-    # HEAD가 다를 때만 git ls-files 실행
-    reload = true
-    if isfile(out)
-        hash =  read(`git rev-parse HEAD`, String)
-        
-        open(out, "r") do io 
-            x = readuntil(io, '\n', keep = true)
-            if x == hash
-                reload = false
+        # HEAD가 다를 때만 git ls-files 실행
+        reload = true
+        if isfile(filelog)
+            hash =  read(`git rev-parse HEAD`, String)
+            
+            open(filelog, "r") do io 
+                x = readuntil(io, '\n', keep = true)
+                if x == hash
+                    reload = false
+                end
             end
         end
+
+        if reload
+            run(pipeline(`git rev-parse HEAD` & `git ls-files`, stdout = filelog))
+            delete!(CACHE[:git], repo)
+        end 
     end
 
-    if reload
-        run(pipeline(`git rev-parse HEAD` & `git ls-files`, stdout = out))
-        delete!(CACHE[:git], repo)
-    end 
-
-    return get!(CACHE[:git], repo, readlines(out))
+    return get!(CACHE[:git], repo, readlines(filelog))
 end
 
