@@ -7,7 +7,7 @@ const CACHE = Dict{Symbol, Any}(
         :git => Dict())
 
 function __init__()
-    if haskey(ENV, "GITHUB_WORKSPACE")
+    if haskey(ENV, "GITHUB_WORKSPACE") #configulatrion for Github Action
         ENV["MARS_CLIENT"] = joinpath(ENV["GITHUB_WORKSPACE"], "mars-client")
         
         extract_backupdata()
