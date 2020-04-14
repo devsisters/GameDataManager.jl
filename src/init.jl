@@ -7,7 +7,8 @@ const CACHE = Dict{Symbol, Any}(
         :git => Dict())
 
 function __init__()
-    if haskey(ENV, "GITHUB_WORKSPACE") #configulatrion for Github Action
+    github_env = haskey(ENV, "GITHUB_WORKSPACE")
+    if github_env
         ENV["MARS_CLIENT"] = joinpath(ENV["GITHUB_WORKSPACE"], "mars-client")
         
         extract_backupdata()
@@ -19,8 +20,10 @@ function __init__()
         if isfile(logfile)
             # log = JSON.parsejson(logfile)
         else 
-            setup!()
-            write(logfile, JSON.json(Dict()))
+            if !github_env
+                setup!()
+                write(logfile, JSON.json(Dict()))
+            end
         end
         CACHE[:meta] = loadmeta()
         CACHE[:xlsxlog] = init_xlsxlog()
