@@ -114,14 +114,17 @@ function backup()
     @assert startswith(GAMEENV["xlsx"]["root"], "G") "네트워크에 연결할 수 없어 XLSX 데이터 백업이 불가능 합니다"
 
     println("../XLSXTable과 ../InkDialogue를 백업합니다")
-    for folder in ("xlsx", "ink")
-        predicate = path -> (isdir(path) || endswith(path, r".xlsx|.xlsm|.ink"))
+    for filetype in ("xlsx", "ink")
+        predicate = path -> (!startswith(path, "~\$")  && (isdir(path) || endswith(path, r".xlsx|.xlsm|.ink")))
 
-        f = "$folder.tar"
-        tarball = Tar.create(predicate, GAMEENV[folder]["root"], 
-                        joinpath(GAMEENV["patch_data"], "_Backup/$f"))
+        source = GAMEENV[filetype]["root"]
+        foldername = basename(source)
 
-        print(" $folder => ")
+        f = "$foldername.tar"
+        tarball = Tar.create(predicate, GAMEENV[filetype]["root"], 
+                        joinpath(GAMEENV["patch_data"], "_Backup/$foldername.tar"))
+
+        print(" $foldername => ")
         printstyled(tarball, "\n"; color=:blue)
     end
 

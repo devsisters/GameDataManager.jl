@@ -59,7 +59,6 @@ function setup_env!()
             """
             GAMEENV["xlsx"] = Dict("root" => joinpath(GAMEENV["patch_data"], "_Backup/XLSXTable"))
             GAMEENV["ink"] = Dict("root" => joinpath(GAMEENV["patch_data"], "_Backup/InkDialogue"))
-
         else 
             GAMEENV["xlsx"] = Dict("root" => joinpath(GAMEENV["NetworkFolder"], "XLSXTable"))
             GAMEENV["ink"] = Dict("root" => joinpath(GAMEENV["NetworkFolder"], "InkDialogue"))
