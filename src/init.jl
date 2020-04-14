@@ -11,13 +11,19 @@ function __init__()
     s = setup_env!()
 
     if s
+        logfile = joinpath(GAMEENV["cache"], "updatelog.json")
+        if isfile(logfile)
+            # log = JSON.parsejson(logfile)
+        else 
+            setup!()
+            write(logfile, JSON.json(Dict()))
+        end
+
         CACHE[:meta] = loadmeta()
         CACHE[:xlsxlog] = init_xlsxlog()
         CACHE[:validation] = true
         CACHE[:git] = Dict()
-        if !endswith(get(ENV, "LOGONSERVER" ,""), "YONGHEEKIM")
-            help()
-        end
+        help()
     end
     nothing
 end
