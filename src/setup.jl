@@ -101,16 +101,14 @@ function git_ls_files(repo)
     if githubCI # GithubCI에서는 미리 복사해둔 로그파일 사용
         filelog = joinpath(dirname(pathof(GameDataManager)), "../test/validation/git_ls-files_$repo.txt")
     else
-        path = GAMEENV[repo]
-        cd(path)
-
-        cache_folder = replace(GAMEENV["cache"], path * "/" => "")
-        filelog = joinpath(cache_folder, "git_ls-files_$repo.txt")
+        filelog = joinpath(GAMEENV["cache"], "git_ls-files_$repo.txt")
 
         # HEAD가 다를 때만 git ls-files 실행
+        cd(GAMEENV[repo]) # git 명령어를 위해 경로 이동
+
         reload = true
         if isfile(filelog)
-            hash =  read(`git rev-parse HEAD`, String)
+            hash = read(`git rev-parse HEAD`, String)
             
             open(filelog, "r") do io 
                 x = readuntil(io, '\n', keep = true)
@@ -129,3 +127,26 @@ function git_ls_files(repo)
     return get!(CACHE[:git], repo, readlines(filelog))
 end
 
+""" 
+    release()
+
+그냥 GoogleDrive에 패키지 업데이트하는 기능...
+나중에 version도 맞춰주는거 추가 할 것
+"""
+function release()
+    # Test데이터 준비
+    outpath = joinpath(dirname(pathof(GameDataManager)), "../test/validation")
+    git_ls_files()
+    for repo in ("mars-client", "patch_data", "mars_art_assets")
+        file = "git_ls-files_$repo.txt"
+        f = joinpath(GAMEENV["cache"], file)
+        cp(joinpath(GAMEENV["cache"], file), joinpath(outpath, file); force = true)
+    end
+
+    root = joinpath(GAMEENV["NetworkFolder"], ".tools")
+    for pkg in ("GameItemBase", "GameBalanceManager", "GameDataManager")
+        cd(joinpath(root, pkg))
+        run(`git pull`)
+    end
+    
+end
