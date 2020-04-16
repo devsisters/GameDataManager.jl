@@ -24,7 +24,11 @@ function checkout_GameDataManager()
                 target = joinpath(tempdir(), "$pkgname")
                 cp(dir, target; force=true)
                 sleep(0.9)
-                Pkg.add(target)
+                try 
+                    Pkg.add(PackageSpec(path=target))
+                catch e
+                    @show e
+                end
             end
         end
     end
