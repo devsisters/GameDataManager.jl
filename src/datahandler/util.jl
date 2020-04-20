@@ -101,3 +101,39 @@ function openxl(file::AbstractString)
     end
     nothing
 end
+
+function lsfiles()
+    x = git_ls_files()
+
+    # commit 해시
+    msg = "MARS_CLIENT:$(x[1][1][1:8])... / patch-data:$(x[2][1][1:8])... / ArtAssets:$(x[3][1][1:8])...\n"
+
+    # filelist 
+    mars_client = filter(el -> startswith(el, "unity"), x[:mars_client])
+    patch_data = "patch-data" .* x[:patch_data]
+    mars_art_assets = "unity/Assets/4_ArtAssets" .* x[:mars_art_assets]
+
+    filelist = [mars_client[2:end]; patch_data[2:end]; mars_art_assets[2:end]]
+
+    data = filter(el -> !(startswith(el, ".") || endswith(el, r".meta|.cs")), filelist)
+
+    output = joinpath(GAMEENV["cache"], "filelist.tsv")
+    open(output, "w") do io 
+        write(io, "Path", '\t', "FileName", '\t', "Extension", '\n')
+
+        for row in data
+            dir = dirname(row)
+            file = basename(row)
+            if occursin(".", file)
+                file = split(file, ".")
+                write(io, dir, '\t', file[1], '\t', file[2])
+            else 
+                write(io, dir, '\t', file)
+            end
+            write(io, '\n')
+        end
+    end
+    print(msg)
+    print(" filelist => ")
+    printstyled(normpath(output); color=:blue)
+end

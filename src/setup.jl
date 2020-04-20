@@ -92,9 +92,9 @@ end
 mars-client와 submodules들의 현재 커밋의 'git-ls-files' 리스트를 저장합니다
 """
 function git_ls_files()
-    (git_ls_files("mars-client"), 
-     git_ls_files("patch_data"),
-     git_ls_files("mars_art_assets"))
+    (mars_client = git_ls_files("mars-client"), 
+    patch_data = git_ls_files("patch_data"),
+    mars_art_assets = git_ls_files("mars_art_assets"))
 end
 function git_ls_files(repo)
     githubCI = haskey(ENV, "GITHUB_WORKSPACE")

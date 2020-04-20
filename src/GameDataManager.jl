@@ -37,6 +37,6 @@ export GAMEENV, GAMEDATA, help, setup!,
        ink,
        
        # 유틸리티
-       @j_str, findblock, get_buildings, get_blocks
+       @j_str, findblock, get_buildings, get_blocks, lsfiles
 
 end
