@@ -195,7 +195,7 @@ function Base.show(io::IO, bt::JSONTable)
 end
 
 """
-    xlookup(worksheet, value, lookup_col, return_col; 
+    xlookup(value, jws::JSONWorksheet, lookup_col::JSONPointer, return_col::JSONPointer; 
                 find_mode = findfirst, operator = isequal)
 
 https://support.office.com/en-us/article/xlookup-function-b7fd680e-6d10-43e6-84f9-88eae8bf5929
