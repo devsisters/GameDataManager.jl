@@ -1,5 +1,15 @@
 using GameItemBase
 
+
+@testset "User와 Village 구조체" begin 
+    u = User() 
+    @test isa(u, User)
+
+    v = u.villagerecordset[1]
+    isa(v, Village)
+end
+
+
 @testset "Currency 타입" begin
 
     @test isa(COIN, Monetary{:COIN})
@@ -89,17 +99,12 @@ end
 
     end
 end
-@testset "EnergyMix 구매" begin
-    u = User()
-    v = u.villagerecordset[1]
-    for i in 1:1000
-        p = GameItemBase.decomposeenerium_price(u)
-        @test GameItemBase.decomposeenerium!(u, v) == false
-        # add!(u, p)
-        # @test GameItemBase.decomposeenerium!(u, v)
 
-    end
+@testset "EnergyMix 구매" begin
+
 end
+
+
 
 
 @testset "SiteCleaner 사용" begin
