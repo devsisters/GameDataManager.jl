@@ -1,4 +1,4 @@
-9297a14d26d05dfc4cd48a62dcea00f470826eea
+3afa6117581e895555074adc66e557983c36d424
 .cache/.gitkeep
 .gitattributes
 .gitconfig
@@ -137,6 +137,16 @@ BuildTemplate/Buildings/Special/coinvault.json
 BuildTemplate/Buildings/Special/infrastructure.json
 Config/CameraRigConfig.json
 Config/SceneLoadConfigRepo.json
+Continents/Continent_0.json
+Continents/Islands/191010-19-18448.json
+Continents/Islands/191010-19-18448.png
+Continents/Islands/191010-19-18448_preview.png
+Continents/Islands/191010-19-18448_report.txt
+Continents/Islands/191104-15-14042.json
+Continents/Islands/191104-15-14042.png
+Continents/Islands/191104-15-14042_preview.png
+Continents/Islands/191104-15-14042_report.txt
+Continents/Islands/200310_tutorial_island.png
 Dialogue/Intro_1.json
 Dialogue/Intro_2.json
 Dialogue/Intro_3.json
@@ -647,8 +657,8 @@ Tables/PipoTalent_Perk.json
 Tables/PipoTalent_Type.json
 Tables/Pipo_Price.json
 Tables/Pipo_Setting.json
+Tables/Player_BonusGrade.json
 Tables/Player_DevelopmentLevel.json
-Tables/Player_TourismGrade.json
 Tables/PrefabPointer_Data.json
 Tables/ProfileImageFileList.json
 Tables/Quest_Condition.json
@@ -678,10 +688,10 @@ Tables/UserBot_Name.json
 Tables/UserBot_VillageInfo.json
 Tables/VillageTokenTable_Data.json
 Tables/Village_AppealLevel.json
+Tables/Village_BonusGrade.json
 Tables/Village_Grade.json
 Tables/Village_SiteCleanerPrice.json
 Tables/Village_SitePrice.json
-Tables/Village_TourismGrade.json
 Tables/Village_VillagePrice.json
 Tables/VillagerTalk_Emoticon.json
 Tables/VillagerTalk_Festival.json
