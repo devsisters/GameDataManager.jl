@@ -127,5 +127,6 @@ function backup()
         print(" $foldername => ")
         printstyled(tarball, "\n"; color=:blue)
     end
-
+    cd(GAMEENV["patch_data"])
+    run(`git commit *.tar -m "PatchDataOrigin 백업"`)
 end
