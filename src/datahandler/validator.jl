@@ -145,7 +145,8 @@ function validate(bt::XLSXTable{:Block})
     if isfile(magnet_file)
         magnet = filter(x -> startswith(x, "  - Key:"), readlines(magnet_file))
         magnetkey = unique(broadcast(x -> split(x, "Key: ")[2], magnet))
-        missing_key = setdiff(unique(block[:, j"/TemplateKey"]), magnetkey)
+        missing_key = setdiff(lowercase.(unique(block[:, j"/TemplateKey"])), lowercase.(magnetkey))
+        
         if !isempty(missing_key)
             @warn "다음 Block TemplateKey가 $(magnet_file)에 없습니다 \n $(missing_key)"
         end
