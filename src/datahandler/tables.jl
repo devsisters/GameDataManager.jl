@@ -204,6 +204,10 @@ https://support.office.com/en-us/article/xlookup-function-b7fd680e-6d10-43e6-84f
 - operator: 비교 함수 `==`, `<=`, `>=` 사용 가능
 - find_mode: `findfirst`, `findlast`, `findall` 사용 가능
 
+## Examples
+- xlookup(2001, Table("ItemTable")["BuildingSeed"], j"/Key", j"/\$Name")
+- xlookup("SES_4", Table("Ability")["Level"], j"/AbilityKey", :; find_mode = findall)
+- xlookup("ShopEnergyStash", Table("Ability")["Level"], j"/Group", j"/Value1"; operator = >=, find_mode = findall)
 """
 function xlookup(value, jws::JSONWorksheet, 
                     lookup_col, return_col; kwargs...)
@@ -231,5 +235,5 @@ function xlookup(value,
 end
 
 @memoize Dict function _xlookup_findindex(value, jws, lookup_col, find_mode, operator)
-    idx = find_mode(el -> operator(el[lookup_col], value), jws.data)
+    find_mode(el -> operator(el[lookup_col], value), jws.data)
 end
