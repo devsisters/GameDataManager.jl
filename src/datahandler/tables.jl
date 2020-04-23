@@ -205,22 +205,20 @@ https://support.office.com/en-us/article/xlookup-function-b7fd680e-6d10-43e6-84f
 - find_mode: `findfirst`, `findlast`, `findall` 사용 가능
 
 """
-@memoize Dict function xlookup(args...;kwargs...)
-    _xlookup(args...;kwargs...)
-end
-
-function _xlookup(value, jws::JSONWorksheet, 
+function xlookup(value, jws::JSONWorksheet, 
                     lookup_col, return_col; kwargs...)
-    _xlookup(value, jws, XLSXasJSON.JSONPointer(lookup_col), XLSXasJSON.JSONPointer(return_col); kwargs...)
+    xlookup(value, jws, XLSXasJSON.JSONPointer(lookup_col), XLSXasJSON.JSONPointer(return_col); kwargs...)
 end
-function _xlookup(value, 
-    jws::JSONWorksheet, lookup_col::XLSXasJSON.JSONPointer, return_col::XLSXasJSON.JSONPointer; 
+function xlookup(value, 
+    jws::JSONWorksheet, lookup_col::XLSXasJSON.JSONPointer, return_col; 
     find_mode::Function = findfirst, operator::Function = isequal)
 
     @assert haskey(jws, lookup_col) "$(lookup_col)은 존재하지 않습니다"
-    @assert haskey(jws, return_col) "$(return_col)은 존재하지 않습니다"
+    if isa(return_col, XLSXasJSON.JSONPointer)
+        @assert haskey(jws, return_col) "$(return_col)은 존재하지 않습니다"
+    end
 
-    idx = find_mode(el -> operator(el[lookup_col], value), jws.data)
+    idx = _xlookup_findindex(value, jws, lookup_col, find_mode, operator)
 
     if isnothing(idx)
         r = nothing 
@@ -232,3 +230,6 @@ function _xlookup(value,
     return r
 end
 
+@memoize Dict function _xlookup_findindex(value, jws, lookup_col, find_mode, operator)
+    idx = find_mode(el -> operator(el[lookup_col], value), jws.data)
+end
