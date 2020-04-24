@@ -234,6 +234,6 @@ function xlookup(value,
     return r
 end
 
-@memoize Dict function _xlookup_findindex(value, jws, lookup_col, find_mode, operator)
+@memoize function _xlookup_findindex(value, jws, lookup_col, find_mode, operator)
     find_mode(el -> operator(el[lookup_col], value), jws.data)
 end
