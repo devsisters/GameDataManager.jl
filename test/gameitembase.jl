@@ -7,6 +7,44 @@ using GameItemBase
 
     v = u.villagerecordset[1]
     isa(v, Village)
+    GameItemBase.getowner(v) === u
+end
+
+@testset "SiteCleaner 구매" begin
+    u = User()
+    @test get(u, COIN) == zero(COIN)
+    @test get(u, SITECLEANER) == zero(SITECLEANER)
+    for i in 1:50
+        price = GameItemBase.sitecleaner_price(u)
+        
+        @test GameItemBase.buysitecleaner!(u, 1) == false 
+        add!(u, price)
+        @test GameItemBase.buysitecleaner!(u, 1) 
+    
+    end
+    @test get(u, SITECLEANER) == 50 * SITECLEANER
+
+end
+
+@testset "사이트 구매" begin
+    u = User()
+
+    candidate = GameItemBase.get_cleanablesites(homevillage(u))
+    
+    for x in candidate
+        @test buysite!(u, homevillage(u), x) == false
+
+        buy_cleaner_count = areas(x)
+        price = GameItemBase.sitecleaner_price(u, buy_cleaner_count)
+        add!(u, price)
+        @test has(u, price)
+        @test GameItemBase.buysitecleaner!(u, buy_cleaner_count) 
+        @test has(u, price) == false 
+
+        @test buysite!(u, homevillage(u), x)
+    end
+
+    # @test get(u, SITECLEANER) == 50 * SITECLEANER
 end
 
 
@@ -81,22 +119,6 @@ end
         @test remove!(u, items)
         @test has(u, items) == false 
         @test remove!(u, items) == false
-    end
-end
-
-# 유저 정보 유지
-@testset "SiteCleaner 구매" begin
-    u = User()
-    @test get(u, COIN) == zero(COIN)
-    @test get(u, SITECLEANER) == zero(SITECLEANER)
-    for i in 1:1000
-        price = GameItemBase.sitecleaner_price(u)
-        
-        add!(u, price)
-        
-        @test GameItemBase.buysitecleaner!(u, 1) == false 
-
-
     end
 end
 
