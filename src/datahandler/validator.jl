@@ -52,8 +52,16 @@ function validate_haskey(class, a; assert=true)
     elseif class == "PrefabPointer"
         jwb = XLSXTable("PrefabPointer"; validation = false).data
         b = unique(get.(jwb[:Data], "Key", missing))
+    elseif class == "SiteBonus"
+        jwb = XLSXTable("SiteBonus"; validation = false).data
+        b = unique(jwb[:Data][:, j"/BonusKey"])
     else
         throw(AssertionError("validate_haskey($(class), ...)은 정의되지 않았습니다")) 
+    end
+    if eltype(a) != eltype(b)
+        if eltype(b) <: Int
+            a = parse.(Int, a)
+        end
     end
         
     validate_subset(a, b;msg = "'$(class)'에 다음 Key가 존재하지 않습니다", assert = assert)
