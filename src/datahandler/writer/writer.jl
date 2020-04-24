@@ -128,6 +128,5 @@ function backup()
         printstyled(tarball, "\n"; color=:blue)
     end
     cd(GAMEENV["patch_data"])
-    cmd = "git commit *.tar -m \"PatchDataOrigin 백업\""
-    run(`$cmd`)
+    run(`git commit \*.tar \-m PatchDataOrigin_백업`)
 end
