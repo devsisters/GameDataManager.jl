@@ -17,7 +17,7 @@ include("datahandler/tables.jl")
 include("datahandler/validator.jl")
 include("datahandler/util.jl")
 
-#######  DataHandler      ##########################################
+#=■■■◤  DataHandler  ◢■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■=#
 include("init.jl")
 include("setup.jl")
 include("datahandler/loader.jl")
