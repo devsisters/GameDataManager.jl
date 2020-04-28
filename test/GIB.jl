@@ -219,36 +219,37 @@ end
 
     @testset "Building건설 - Shop과 Residence" begin
         for k in ("sWaterStore", "sIcecream", "sFashion",
-            "sDiner", "sJewelry", "sChineseRestaurant")
+                  "sDiner", "sJewelry", "sChineseRestaurant", 
+                  "rHealingCamp", "rAutoCamp", "rVintageCottage", 
+                  "rHillsideMansion", "rWestfieldVilla", "rCherryBlossomVilla")
+            devpoint_before = homevillage(u).villagerecord[:DevelopmentPoint]
+            devpoint = GameItemBase.get_levelreward(Building(k))["DevelopmentPoint"]
+
             bs = BuildingSeed(k)
             @test build!(u, k) == false
             add!(u, bs)
 
             @test build!(u, k)
-            @test has(u, bs) == false
-        end
-
-        # 일단 면적 전체는 말고 하드코딩된 일부 건물
-        for k in ("rHealingCamp", "rAutoCamp", "rVintageCottage", 
-            "rHillsideMansion", "rWestfieldVilla", "rCherryBlossomVilla")
-            bs = BuildingSeed(k)
-            @test build!(u, k) == false
-            add!(u, bs)
-
-            @test build!(u, k)
+            @test devpoint_before + devpoint == homevillage(u).villagerecord[:DevelopmentPoint]
             @test has(u, bs) == false
         end
     end
-
 
     @testset "Building건설 - Attraction" begin
-    # 특수건물 4종
-    for k in ("pEnergyMixLab","pWelcomeCenter",
-                "pSpaceDrop", "pDeliveryCenter")
-        @test has(u, BuildingSeed(k))
-        @test build!(u, k)
-        @test !has(u, BuildingSeed(k))
-    end
+        # 제일 큰 6x6은 제외
+        for k in ("aAttraction2x1", "aAttraction2x2", "aAttraction2x4", 
+                  "aAttraction3x3", "aAttraction3x4", "aAttraction4x4")
+            bonuspoint_before = homevillage(u).villagerecord[:SiteBonusBasePoint]
+            bonuspoint = GameItemBase.get_levelreward(Building(k))["DailyVillageBonusPoint"]
+
+            bs = BuildingSeed(k)
+            @test build!(u, k) == false
+            add!(u, bs)
+
+            @test build!(u, k)
+            @test bonuspoint_before + bonuspoint == homevillage(u).villagerecord[:SiteBonusBasePoint]
+            @test has(u, bs) == false
+        end
     end
 end
 
