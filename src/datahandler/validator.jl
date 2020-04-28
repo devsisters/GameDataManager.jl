@@ -445,7 +445,7 @@ function validate(bt::XLSXTable{:Store})
 end
 
 function parse_usercondition_trigger()
-    ref = Table("Quest"; readfrom=:JSON)["Condition"]
+    ref = Table("Quest"; validation = false)["Condition"]
 end
 function parse_usercondition_trigger(ref)
     d = Dict()
