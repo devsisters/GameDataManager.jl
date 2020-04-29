@@ -113,6 +113,7 @@ end
     end
 end
 
+
 @testset "사이트 구매 및 건물 건설" begin 
     @testset "BuildingSeed 구매" begin
         u = User()
@@ -177,7 +178,6 @@ end
             enerium_after = get(homevillage(u), GameItemBase.ENERIUM)
             @test enerium_before + (areas(x) * GameItemBase.ENERIUM) == enerium_after
         end
-
     end
 
     @testset "Energy 구매" begin
@@ -236,23 +236,56 @@ end
     end
 
     @testset "Building건설 - Attraction" begin
-        # 제일 큰 6x6은 제외
+        #  4x4, 6x6은 제외
         for k in ("aAttraction2x1", "aAttraction2x2", "aAttraction2x4", 
-                  "aAttraction3x3", "aAttraction3x4", "aAttraction4x4")
-            bonuspoint_before = homevillage(u).villagerecord[:SiteBonusBasePoint]
+                  "aAttraction3x3", "aAttraction3x4")
+            bonuspoint_before = homevillage(u).villagerecord[:AttractionBonusPoint]
             bonuspoint = GameItemBase.get_levelreward(Building(k))["DailyVillageBonusPoint"]
-
+            
             bs = BuildingSeed(k)
             @test build!(u, k) == false
             add!(u, bs)
 
             @test build!(u, k)
-            @test bonuspoint_before + bonuspoint == homevillage(u).villagerecord[:SiteBonusBasePoint]
+            @test bonuspoint_before + bonuspoint == homevillage(u).villagerecord[:AttractionBonusPoint]
             @test has(u, bs) == false
         end
     end
 end
 
+@testset "사이트보너스" begin
+    # User의 건물을 SiteBonus를 기준으로 재배열
+    u = User()
+    # prepare for 
+    add!(u, 10000*SITECLEANER)
+    add!(u, 10000*COIN)
+    for i in 1:6
+        @test buysite!(u)
+    end
+    for i in 1:13
+        @test buyenergy!(u)
+    end
+
+    # 현재 테스트 유저가 가질 수 있는 보너스만
+    target_sitebonuskey = [1,2,3,4,15,16,17,18]
+    total_point = sum(k -> xlookup(k, Table("SiteBonus")["Data"], j"/BonusKey", j"/Reward/DailyVillageBonusPoint"), target_sitebonuskey)
+    for i in target_sitebonuskey
+        req = GameItemBase.lookup_sitebonus(i)
+        for el in req
+            add!(u, 200JOY)
+            @test buybuildingseed!(u, el[1])
+            @test build!(u, el[1])
+        end
+    end
+
+    _bonuses = GameItemBase.activatable_sitebonus(homevillage(u))
+    @test all(map(el -> _bonuses[el], target_sitebonuskey))
+
+    activate_sitebonus!(u)
+    
+    @test homevillage(u).villagerecord[:SiteBonusPoint] == total_point
+
+end
 
 
 @testset "건물 레벨업, 계정 레벨업" begin
