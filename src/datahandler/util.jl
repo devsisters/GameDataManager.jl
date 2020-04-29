@@ -1,18 +1,13 @@
+isnull(x) = ismissing(x) | isnothing(x)
+
 # utility functions
 is_xlsxfile(f)::Bool = (endswith(f, ".xlsx") || endswith(f, ".xlsm"))
 is_jsonfile(f)::Bool = endswith(f, ".json")
 is_inkfile(f)::Bool = endswith(f, ".ink")
 
-
 function Base.readdir(dir; extension::String)
     filter(x -> endswith(x, extension), readdir(dir))
 end
-"""
-    isnull(x)
-
-json에서는 'nothing'과 'missing'을 모두 null로 지칭하기 때문에 필요
-"""
-isnull(x) = ismissing(x) | isnothing(x)
 
 function print_write_result(path, msg = "다음과 같습니다")
     print_section("$(msg)\n   SAVED => $(normpath(path))", "연산결과"; color=:green)
