@@ -178,6 +178,11 @@ end
             enerium_after = get(homevillage(u), GameItemBase.ENERIUM)
             @test enerium_before + (areas(x) * GameItemBase.ENERIUM) == enerium_after
         end
+
+        # TODO 레벨별 구매 면적 제한테스트도 추가 
+
+
+
     end
 
     @testset "Energy 구매" begin
@@ -253,40 +258,90 @@ end
     end
 end
 
+@testset "마을 건물 움직이기" begin 
+    u = User()
+    add!(u, 30000*COIN)
+    buyenergy!(u)
+    buyenergy!(u)
+    buyenergy!(u)
+    buyenergy!(u)
+    for k in ("sIcecream", "sFashion", "sDiner", "sChineseRestaurant",
+              "rHealingCamp", "rHillsideMansion", "rAutoCamp", "rWestfieldVilla",
+              "aAttraction2x1", "aAttraction2x2", "aAttraction3x3")
+        add!(u, BuildingSeed(k))
+        @test build!(u, k)
+    end
+
+    # 모든 건물 비우기
+    GameItemBase._moveout!(homevillage(u))
+    @test all(isempty.(values(GameItemBase.site_segment(homevillage(u)))))
+    @test all(iszero.(values(GameItemBase.segment_site(homevillage(u)))))
+
+    home = getsegments(homevillage(u), "Home")
+    sites = GameItemBase.getcleanedsites(homevillage(u))
+
+    # 하드코딩으로 초기 지급 사이트 면적 확인
+    @test areas.(sites) == (24, 16, 24, 24)
+
+    # 홈이리저리 옮겨보기
+    @test move!(homevillage(u), home[1], sites[1])
+    @test GameItemBase.getusablearea(homevillage(u), sites[1]) == areas(sites[1]) - areas(home[1])
+    @test move!(homevillage(u), home[1], sites[3])
+    @test GameItemBase.getusablearea(homevillage(u), sites[3]) == areas(sites[3]) - areas(home[1])
+    @test move!(homevillage(u), home[1], sites[4])
+    @test GameItemBase.getusablearea(homevillage(u), sites[4]) == areas(sites[4]) - areas(home[1])
+    @test move!(homevillage(u), home[1], sites[2])
+    @test GameItemBase.getusablearea(homevillage(u), sites[2]) == areas(sites[2]) - areas(home[1])
+    @test move!(homevillage(u), home[1], sites[2]) == false 
+    
+    # 가용면적 확인 
+    @test GameItemBase.getusablearea(homevillage(u), sites[2]) |> iszero
+
+    shops = getsegments(Shop, homevillage(u))
+    resis = getsegments(Residence, homevillage(u))
+    attrs = getsegments(Attraction, homevillage(u))
+
+    for s in shops 
+        before_area = GameItemBase.getusablearea(homevillage(u), sites[1])
+        @test move!(homevillage(u), s, sites[1])
+        after_area = GameItemBase.getusablearea(homevillage(u), sites[1])
+        @test before_area - after_area == areas(s)
+    end
+    # 자리 부족으로 이동 불가
+    @test move!(homevillage(u), attrs[3], sites[1]) == false 
+
+end
+
 @testset "사이트보너스" begin
-    # User의 건물을 SiteBonus를 기준으로 재배열
     u = User()
     # prepare for 
-    add!(u, 10000*SITECLEANER)
-    add!(u, 10000*COIN)
-    for i in 1:6
+    add!(u, 2000*SITECLEANER)
+    add!(u, 1000000*COIN)
+    # 모든 사이트 다 구매
+    GameItemBase._add!(homevillage(u), 100000 * GameItemBase.DEVELOPMENTPOINT)
+    for i in 1:39
         @test buysite!(u)
-    end
-    for i in 1:13
         @test buyenergy!(u)
+        buyenergy!(u)
+        buyenergy!(u)
     end
 
     # 현재 테스트 유저가 가질 수 있는 보너스만
-    target_sitebonuskey = [1,2,3,4,15,16,17,18]
-    total_point = sum(k -> xlookup(k, Table("SiteBonus")["Data"], j"/BonusKey", j"/Reward/DailyVillageBonusPoint"), target_sitebonuskey)
-    for i in target_sitebonuskey
+    sitebonuskeys = Table("SiteBonus")["Data"][1:30, j"/BonusKey"]
+    total_point = sum(Table("SiteBonus")["Data"][1:30, j"/Reward/DailyVillageBonusPoint"])
+    for i in sitebonuskeys
         req = GameItemBase.lookup_sitebonus(i)
         for el in req
-            add!(u, 200JOY)
+            add!(u, 1000JOY)
             @test buybuildingseed!(u, el[1])
             @test build!(u, el[1])
         end
     end
 
     _bonuses = GameItemBase.activatable_sitebonus(homevillage(u))
-    @test all(map(el -> _bonuses[el], target_sitebonuskey))
-
-    activate_sitebonus!(u)
-    
+    @test all(map(el -> _bonuses[el], 1:30))    
     @test homevillage(u).villagerecord[:SiteBonusPoint] == total_point
-
 end
-
 
 @testset "건물 레벨업, 계정 레벨업" begin
 
