@@ -1,13 +1,15 @@
 using Test
 using GameItemBase, GameDataManager
+using Dates
 
 set_validation!(false)
 
 @testset "User와 Village 생성" begin 
     u = User() 
     @test isa(u, User)
+    @test GameItemBase.getuser(GameItemBase.getid(u)) === u 
 
-    v = u.villagerecordset[1]
+    v = homevillage(u)
     isa(v, Village)
     GameItemBase.getowner(v) === u
 
@@ -18,6 +20,28 @@ set_validation!(false)
     @test get(u, JOY) == jws[1, j"/AddJoy"] * JOY
 
     @test get(v, GameItemBase.ENERIUM) == jws[1, j"/AddEnerium"] * GameItemBase.ENERIUM
+end
+
+@testset "GamerServer 시간" begin
+
+    server = GameItemBase.GAMESERVER 
+
+    @test server.init_time == server.current_time
+    t = rand(1:10000)
+    GameItemBase.timestep!(Minute(t))
+    @test server.current_time == server.init_time + Second(t)
+end
+
+@testset "Energy 생산" begin
+    # 여러 시간
+    for sec in (10, 25, 60, 60*30, 60*60, 60*60*3, 60*60*6, 60*60*12, 60*60*24, 60*60*48, 60*60*72, 60*60*168)
+        a = GameItemBase.calculate_height(Millisecond(sec*1000))
+        b = GameItemBase.calculate_height(Second(sec))
+        c = GameItemBase.calculate_height(sec, "Normal")
+
+        @test a == b == c
+
+    end
 end
 
 
@@ -182,7 +206,6 @@ end
         # TODO 레벨별 구매 면적 제한테스트도 추가 
 
 
-
     end
 
     @testset "Energy 구매" begin
@@ -268,6 +291,7 @@ end
     for k in ("sIcecream", "sFashion", "sDiner", "sChineseRestaurant",
               "rHealingCamp", "rHillsideMansion", "rAutoCamp", "rWestfieldVilla",
               "aAttraction2x1", "aAttraction2x2", "aAttraction3x3")
+        @show k 
         add!(u, BuildingSeed(k))
         @test build!(u, k)
     end
@@ -321,7 +345,7 @@ end
     GameItemBase._add!(homevillage(u), 100000 * GameItemBase.DEVELOPMENTPOINT)
     for i in 1:39
         @test buysite!(u)
-        @test buyenergy!(u)
+        buyenergy!(u)
         buyenergy!(u)
         buyenergy!(u)
     end
@@ -338,9 +362,13 @@ end
         end
     end
 
+    @test activate_sitebonus!(u)
+
     _bonuses = GameItemBase.activatable_sitebonus(homevillage(u))
     @test all(map(el -> _bonuses[el], 1:30))    
     @test homevillage(u).villagerecord[:SiteBonusPoint] == total_point
+    @test all(values(GameItemBase.segment_site(homevillage(u))) .> 0)
+
 end
 
 @testset "건물 레벨업, 계정 레벨업" begin
