@@ -98,7 +98,7 @@ end
 function collect_ink(rootfolder, everything = false)
     targets = String[]
     for (root, dirs, files) in walkdir(rootfolder)
-        for f in filter(x -> !startswith(x, "_"), files) 
+        for f in filter(x -> !startswith(x, "_") && endswith(x, ".ink"), files) 
             ink = joinpath(root, f)
             if everything
                 push!(targets, joinpath(root, f))
