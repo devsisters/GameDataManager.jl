@@ -46,7 +46,7 @@ end
     @test isfile(joinpath(GAMEENV["cache"], "get_blocks.tsv"))
 
     x = get_blocks(false)
-    ref = Table("Block"; readfrom=:JSON, validation=false)["Block"]
+    ref = Table("Block"; readfrom = :JSON, validation = false)["Block"]
     @test issubset(keys(x), ref[:, j"/Key"])
 end
 

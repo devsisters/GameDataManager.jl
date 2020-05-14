@@ -22,10 +22,10 @@ function checkout_GameDataManager()
             
             if v1 < v2 # Pkg 업데이트
                 target = joinpath(tempdir(), "$pkgname")
-                cp(dir, target; force=true)
+                cp(dir, target; force = true)
                 sleep(0.9)
                 try 
-                    Pkg.add(PackageSpec(path=target))
+                    Pkg.add(PackageSpec(path = target))
                 catch e
                     @show e
                 end

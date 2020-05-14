@@ -7,7 +7,7 @@ function xl(exportall::Bool = false)
         help(2)
     else
         print_section("xlsx -> json 추출을 시작합니다 ⚒\n" * 
-                        "-"^(displaysize(stdout)[2]-4); color = :cyan)
+                        "-"^(displaysize(stdout)[2] - 4); color = :cyan)
         export_gamedata(files)
         print_section("json 추출이 완료되었습니다 ☺", "DONE"; color = :cyan)
     end
@@ -15,7 +15,7 @@ end
 function xl(x::AbstractString)
     
     print_section("xlsx -> json 추출을 시작합니다 ⚒\n" * 
-                    "-"^(displaysize(stdout)[2]-4); color = :cyan)
+                    "-"^(displaysize(stdout)[2] - 4); color = :cyan)
     reload_meta!()
     export_gamedata(x)
     print_section("json 추출이 완료되었습니다 ☺", "DONE"; color = :cyan)
@@ -47,7 +47,7 @@ function export_gamedata(files::Vector)
         for f in files
             println("『", f, "』")
             bt = Table(f; readfrom = :XLSX)
-            write_json(bt.data)
+write_json(bt.data)
         end
     end
     nothing
@@ -72,7 +72,7 @@ function write_json(jwb::JSONWorkbook)
         if modified
             write(json, newdata)
             print(" SAVE => ")
-            printstyled(normpath(json), "\n"; color=:blue)
+            printstyled(normpath(json), "\n"; color = :blue)
         else
             print("  ⁿ/ₐ => ")
             print(normpath(json), "\n")
@@ -94,7 +94,7 @@ function md5hash()
     download(url, joinpath(GAMEENV["cache"], "temp.txt"))
 
     jsons = readdir(GAMEENV["json"]["root"]; extension = ".json")
-
+            
     result = joinpath(GAMEENV["cache"], "md5hash.tsv")
     open(result, "w") do io
         for (i, el) in enumerate(jsons)
@@ -103,7 +103,7 @@ function md5hash()
             write(io, "\n")
         end
     end
-    printstyled("json파일별 MD5해시가 저장되었습니다 => \"$(result)\" \n"; color=:blue)
+    printstyled("json파일별 MD5해시가 저장되었습니다 => \"$(result)\" \n"; color = :blue)
 end
 function md5hash(f)
     bytes2hex(md5(read(joinpath_gamedata(f), String)))
@@ -112,10 +112,10 @@ end
 function backup()
     # 네트워크의 게임 데이터를 백업합니다
     @assert startswith(GAMEENV["xlsx"]["root"], "G") "네트워크에 연결할 수 없어 XLSX 데이터 백업이 불가능 합니다"
-
+        
     println("../XLSXTable과 ../InkDialogue를 백업합니다")
     for filetype in ("xlsx", "ink")
-        predicate = path -> (!startswith(path, "~\$")  && (isdir(path) || endswith(path, r".xlsx|.xlsm|.ink")))
+        predicate = path->(!startswith(path, "~\$")  && (isdir(path) || endswith(path, r".xlsx|.xlsm|.ink")))
 
         source = GAMEENV[filetype]["root"]
         foldername = basename(source)
@@ -125,7 +125,7 @@ function backup()
                         joinpath(GAMEENV["patch_data"], "_Backup/$foldername.tar"))
 
         print(" $foldername => ")
-        printstyled(tarball, "\n"; color=:blue)
+        printstyled(tarball, "\n"; color = :blue)
     end
     cd(GAMEENV["patch_data"])
     run(`git commit \*.tar \-m PatchDataOrigin_백업`)

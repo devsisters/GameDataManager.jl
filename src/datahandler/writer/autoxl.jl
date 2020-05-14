@@ -16,7 +16,7 @@ xl_auto(interval = 3, timeout = 10000) = xl_auto(collect_auto_xlsx(), interval, 
     # @async로 task로 생성할 수도 있지만... exportlog 파일을 동시 편집할 위험이 있기 때문에 @async는 사용하지 않는다
     bars = [repeat("↗↘", 15), repeat("←↑", 10)]
     @inbounds for i in 1:timeout
-        bar = bars[isodd(i)+1]
+        bar = bars[isodd(i) + 1]
         printover(stdout, "/01_XLSX 폴더 감시 중... $bar", :green)
 
         target = ismodified.(candidate)
@@ -30,5 +30,5 @@ xl_auto(interval = 3, timeout = 10000) = xl_auto(collect_auto_xlsx(), interval, 
 end
 @inline function printover(io::IO, s::AbstractString, color::Symbol = :color_normal)
     print(io, "\r")
-    printstyled(io, s; color=color)
+    printstyled(io, s; color = color)
 end

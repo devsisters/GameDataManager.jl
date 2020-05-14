@@ -41,7 +41,7 @@ jobs:
       - uses: julia-actions/setup-julia@latest
         with:
           version: ${{ matrix.julia-version }}
-      - name: add GameItemBase 
+      - name: add GameItemBase
         run: julia -e 'using Pkg; Pkg.add(PackageSpec(url="$(ENV["GITHUB_WORKSPACE"])/GameItemBase"))'
       - name: add GameBalanceManager
         run: julia -e 'using Pkg; Pkg.add(PackageSpec(url="$(ENV["GITHUB_WORKSPACE"])/GameBalanceManager"))'

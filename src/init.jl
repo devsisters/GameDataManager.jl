@@ -1,6 +1,6 @@
-const GAMEENV = Dict{String, Any}()
-const GAMEDATA = Dict{String, Table}()
-const CACHE = Dict{Symbol, Any}(
+const GAMEENV = Dict{String,Any}()
+const GAMEDATA = Dict{String,Table}()
+const CACHE = Dict{Symbol,Any}(
         :meta => missing,
         :xlsxlog => missing,
         :validation => true, 
@@ -50,7 +50,7 @@ function loadmeta(metafile = joinpath_gamedata("_Meta.json"))
               squeeze      = get(x, "squeeze", false))
     end
     function parse_metainfo(origin)
-        d = OrderedDict{String, Any}()
+        d = OrderedDict{String,Any}()
         for el in origin
             xl = string(el["xlsx"])
             d[xl] = Dict()
@@ -61,11 +61,11 @@ function loadmeta(metafile = joinpath_gamedata("_Meta.json"))
         d
     end
     function create_shortcut(d)
-        files = broadcast(x -> (splitext(basename(x))[1], x), filter(is_xlsxfile, keys(d)))
+        files = broadcast(x->(splitext(basename(x))[1], x), filter(is_xlsxfile, keys(d)))
         validate_duplicate(files)
         Dict(files)
     end
-    jsonfile = JSON.parsefile(metafile; dicttype=OrderedDict{String, Any})
+    jsonfile = JSON.parsefile(metafile; dicttype = OrderedDict{String,Any})
 
     meta = Dict()
     # xl()로 자동 추출하는 파일
@@ -73,7 +73,7 @@ function loadmeta(metafile = joinpath_gamedata("_Meta.json"))
     meta[:manual] = parse_metainfo(jsonfile["manual"])
     meta[:xlsx_shortcut] = merge(create_shortcut(meta[:auto]), create_shortcut(meta[:manual]))
 
-    println("_Meta.json 로딩이 완료되었습니다", "."^max(6, displaysize(stdout)[2]-34))
+    println("_Meta.json 로딩이 완료되었습니다", "."^max(6, displaysize(stdout)[2] - 34))
 
     return meta
 end
@@ -81,9 +81,9 @@ end
 function init_xlsxlog()
     file = GAMEENV["xlsxlog"]
     if isfile(file) 
-        log = JSON.parsefile(file; dicttype=Dict{String, Any})
+        log = JSON.parsefile(file; dicttype = Dict{String,Any})
     else 
-        log = Dict{String, Any}()
+        log = Dict{String,Any}()
     end
     # 방금 로딩한 _Meta.json 시간
     log["_Meta.json"] = [mtime(joinpath_gamedata("_Meta.json"))]
@@ -94,9 +94,9 @@ end
 function init_inklog()
     file = GAMEENV["inklog"]
     if isfile(file) 
-        log = JSON.parsefile(file; dicttype=Dict{String, Float64})
+        log = JSON.parsefile(file; dicttype = Dict{String,Float64})
     else 
-        log = Dict{String, Float64}()
+        log = Dict{String,Float64}()
     end
     return log
 end
@@ -116,7 +116,7 @@ function help(idx = 1)
 
     # setup! 안하면 사용 불가
     if !isempty(GAMEENV)
-        basic ="""
+        basic = """
         # 기본 기능
             backup()    : '../XLSXTable'와 '../InkDialogue'의 데이터를 압축하여'patchdata/_Backup'에 덮어 씌웁니다
             ink()       : '../InkDialogue'의 수정된 .ink를 .json로 변환합니다
@@ -141,12 +141,12 @@ function help(idx = 1)
 
             msg = intro * rand([thankyou; oneline_asciiarts]) * "\n" * extra * basic
         elseif idx == 2
-            line_breaker = "-"^(displaysize(stdout)[2]-4)
+            line_breaker = "-"^(displaysize(stdout)[2] - 4)
             msg = string("json으로 변환할 파일이 없습니다 ♫\n", line_breaker, "\n", basic)
 
             msg *= rand(oneline_asciiarts)
         end
         print_section(msg, "도움말"; color = :green)
-    end
+end
     nothing
 end

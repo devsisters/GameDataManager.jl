@@ -34,8 +34,8 @@ end
 
 @testset "Energy 생산" begin
     # 여러 시간
-    for sec in (10, 25, 60, 60*30, 60*60, 60*60*3, 60*60*6, 60*60*12, 60*60*24, 60*60*48, 60*60*72, 60*60*168)
-        a = GameItemBase.calculate_height(Millisecond(sec*1000))
+    for sec in (10, 25, 60, 60 * 30, 60 * 60, 60 * 60 * 3, 60 * 60 * 6, 60 * 60 * 12, 60 * 60 * 24, 60 * 60 * 48, 60 * 60 * 72, 60 * 60 * 168)
+        a = GameItemBase.calculate_height(Millisecond(sec * 1000))
         b = GameItemBase.calculate_height(Second(sec))
         c = GameItemBase.calculate_height(sec, "Normal")
 
@@ -54,12 +54,12 @@ end
     end
 
     # Out of range 
-    inteval = normal_accum[end] - normal_accum[end-1]
+    inteval = normal_accum[end] - normal_accum[end - 1]
     a = GameItemBase.calculate_height(normal_accum[end], "Normal")
     p = rand(1:10000)
     @test a + p == GameItemBase.calculate_height(normal_accum[end] + inteval * p, "Normal")
 
-    inteval = festiv_accum[end] - festiv_accum[end-1]
+    inteval = festiv_accum[end] - festiv_accum[end - 1]
     a = GameItemBase.calculate_height(festiv_accum[end], "Festival")
     p = rand(1:10000)
     @test a + p == GameItemBase.calculate_height(festiv_accum[end] + inteval * p, "Festival")
@@ -173,7 +173,7 @@ end
                 price = GameItemBase.buildingseed_price(u, key)
                 
                 p2 = xlookup(intkey, Table("ItemTable")["BuildingSeed"], j"/Key", j"/PriceJoy")
-                @test price == p2*JOY
+                @test price == p2 * JOY
 
                 @test buybuildingseed!(u, key) == false
                 add!(u, price)
@@ -181,7 +181,7 @@ end
 
                 price2 = GameItemBase.buildingseed_price(u, intkey)
             
-                @test price2 == 2 * p2*JOY
+                @test price2 == 2 * p2 * JOY
             end
         end
     end
@@ -260,7 +260,7 @@ end
 
     @testset "Building건설 - 특수건물" begin
         # 특수건물 4종
-        for k in ("pEnergyMixLab","pWelcomeCenter",
+        for k in ("pEnergyMixLab", "pWelcomeCenter",
                     "pSpaceDrop", "pDeliveryCenter")
             @test has(u, BuildingSeed(k))
             @test build!(u, k)
@@ -306,7 +306,7 @@ end
 
 @testset "마을 건물 움직이기" begin 
     u = User()
-    add!(u, 30000*COIN)
+    add!(u, 30000 * COIN)
     buyenergy!(u)
     buyenergy!(u)
     buyenergy!(u)
@@ -362,8 +362,8 @@ end
 @testset "사이트보너스" begin
     u = User()
     # prepare for 
-    add!(u, 2000*SITECLEANER)
-    add!(u, 1000000*COIN)
+    add!(u, 2000 * SITECLEANER)
+    add!(u, 1000000 * COIN)
     # 모든 사이트 다 구매
     GameItemBase._add!(homevillage(u), 100000 * GameItemBase.DEVELOPMENTPOINT)
     for i in 1:39
@@ -388,7 +388,7 @@ end
     @test activate_sitebonus!(u)
 
     _bonuses = GameItemBase.activatable_sitebonus(homevillage(u))
-    @test all(map(el -> _bonuses[el], 1:30))    
+    @test all(map(el->_bonuses[el], 1:30))    
     @test homevillage(u).villagerecord[:SiteBonusPoint] == total_point
     @test all(values(GameItemBase.segment_site(homevillage(u))) .> 0)
 

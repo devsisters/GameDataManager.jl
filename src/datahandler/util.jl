@@ -6,11 +6,11 @@ is_jsonfile(f)::Bool = endswith(f, ".json")
 is_inkfile(f)::Bool = endswith(f, ".ink")
 
 function Base.readdir(dir; extension::String)
-    filter(x -> endswith(x, extension), readdir(dir))
+    filter(x->endswith(x, extension), readdir(dir))
 end
 
 function print_write_result(path, msg = "다음과 같습니다")
-    print_section("$(msg)\n   SAVED => $(normpath(path))", "연산결과"; color=:green)
+    print_section("$(msg)\n   SAVED => $(normpath(path))", "연산결과"; color = :green)
 
     nothing
 end
@@ -23,7 +23,7 @@ function print_section(message, title = "NOTE"; color = :normal)
                                 i == 1 ? "┌ $title: " :
                                 el == last(msglines) ? "└ " : "│ "
 
-        printstyled(stderr, prefix; color=color)
+        printstyled(stderr, prefix; color = color)
         print(stderr, el)
         el != last(msglines) && print(stderr,  '\n')
     end
@@ -104,13 +104,13 @@ function lsfiles()
     msg = "MARS_CLIENT:$(x[1][1][1:8])... / patch-data:$(x[2][1][1:8])... / ArtAssets:$(x[3][1][1:8])...\n"
 
     # filelist 
-    mars_client = filter(el -> startswith(el, "unity"), x[:mars_client])
+    mars_client = filter(el->startswith(el, "unity"), x[:mars_client])
     patch_data = "patch-data" .* x[:patch_data]
     mars_art_assets = "unity/Assets/4_ArtAssets" .* x[:mars_art_assets]
 
     filelist = [mars_client[2:end]; patch_data[2:end]; mars_art_assets[2:end]]
 
-    data = filter(el -> !(startswith(el, ".") || endswith(el, r".meta|.cs")), filelist)
+    data = filter(el->!(startswith(el, ".") || endswith(el, r".meta|.cs")), filelist)
 
     output = joinpath(GAMEENV["cache"], "filelist.tsv")
     open(output, "w") do io 
@@ -130,5 +130,5 @@ function lsfiles()
     end
     print(msg)
     print(" filelist => ")
-    printstyled(normpath(output); color=:blue)
+    printstyled(normpath(output); color = :blue)
 end

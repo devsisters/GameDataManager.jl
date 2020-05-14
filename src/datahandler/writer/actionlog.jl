@@ -1,6 +1,4 @@
-#=■■■◤  XLSX  ◢■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-
-=#
+#= ■■■◤  XLSX  ◢■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ =#
 """
     collect_modified_xlsx()
 
@@ -29,16 +27,16 @@ end
 function ismodified(f)::Bool
     if is_xlsxfile(f) | is_jsonfile(f)
         t = mtime(joinpath_gamedata(f)) 
-        t_log = get(CACHE[:xlsxlog], f ,[0.])[1]
+        t_log = get(CACHE[:xlsxlog], f, [0.])[1]
     elseif is_inkfile(f)
         @assert isfile(f) "\"$(f)\"가 존재하지 않습니다"
         t = mtime(f)
         log = get!(CACHE, :inklog, init_inklog())
-        t_log = get(log, basename(f) ,0.)
-    else #xlsx shortcut 
+        t_log = get(log, basename(f), 0.)
+    else # xlsx shortcut 
         f = CACHE[:meta][:xlsx_shortcut][f]
         t = mtime(joinpath_gamedata(f)) 
-        t_log = get(CACHE[:xlsxlog], f ,[0.])[1]
+        t_log = get(CACHE[:xlsxlog], f, [0.])[1]
     end
     return t > t_log
 end
@@ -51,9 +49,9 @@ function xlsxlog(jwb::JSONWorkbook)
     # TODO 이부분을 XLSXasJSON에 JSONTOken을 JSON.json으로 serialize하게 추가
     pointer = Dict()
     for s in sheetnames(jwb)
-        vals = Array{String, 1}(undef, length(jwb[s].pointer))
+        vals = Array{String,1}(undef, length(jwb[s].pointer))
         for (i, p) in enumerate(jwb[s].pointer)
-            token = "/"*join(p.token, "/")
+            token = "/" * join(p.token, "/")
             T = eltype(p)
             vals[i] = (T == Any ? token : "$token::$T")
         end
@@ -64,7 +62,7 @@ function xlsxlog(jwb::JSONWorkbook)
     CACHE[:xlsxlog]["write_count"] = get(CACHE[:xlsxlog], "write_count", 0) + 1
     write_xlsxlog!(5)
 end
-
+    
 function write_xlsxlog!(threadhold::Int)
     log = CACHE[:xlsxlog]
     if get(log, "write_count", 0) >= threadhold
@@ -89,23 +87,21 @@ function cleanup_xlsxlog()
     nothing
 end
 
-#=■■■◤  Ink  ◢■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-
-=#
+#= ■■■◤  Ink  ◢■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ =#
 """
 
 """
 function collect_ink(rootfolder, everything = false)
     targets = String[]
     for (root, dirs, files) in walkdir(rootfolder)
-        for f in filter(x -> !startswith(x, "_") && endswith(x, ".ink"), files) 
+        for f in filter(x->!startswith(x, "_") && endswith(x, ".ink"), files) 
             ink = joinpath(root, f)
             if everything
                 push!(targets, joinpath(root, f))
             else 
                 if ismodified(ink)
                     push!(targets, joinpath(root, f))
-                end
+    end
             end
         end
     end

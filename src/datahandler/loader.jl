@@ -1,6 +1,6 @@
 
 function joinpath_gamedata(file)
-    if is_xlsxfile(file) #검색하여 폴더 위치를 기록해 둔다.
+    if is_xlsxfile(file) # 검색하여 폴더 위치를 기록해 둔다.
         folder = GAMEENV["xlsx"]["root"]
         p = get!(GAMEENV["xlsx"], file, joinpath(folder, file))
 
@@ -11,12 +11,12 @@ function joinpath_gamedata(file)
                 fuzzy_lookupname(keys(CACHE[:meta][:auto]), file; msg = "$(file)이름이 올바르지 않습니다")
             end
         end
-    elseif is_jsonfile(file) #Tables/json은 하위폴더가 없다
-        folder= GAMEENV["json"]["root"]
+    elseif is_jsonfile(file) # Tables/json은 하위폴더가 없다
+        folder = GAMEENV["json"]["root"]
         p = get!(GAMEENV["json"], file, joinpath(folder, file))
         @assert isfile(p) "$(file) 은 $(folder)에 존재하지 않는 파일입니다. 파일명을 다시 확인해 주세요"
     elseif is_inkfile(file)
-        folder= GAMEENV["ink"]["root"]
+        folder = GAMEENV["ink"]["root"]
 
         p = missing
         for (root, dirs, files) in walkdir(folder)
@@ -42,7 +42,7 @@ function fuzzy_lookupname(keyset, idx; kwargs...)
 end
 
 function fuzzy_lookupname(names::AbstractArray, idx::AbstractString; msg = "'$(idx)'를 찾을 수 없습니다.")
-    l = Dict{AbstractString, Int}(zip(names, eachindex(names)))
+    l = Dict{AbstractString,Int}(zip(names, eachindex(names)))
     candidates = XLSXasJSON.fuzzymatch(l, idx)
     if isempty(candidates)
         throw(ArgumentError(msg))

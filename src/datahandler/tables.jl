@@ -110,7 +110,7 @@ function _jsonworkbook(xlsxpath, file)
                 pointers = broadcast(XLSXasJSON.JSONPointer, al[2][el[1]])
                 
                 JSONWorksheet(xlsxpath, pointers, 
-                            convert(Array{OrderedDict, 1}, json), el[1])
+                            convert(Array{OrderedDict,1}, json), el[1])
             end
             push!(sheets, jws)
         end
@@ -122,15 +122,15 @@ end
 
 function copy_to_cache(origin)
     destination = replace(origin, GAMEENV["xlsx"]["root"] => joinpath(GAMEENV["cache"], "XLSXTable"))
-
+    
     cd(GAMEENV["cache"])
     if !isdir(joinpath(GAMEENV["cache"], "XLSXTable"))
         mkdir(joinpath(GAMEENV["cache"], "XLSXTable"))
     end
-    #NOTE 이 상태에서는 폴더 depth가 2이상이면 안됨
+    # NOTE 이 상태에서는 폴더 depth가 2이상이면 안됨
     dir, file = splitdir(destination)
     if !isdir(dir)
-        mkdir(dir)
+    mkdir(dir)
     end
     cp(origin, destination; force = true)
 end
@@ -142,14 +142,14 @@ end
 JSON을 쥐고 있음
 """
 struct JSONTable <: Table
-    data::Array{T, 1} where T <: AbstractDict
+    data::Array{T,1} where T <: AbstractDict
     filepath::AbstractString
 end
 function JSONTable(file::String)
     @assert endswith(file, ".json") "$file 파일의 확장자가 `.json`이어야 합니다."
 
     f = joinpath_gamedata(file)
-    data = JSON.parsefile(f; dicttype=OrderedDict)
+    data = JSON.parsefile(f; dicttype = OrderedDict)
     if isa(data, Array)
         data = convert(Vector{OrderedDict}, data)
     else
@@ -175,7 +175,7 @@ index(x::XLSXTable) = x.data.sheetindex
 cache(x::XLSXTable) = x.cache
 XLSXasJSON.sheetnames(xgd::XLSXTable) = sheetnames(xgd.data)
 
-function Base.show(io::IO, bt::XLSXTable)
+    function Base.show(io::IO, bt::XLSXTable)
     println(io, ".data ┕━")
     print(io, bt.data)
 end
@@ -212,7 +212,7 @@ https://support.office.com/en-us/article/xlookup-function-b7fd680e-6d10-43e6-84f
 function xlookup(value, jws::JSONWorksheet, 
                     lookup_col, return_col; kwargs...)
     xlookup(value, jws, XLSXasJSON.JSONPointer(lookup_col), XLSXasJSON.JSONPointer(return_col); kwargs...)
-end
+    end
 function xlookup(value, 
     jws::JSONWorksheet, lookup_col::XLSXasJSON.JSONPointer, return_col; 
     find_mode::Function = findfirst, operator::Function = isequal)
@@ -235,5 +235,5 @@ function xlookup(value,
 end
 
 @memoize function _xlookup_findindex(value, jws, lookup_col, find_mode, operator)
-    find_mode(el -> operator(el[lookup_col], value), jws.data)
+    find_mode(el->operator(el[lookup_col], value), jws.data)
 end
