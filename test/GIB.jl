@@ -42,6 +42,29 @@ end
         @test a == b == c
 
     end
+
+    normal_accum = Table("Ability")["Energy"][1, j"/Normal/Accumulated"]
+    festiv_accum = Table("Ability")["Energy"][1, j"/Festival/Accumulated"]
+
+    sample = rand(1:length(normal_accum), 100)
+
+    for i in sample
+        @test GameItemBase.calculate_height(normal_accum[i], "Normal") == i
+        @test GameItemBase.calculate_height(festiv_accum[i], "Festival") == i
+    end
+
+    # Out of range 
+    inteval = normal_accum[end] - normal_accum[end-1]
+    a = GameItemBase.calculate_height(normal_accum[end], "Normal")
+    p = rand(1:10000)
+    @test a + p == GameItemBase.calculate_height(normal_accum[end] + inteval * p, "Normal")
+
+    inteval = festiv_accum[end] - festiv_accum[end-1]
+    a = GameItemBase.calculate_height(festiv_accum[end], "Festival")
+    p = rand(1:10000)
+    @test a + p == GameItemBase.calculate_height(festiv_accum[end] + inteval * p, "Festival")
+
+    
 end
 
 
