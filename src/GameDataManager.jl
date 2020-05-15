@@ -8,7 +8,6 @@ using DataStructures
 using Tar
 using Memoization
 using MD5
-using LibGit2
 
 using GameBalanceManager
 
