@@ -34,10 +34,10 @@ end
     @test lookup_findall[end] == lookup_findlast
 
     # operator <=, >=
-    @test xlookup(2, Table("Block")["Block"], j"/Key", j"/Key"; operator = <) == 1
-    @test xlookup(100, Table("Block")["Block"], j"/Key", j"/Key"; operator = >) > 1
-    @test xlookup(900000009, Table("Block")["Block"], j"/Key", j"/ArtAsset"; operator = >) == "error_cube"
-    @test xlookup(900000009, Table("Block")["Block"], j"/Key", j"/ArtAsset"; operator = >=) == "Test_ZfightingBuilding_prefab"
+    @test xlookup(2, Table("Block")["Block"], j"/Key", j"/Key"; lt = <) == 1
+    @test xlookup(100, Table("Block")["Block"], j"/Key", j"/Key"; lt = >) > 1
+    @test xlookup(900000009, Table("Block")["Block"], j"/Key", j"/ArtAsset"; lt = >) == "error_cube"
+    @test xlookup(900000009, Table("Block")["Block"], j"/Key", j"/ArtAsset"; lt = >=) == "Test_ZfightingBuilding_prefab"
 
 end
 

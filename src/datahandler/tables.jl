@@ -196,18 +196,18 @@ end
 
 """
     xlookup(value, jws::JSONWorksheet, lookup_col::JSONPointer, return_col::JSONPointer; 
-                find_mode = findfirst, operator = isequal)
+                find_mode = findfirst, lt=<comparison>)
 
 https://support.office.com/en-us/article/xlookup-function-b7fd680e-6d10-43e6-84f9-88eae8bf5929
 
 ## Arguements
-- operator: 비교 함수 `==`, `<=`, `>=` 사용 가능
+- lt: 비교 함수 `==`, `<=`, `>=` 사용 가능
 - find_mode: `findfirst`, `findlast`, `findall` 사용 가능
 
 ## Examples
 - xlookup(2001, Table("ItemTable")["BuildingSeed"], j"/Key", j"/\$Name")
 - xlookup("SES_4", Table("Ability")["Level"], j"/AbilityKey", :; find_mode = findall)
-- xlookup("ShopEnergyStash", Table("Ability")["Level"], j"/Group", j"/Value1"; operator = >=, find_mode = findall)
+- xlookup("ShopEnergyStash", Table("Ability")["Level"], j"/Group", j"/Value1"; lt = >=, find_mode = findall)
 """
 function xlookup(value, jws::JSONWorksheet, 
                     lookup_col, return_col; kwargs...)
@@ -215,14 +215,14 @@ function xlookup(value, jws::JSONWorksheet,
     end
 function xlookup(value, 
     jws::JSONWorksheet, lookup_col::XLSXasJSON.JSONPointer, return_col; 
-    find_mode::Function = findfirst, operator::Function = isequal)
+    find_mode::Function = findfirst, lt::Function = isequal)
 
     @assert haskey(jws, lookup_col) "$(lookup_col)은 존재하지 않습니다"
     if isa(return_col, XLSXasJSON.JSONPointer)
         @assert haskey(jws, return_col) "$(return_col)은 존재하지 않습니다"
     end
 
-    idx = _xlookup_findindex(value, jws, lookup_col, find_mode, operator)
+    idx = _xlookup_findindex(value, jws, lookup_col, find_mode, lt)
 
     if isnothing(idx)
         r = nothing 
@@ -234,6 +234,6 @@ function xlookup(value,
     return r
 end
 
-@memoize function _xlookup_findindex(value, jws, lookup_col, find_mode, operator)
-    find_mode(el->operator(el[lookup_col], value), jws.data)
+@memoize function _xlookup_findindex(value, jws, lookup_col, find_mode, lt)
+    find_mode(el->lt(el[lookup_col], value), jws.data)
 end
