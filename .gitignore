@@ -4,5 +4,9 @@
 # VSCode Generated
 *.vscode
 
+# not ready
+/run
+
 # test data
-/test/patch-data
+/test/wiptest.jl
+
