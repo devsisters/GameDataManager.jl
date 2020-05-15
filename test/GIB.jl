@@ -2,6 +2,45 @@ using Test
 using GameItemBase, GameDataManager
 using Dates
 
+# 테스트용 치트 유저 생성
+function CheatUser(cheat_target = [:UserLevel, :Ability, :AllSite, :Energy])
+    u = User()
+    # 계정레벨 강제 수정
+    if in(:UserLevel, cheat_target)
+        ep = Table("Player")["DevelopmentLevel"][end, j"/NeedDevelopmentPoint"]
+        homevillage(u).villagerecord[:DevelopmentPoint] = ep
+    end
+
+    if in(:Ability, cheat_target)
+        for k in (:CoinStorageCap, :JoyTank, :AddInventory)
+            ability = getfield(u.abilityset, k)
+            while true 
+                try
+                    GameItemBase._levelup!(ability)
+                catch 
+                    break 
+                end
+            end
+        end
+    end
+
+    if in(:AllSite, cheat_target)
+        add!(u, 1800SITECLEANER)
+        while buysite!(u)
+        end
+    end
+
+    if in(:Energy, cheat_target)
+        price = GameItemBase.energyprice(u)
+        add!(u, price[:User])
+        while buyenergy!(u) 
+            price = GameItemBase.energyprice(u)
+            add!(u, price[:User])
+        end
+    end
+    return u 
+end
+
 set_validation!(false)
 
 @testset "User와 Village 생성" begin 
@@ -22,14 +61,35 @@ set_validation!(false)
     @test get(v, GameItemBase.ENERIUM) == jws[1, j"/AddEnerium"] * GameItemBase.ENERIUM
 end
 
-@testset "GamerServer 시간" begin
+@testset "User Ability 레벨업" begin 
+    u = User()
+    # Coin 저장고
+    for i in 1:10
+        cost = GameItemBase.abilitylevelup_price(u, "CoinStorageCap")
+        @test add!(u, cost)
+        @test ability_levelup!(u, "CoinStorageCap")
+    end
+    # JoyTank
+    for i in 1:5
+        cost = GameItemBase.abilitylevelup_price(u, "JoyTank")
+        @test add!(u, cost)
+        @test ability_levelup!(u, "JoyTank")
+    end
+    # Inventory 
+    for i in 1:5
+        cost = GameItemBase.abilitylevelup_price(u, "AddInventory")
+        @test add!(u, cost)
+        @test ability_levelup!(u, "AddInventory")
+    end
+end
 
+@testset "GamerServer 시간" begin
     server = GameItemBase.GAMESERVER 
 
     @test server.init_time == server.current_time
     t = rand(1:10000)
     GameItemBase.timestep!(Minute(t))
-    @test server.current_time == server.init_time + Second(t)
+    @test server.current_time == server.init_time + Minute(t)
 end
 
 @testset "Energy 생산" begin
@@ -40,7 +100,6 @@ end
         c = GameItemBase.calculate_height(sec, "Normal")
 
         @test a == b == c
-
     end
 
     normal_accum = Table("Ability")["Energy"][1, j"/Normal/Accumulated"]
@@ -63,8 +122,6 @@ end
     a = GameItemBase.calculate_height(festiv_accum[end], "Festival")
     p = rand(1:10000)
     @test a + p == GameItemBase.calculate_height(festiv_accum[end] + inteval * p, "Festival")
-
-    
 end
 
 
@@ -163,7 +220,7 @@ end
 
 @testset "사이트 구매 및 건물 건설" begin 
     @testset "BuildingSeed 구매" begin
-        u = User()
+        u = CheatUser([:Ability])
         
         remove!(u, get(u, JOY))
         for t in ("Shop", "Residence")
@@ -187,14 +244,14 @@ end
     end
 
     @testset "SiteCleaner 구매" begin
-        u = User()
+        u = CheatUser([:Ability])
         @test remove!(u, get(u, COIN))
         @test get(u, SITECLEANER) == zero(SITECLEANER)
         for i in 1:50
             price = GameItemBase.sitecleaner_price(u)
             
             @test GameItemBase.buysitecleaner!(u, 1) == false 
-            add!(u, price)
+            @test add!(u, price)
             @test GameItemBase.buysitecleaner!(u, 1) 
         
         end
@@ -202,9 +259,9 @@ end
 
     end
 
-    # 사이트 구매 및 에너지 구매까지 계속
-    u = User()
+    # 사이트 구매
     @testset "사이트 구매" begin
+        u = CheatUser([:Ability])
         remove!(u, get(u, COIN))
 
         candidate = GameItemBase.get_cleanablesites(homevillage(u))
@@ -227,13 +284,13 @@ end
         end
 
         # TODO 레벨별 구매 면적 제한테스트도 추가 
-
-
     end
 
+
+    u = CheatUser([:Ability, :AllSite])
+    remove!(u, get(u, COIN))
     @testset "Energy 구매" begin
         price = GameItemBase.energyprice(u)
-    
         enerium = get(homevillage(u), GameItemBase.ENERIUM)
         energy_buyable_count = round(Int, enerium / price[:Village], RoundDown)
 
@@ -305,12 +362,8 @@ end
 end
 
 @testset "마을 건물 움직이기" begin 
-    u = User()
-    add!(u, 30000 * COIN)
-    buyenergy!(u)
-    buyenergy!(u)
-    buyenergy!(u)
-    buyenergy!(u)
+    u = CheatUser([:Ability, :Energy])
+  
     for k in ("sIcecream", "sFashion", "sDiner", "sChineseRestaurant",
               "rHealingCamp", "rHillsideMansion", "rAutoCamp", "rWestfieldVilla",
               "aAttraction2x1", "aAttraction2x2", "aAttraction3x3")
@@ -360,18 +413,7 @@ end
 end
 
 @testset "사이트보너스" begin
-    u = User()
-    # prepare for 
-    add!(u, 2000 * SITECLEANER)
-    add!(u, 1000000 * COIN)
-    # 모든 사이트 다 구매
-    GameItemBase._add!(homevillage(u), 100000 * GameItemBase.DEVELOPMENTPOINT)
-    for i in 1:39
-        @test buysite!(u)
-        buyenergy!(u)
-        buyenergy!(u)
-        buyenergy!(u)
-    end
+    u = CheatUser([:UserLevel, :Ability, :AllSite, :Energy])
 
     # 현재 테스트 유저가 가질 수 있는 보너스만
     sitebonuskeys = Table("SiteBonus")["Data"][1:30, j"/BonusKey"]
