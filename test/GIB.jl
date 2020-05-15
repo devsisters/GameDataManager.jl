@@ -2,44 +2,7 @@ using Test
 using GameItemBase, GameDataManager
 using Dates
 
-# 테스트용 치트 유저 생성
-function CheatUser(cheat_target = [:UserLevel, :Ability, :AllSite, :Energy])
-    u = User()
-    # 계정레벨 강제 수정
-    if in(:UserLevel, cheat_target)
-        ep = Table("Player")["DevelopmentLevel"][end, j"/NeedDevelopmentPoint"]
-        homevillage(u).villagerecord[:DevelopmentPoint] = ep
-    end
-
-    if in(:Ability, cheat_target)
-        for k in (:CoinStorageCap, :JoyTank, :AddInventory)
-            ability = getfield(u.abilityset, k)
-            while true 
-                try
-                    GameItemBase._levelup!(ability)
-                catch 
-                    break 
-                end
-            end
-        end
-    end
-
-    if in(:AllSite, cheat_target)
-        add!(u, 1800SITECLEANER)
-        while buysite!(u)
-        end
-    end
-
-    if in(:Energy, cheat_target)
-        price = GameItemBase.energyprice(u)
-        add!(u, price[:User])
-        while buyenergy!(u) 
-            price = GameItemBase.energyprice(u)
-            add!(u, price[:User])
-        end
-    end
-    return u 
-end
+import GameItemBase.CheatUser
 
 set_validation!(false)
 
@@ -61,12 +24,20 @@ set_validation!(false)
     @test get(v, GameItemBase.ENERIUM) == jws[1, j"/AddEnerium"] * GameItemBase.ENERIUM
 end
 
-@testset "User Ability 레벨업" begin 
+@testset "User Ability 레벨업과 저장고 용량" begin 
     u = User()
     # Coin 저장고
     for i in 1:10
+        r = GameItemBase.coinstorage_remainder(u)
+        @test add!(u, r*COIN)
+        @test add!(u, 1COIN) == false 
+
         cost = GameItemBase.abilitylevelup_price(u, "CoinStorageCap")
-        @test add!(u, cost)
+        for el in values(cost)
+            if isa(el, StackItem)  
+                @test add!(u, el)
+            end
+        end
         @test ability_levelup!(u, "CoinStorageCap")
     end
     # JoyTank
@@ -433,10 +404,5 @@ end
     @test all(map(el->_bonuses[el], 1:30))    
     @test homevillage(u).villagerecord[:SiteBonusPoint] == total_point
     @test all(values(GameItemBase.segment_site(homevillage(u))) .> 0)
-
-end
-
-@testset "건물 레벨업, 계정 레벨업" begin
-
 
 end
