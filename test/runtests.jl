@@ -1,5 +1,6 @@
 using Test
 using GameDataManager
 
-include("GDM.jl")
-include("GIB.jl")
+include("GameDataManager/basic.jl")
+include("GameItemBase/basic.jl")
+include("GameItemBase/production.jl")

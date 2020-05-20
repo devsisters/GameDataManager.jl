@@ -63,39 +63,6 @@ end
     @test server.current_time == server.init_time + Minute(t)
 end
 
-@testset "Energy 생산" begin
-    # 여러 시간
-    for sec in (10, 25, 60, 60 * 30, 60 * 60, 60 * 60 * 3, 60 * 60 * 6, 60 * 60 * 12, 60 * 60 * 24, 60 * 60 * 48, 60 * 60 * 72, 60 * 60 * 168)
-        a = GameItemBase.calculate_height(Millisecond(sec * 1000))
-        b = GameItemBase.calculate_height(Second(sec))
-        c = GameItemBase.calculate_height(sec, "Normal")
-
-        @test a == b == c
-    end
-
-    normal_accum = Table("Ability")["Energy"][1, j"/Normal/Accumulated"]
-    festiv_accum = Table("Ability")["Energy"][1, j"/Festival/Accumulated"]
-
-    sample = rand(1:length(normal_accum), 100)
-
-    for i in sample
-        @test GameItemBase.calculate_height(normal_accum[i], "Normal") == i
-        @test GameItemBase.calculate_height(festiv_accum[i], "Festival") == i
-    end
-
-    # Out of range 
-    inteval = normal_accum[end] - normal_accum[end - 1]
-    a = GameItemBase.calculate_height(normal_accum[end], "Normal")
-    p = rand(1:10000)
-    @test a + p == GameItemBase.calculate_height(normal_accum[end] + inteval * p, "Normal")
-
-    inteval = festiv_accum[end] - festiv_accum[end - 1]
-    a = GameItemBase.calculate_height(festiv_accum[end], "Festival")
-    p = rand(1:10000)
-    @test a + p == GameItemBase.calculate_height(festiv_accum[end] + inteval * p, "Festival")
-end
-
-
 @testset "재화 및 아이템 차감" begin
 
     @testset "Currency 타입" begin
@@ -338,7 +305,6 @@ end
     for k in ("sIcecream", "sFashion", "sDiner", "sChineseRestaurant",
               "rHealingCamp", "rHillsideMansion", "rAutoCamp", "rWestfieldVilla",
               "aAttraction2x1", "aAttraction2x2", "aAttraction3x3")
-        @show k 
         add!(u, BuildingSeed(k))
         @test build!(u, k)
     end
@@ -368,9 +334,9 @@ end
     # 가용면적 확인 
     @test GameItemBase.getusablearea(homevillage(u), sites[2]) |> iszero
 
-    shops = getsegments(Shop, homevillage(u))
-    resis = getsegments(Residence, homevillage(u))
-    attrs = getsegments(Attraction, homevillage(u))
+    shops = getsegments(homevillage(u), Shop)
+    resis = getsegments(homevillage(u), Residence)
+    attrs = getsegments(homevillage(u), Attraction)
 
     for s in shops 
         before_area = GameItemBase.getusablearea(homevillage(u), sites[1])
