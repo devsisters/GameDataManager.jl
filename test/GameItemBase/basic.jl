@@ -32,7 +32,7 @@ end
         @test add!(u, r*COIN)
         @test add!(u, 1COIN) == false 
 
-        cost = GameItemBase.abilitylevelup_price(u, "CoinStorageCap")
+        cost = GameItemBase.ability_levelupprice(u, "CoinStorageCap")
         for el in values(cost)
             if isa(el, StackItem)  
                 @test add!(u, el)
@@ -42,13 +42,13 @@ end
     end
     # JoyTank
     for i in 1:5
-        cost = GameItemBase.abilitylevelup_price(u, "JoyTank")
+        cost = GameItemBase.ability_levelupprice(u, "JoyTank")
         @test add!(u, cost)
         @test ability_levelup!(u, "JoyTank")
     end
     # Inventory 
     for i in 1:5
-        cost = GameItemBase.abilitylevelup_price(u, "AddInventory")
+        cost = GameItemBase.ability_levelupprice(u, "AddInventory")
         @test add!(u, cost)
         @test ability_levelup!(u, "AddInventory")
     end
@@ -297,6 +297,12 @@ end
             @test has(u, bs) == false
         end
     end
+end
+
+@testset "건물 건설 및 레벨업" begin
+
+    # TODO...
+    # 계정레벨 까지...
 end
 
 @testset "마을 건물 움직이기" begin 
