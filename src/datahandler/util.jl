@@ -73,15 +73,15 @@ function lookfor_xlsx(file)
         hay = keys(CACHE[:meta][:xlsx_shortcut])
         needle = file
         if !in(file, hay)
-            for h in hay
+            for (i, h) in enumerate(hay)
                 if lowercase(h) == lowercase(file)
                     # 소문자일 경우 처리 해줌
                     needle = h
                     break
                 end
-            end
-            if needle == file
-                fuzzy_lookupname(hay, file)
+                if i == length(hay)
+                    throw_fuzzylookupname(hay, file)
+                end
             end
         end
         f = CACHE[:meta][:xlsx_shortcut][needle]

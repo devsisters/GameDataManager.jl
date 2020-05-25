@@ -8,7 +8,7 @@ function joinpath_gamedata(file)
             if in(file, keys(CACHE[:meta][:auto]))
                 @warn "'$(file)'이 '$(dirname(p))'경로에 존재하지 않습니다"
             else 
-                fuzzy_lookupname(keys(CACHE[:meta][:auto]), file; msg = "$(file)이름이 올바르지 않습니다")
+                throw_fuzzylookupname(keys(CACHE[:meta][:auto]), file; msg = "$(file)이름이 올바르지 않습니다")
             end
         end
     elseif is_jsonfile(file) # Tables/json은 하위폴더가 없다
@@ -37,11 +37,11 @@ function joinpath_gamedata(file)
     return p
 end
 
-function fuzzy_lookupname(keyset, idx; kwargs...)
-    fuzzy_lookupname(collect(keyset), idx; kwargs...)
+function throw_fuzzylookupname(keyset, idx; kwargs...)
+    throw_fuzzylookupname(collect(keyset), idx; kwargs...)
 end
 
-function fuzzy_lookupname(names::AbstractArray, idx::AbstractString; msg = "'$(idx)'를 찾을 수 없습니다.")
+function throw_fuzzylookupname(names::AbstractArray, idx::AbstractString; msg = "'$(idx)'를 찾을 수 없습니다.")
     l = Dict{AbstractString,Int}(zip(names, eachindex(names)))
     candidates = XLSXasJSON.fuzzymatch(l, idx)
     if isempty(candidates)
