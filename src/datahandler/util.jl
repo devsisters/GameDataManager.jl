@@ -1,4 +1,10 @@
 isnull(x) = ismissing(x) | isnothing(x)
+function skipnothing(itr)
+    [x for x in itr if !isnothing(x)]
+end
+function skipnull(itr)
+    skipnothing(skipmissing(itr))
+end
 
 # utility functions
 is_xlsxfile(f)::Bool = (endswith(f, ".xlsx") || endswith(f, ".xlsm"))

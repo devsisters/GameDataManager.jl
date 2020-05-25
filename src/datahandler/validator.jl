@@ -446,14 +446,13 @@ end
 
 function parse_usercondition_trigger()
     ref = Table("Quest"; validation = false)["Condition"]
-end
-function parse_usercondition_trigger(ref)
+
     d = Dict()
     # Condition 리스트 생성
     for row in ref
         k = row["Key"]
         d[k] = []
-        for p in skipmissing(row["#Param"])
+        for p in skipnull(row["#Param"])
             if startswith(p, "r\"")
                 x = Regex(chop(p, head=2, tail=1))
             elseif startswith(p, "::")
@@ -469,7 +468,6 @@ end
 
 function validate_usercondition(x::Array{T, 1}) where T
     ref = get!(CACHE, :usercondition, parse_usercondition_trigger())
-
     param = ref[x[1]]
 
     for (i, checker) in enumerate(param)
