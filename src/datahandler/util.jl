@@ -1,19 +1,7 @@
-isnull(x) = ismissing(x) | isnothing(x)
-function skipnothing(itr)
-    [x for x in itr if !isnothing(x)]
-end
-function skipnull(itr)
-    skipnothing(skipmissing(itr))
-end
-
 # utility functions
 is_xlsxfile(f)::Bool = (endswith(f, ".xlsx") || endswith(f, ".xlsm"))
 is_jsonfile(f)::Bool = endswith(f, ".json")
 is_inkfile(f)::Bool = endswith(f, ".ink")
-
-function Base.readdir(dir; extension::String)
-    filter(x->endswith(x, extension), readdir(dir))
-end
 
 function print_write_result(path, msg = "다음과 같습니다")
     print_section("$(msg)\n   SAVED => $(normpath(path))", "연산결과"; color = :green)
