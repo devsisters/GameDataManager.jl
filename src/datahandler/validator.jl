@@ -216,13 +216,16 @@ function validate_building(bt::XLSXTable)
     buildgkey_level = broadcast(row -> (row["BuildingKey"], row["Level"]), leveldata)
     validate_duplicate(buildgkey_level; assert = true, msg = "[Level]시트에 중복된 Level이 있습니다")
 
-    # TODO 이거 안됨!! 버그 고칠 것
     templates = filter(!isnull, leveldata[:, j"/BuildingTemplate"]) .* ".json"
     isfile_inrepo("patch_data", "BuildTemplate/Buildings", templates)
 
+    if haskey(leveldata, j"/BuildingPrefab")
+        prefabs = filter(!isnull, leveldata[:, j"/BuildingPrefab"]) .* ".prefab"
+        isfile_inrepo("mars_art_assets", "GameResources", prefabs)
+    end
+
     icons = data[:, j"/Icon"] .* ".png"
-    isfile_inrepo("mars-client", "unity/Assets/1_CollectionResources", icons; 
-                    msg = "BuildingTemolate가 존재하지 않습니다")
+    isfile_inrepo("mars-client", "unity/Assets/1_CollectionResources", icons)
 
     nothing
 end
