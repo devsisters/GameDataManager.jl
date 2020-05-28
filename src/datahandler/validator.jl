@@ -446,7 +446,10 @@ end
 
 function parse_usercondition_trigger()
     ref = Table("Quest"; validation = false)["Condition"]
+    return parse_usercondition_trigger(ref)
+end
 
+function parse_usercondition_trigger(ref)
     d = Dict()
     # Condition 리스트 생성
     for row in ref
