@@ -202,7 +202,7 @@ end
         u = CheatUser([:Ability])
         remove!(u, get(u, COIN))
 
-        candidate = GameItemBase.get_cleanablesites(homevillage(u))
+        candidate = GameItemBase.cleanablesites(homevillage(u))
         
         for x in candidate
             @test buysite!(u, homevillage(u), x) == false
@@ -225,7 +225,7 @@ end
     end
 
 
-    u = CheatUser([:Ability, :AllSite])
+    u = CheatUser([:UserLevel, :Ability, :AllSite])
     remove!(u, get(u, COIN))
     @testset "Energy 구매" begin
         price = GameItemBase.energyprice(u)
@@ -261,6 +261,9 @@ end
             @test build!(u, k)
             @test has(u, BuildingSeed(k)) == false
         end
+        segments = getsegments(homevillage(u), Building)
+        @test length(segments) == 5
+        @test any(ismissing.(getowner.(segments))) == false
     end
 
     @testset "Building건설 - Shop과 Residence" begin
@@ -269,7 +272,7 @@ end
                   "rHealingCamp", "rAutoCamp", "rVintageCottage", 
                   "rHillsideMansion", "rWestfieldVilla", "rCherryBlossomVilla")
             devpoint_before = homevillage(u).villagerecord[:DevelopmentPoint]
-            devpoint = GameItemBase.get_levelreward(Building(k))["DevelopmentPoint"]
+            devpoint = GameItemBase.leveluprewards(Building(k))["DevelopmentPoint"]
 
             bs = BuildingSeed(k)
             @test build!(u, k) == false
@@ -279,6 +282,8 @@ end
             @test devpoint_before + devpoint == homevillage(u).villagerecord[:DevelopmentPoint]
             @test has(u, bs) == false
         end
+        segments = getsegments(homevillage(u), Building)
+        @test any(ismissing.(getowner.(segments))) == false
     end
 
     @testset "Building건설 - Attraction" begin
@@ -286,7 +291,7 @@ end
         for k in ("aAttraction2x1", "aAttraction2x2", "aAttraction2x4", 
                   "aAttraction3x3", "aAttraction3x4")
             bonuspoint_before = homevillage(u).villagerecord[:AttractionBonusPoint]
-            bonuspoint = GameItemBase.get_levelreward(Building(k))["DailyVillageBonusPoint"]
+            bonuspoint = GameItemBase.leveluprewards(Building(k))["DailyVillageBonusPoint"]
             
             bs = BuildingSeed(k)
             @test build!(u, k) == false

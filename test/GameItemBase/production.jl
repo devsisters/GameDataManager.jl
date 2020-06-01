@@ -72,7 +72,7 @@ end
     shops = GameItemBase.getsegments(homevillage(u), Shop)
     for (i, s) in enumerate(shops)
         @test collect!(homevillage(u), s)
-        @test s.segmentrecord[:LastCollectTime] == GameItemBase.servertime()
+        @test s.record[:LastCollectTime] == GameItemBase.servertime()
 
         exchange_rate = GameItemBase.exchangerate_energytocoin(homevillage(u))
         @test get(u, COIN) == exchange_rate * areas(s) * COIN
@@ -85,9 +85,9 @@ end
 
     GameItemBase.timestep!(Hour(1))
     for (i, s) in enumerate(shops)
-        prev_time = s.segmentrecord[:LastCollectTime]
+        prev_time = s.record[:LastCollectTime]
         @test collect!(homevillage(u), s) == false 
-        @test s.segmentrecord[:LastCollectTime] == prev_time
+        @test s.record[:LastCollectTime] == prev_time
     end
 
     # TODO 부분 채집 테스트
