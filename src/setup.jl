@@ -7,7 +7,7 @@ function setup!(marsrepo = get(ENV, "MARS_CLIENT", ""))
     end
 
     marsrepo = replace(marsrepo, "\\" => "/")
-    f = joinpath(DEPOT_PATH[1], "config/juno_startup.jl")
+    f = joinpath(DEPOT_PATH[1], "config/startup.jl")
     open(f, "w") do io 
             write(io, """
         include(joinpath(dirname(Base.find_package("GameDataManager")), "_startup.jl"))
@@ -15,7 +15,11 @@ function setup!(marsrepo = get(ENV, "MARS_CLIENT", ""))
             using Pkg
             checkout_GameDataManager()
         end
-        using GameDataManager
+        try 
+            using GameDataManager
+        catch e
+            print(e)
+        end
         """)
     end
 
