@@ -47,7 +47,7 @@ function export_gamedata(files::Vector)
         for f in files
             println("『", f, "』")
             bt = Table(f; readfrom = :XLSX)
-write_json(bt.data)
+            write_json(bt.data)
         end
     end
     nothing

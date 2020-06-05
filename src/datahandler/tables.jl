@@ -135,6 +135,17 @@ function copy_to_cache(origin)
     cp(origin, destination; force = true)
 end
 
+function copy_to_backup(ink)
+    destination = replace(ink, GAMEENV["ink"]["root"] => joinpath(GAMEENV["patch_data"], "_Backup/InkDialogue"))
+    
+    # NOTE 이 상태에서는 폴더 depth가 2이상이면 안됨
+    dir, file = splitdir(destination)
+    if !isdir(dir)
+        mkdir(dir)
+    end
+    cp(ink, destination; force = true)
+end
+
 
 """
     JSONTable

@@ -27,30 +27,38 @@ function convert_ink(root, everything)
         print_section("\"$(normpath(root))\"에는 변환할 ink 파일이 없습니다"; color = :yellow)
     end
 
-    for input in targets 
+    for inkfile in targets 
         # Template 파일은 _으로 시작
-        if !startswith(basename(input), "_")
-            output = replace(chop(input, head=0, tail=4), GAMEENV["ink"]["root"] => output_folder)
+        if !startswith(basename(inkfile), "_")
+            output = replace(chop(inkfile, head=0, tail=4), GAMEENV["ink"]["root"] => output_folder)
 
-            invalid_functions = validate_ink(input)
+            invalid_functions = validate_ink(inkfile)
             if !isempty(invalid_functions)
                 print("      TODO: validate_ink // ")
                 println(invalid_functions[1]) 
             end
 
             if Sys.iswindows()
-                cmd = `$inklecate -o "$output.json" "$input"`
+                cmd = `$inklecate -o "$output.json" "$inkfile"`
             else 
                 unityembeded = "/Applications/Unity/Hub/Editor/2019.3.7f1/Unity.app/Contents/MonoBleedingEdge/bin/mono"
-                cmd = `$unityembeded $inklecate -o “$output.json” “$input”`
+                cmd = `$unityembeded $inklecate -o “$output.json” “$inkfile”`
             end
-            print(" SAVE => ")
-            printstyled(normpath(output), ".json\n"; color=:blue)
 
-            run(cmd)
-            inklog(input)
+
+            try 
+                run(cmd)
+                print(" SAVE => ")
+                printstyled(normpath(output), ".json\n"; color=:blue)
+                copy_to_backup(inkfile)
+                inklog(inkfile)
+            catch e 
+                print("\t")
+                println(e)
+            end
         end
     end
+
     if !isempty(targets)
         write_inklog!()
         print_section("ink 추출이 완료되었습니다 ☺", "DONE"; color = :cyan)
