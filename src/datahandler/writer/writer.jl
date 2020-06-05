@@ -111,22 +111,23 @@ end
 
 function backup()
     # 네트워크의 게임 데이터를 백업합니다
-    @assert startswith(GAMEENV["xlsx"]["root"], "G") "네트워크에 연결할 수 없어 XLSX 데이터 백업이 불가능 합니다"
+    @assert startswith(GAMEENV["xlsx"]["root"], "G") "네트워크에 연결할 수 없어 데이터 백업이 불가능 합니다"
         
-    println("../XLSXTable과 ../InkDialogue를 백업합니다")
-    for filetype in ("xlsx", "ink")
-        predicate = path->(!startswith(path, "~\$")  && (isdir(path) || endswith(path, r".xlsx|.xlsm|.ink")))
+    println("../XLSXTable을 백업합니다")
 
-        source = GAMEENV[filetype]["root"]
-        foldername = basename(source)
+    filetype= "xlsx"
+    predicate = path->(!startswith(path, "~\$")  && (isdir(path) || endswith(path, r".xlsx|.xlsm|.ink")))
 
-        f = "$foldername.tar"
-        tarball = Tar.create(predicate, GAMEENV[filetype]["root"], 
-                        joinpath(GAMEENV["patch_data"], "_Backup/$foldername.tar"))
+    source = GAMEENV[filetype]["root"]
+    foldername = basename(source)
 
-        print(" $foldername => ")
-        printstyled(tarball, "\n"; color = :blue)
-    end
+    f = "$foldername.tar"
+    tarball = Tar.create(predicate, GAMEENV[filetype]["root"], 
+                    joinpath(GAMEENV["patch_data"], "_Backup/$foldername.tar"))
+
+    print(" $foldername => ")
+    printstyled(tarball, "\n"; color = :blue)
+
     cd(GAMEENV["patch_data"])
     run(`git commit \*.tar \-m PatchDataOrigin_백업`)
 end
