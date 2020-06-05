@@ -15,15 +15,17 @@ function setup!(marsrepo = get(ENV, "MARS_CLIENT", ""))
             using Pkg
             checkout_GameDataManager()
         end
-        try 
-            using GameDataManager
-        catch e
-            print(e)
+        atreplinit() do repl
+            try
+                @eval using GameDataManager
+            catch e
+                @warn(e.msg)
+            end
         end
         """)
     end
 
-    @info "\"$(f)\"을 성공적으로 생성하였습니다\n\tAtom을 종료 후 다시 시작해 주세요."
+    @info "\"$(f)\"을 성공적으로 생성하였습니다\n\t터미널을 종료 후 다시 시작해 주세요."
 end
 
 """
