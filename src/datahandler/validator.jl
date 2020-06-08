@@ -446,7 +446,36 @@ function validate(bt::XLSXTable{:Store})
     end
     nothing
 end
+"""
+    validate(bt::XLSXTable{:Trigger})
 
+다음 문서 참고
+https://www.notion.so/devsisters/Trigger-Behaviour-186053e1e4694a93b34278aabb4c0480
+"""
+function validate(bt::XLSXTable{:Trigger})
+    behaviour_types = ["ShowTouchGuide", "Deactivate", "PlayDialogue"]
+    validate_subset(bt["Data"][:, j"/Behaviour/Type"], behaviour_types; msg = "다음의 '/Behaviour/Type'이 존재하지 않습니다")
+
+    tourguidekey = bt["TouchGuide"][:, j"/Key"]
+    for row in bt["Data"]
+        if row[j"/Behaviour/Type"] == "ShowTouchGuide"
+            targetid = row[j"/Behaviour/TargetId"]
+            validate_subset([targetid], bt["TouchGuide"][:, j"/Key"]; 
+                            msg = "다음의 '/Behaviour/TargetId'가 존재하지 않습니다")
+        end
+    end
+
+    # TODO condition 체크 필요
+    # for row in bt["Data"]
+    # end
+
+    nothing
+end
+
+
+# ■■■◤  ConditionChecker  ◢■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+# TODO: trigger 데이터에서도 쓸 수 있게 리팩토링 필요
+#    
 function parse_usercondition_trigger()
     ref = Table("Quest"; validation = false)["Condition"]
     return parse_usercondition_trigger(ref)
