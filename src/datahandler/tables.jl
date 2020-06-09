@@ -74,7 +74,7 @@ function XLSXTable(file::AbstractString; validation = CACHE[:validation],
         k = splitext(basename(f))[1]
 
         if !haskey(GAMEDATA, k)
-            jwb = _jsonworkbook(joinpath_gamedata(f), f)
+            jwb = _jsonworkbook(f)
             table = XLSXTable(jwb, validation)
         else 
             table = GAMEDATA[k]
@@ -94,30 +94,31 @@ function _xlsxworkbook(f)
     JSONWorkbook(copy_to_cache(joinpath_gamedata(f)), keys(meta), kwargs_per_sheet)
 end
 
-function _jsonworkbook(xlsxpath, file)   
-    if !haskey(CACHE[:xlsxlog], file) 
-        print("\t...'xl(\"$(basename(file))\")'의 xlsxlog 생성합니다")
-        xlsxlog(_xlsxworkbook(file))
+function _jsonworkbook(xlsxfile)   
+    if !haskey(CACHE[:xlsxlog], xlsxfile) 
+        print("\t...'xl(\"$(basename(xlsxfile))\")'의 xlsxlog 생성합니다")
+        xlsxlog(_xlsxworkbook(xlsxfile))
     end
-    al = CACHE[:xlsxlog][file]
     
     sheets = JSONWorksheet[]
-    for el in getmetadata(file) # sheetindex가 xlsx과 다르다. getindex할 때 이름으로 참조할 것!
-        if endswith(lowercase(el[2][1]), ".json") 
-            jws = begin 
-                jsonfile = joinpath_gamedata(el[2][1])
-                json = JSON.parsefile(jsonfile; dicttype = OrderedDict)
-                pointers = broadcast(XLSXasJSON.JSONPointer, al[2][el[1]])
-                
-                JSONWorksheet(xlsxpath, pointers, 
-                            convert(Array{OrderedDict,1}, json), el[1])
-            end
+    for sheet_json in getmetadata(xlsxfile) # sheetindex가 xlsx과 다르다. getindex할 때 이름으로 참조할 것!
+        jsonfile = sheet_json[2][1]
+        if endswith(lowercase(jsonfile), ".json") 
+            jws = _jsonworksheet(xlsxfile, sheet_json[1], joinpath_gamedata(jsonfile))
             push!(sheets, jws)
         end
     end
     index = XLSXasJSON.Index(sheetnames.(sheets))
-    JSONWorkbook(joinpath_gamedata(file), sheets, index)
+    JSONWorkbook(joinpath_gamedata(xlsxfile), sheets, index)
 end
+
+function _jsonworksheet(xlsxfile, sheet, jsonfile)
+    data = JSON.parsefile(jsonfile; dicttype = OrderedDict)
+    pointers = getjsonpointer(xlsxfile, sheet)
+    
+    JSONWorksheet(xlsxfile, pointers, 
+        convert(Array{OrderedDict,1}, data), sheet)
+end 
 
 
 function copy_to_cache(origin)
@@ -160,11 +161,12 @@ function JSONTable(file::String)
     @assert endswith(file, ".json") "$file 파일의 확장자가 `.json`이어야 합니다."
 
     f = joinpath_gamedata(file)
-    data = JSON.parsefile(f; dicttype = OrderedDict)
-    if isa(data, Array)
-        data = convert(Vector{OrderedDict}, data)
+    rawdata = JSON.parsefile(f; dicttype = OrderedDict)
+ 
+    if isa(rawdata, Array)
+        data = convert(Vector{OrderedDict}, rawdata)
     else
-        data = Dict[data]
+        data = Dict[rawdata]
     end
     GAMEDATA[file] = JSONTable(data, file)
 
