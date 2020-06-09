@@ -50,8 +50,9 @@ function validate_haskey(class, a; assert=true)
         jwb = XLSXTable("Quest"; validation = false).data
         b = unique(get.(jwb[:Group], "Name", missing))
     elseif class == "PrefabPointer"
-        jwb = XLSXTable("PrefabPointer"; validation = false).data
-        b = unique(get.(jwb[:Data], "Key", missing))
+        jwb = XLSXTable("Trigger"; validation = false).data
+        b = unique(jwb[:PrefabPointer][:, j"/Key"])
+        a = parse.(Int, a)
     elseif class == "SiteBonus"
         jwb = XLSXTable("SiteBonus"; validation = false).data
         b = unique(jwb[:Data][:, j"/BonusKey"])
@@ -396,7 +397,7 @@ function validate(bt::XLSXTable{:Flag})
     validate_haskey("Building", ref[:, j"/BuildingKey"])
 
     for row in ref
-        validate_usercondition.(row["Condition"])
+        validate_questcondition.(row["Condition"])
     end
     nothing
 end
@@ -410,11 +411,10 @@ function validate(bt::XLSXTable{:Quest})
     if maximum(group[:, j"/Key"]) > 1023 || minimum(group[:, j"/Key"]) < 0
         throw(AssertionError("GroupKey는 0~1023만 사용 가능합니다."))
     end
-    CACHE[:usercondition] = parse_usercondition_trigger(bt["Condition"])
     # Trigger 정합성 검사
     for row in group
-        validate_usercondition.(row["OrCondition"])
-        validate_usercondition.(row["AndCondition"])
+        validate_questcondition.(row["OrCondition"])
+        validate_questcondition.(row["AndCondition"])
     end
 
     # Main시트 검사
@@ -423,7 +423,7 @@ function validate(bt::XLSXTable{:Quest})
         throw(AssertionError("MemberKey는 1~9만 사용 가능합니다."))
     end
     for row in member
-        validate_usercondition.(row["CompleteCondition"])
+        validate_questcondition.(row["CompleteCondition"])
     end
     # RewardKey 존재 여부
     rewards = get.(member[:, j"/CompleteAction"], "RewardKey", missing)
@@ -441,7 +441,7 @@ function validate(bt::XLSXTable{:Store})
     for row in jws
         # Type이 Server면 별도로 검사 필요
         if row[j"/OpenCondition/Type"] == "User"
-            validate_usercondition.(row[j"/OpenCondition/And"])
+            validate_questcondition.(row[j"/OpenCondition/And"])
         end
     end
     nothing
@@ -465,26 +465,35 @@ function validate(bt::XLSXTable{:Trigger})
         end
     end
 
-    # TODO condition 체크 필요
-    # for row in bt["Data"]
-    # end
+    a = bt["Data"][:, j"/TriggerCondition"] |> skipnull |> collect
+    b = bt["Data"][:, j"/DeadCondition"] |> skipnull |> collect
+
+    validate_triggercondition.(a)
+    validate_triggercondition.(b)
+
 
     nothing
 end
 
 
 # ■■■◤  ConditionChecker  ◢■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-# TODO: trigger 데이터에서도 쓸 수 있게 리팩토링 필요
+# 
 #    
-function parse_usercondition_trigger()
-    ref = Table("Quest"; validation = false)["Condition"]
-    return parse_usercondition_trigger(ref)
+
+function usercondition(type)::Dict
+    if type == :Quest
+        ref = Table("Quest"; readfrom = :JSON, validation = false)["Condition"]
+        parse_usercondition(ref)
+    elseif type == :Trigger
+        ref = Table("Trigger"; readfrom = :JSON, validation = false)["Condition"]
+        parse_usercondition(ref)
+    end
 end
 
-function parse_usercondition_trigger(ref)
+@memoize function parse_usercondition(data)::Dict
     d = Dict()
     # Condition 리스트 생성
-    for row in ref
+    for row in data
         k = row["Key"]
         d[k] = []
         for p in skipnull(row["#Param"])
@@ -501,8 +510,34 @@ function parse_usercondition_trigger(ref)
     return d
 end
 
-function validate_usercondition(x::Array{T, 1}) where T
-    ref = get!(CACHE, :usercondition, parse_usercondition_trigger())
+
+
+function validate_questcondition(x::Array{T, 1}) where T
+    ref = usercondition(:Quest)
+    param = ref[x[1]]
+
+    for (i, checker) in enumerate(param)
+        subject = x[i+1]
+        b = if isa(checker, Array)
+            in(subject, checker)
+        elseif isa(checker, Regex)
+            # 있으면 안되는걸 정규식으로 기입
+            !occursin(checker, subject)
+        elseif isa(checker, Symbol)
+            validate_haskey(string(checker), [subject])
+            true
+        else
+            throw(ArgumentError("$(checker)가 parse_usercondition_trigger에서 정의되지 않았습니다."))
+        end
+
+        @assert b "$(x)의 $(subject)이 trigger 조건에 부합하지 않습니다"
+    end
+   
+    nothing
+end
+
+function validate_triggercondition(x::Array{T, 1}) where T
+    ref = usercondition(:Trigger)
     param = ref[x[1]]
 
     for (i, checker) in enumerate(param)
