@@ -1,4 +1,4 @@
-a3d675bd199d4fe4b5b1b4d6dfb7a6acbb8bbbd3
+3bca8fb87b549d27efd98062ebf5f71fc3115282
 .gitconfig
 GameResources.meta
 GameResources/Blocks.meta
@@ -4136,6 +4136,10 @@ Internal/EditorResources/OriginalColorDescription.asset
 Internal/EditorResources/OriginalColorDescription.asset.meta
 Internal/EditorResources/PaletteDescription.asset
 Internal/EditorResources/PaletteDescription.asset.meta
+Internal/EditorResources/PalettePapyrus.csv
+Internal/EditorResources/PalettePapyrus.csv.meta
+Internal/EditorResources/PalettePapyrusIO.asset
+Internal/EditorResources/PalettePapyrusIO.asset.meta
 Internal/EditorResources/PaletteTextureBaseCollection.asset
 Internal/EditorResources/PaletteTextureBaseCollection.asset.meta
 Internal/EditorResources/PaletteTextureEditCollection.asset
