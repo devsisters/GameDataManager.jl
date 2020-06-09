@@ -1,5 +1,10 @@
 # This file is machine-generated - editing it directly is not advised
 
+[[ArgTools]]
+git-tree-sha1 = "3ca019a0a4a469dbade0869856794ad783ef3574"
+uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
+version = "1.0.1"
+
 [[Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
@@ -47,19 +52,19 @@ version = "0.3.0"
 
 [[GameBalanceManager]]
 deps = ["CurrenciesBase", "DataStructures", "Dates", "GameItemBase", "JSON", "Memoization", "Parameters", "Test", "Unitful", "XLSXasJSON"]
-git-tree-sha1 = "af50469a3c175c29c00d3ca071209af88e70fbf6"
+git-tree-sha1 = "2a0f6dad188efb78b6034375c7309809acdede03"
 repo-rev = "master"
 repo-url = "git@github.com:devsisters/GameBalanceManager.jl.git"
 uuid = "bb77ccaf-9d50-4d58-b991-76f827c14ecc"
-version = "0.3.6"
+version = "0.3.11"
 
 [[GameItemBase]]
 deps = ["CurrenciesBase", "DataStructures", "Dates", "JSON", "LRUCache", "Memoization", "Printf", "Random", "StatsBase", "UUIDs", "Unitful", "XLSXasJSON"]
-git-tree-sha1 = "d33241f613fc35d957422bd511cd55e2e8eaae63"
+git-tree-sha1 = "b061c10b9139a6d4c29b8a0ae70da2a8dce147ff"
 repo-rev = "master"
 repo-url = "git@github.com:devsisters/GameItemBase.jl.git"
 uuid = "5bad4de0-7d96-491e-9f11-736efa64e4f5"
-version = "0.2.10"
+version = "0.2.13"
 
 [[InteractiveUtils]]
 deps = ["Markdown"]
@@ -114,9 +119,9 @@ uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 
 [[Memoization]]
 deps = ["MacroTools"]
-git-tree-sha1 = "eece658cd9a0ea5a50e9a2996a71fd9fb51b3710"
+git-tree-sha1 = "d56f5873d977723522894cac0b759a114b35ea66"
 uuid = "6fafb56a-5788-4b4e-91ca-c0cea6611c73"
-version = "0.1.3"
+version = "0.1.4"
 
 [[Missings]]
 deps = ["DataAPI"]
@@ -140,9 +145,9 @@ version = "0.12.1"
 
 [[Parsers]]
 deps = ["Dates", "Test"]
-git-tree-sha1 = "f0abb338b4d00306500056a3fd44c221b8473ef2"
+git-tree-sha1 = "eb3e09940c0d7ae01b01d9291ebad7b081c844d3"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "1.0.4"
+version = "1.0.5"
 
 [[Pkg]]
 deps = ["Dates", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "UUIDs"]
@@ -190,10 +195,10 @@ uuid = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 version = "0.33.0"
 
 [[Tar]]
-deps = ["SHA"]
-git-tree-sha1 = "754cce1b60262292480f889ecc1782f507ea42b7"
+deps = ["ArgTools", "SHA"]
+git-tree-sha1 = "f4c656310c65efd6e4aa1c7f6884cac8e2a5863a"
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
-version = "1.4.0"
+version = "1.5.0"
 
 [[Test]]
 deps = ["Distributed", "InteractiveUtils", "Logging", "Random"]
