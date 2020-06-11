@@ -39,7 +39,6 @@ JSONWorkbook과 기타 메타 데이터
 struct XLSXTable{FileName} <: Table
     chksum::UInt64
     data::JSONWorkbook
-    # cache::Union{Missing, Array{Dict, 1}}
 end
 function XLSXTable(jwb::JSONWorkbook, validation::Bool)
     f = splitext(basename(jwb))[1] |> string
