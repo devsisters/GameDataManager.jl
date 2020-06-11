@@ -9,6 +9,7 @@ using Tar
 using Memoization
 using MD5
 
+import GameItemBase.buildingtype
 using GameBalanceManager
 
 # Table

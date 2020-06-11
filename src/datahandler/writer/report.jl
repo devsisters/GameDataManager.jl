@@ -1,16 +1,4 @@
-"""
-    buildingtype
 
-BuildingKey의 prefix 규칙으로 타입을 반환
-"""
-function buildingtype(key)
-    startswith(key, "s") ? "Shop" :
-    startswith(key, "r") ? "Residence" :
-    startswith(key, "a") ? "Attraction" :
-    startswith(key, "p") ? "Special" : 
-    key == "Home" ? "Special" :
-    throw(KeyError(key))
-end
 
 """
     findblock()
