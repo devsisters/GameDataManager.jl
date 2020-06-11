@@ -1,37 +1,37 @@
 
-function joinpath_gamedata(file)
-    if is_xlsxfile(file) # 검색하여 폴더 위치를 기록해 둔다.
+function joinpath_gamedata(fname)
+    if is_xlsxfile(fname) # 검색하여 폴더 위치를 기록해 둔다.
         folder = GAMEENV["xlsx"]["root"]
-        p = get!(GAMEENV["xlsx"], file, joinpath(folder, file))
+        p = get!(GAMEENV["xlsx"], fname, joinpath(folder, fname))
 
         if !isfile(p) 
-            if in(file, keys(CACHE[:meta][:auto]))
-                @warn "'$(file)'이 '$(dirname(p))'경로에 존재하지 않습니다"
+            if in(fname, keys(CACHE[:meta][:auto]))
+                @warn "'$(fname)'이 '$(dirname(p))'경로에 존재하지 않습니다"
             else 
-                throw_fuzzylookupname(keys(CACHE[:meta][:auto]), file; msg = "$(file)이름이 올바르지 않습니다")
+                throw_fuzzylookupname(keys(CACHE[:meta][:auto]), fname; msg = "$(fname)이름이 올바르지 않습니다")
             end
         end
-    elseif is_jsonfile(file) # Tables/json은 하위폴더가 없다
+    elseif is_jsonfile(fname) # Tables/json은 하위폴더가 없다
         folder = GAMEENV["json"]["root"]
-        p = get!(GAMEENV["json"], file, joinpath(folder, file))
-        @assert isfile(p) "$(file) 은 $(folder)에 존재하지 않는 파일입니다. 파일명을 다시 확인해 주세요"
-    elseif is_inkfile(file)
+        p = get!(GAMEENV["json"], fname, joinpath(folder, fname))
+        @assert isfile(p) "$(fname) 은 $(folder)에 존재하지 않는 파일입니다. 파일명을 다시 확인해 주세요"
+    elseif is_inkfile(fname)
         folder = GAMEENV["ink"]["root"]
-
+        
         p = missing
         for (root, dirs, files) in walkdir(folder)
             # NOTE 이 코드로는 뎁스가 1이상이면 검색 불가
             for d in dirs 
                 child = joinpath(root, d)
-                if isfile(joinpath(child, file))
-                    p = joinpath(child, file)
+                if isfile(joinpath(child, fname))
+                    p = joinpath(child, fname)
                     @goto escape_loop
                 end
             end
         end 
         @label escape_loop
     else
-        throw(AssertionError("$(file)은 지원하지 않습니다. excel 파일 혹은 .json 파일로 검색해 주세요"))
+        throw(AssertionError("$(fname)은 지원하지 않습니다. excel 파일 혹은 .json 파일로 검색해 주세요"))
     end
 
     return p
