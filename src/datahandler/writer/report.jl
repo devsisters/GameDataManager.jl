@@ -157,8 +157,13 @@ end
 
 function count_buildtemplate(f)
     root = joinpath(GAMEENV["json"]["root"], "../BuildTemplate/Buildings")
-    x = joinpath(root, "$(f).json") |> JSON.parsefile
-    countmap(map(x -> x["BlockKey"], x["Blocks"]))
+    file = joinpath(root, "$(f).json")
+    try 
+        x = JSON.parsefile(file)
+        countmap(map(x -> x["BlockKey"], x["Blocks"]))
+    catch 
+        throw(ArgumentError("JSON 오류로 파일을 읽지 못 하였습니다\n$file"))
+    end
 end
 
 """
@@ -170,13 +175,22 @@ function get_blocks(savetsv::Bool = true)
     root = joinpath(GAMEENV["json"]["root"], "../BuildTemplate/Buildings")
     templates = Dict{String, Any}()
 
+    errorfiles = String[]
     for (folder, dir, files) in walkdir(root)
         jsonfiles = filter(x -> endswith(x, ".json"), files)
         for f in jsonfiles
             file = joinpath(folder, f)
             k = chop(replace(file, root => ""); tail = 5)
-            templates[k] = JSON.parsefile(file)
+            try 
+                templates[k] = JSON.parsefile(file)
+            catch e
+                push!(errorfiles, normpath(file))
+            end
         end
+    end
+
+    if !isempty(errorfiles)
+        @warn "JSON 오류로 다음의 파일들은 읽지 못 하였습니다\n $(join(errorfiles, "\n"))"
     end
 
     d2 = OrderedDict()
