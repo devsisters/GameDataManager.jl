@@ -15,40 +15,40 @@ end
 function validate_haskey(class, a; assert=true)
     if class == "ItemTable"
         jwb = XLSXTable(class; validation = false).data
-        b = vcat(map(i -> get.(jwb[i], "Key", missing), 1:length(jwb))...)
+        b = vcat(map(i -> jwb[i][:, j"/Key"], 1:length(jwb))...)
     elseif class == "Building"
         b = String[]
         for f in ("Shop", "Residence", "Attraction", "Special")
             jwb = XLSXTable(f; validation = false).data
-            x = get.(jwb[:Building], "BuildingKey", "")
+            x = jwb[:Building][:, j"/BuildingKey"]
             append!(b, x)
         end
     elseif class == "Ability"
         jwb = XLSXTable(class; validation = false).data
-        b = unique(get.(jwb[:Level], "AbilityKey", missing))
+        b = unique(jwb[:Level][:, j"/AbilityKey"])
     elseif class == "AbilityGroup"
         jwb = XLSXTable("Ability"; validation = false).data
-        b = unique(get.(jwb[:Group], "GroupKey", missing))
+        b = unique(jwb[:Group][:, j"/GroupKey"])
     elseif class == "Block"
         jwb = XLSXTable(class; validation = false).data
-        b = unique(get.(jwb[:Block], "Key", missing))
+        b = unique(jwb[:Block][:, j"/Key"])
     elseif class == "BlockSet"
         jwb = XLSXTable("Block"; validation = false).data
-        b = unique(get.(jwb[:Set], "BlockSetKey", missing))
+        b = unique(jwb[:Set][:, j"/BlockSetKey"])
     elseif class == "RewardTable"
         jwb = XLSXTable(class; validation = false).data
         jwb2 = XLSXTable("BlockRewardTable"; validation = false).data
 
-        b = [get.(jwb[1], "RewardKey", missing); get.(jwb2[1], "RewardKey", missing)]
+        b = [jwb[1][:, j"/RewardKey"]; jwb2[1][:,j"/RewardKey"]]
     elseif class == "Perk"
         jwb = XLSXTable("Pipo"; validation = false).data
-        b = unique(get.(jwb[:Perk], "Key", missing))
+        b = jwb[:Perk][:, j"/Key"]
     elseif class == "Chore"
         jwb = XLSXTable("Chore"; validation = false).data
-        b = unique(get.(jwb[:Group], "GroupKey", missing))
+        b = jwb[:Group][:, j"/GroupKey"]
     elseif class == "QuestGroup"
         jwb = XLSXTable("Quest"; validation = false).data
-        b = unique(get.(jwb[:Group], "Name", missing))
+        b = jwb[:Group][:, j"/Name"]
     elseif class == "PrefabPointer"
         jwb = XLSXTable("Trigger"; validation = false).data
         b = unique(jwb[:PrefabPointer][:, j"/Key"])
@@ -57,6 +57,12 @@ function validate_haskey(class, a; assert=true)
         jwb = XLSXTable("SiteBonus"; validation = false).data
         b = unique(jwb[:Data][:, j"/BonusKey"])
         a = parse.(Int, a)
+    elseif class == "GameObjectId"
+        jwb = XLSXTable("Trigger"; validation = false).data
+        b = unique(jwb[:GameObjectId][:, j"/Id"])
+    elseif class == "InkFile"
+        @warn "TODO: InkFile 체크"
+        return true
     else
         throw(AssertionError("validate_haskey($(class), ...)은 정의되지 않았습니다")) 
     end
@@ -510,36 +516,22 @@ end
     return d
 end
 
-
-
 function validate_questcondition(x::Array{T, 1}) where T
     ref = usercondition(:Quest)
-    param = ref[x[1]]
-
-    for (i, checker) in enumerate(param)
-        subject = x[i+1]
-        b = if isa(checker, Array)
-            in(subject, checker)
-        elseif isa(checker, Regex)
-            # 있으면 안되는걸 정규식으로 기입
-            !occursin(checker, subject)
-        elseif isa(checker, Symbol)
-            validate_haskey(string(checker), [subject])
-            true
-        else
-            throw(ArgumentError("$(checker)가 parse_usercondition_trigger에서 정의되지 않았습니다."))
-        end
-
-        @assert b "$(x)의 $(subject)이 trigger 조건에 부합하지 않습니다"
-    end
-   
-    nothing
+    validate_condition(x, ref)
 end
 
 function validate_triggercondition(x::Array{T, 1}) where T
     ref = usercondition(:Trigger)
+    validate_condition(x, ref)
+end
+
+function validate_condition(x::Array{T, 1}, ref) where T
     param = ref[x[1]]
 
+    if isempty(param)
+        @warn "'Trigger_Condtion.json'에 $(x[1]) validation을 기능을 추가해 주세요"
+    end
     for (i, checker) in enumerate(param)
         subject = x[i+1]
         b = if isa(checker, Array)
