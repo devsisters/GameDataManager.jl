@@ -421,6 +421,7 @@ function validate(bt::XLSXTable{:Quest})
     for row in group
         validate_questcondition.(row["OrCondition"])
         validate_questcondition.(row["AndCondition"])
+        validate_questcondition.(row["WhenCondition"])
     end
 
     # Main시트 검사
