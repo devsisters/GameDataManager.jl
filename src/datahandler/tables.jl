@@ -130,7 +130,7 @@ function copy_to_cache(origin)
     # NOTE 이 상태에서는 폴더 depth가 2이상이면 안됨
     dir, file = splitdir(destination)
     if !isdir(dir)
-    mkdir(dir)
+        mkdir(dir)
     end
     cp(origin, destination; force = true)
 end
