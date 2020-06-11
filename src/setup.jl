@@ -7,8 +7,12 @@ function setup!(marsrepo = get(ENV, "MARS_CLIENT", ""))
     end
 
     marsrepo = replace(marsrepo, "\\" => "/")
-    f = joinpath(DEPOT_PATH[1], "config/startup.jl")
-    open(f, "w") do io 
+    dir = joinpath(DEPOT_PATH[1], "config")
+    startup = joinpath(dir, "startup.jl")
+    if !isdir(dir)
+        mkdir(dir)
+    end
+    open(startup, "w") do io 
             write(io, """
         include(joinpath(dirname(Base.find_package("GameDataManager")), "_startup.jl"))
         let 
@@ -25,7 +29,7 @@ function setup!(marsrepo = get(ENV, "MARS_CLIENT", ""))
         """)
     end
 
-    @info "\"$(f)\"을 성공적으로 생성하였습니다\n\t터미널을 종료 후 다시 시작해 주세요."
+    @info "\"$(startup)\"을 성공적으로 생성하였습니다\n\t터미널을 종료 후 다시 시작해 주세요."
 end
 
 """
