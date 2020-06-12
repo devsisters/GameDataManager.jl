@@ -211,27 +211,30 @@ validate(bt::XLSXTable{:Shop}) = validate_building(bt)
 validate(bt::XLSXTable{:Residence}) = validate_building(bt)
 validate(bt::XLSXTable{:Attraction}) = validate_building(bt)
 function validate_building(bt::XLSXTable)
-    fname = _filename(bt)    
-    data = bt["Building"]
+    buildingsheet = bt["Building"]
         
-    validate_haskey("Ability", filter(!isnull, vcat(data[:, j"/AbilityKey"]...)))
-    building_seeds = get.(data[:, j"/BuildCost"], "NeedItemKey", missing)
+    validate_haskey("Ability", filter(!isnull, vcat(buildingsheet[:, j"/AbilityKey"]...)))
+    building_seeds = get.(buildingsheet[:, j"/BuildCost"], "NeedItemKey", missing)
     validate_haskey("ItemTable", building_seeds)
     # Level 시트
-    leveldata = bt["Level"]
+    levelsheet = bt["Level"]
     
-    buildgkey_level = broadcast(row -> (row["BuildingKey"], row["Level"]), leveldata)
+    buildgkey_level = broadcast(row -> (row["BuildingKey"], row["Level"]), levelsheet)
     validate_duplicate(buildgkey_level; assert = true, msg = "[Level]시트에 중복된 Level이 있습니다")
 
-    templates = filter(!isnull, leveldata[:, j"/BuildingTemplate"]) .* ".json"
+    templates = filter(!isnull, levelsheet[:, j"/BuildingTemplate"]) .* ".json"
     isfile_inrepo("patch_data", "BuildTemplate/Buildings", templates)
 
-    if haskey(leveldata, j"/BuildingPrefab")
-        prefabs = filter(!isnull, leveldata[:, j"/BuildingPrefab"]) .* ".prefab"
+    if haskey(levelsheet, j"/BuildingPrefab")
+        prefabs = filter(!isnull, levelsheet[:, j"/BuildingPrefab"]) .* ".prefab"
         isfile_inrepo("mars_art_assets", "GameResources", prefabs)
     end
+    if haskey(levelsheet, j"/Reward/BlockSetRewardKey")
+        rewards = levelsheet[:, j"/Reward/BlockSetRewardKey"]
+        validate_haskey("RewardTable", skipnull(rewards))
+    end
 
-    icons = data[:, j"/Icon"] .* ".png"
+    icons = buildingsheet[:, j"/Icon"] .* ".png"
     isfile_inrepo("mars-client", "unity/Assets/1_CollectionResources", icons)
 
     nothing
