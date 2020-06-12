@@ -122,8 +122,10 @@ function help(idx = 1)
             ink()       : '../InkDialogue'의 수정된 .ink를 .json로 변환합니다
             ink(true)       : '../InkDialogue'의 모든 .ink를 .json로 변환합니다
             ink("Villager") : '../InkDialogue/Villager'의 수정된 .ink를 .json으로 변환합니다
-            xl()        : 수정된 엑셀파일만 검색하여 json으로 추출합니다
-            xl(true)    : '_Meta.json'에서 관리하는 모든 파일을 json으로 추출합니다
+            ink_cleanup!()  : '../InkDialogue'에 없지만, 'patch-data'에 남아있는 .ink와 .json을 삭제합니다
+
+            xl()            : 수정된 엑셀파일만 검색하여 json으로 추출합니다
+            xl(true)        : '_Meta.json'에서 관리하는 모든 파일을 json으로 추출합니다
 
             openxl("block"): Office를 실행하여 Block.xlsx을 엽니다
             xl("Block")    : Block.xlsx 파일만 json으로 추출합니다

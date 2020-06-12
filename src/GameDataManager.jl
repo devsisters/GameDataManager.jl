@@ -34,7 +34,7 @@ export GAMEENV, GAMEDATA, help, setup!,
        sheetnames,
        xl, backup, xl_auto, md5hash, openxl,
        set_validation!, cleanup_cache!,
-       ink,
+       ink, ink_cleanup!,
        
        # 유틸리티
        @j_str, findblock, get_buildings, get_blocks, lsfiles

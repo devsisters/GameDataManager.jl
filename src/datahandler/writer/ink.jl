@@ -15,6 +15,31 @@ everything : 'true'면 모든 ink파일을 변환합니다
 function ink(subfolder, everything::Bool = false) 
     convert_ink(joinpath(GAMEENV["ink"]["root"], subfolder), everything)
 end
+function ink_cleanup!()
+    origin = normpath.(collect_ink(GAMEENV["ink"]["root"], true))
+
+    ink_root = joinpath(GAMEENV["patch_data"], "Dialogue")
+    x = replace.(origin, normpath(GAMEENV["ink"]["root"]) => ink_root)
+
+    delete_target = []
+    for (root, dirs, files) in walkdir(ink_root)
+        for f in files 
+            output = joinpath(root, f) |> normpath
+            if !in(replace(output, ".json" => ".ink"), x)
+                push!(delete_target, output)
+            end
+        end
+    end
+    if !isempty(delete_target)
+        @warn "Google Drive에 존재하지 않는 InkDialogue를 삭제합니다\n$(join(delete_target, "\n"))"
+        for f in delete_target
+            f2 = replace(f, ink_root => joinpath(GAMEENV["patch_data"], "_Backup/InkDialogue"))
+            f2 = replace(f2, ".json" => ".ink")
+            rm(f; force = true)
+            rm(f2; force = true)
+        end
+    end
+end
 function convert_ink(root, everything)
     inklecate = joinpath(dirname(pathof(GameDataManager)), "../deps/ink/inklecate.exe")
     
@@ -44,7 +69,6 @@ function convert_ink(root, everything)
                 unityembeded = "/Applications/Unity/Hub/Editor/2019.3.7f1/Unity.app/Contents/MonoBleedingEdge/bin/mono"
                 cmd = `$unityembeded $inklecate -o “$output.json” “$inkfile”`
             end
-
 
             try 
                 run(cmd)

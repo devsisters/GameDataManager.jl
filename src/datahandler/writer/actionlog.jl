@@ -101,7 +101,7 @@ function collect_ink(rootfolder, everything = false)
             else 
                 if ismodified(ink)
                     push!(targets, joinpath(root, f))
-    end
+                end
             end
         end
     end
@@ -114,10 +114,16 @@ end
 """
 function inklog(file)
     CACHE[:inklog][basename(file)] = mtime(file)
+    CACHE[:inklog]["write_count"] = get(CACHE[:inklog], "write_count", 0) + 1
 end
 
-function write_inklog!()
-    open(GAMEENV["inklog"], "w") do io
-        write(io, JSON.json(CACHE[:inklog]))
+function write_inklog!(threadhold = 2)
+    log = CACHE[:xlsxlog]
+    if get(log, "write_count", 0) >= threadhold
+
+        log["write_count"] = 0
+        open(GAMEENV["inklog"], "w") do io
+            write(io, JSON.json(log))
+        end
     end
 end
