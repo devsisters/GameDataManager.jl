@@ -113,7 +113,7 @@ function git_ls_files(repo)
     else
         filelog = joinpath(GAMEENV["cache"], "git_ls-files_$repo.txt")
 
-        # HEAD가 다를 때만 git ls-files 실행
+        origin = pwd()
         cd(GAMEENV[repo]) # git 명령어를 위해 경로 이동
 
         reload = true
@@ -132,6 +132,7 @@ function git_ls_files(repo)
             run(pipeline(`git rev-parse HEAD` & `git ls-files`, stdout = filelog))
             delete!(CACHE[:git], repo)
         end 
+        cd(origin)
     end
 
     return get!(CACHE[:git], repo, readlines(filelog))

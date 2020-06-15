@@ -122,15 +122,16 @@ end
 
 function copy_to_cache(origin)
     destination = replace(origin, GAMEENV["xlsx"]["root"] => joinpath(GAMEENV["cache"], "XLSXTable"))
-    
-    cd(GAMEENV["cache"])
-    if !isdir(joinpath(GAMEENV["cache"], "XLSXTable"))
-        mkdir(joinpath(GAMEENV["cache"], "XLSXTable"))
-    end
-    # NOTE 이 상태에서는 폴더 depth가 2이상이면 안됨
-    dir, file = splitdir(destination)
-    if !isdir(dir)
-        mkdir(dir)
+    quote
+        cd(GAMEENV["cache"])
+        if !isdir(joinpath(GAMEENV["cache"], "XLSXTable"))
+            mkdir(joinpath(GAMEENV["cache"], "XLSXTable"))
+        end
+        # NOTE 이 상태에서는 폴더 depth가 2이상이면 안됨
+        dir, file = splitdir(destination)
+        if !isdir(dir)
+            mkdir(dir)
+        end
     end
     cp(origin, destination; force = true)
 end
