@@ -131,3 +131,13 @@ function backup()
     cd(GAMEENV["patch_data"])
     run(`git commit \*.tar \-m PatchDataOrigin_백업`)
 end
+
+function dircheck_and_create(path)
+    #NOTE 폴더 depth가 2 이상이면 안됨
+    dir, file = splitdir(path)
+    @assert ispath(dir) "올바른 경로가 아닙니다 / $dir"
+
+    if !isdir(dir)
+        mkdir(dir)
+    end
+end

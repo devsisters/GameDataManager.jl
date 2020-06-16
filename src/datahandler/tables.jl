@@ -125,22 +125,16 @@ function copy_to_cache(origin)
     if !isdir(joinpath(GAMEENV["cache"], "XLSXTable"))
         mkdir(joinpath(GAMEENV["cache"], "XLSXTable"))
     end
-    # NOTE 이 상태에서는 폴더 depth가 2이상이면 안됨
-    dir, file = splitdir(destination)
-    if !isdir(dir)
-        mkdir(dir)
-    end
+
+    dircheck_and_create(destination)
+
     cp(origin, destination; force = true)
 end
 
 function copy_to_backup(ink)
     destination = replace(ink, GAMEENV["ink"]["root"] => joinpath(GAMEENV["patch_data"], "_Backup/InkDialogue"))
     
-    # NOTE 이 상태에서는 폴더 depth가 2이상이면 안됨
-    dir, file = splitdir(destination)
-    if !isdir(dir)
-        mkdir(dir)
-    end
+    dircheck_and_create(destination)
     cp(ink, destination; force = true)
 end
 

@@ -69,7 +69,8 @@ function convert_ink(root, everything)
                 unityembeded = "/Applications/Unity/Hub/Editor/2019.3.7f1/Unity.app/Contents/MonoBleedingEdge/bin/mono"
                 cmd = `$unityembeded $inklecate -o “$output.json” “$inkfile”`
             end
-
+            dircheck_and_create(output)
+                        
             try 
                 run(cmd)
                 print(" SAVE => ")
