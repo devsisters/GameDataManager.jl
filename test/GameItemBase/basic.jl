@@ -291,7 +291,7 @@ end
         for k in ("aAttraction2x1", "aAttraction2x2", "aAttraction2x4", 
                   "aAttraction3x3", "aAttraction3x4")
             bonuspoint_before = homevillage(u).villagerecord[:AttractionBonusPoint]
-            bonuspoint = GameItemBase.leveluprewards(Building(k))["DailyVillageBonusPoint"]
+            bonuspoint = GameItemBase.dailyvillagebonuspoint(Building(k))
             
             bs = BuildingSeed(k)
             @test build!(u, k) == false
@@ -311,7 +311,7 @@ end
 end
 
 @testset "마을 건물 움직이기" begin 
-    u = CheatUser([:Ability, :Energy])
+    u = CheatUser()
   
     for k in ("sIcecream", "sFashion", "sDiner", "sChineseRestaurant",
               "rHealingCamp", "rHillsideMansion", "rAutoCamp", "rWestfieldVilla",
@@ -322,14 +322,14 @@ end
 
     # 모든 건물 비우기
     GameItemBase._moveout!(homevillage(u))
-    @test all(isempty.(values(GameItemBase.site_segment(homevillage(u)))))
-    @test all(iszero.(values(GameItemBase.segment_site(homevillage(u)))))
+    segments = getsegments(homevillage(u), Building)
+    @test all(ismissing.(getowner.(segments)))
+    for site in GameItemBase.sitemap(homevillage(u))
+        @test all(iszero.(site))
+    end 
 
     home = getsegments(homevillage(u), "Home")
-    sites = GameItemBase.getcleanedsites(homevillage(u))
-
-    # 하드코딩으로 초기 지급 사이트 면적 확인
-    @test areas.(sites) == (24, 16, 24, 24)
+    sites = GameItemBase.cleanedsites(homevillage(u))
 
     # 홈이리저리 옮겨보기
     @test move!(homevillage(u), home[1], sites[1])
@@ -342,9 +342,6 @@ end
     @test GameItemBase.getusablearea(homevillage(u), sites[2]) == areas(sites[2]) - areas(home[1])
     @test move!(homevillage(u), home[1], sites[2]) == false 
     
-    # 가용면적 확인 
-    @test GameItemBase.getusablearea(homevillage(u), sites[2]) |> iszero
-
     shops = getsegments(homevillage(u), Shop)
     resis = getsegments(homevillage(u), Residence)
     attrs = getsegments(homevillage(u), Attraction)
