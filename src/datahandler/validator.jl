@@ -15,7 +15,12 @@ end
 function validate_haskey(class, a; assert=true)
     if class == "ItemTable"
         jwb = XLSXTable(class; validation = false).data
-        b = vcat(map(i -> jwb[i][:, j"/Key"], 1:length(jwb))...)
+        b = []
+        for jws in jwb
+            if haskey(jws, j"/Key")
+                append!(b, jws[:, j"/Key"])
+            end
+        end
     elseif class == "Building"
         b = String[]
         for f in ("Shop", "Residence", "Attraction", "Special")
@@ -424,7 +429,6 @@ function validate(bt::XLSXTable{:Quest})
     for row in group
         validate_questcondition.(row["OrCondition"])
         validate_questcondition.(row["AndCondition"])
-        validate_questcondition.(row["WhenCondition"])
     end
 
     # Main시트 검사
@@ -477,9 +481,11 @@ function validate(bt::XLSXTable{:Trigger})
 
     a = bt["Data"][:, j"/TriggerCondition"] |> skipnull |> collect
     b = bt["Data"][:, j"/DeadCondition"] |> skipnull |> collect
+    c = bt["Data"][:, j"/WhenCondition"] |> skipnull |> collect
 
     validate_triggercondition.(a)
     validate_triggercondition.(b)
+    validate_triggercondition.(c)
 
 
     nothing
