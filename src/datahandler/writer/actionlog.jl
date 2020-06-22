@@ -118,7 +118,7 @@ function inklog(file)
 end
 
 function write_inklog!(threadhold = 2)
-    log = CACHE[:xlsxlog]
+    log = CACHE[:inklog]
     if get(log, "write_count", 0) >= threadhold
 
         log["write_count"] = 0
