@@ -109,6 +109,14 @@ function md5hash(f)
     bytes2hex(md5(read(joinpath_gamedata(f), String)))
 end
 
+"""
+    patch-data 버전 검사
+"""
+function servercheck()
+    # r = HTTP.request"GET", "http://marspot.devscake.com:25078/data_version")
+    # String(r.body)
+end
+
 function backup()
     # 네트워크의 게임 데이터를 백업합니다
     @assert startswith(GAMEENV["xlsx"]["root"], "G") "네트워크에 연결할 수 없어 데이터 백업이 불가능 합니다"

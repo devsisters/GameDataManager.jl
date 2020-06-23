@@ -1,9 +1,9 @@
 # This file is machine-generated - editing it directly is not advised
 
 [[ArgTools]]
-git-tree-sha1 = "3ca019a0a4a469dbade0869856794ad783ef3574"
+git-tree-sha1 = "ed68c30deded537749c99f012873bb16708c6fb6"
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
-version = "1.0.1"
+version = "1.1.0"
 
 [[Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
@@ -26,9 +26,9 @@ version = "1.3.0"
 
 [[DataStructures]]
 deps = ["InteractiveUtils", "OrderedCollections"]
-git-tree-sha1 = "af6d9c86e191c917c2276fbede1137e8ea20157f"
+git-tree-sha1 = "be680f1ad03c0a03796aa3fda5a2180df7f83b46"
 uuid = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
-version = "0.17.17"
+version = "0.17.18"
 
 [[Dates]]
 deps = ["Printf"]
@@ -52,19 +52,19 @@ version = "0.3.0"
 
 [[GameBalanceManager]]
 deps = ["CurrenciesBase", "DataStructures", "Dates", "GameItemBase", "JSON", "Memoization", "Parameters", "Test", "Unitful", "XLSXasJSON"]
-git-tree-sha1 = "2a0f6dad188efb78b6034375c7309809acdede03"
+git-tree-sha1 = "61643aca39b588c3a6e3f7ecbf8f3713bb057b8f"
 repo-rev = "master"
 repo-url = "git@github.com:devsisters/GameBalanceManager.jl.git"
 uuid = "bb77ccaf-9d50-4d58-b991-76f827c14ecc"
-version = "0.3.11"
+version = "0.3.25"
 
 [[GameItemBase]]
 deps = ["CurrenciesBase", "DataStructures", "Dates", "JSON", "LRUCache", "Memoization", "Printf", "Random", "StatsBase", "UUIDs", "Unitful", "XLSXasJSON"]
-git-tree-sha1 = "b061c10b9139a6d4c29b8a0ae70da2a8dce147ff"
+git-tree-sha1 = "73782eee536ee3114246020ed58283558d75fcae"
 repo-rev = "master"
 repo-url = "git@github.com:devsisters/GameItemBase.jl.git"
 uuid = "5bad4de0-7d96-491e-9f11-736efa64e4f5"
-version = "0.2.13"
+version = "0.3.3"
 
 [[InteractiveUtils]]
 deps = ["Markdown"]
