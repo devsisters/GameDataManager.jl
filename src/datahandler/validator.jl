@@ -467,7 +467,7 @@ end
 https://www.notion.so/devsisters/Trigger-Behaviour-186053e1e4694a93b34278aabb4c0480
 """
 function validate(bt::XLSXTable{:Trigger})
-    behaviour_types = ["ShowTouchGuide", "Deactivate", "PlayDialogue"]
+    behaviour_types = ["ShowTouchGuide", "Deactivate", "PlayDialogue", "GameObjectMod_Apply_Deactivate", "GameObjectMod_Erase_Deactivate"]
     validate_subset(bt["Data"][:, j"/Behaviour/Type"], behaviour_types; msg = "다음의 '/Behaviour/Type'이 존재하지 않습니다")
 
     tourguidekey = bt["TouchGuide"][:, j"/Key"]
@@ -486,7 +486,6 @@ function validate(bt::XLSXTable{:Trigger})
     validate_triggercondition.(a)
     validate_triggercondition.(b)
     validate_triggercondition.(c)
-
 
     nothing
 end
@@ -539,9 +538,6 @@ end
 function validate_condition(x::Array{T, 1}, ref) where T
     param = ref[x[1]]
 
-    if isempty(param)
-        @warn "'Trigger_Condtion.json'에 $(x[1]) validation을 기능을 추가해 주세요"
-    end
     for (i, checker) in enumerate(param)
         subject = x[i+1]
         b = if isa(checker, Array)
