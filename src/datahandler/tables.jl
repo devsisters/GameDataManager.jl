@@ -112,7 +112,7 @@ function _jsonworkbook(xlsxfile)
 end
 
 function _jsonworksheet(xlsxfile, sheet, jsonfile)
-    data = JSON.parsefile(jsonfile; dicttype = OrderedDict)
+    data = JSON.parsefile(jsonfile; dicttype = OrderedDict, null = missing)
     pointers = getjsonpointer(xlsxfile, sheet)
     
     JSONWorksheet(xlsxfile, pointers, 
