@@ -1,9 +1,9 @@
 # This file is machine-generated - editing it directly is not advised
 
 [[ArgTools]]
-git-tree-sha1 = "ed68c30deded537749c99f012873bb16708c6fb6"
+git-tree-sha1 = "bdf73eec6a88885256f282d48eafcad25d7de494"
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
-version = "1.1.0"
+version = "1.1.1"
 
 [[Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
@@ -30,6 +30,11 @@ git-tree-sha1 = "be680f1ad03c0a03796aa3fda5a2180df7f83b46"
 uuid = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
 version = "0.17.18"
 
+[[DataValueInterfaces]]
+git-tree-sha1 = "bfc1187b79289637fa0ef6d4436ebdfe6905cbd6"
+uuid = "e2d170a0-9d28-54be-80f0-106bbe20a464"
+version = "1.0.0"
+
 [[Dates]]
 deps = ["Printf"]
 uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
@@ -51,24 +56,29 @@ uuid = "fb4d412d-6eee-574d-9565-ede6634db7b0"
 version = "0.3.0"
 
 [[GameBalanceManager]]
-deps = ["CurrenciesBase", "DataStructures", "Dates", "GameItemBase", "JSON", "Memoization", "Parameters", "Test", "Unitful", "XLSXasJSON"]
-git-tree-sha1 = "61643aca39b588c3a6e3f7ecbf8f3713bb057b8f"
+deps = ["CurrenciesBase", "Dates", "GameItemBase", "JSON", "JSONPointer", "Memoization", "OrderedCollections", "Parameters", "Test", "Unitful", "XLSXasJSON"]
+git-tree-sha1 = "d9ff9e92b76f7a5636c516a0b2923688eefbffea"
 repo-rev = "master"
 repo-url = "git@github.com:devsisters/GameBalanceManager.jl.git"
 uuid = "bb77ccaf-9d50-4d58-b991-76f827c14ecc"
-version = "0.3.25"
+version = "0.4.0"
 
 [[GameItemBase]]
-deps = ["CurrenciesBase", "DataStructures", "Dates", "JSON", "LRUCache", "Memoization", "Printf", "Random", "StatsBase", "UUIDs", "Unitful", "XLSXasJSON"]
-git-tree-sha1 = "73782eee536ee3114246020ed58283558d75fcae"
+deps = ["CurrenciesBase", "Dates", "JSON", "JSONPointer", "LRUCache", "Memoization", "OrderedCollections", "Printf", "Random", "StatsBase", "UUIDs", "Unitful", "XLSXasJSON"]
+git-tree-sha1 = "af24ac9c1d28edfc19a69ad6009e5c18132cd9c0"
 repo-rev = "master"
 repo-url = "git@github.com:devsisters/GameItemBase.jl.git"
 uuid = "5bad4de0-7d96-491e-9f11-736efa64e4f5"
-version = "0.3.3"
+version = "0.4.0"
 
 [[InteractiveUtils]]
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
+
+[[IteratorInterfaceExtensions]]
+git-tree-sha1 = "a3f24677c21f5bbe9d2a714f95dcd58337fb2856"
+uuid = "82899510-4779-5014-852e-03e436cf321d"
+version = "1.0.0"
 
 [[JSON]]
 deps = ["Dates", "Mmap", "Parsers", "Unicode"]
@@ -78,9 +88,9 @@ version = "0.21.0"
 
 [[JSONPointer]]
 deps = ["OrderedCollections"]
-git-tree-sha1 = "9d749f7e345731224060e18cc8dec2493bf324d1"
+git-tree-sha1 = "e1cb3c473ff4ad4994a94d650ab013de4aac2b2b"
 uuid = "cc3ff66e-924d-4e6b-b111-1d9960e4bba9"
-version = "0.1.0"
+version = "0.2.0"
 
 [[LRUCache]]
 git-tree-sha1 = "788ab2f8a434a63f065ad962368a8cd0f8660a21"
@@ -200,6 +210,18 @@ git-tree-sha1 = "a6102b1f364befdb05746f386b67c6b7e3262c45"
 uuid = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 version = "0.33.0"
 
+[[TableTraits]]
+deps = ["IteratorInterfaceExtensions"]
+git-tree-sha1 = "b1ad568ba658d8cbb3b892ed5380a6f3e781a81e"
+uuid = "3783bdb8-4a98-5b6b-af9a-565f29a5fe9c"
+version = "1.0.0"
+
+[[Tables]]
+deps = ["DataAPI", "DataValueInterfaces", "IteratorInterfaceExtensions", "LinearAlgebra", "TableTraits", "Test"]
+git-tree-sha1 = "c45dcc27331febabc20d86cb3974ef095257dcf3"
+uuid = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
+version = "1.0.4"
+
 [[Tar]]
 deps = ["ArgTools", "SHA"]
 git-tree-sha1 = "f4c656310c65efd6e4aa1c7f6884cac8e2a5863a"
@@ -229,16 +251,16 @@ uuid = "1986cc42-f94f-5a68-af5c-568840ba703d"
 version = "1.2.1"
 
 [[XLSX]]
-deps = ["Dates", "EzXML", "Printf", "ZipFile"]
-git-tree-sha1 = "1512a46bb6155c692f7e040205967a7276490cb7"
+deps = ["Dates", "EzXML", "Printf", "Tables", "ZipFile"]
+git-tree-sha1 = "9ec08085825cf7a03103daffda9ce3220957abef"
 uuid = "fdbf4ff8-1666-58a4-91e7-1b58723a45e0"
-version = "0.6.2"
+version = "0.7.2"
 
 [[XLSXasJSON]]
-deps = ["DataStructures", "JSON", "Printf", "REPL", "XLSX"]
-git-tree-sha1 = "81557a65da8ee5ef867ec83023d4a9a4959f0602"
+deps = ["JSON", "JSONPointer", "OrderedCollections", "Printf", "REPL", "XLSX"]
+git-tree-sha1 = "c87851e7d392b9236c47698f670462bdc6ac2679"
 uuid = "8c9e00cc-ccf1-11e8-3de6-5b028f480d9e"
-version = "0.2.5"
+version = "0.3.0"
 
 [[XML2_jll]]
 deps = ["Libdl", "Libiconv_jll", "Pkg", "Zlib_jll"]
