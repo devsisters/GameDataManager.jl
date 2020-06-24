@@ -21,7 +21,7 @@ xl_auto(interval = 3, timeout = 10000) = xl_auto(collect_auto_xlsx(), interval, 
 
         target = ismodified.(candidate)
         if any(target)
-            export_gamedata(candidate[target])
+            export_xlsxtable(candidate[target])
         else
             sleep(interval)
         end

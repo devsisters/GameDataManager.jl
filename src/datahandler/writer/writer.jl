@@ -8,7 +8,7 @@ function xl(exportall::Bool = false)
     else
         print_section("xlsx -> json 추출을 시작합니다 ⚒\n" * 
                         "-"^(displaysize(stdout)[2] - 4); color = :cyan)
-        export_gamedata(files)
+        export_xlsxtable(files)
         print_section("json 추출이 완료되었습니다 ☺", "DONE"; color = :cyan)
     end
 end
@@ -17,7 +17,7 @@ function xl(x::AbstractString)
     print_section("xlsx -> json 추출을 시작합니다 ⚒\n" * 
                     "-"^(displaysize(stdout)[2] - 4); color = :cyan)
     reload_meta!()
-    export_gamedata(x)
+    export_xlsxtable(x)
     print_section("json 추출이 완료되었습니다 ☺", "DONE"; color = :cyan)
     
     nothing
@@ -29,30 +29,20 @@ function json_to_xl()
 
     for f in collect_auto_xlsx()
         try 
-            json_to_xl(f)
+            write_xlsxtable(f)
         catch e
             printstyled("$f json -> xlsx 변환 실패\n"; color = :red)
         end
     end
     print_section("xlsx 변환이 완료되었습니다 ☺", "DONE"; color = :cyan)
 end
-function json_to_xl(x::AbstractString)
-    jwb = Table(x; readfrom=:JSON).data
-    destination = joinpath(GAMEENV["cache"], "JSONTable")
-    if !isdir(destination)
-        mkdir(destination)
-    end
-
-    path = replace(xlsxpath(jwb), "XLSXTable" => "JSONTable")
-    path = replace(path, ".xlsx" => "_J.xlsx")
-    dircheck_and_create(normpath(path))
-
-    print(" SAVE => ")
-    printstyled(normpath(path), "\n"; color = :blue)
-
-    XLSXasJSON.write_xlsx(path, jwb)
+function json_to_xl(f::AbstractString)
+    print_section("json -> xlsx 재변환을 시작합니다 ⚒\n" * 
+    "-"^(displaysize(stdout)[2] - 4); color = :cyan) 
     
-    nothing
+    write_xlsxtable(f)
+    
+    print_section("xlsx 변환이 완료되었습니다 ☺", "DONE"; color = :cyan)
 end
 
 
@@ -66,7 +56,7 @@ end
 
 mars 메인 저장소의 '.../_META.json'에 명시된 파일만 추출가능합니다
 """
-function export_gamedata(file::AbstractString)
+function export_xlsxtable(file::AbstractString)
     f = lookfor_xlsx(file)
 
     println("『", f, "』")
@@ -75,7 +65,7 @@ function export_gamedata(file::AbstractString)
 
     nothing
 end
-function export_gamedata(files::Vector)
+function export_xlsxtable(files::Vector)
     if !isempty(files)
         for f in files
             println("『", f, "』")
@@ -85,6 +75,33 @@ function export_gamedata(files::Vector)
     end
     nothing
 end
+
+"""
+    reconstruct_xlsxtable(file::AbstractString)
+
+JSON파일에서부터 XLSX을 다시 구성한다.
+kwargs로 기입한 속성은 부활하지 않는다
+"""
+function write_xlsxtable(file::AbstractString)
+    jwb = Table(file; readfrom=:JSON).data
+    parent = joinpath(GAMEENV["cache"], "JSONTable")
+    !isdir(parent) && mkdir(parent)
+    
+    path = begin 
+        a, f = split(normpath(xlsxpath(jwb)), "XLSXTable")
+        replace(f, ".xlsx" => "_J.xlsx")
+        normpath(normpath(parent) * f)
+    end
+    dircheck_and_create(path)
+
+    print(" SAVE => ")
+    printstyled(path, "\n"; color = :blue)
+
+    XLSXasJSON.write_xlsx(path, jwb)
+    
+    return path
+end
+
 
 """
     write_json
