@@ -127,8 +127,9 @@ function help(idx = 1)
             xl()            : 수정된 엑셀파일만 검색하여 json으로 추출합니다
             xl(true)        : '_Meta.json'에서 관리하는 모든 파일을 json으로 추출합니다
 
-            openxl("block"): Office를 실행하여 Block.xlsx을 엽니다
-            xl("Block")    : Block.xlsx 파일만 json으로 추출합니다
+            json_to_xl()   : JSON파일을 '\$(filename)_J.xlsx'파일로 다시 변환합니다
+            openxl("block"): Office를 실행하여 'Block.xlsx'을 엽니다
+            xl("Block")    : 'Block.xlsx' 파일만 json으로 추출합니다
         """
         if idx == 1
             extra = """

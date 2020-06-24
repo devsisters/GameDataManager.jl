@@ -23,6 +23,39 @@ function xl(x::AbstractString)
     nothing
 end
 
+function json_to_xl() 
+    print_section("json -> xlsx 재변환을 시작합니다 ⚒\n" * 
+                "-"^(displaysize(stdout)[2] - 4); color = :cyan)
+
+    for f in collect_auto_xlsx()
+        try 
+            json_to_xl(f)
+        catch e
+            printstyled("$f json -> xlsx 변환 실패\n"; color = :red)
+        end
+    end
+    print_section("xlsx 변환이 완료되었습니다 ☺", "DONE"; color = :cyan)
+end
+function json_to_xl(x::AbstractString)
+    jwb = Table(x; readfrom=:JSON).data
+    destination = joinpath(GAMEENV["cache"], "JSONTable")
+    if !isdir(destination)
+        mkdir(destination)
+    end
+
+    path = replace(xlsxpath(jwb), "XLSXTable" => "JSONTable")
+    path = replace(path, ".xlsx" => "_J.xlsx")
+    dircheck_and_create(normpath(path))
+
+    print(" SAVE => ")
+    printstyled(normpath(path), "\n"; color = :blue)
+
+    XLSXasJSON.write_xlsx(path, jwb)
+    
+    nothing
+end
+
+
 """
     export_gamedata(file::AbstractString)
     export_gamedata(exportall::Bool = false)
@@ -143,7 +176,7 @@ end
 function dircheck_and_create(path)
     #NOTE 폴더 depth가 2 이상이면 안됨
     dir, file = splitdir(path)
-
+    
     if !isdir(dir)
         mkdir(dir)
     end
