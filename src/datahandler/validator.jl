@@ -65,9 +65,6 @@ function validate_haskey(class, a; assert=true)
     elseif class == "GameObjectId"
         jwb = XLSXTable("Trigger"; validation = false).data
         b = unique(jwb[:GameObjectId][:, j"/Id"])
-    elseif class == "InkFile"
-        @warn "TODO: InkFile 체크"
-        return true
     else
         throw(AssertionError("validate_haskey($(class), ...)은 정의되지 않았습니다")) 
     end
