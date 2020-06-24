@@ -89,7 +89,7 @@ function write_xlsxtable(file::AbstractString)
     
     path = begin 
         a, f = split(normpath(xlsxpath(jwb)), "XLSXTable")
-        replace(f, ".xlsx" => "_J.xlsx")
+        f = replace(f, ".xlsx" => "_J.xlsx")
         normpath(normpath(parent) * f)
     end
     dircheck_and_create(path)
