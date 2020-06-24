@@ -215,14 +215,14 @@ https://support.office.com/en-us/article/xlookup-function-b7fd680e-6d10-43e6-84f
 """
 function xlookup(value, jws::JSONWorksheet, 
                     lookup_col, return_col; kwargs...)
-    xlookup(value, jws, XLSXasJSON.JSONPointer(lookup_col), XLSXasJSON.JSONPointer(return_col); kwargs...)
-    end
+    xlookup(value, jws, JSONPointer.Pointer(lookup_col), JSONPointer.Pointer(return_col); kwargs...)
+end
 function xlookup(value, 
-    jws::JSONWorksheet, lookup_col::XLSXasJSON.JSONPointer, return_col; 
+    jws::JSONWorksheet, lookup_col::JSONPointer.Pointer, return_col; 
     find_mode::Function = findfirst, lt::Function = isequal)
 
     @assert haskey(jws, lookup_col) "$(lookup_col)은 존재하지 않습니다"
-    if isa(return_col, XLSXasJSON.JSONPointer)
+    if isa(return_col, JSONPointer.Pointer)
         @assert haskey(jws, return_col) "$(return_col)은 존재하지 않습니다"
     end
 

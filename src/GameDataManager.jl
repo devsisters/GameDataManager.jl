@@ -3,8 +3,9 @@ module GameDataManager
 using Printf
 using StatsBase
 using XLSX, JSON, XLSXasJSON
-import XLSXasJSON: Index, @j_str
-using DataStructures
+import XLSXasJSON: Index
+using JSONPointer
+using OrderedCollections
 using Tar
 using Memoization
 using MD5
@@ -38,7 +39,7 @@ export GAMEENV, GAMEDATA, help, setup!,
        # datahandler
        Table, xlookup,
        sheetnames,
-       xl, backup, xl_auto, md5hash, openxl,
+       xl, backup, md5hash, openxl, json_to_xl,
        set_validation!, cleanup_cache!,
        ink, ink_cleanup!,
        

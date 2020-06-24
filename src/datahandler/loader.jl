@@ -104,5 +104,5 @@ function getjsonpointer(filename, sheetname)
     if ismissing(data)
         throw(ArgumentError("$filename 의 JSONPointer cache가 존재하지 않습니다. xl(\"$filename\")한번 해주세요"))
     end
-    XLSXasJSON.JSONPointer.(data[2][sheetname])
+    JSONPointer.Pointer.(data[2][sheetname])
 end
