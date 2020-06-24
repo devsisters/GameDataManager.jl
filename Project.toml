@@ -21,5 +21,9 @@ XLSXasJSON = "8c9e00cc-ccf1-11e8-3de6-5b028f480d9e"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
+[compat]
+JSONPointer = ">= 0.2"
+XLSXasJSON = ">= 0.3"
+
 [targets]
 test = ["Test", "Dates"]
