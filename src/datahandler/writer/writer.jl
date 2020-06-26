@@ -8,7 +8,13 @@ function xl(exportall::Bool = false)
     else
         print_section("xlsx -> json 추출을 시작합니다 ⚒\n" * 
                         "-"^(displaysize(stdout)[2] - 4); color = :cyan)
-        export_xlsxtable(files)
+        for f in files
+            try 
+                export_xlsxtable(f)
+            catch e
+                printstyled("$f json -> xlsx 변환 실패\n"; color = :red)
+            end
+        end
         print_section("json 추출이 완료되었습니다 ☺", "DONE"; color = :cyan)
     end
 end
@@ -63,16 +69,6 @@ function export_xlsxtable(file::AbstractString)
     bt = Table(f; readfrom = :XLSX)
     write_json(bt.data)
 
-    nothing
-end
-function export_xlsxtable(files::Vector)
-    if !isempty(files)
-        for f in files
-            println("『", f, "』")
-            bt = Table(f; readfrom = :XLSX)
-            write_json(bt.data)
-        end
-    end
     nothing
 end
 
@@ -190,11 +186,13 @@ function backup()
     run(`git commit \*.tar \-m PatchDataOrigin_백업`)
 end
 
-function dircheck_and_create(path)
+function dircheck_and_create(path)::Bool
     #NOTE 폴더 depth가 2 이상이면 안됨
     dir, file = splitdir(path)
     
     if !isdir(dir)
         mkdir(dir)
+        return true 
     end
+    return false
 end
