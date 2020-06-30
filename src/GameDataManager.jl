@@ -16,6 +16,7 @@ using GameBalanceManager
 # Table
 include("datahandler/tables.jl")
 include("datahandler/validator.jl")
+include("datahandler/inkvalidator.jl")
 include("datahandler/util.jl")
 
 #= ■■■◤  DataHandler  ◢■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ =#

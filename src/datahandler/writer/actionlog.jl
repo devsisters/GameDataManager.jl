@@ -29,10 +29,11 @@ function ismodified(f)::Bool
         t = mtime(joinpath_gamedata(f)) 
         t_log = get(CACHE[:xlsxlog], f, [0.])[1]
     elseif is_inkfile(f)
-        @assert isfile(f) "\"$(f)\"가 존재하지 않습니다"
         t = mtime(f)
-        log = get!(CACHE, :inklog, init_inklog())
-        t_log = get(log, basename(f), 0.)
+        if !haskey(CACHE, :inklog)
+            CACHE[:inklog] = init_inklog()
+        end
+        t_log = get(CACHE[:inklog], basename(f), 0.)
     else # xlsx shortcut 
         f = CACHE[:meta][:xlsx_shortcut][f]
         t = mtime(joinpath_gamedata(f)) 
@@ -88,24 +89,26 @@ function cleanup_xlsxlog()
 end
 
 #= ■■■◤  Ink  ◢■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ =#
-"""
+#
+#
+function collect_ink(folder = "")
+    inkfiles = String[]
 
-"""
-function collect_ink(rootfolder, everything = false)
-    targets = String[]
-    for (root, dirs, files) in walkdir(rootfolder)
+    rootdir = joinpath(GAMEENV["ink"]["root"], folder)
+    @assert isdir(rootdir) "존재하지 않은 폴더입니다 폴더명을 확인해 주세요  \'$folder\'"
+
+    for (root, dirs, files) in walkdir(rootdir)
         for f in filter(x->!startswith(x, "_") && endswith(x, ".ink"), files) 
             ink = joinpath(root, f)
-            if everything
-                push!(targets, joinpath(root, f))
-            else 
-                if ismodified(ink)
-                    push!(targets, joinpath(root, f))
-                end
-            end
+            push!(inkfiles, joinpath(root, f))
         end
     end
-    return targets
+    return inkfiles
+end
+function collect_modified_ink(folder = "")
+    rootdir = joinpath(GAMEENV["ink"]["root"], folder)
+
+    filter(ismodified, collect_ink(rootdir))
 end
 """
     inklog()
@@ -118,7 +121,7 @@ function inklog(file)
 end
 
 function write_inklog!(threadhold = 2)
-    log = CACHE[:inklog]
+    log = get!(CACHE, :inklog, init_inklog())
     if get(log, "write_count", 0) >= threadhold
 
         log["write_count"] = 0

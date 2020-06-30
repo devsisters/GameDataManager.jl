@@ -60,7 +60,8 @@ function setup_env!()
         GAMEENV["CollectionResources"] = joinpath(GAMEENV["mars-client"], "unity/Assets/1_CollectionResources")
 
         GAMEENV["NetworkFolder"] = Sys.iswindows() ? "G:/공유 드라이브/프로젝트 MARS/PatchDataOrigin" : "/Volumes/GoogleDrive/공유 드라이브/프로젝트 MARS/PatchDataOrigin"
-
+        GAMEENV["NetworkCache"] = joinpath(GAMEENV["NetworkFolder"], ".cache")
+        
         # Window라면 네트워크 드라이브 연결을 시도한다
         if !isdir(GAMEENV["NetworkFolder"]) 
             @warn """구글 파일 스트림이 세팅 되어 있지 않습니다.

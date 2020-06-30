@@ -1,22 +1,25 @@
-"""
-    ink()
 
-'../InkDialogue'의 모든 하위폴더의 '.ink' 파일 중 수정된 파일을 찾아 json으로 변환합니다
 """
-ink(everything::Bool = false) = convert_ink(GAMEENV["ink"]["root"], everything)
-"""
-    ink(subfolder, everything = false)
+    ink(folder, everything = false)
 
-'../InkDialogue/(subfolder)'의 '.ink' 파일을 json으로 변환합니다
+'../InkDialogue/(folder)'의 '.ink' 파일을 json으로 변환합니다
 
 ## Arguments
-everything : 'true'면 모든 ink파일을 변환합니다
+modifiedonly : 'false'면 모든 ink파일을 변환합니다
 """
-function ink(subfolder, everything::Bool = false) 
-    convert_ink(joinpath(GAMEENV["ink"]["root"], subfolder), everything)
+function ink(folder = "", exportall::Bool = true) 
+    if exportall
+        files = collect_ink(folder)
+    else 
+        files = collect_modified_ink(folder)
+    end
+    convert_ink(files)
 end
+ink(exportall::Bool) = ink("", exportall)
+
+
 function ink_cleanup!()
-    origin = normpath.(collect_ink(GAMEENV["ink"]["root"], true))
+    origin = collect_ink()
 
     ink_root = joinpath(GAMEENV["patch_data"], "Dialogue")
     x = replace.(origin, normpath(GAMEENV["ink"]["root"]) => ink_root)
@@ -40,73 +43,53 @@ function ink_cleanup!()
         end
     end
 end
-function convert_ink(root, everything)
+function convert_ink(files)
     inklecate = joinpath(dirname(pathof(GameDataManager)), "../deps/ink/inklecate.exe")
-    
-    targets = collect_ink(root, everything)
     output_folder = joinpath(GAMEENV["patch_data"], "Dialogue")
 
-    if !isempty(targets)
+    if !isempty(files)
         print_section("ink -> json 변환을 시작합니다 ⚒\n" * "-"^(displaysize(stdout)[2]-4); color = :cyan)
     else 
-        print_section("\"$(normpath(root))\"에는 변환할 ink 파일이 없습니다"; color = :yellow)
+        print_section("변환할 ink 파일이 없습니다"; color = :yellow)
     end
 
-    for inkfile in targets 
-        # Template 파일은 _으로 시작
-        if !startswith(basename(inkfile), "_")
-            output = replace(chop(inkfile, head=0, tail=4), GAMEENV["ink"]["root"] => output_folder)
+    for inkfile in files 
+        output = replace(chop(inkfile, head=0, tail=4), GAMEENV["ink"]["root"] => output_folder)
 
-            invalid_functions = validate_ink(inkfile)
-            if !isempty(invalid_functions)
-                print("      TODO: validate_ink // ")
-                println(invalid_functions[1]) 
+        ink_errors = validate_ink(inkfile)
+        if !isempty(ink_errors)
+            printstyled("  Error: \"$inkfile\"\n"; color= :red)
+            for e in ink_errors
+                printstyled("\t", e; color= :red)
+                println()
             end
 
-            if Sys.iswindows()
-                cmd = `$inklecate -o "$output.json" "$inkfile"`
-            else 
-                unityembeded = "/Applications/Unity/Hub/Editor/2019.3.7f1/Unity.app/Contents/MonoBleedingEdge/bin/mono"
-                cmd = `$unityembeded $inklecate -o “$output.json” “$inkfile”`
-            end
-            dircheck_and_create(output)
-                        
-            try 
-                run(cmd)
-                print(" SAVE => ")
-                printstyled(normpath(output), ".json\n"; color=:blue)
-                copy_to_backup(inkfile)
-                inklog(inkfile)
-            catch e 
-                print("\t")
-                println(e)
-            end
+        end
+
+        if Sys.iswindows()
+            cmd = `$inklecate -o "$output.json" "$inkfile"`
+        else 
+            unityembeded = "/Applications/Unity/Hub/Editor/2019.3.7f1/Unity.app/Contents/MonoBleedingEdge/bin/mono"
+            cmd = `$unityembeded $inklecate -o “$output.json” “$inkfile”`
+        end
+        dircheck_and_create(output)
+                    
+        try 
+            run(cmd)
+            print(" SAVE => ")
+            printstyled(normpath(output), ".json\n"; color=:blue)
+            copy_to_backup(inkfile)
+            inklog(inkfile)
+        catch e 
+            print("\t")
+            println(e)
         end
     end
 
-    if !isempty(targets)
+    if !isempty(files)
         write_inklog!()
         print_section("ink 추출이 완료되었습니다 ☺", "DONE"; color = :cyan)
     end
     nothing
 end
 
-"""
-    validate_ink(file)
-
-#TODO
-- valida 하지 않은 함수만 모아서 line 번호와 함께 반환할 것
-"""
-function validate_ink(file::AbstractString)
-    io = read(file, String)
-    # @ ......;  함수들
-    custom_functions = eachmatch(r"\@(.*?)(?=[\t|\r|\n|;])", io)
-
-    report = []
-    for el in custom_functions
-        s = el.captures[1]
-        func = split(s, r"\s")
-        push!(report, [join(func, ", ")])
-    end
-    return report
-end
