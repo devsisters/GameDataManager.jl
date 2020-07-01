@@ -5,6 +5,7 @@ using StatsBase
 using XLSX, JSON, XLSXasJSON
 import XLSXasJSON: Index
 using JSONPointer
+using SQLite, Tables
 using OrderedCollections
 using Tar
 using Memoization

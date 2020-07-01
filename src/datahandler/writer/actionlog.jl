@@ -30,10 +30,7 @@ function ismodified(f)::Bool
         t_log = get(CACHE[:xlsxlog], f, [0.])[1]
     elseif is_inkfile(f)
         t = mtime(f)
-        if !haskey(CACHE, :inklog)
-            CACHE[:inklog] = init_inklog()
-        end
-        t_log = get(CACHE[:inklog], basename(f), 0.)
+        t_log = inklog_mtime(f)
     else # xlsx shortcut 
         f = CACHE[:meta][:xlsx_shortcut][f]
         t = mtime(joinpath_gamedata(f)) 
@@ -110,23 +107,39 @@ function collect_modified_ink(folder = "")
 
     filter(ismodified, collect_ink(rootdir))
 end
-"""
-    inklog()
 
-'ink'파일을 json으로 추출한 이력
-"""
-function inklog(file)
-    CACHE[:inklog][basename(file)] = mtime(file)
-    CACHE[:inklog]["write_count"] = get(CACHE[:inklog], "write_count", 0) + 1
+function DB_inklog()
+    dbfile = joinpath(GAMEENV["cache"], "ExportLog_ink.sqlite")
+    db = SQLite.DB(dbfile)
+
+    tables = SQLite.tables(db)
+    if isempty(tables)
+        s = """
+        CREATE TABLE ExportLog (filename TEXT PRIMARY KEY, mtime REAL DEFAULT 0);
+            """
+            DBInterface.execute(db, s)
+        @show "$(basename(dbfile)) is created with '$(s)'"
+    end
+
+    return db
 end
 
-function write_inklog!(threadhold = 2)
-    log = get!(CACHE, :inklog, init_inklog())
-    if get(log, "write_count", 0) >= threadhold
+function inklog_replace(file)
+    db = DB_inklog()
 
-        log["write_count"] = 0
-        open(GAMEENV["inklog"], "w") do io
-            write(io, JSON.json(log))
-        end
-    end
+    fname = basename(file)
+
+    mt = mtime(file)    
+    DBInterface.execute(db, "REPLACE INTO ExportLog VALUES (?, ?)", (fname, mt))
+
+    nothing
+end
+
+function inklog_mtime(file)
+    fname = basename(file)
+    db = DB_inklog()
+
+    r = DBInterface.execute(db, "SELECT mtime FROM ExportLog WHERE filename='$fname'") |> columntable
+    
+    return r[:mtime][1]
 end

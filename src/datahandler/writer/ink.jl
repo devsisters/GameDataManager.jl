@@ -7,7 +7,7 @@
 ## Arguments
 modifiedonly : 'false'면 모든 ink파일을 변환합니다
 """
-function ink(folder = "", exportall::Bool = true) 
+function ink(folder = "", exportall::Bool = false) 
     if exportall
         files = collect_ink(folder)
     else 
@@ -19,7 +19,7 @@ ink(exportall::Bool) = ink("", exportall)
 
 
 function ink_cleanup!()
-    origin = collect_ink()
+    origin = normpath.(collect_ink())
 
     ink_root = joinpath(GAMEENV["patch_data"], "Dialogue")
     x = replace.(origin, normpath(GAMEENV["ink"]["root"]) => ink_root)
@@ -33,6 +33,7 @@ function ink_cleanup!()
             end
         end
     end
+
     if !isempty(delete_target)
         @warn "Google Drive에 존재하지 않는 InkDialogue를 삭제합니다\n$(join(delete_target, "\n"))"
         for f in delete_target
@@ -79,7 +80,7 @@ function convert_ink(files)
             print(" SAVE => ")
             printstyled(normpath(output), ".json\n"; color=:blue)
             copy_to_backup(inkfile)
-            inklog(inkfile)
+            inklog_replace(inkfile)
         catch e 
             print("\t")
             println(e)
@@ -87,7 +88,6 @@ function convert_ink(files)
     end
 
     if !isempty(files)
-        write_inklog!()
         print_section("ink 추출이 완료되었습니다 ☺", "DONE"; color = :cyan)
     end
     nothing
