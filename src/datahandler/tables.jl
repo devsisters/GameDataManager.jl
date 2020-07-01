@@ -1,18 +1,12 @@
 """
-    Table(f::AbstractString; kwargs...)
-mars 프로젝트에서 사용하는 '.xlsx'과 '.json'을 읽습니다
+    Table("ItemTable"; readfrom = :NEW, validate = true)
 
-** Constructors ** 
-===
-``` julia
-Table("ItemTable") # XLSX파일
-Table("zGameBalanceManager.json") #JSON파일은 확장자 명시
-```
+GameData를 메모리로 읽어온다. XLSX파싱하여 JSON데이터로 재구성할 뿐 아니라, JSON으로부터 XLSX파일을 만들 수 있다.
 
 ** Arguements **
 ====
-* 'readfrom' : `:NEW`, `:XLSX`, `:JSON `
-* 'validate' : false로 하면 validation 하지않습니다
+* 'readfrom' : `:NEW`-편집된 경우 XLSX, 아니면 JSON에서 재 조합한다. `:XLSX`, `:JSON `
+* 'validate' : false로 하면 validation 하지않는다.
 
 """
 abstract type Table end
@@ -119,7 +113,6 @@ function _jsonworksheet(xlsxfile, sheet, jsonfile)
         convert(Array{OrderedDict,1}, data), sheet)
 end 
 
-
 function copy_to_cache(origin)
     destination = replace(origin, GAMEENV["xlsx"]["root"] => joinpath(GAMEENV["cache"], "XLSXTable"))
     if !isdir(joinpath(GAMEENV["cache"], "XLSXTable"))
@@ -127,7 +120,6 @@ function copy_to_cache(origin)
     end
 
     dircheck_and_create(destination)
-
     cp(origin, destination; force = true)
 end
 
