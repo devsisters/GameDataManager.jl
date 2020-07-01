@@ -140,6 +140,7 @@ function inklog_mtime(file)
     db = DB_inklog()
 
     r = DBInterface.execute(db, "SELECT mtime FROM ExportLog WHERE filename='$fname'") |> columntable
-    
-    return r[:mtime][1]
+    mtime = get(r, :mtime, [0.])
+
+    return mtime[1]
 end
