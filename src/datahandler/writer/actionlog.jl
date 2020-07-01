@@ -125,7 +125,7 @@ function DB_inklog()
 end
 
 function inklog_replace(file)
-    db = DB_inklog()
+    db = get!(CACHE, :DB_inklog, DB_inklog())
 
     fname = basename(file)
 
@@ -137,7 +137,7 @@ end
 
 function inklog_mtime(file)
     fname = basename(file)
-    db = DB_inklog()
+    db = get!(CACHE, :DB_inklog, DB_inklog())
 
     r = DBInterface.execute(db, "SELECT mtime FROM ExportLog WHERE filename='$fname'") |> columntable
     mtime = get(r, :mtime, [0.])
