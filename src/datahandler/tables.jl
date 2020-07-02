@@ -126,6 +126,8 @@ function copy_to_cache(origin)
 
     dircheck_and_create(destination)
     cp(origin, destination; force = true)
+
+    return destination
 end
 
 function copy_to_backup(ink)
@@ -133,6 +135,8 @@ function copy_to_backup(ink)
     
     dircheck_and_create(destination)
     cp(ink, destination; force = true)
+
+    return destination
 end
 
 

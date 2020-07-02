@@ -77,10 +77,10 @@ function convert_ink(files)
                     
         try 
             run(cmd)
-            print(" SAVE => ")
-            printstyled(normpath(output), ".json\n"; color=:blue)
-            copy_to_backup(inkfile)
+            ink_backup = copy_to_backup(inkfile)
             DBwrite_inklog(inkfile)
+            print(" EXPORT => ")
+            printstyled(normpath(ink_backup), "\n"; color=:blue)
         catch e 
             print("\t")
             println(e)
