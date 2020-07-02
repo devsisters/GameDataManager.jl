@@ -37,7 +37,7 @@ end
 function XLSXTable(jwb::JSONWorkbook, validation::Bool)
     f = splitext(basename(jwb))[1] |> string
     
-    xlsxlog(jwb)
+    DBwrite_xlsxlog(jwb)
     GAMEDATA[f] = XLSXTable{Symbol(f)}(hash(jwb), jwb)
     if validation 
         validate(GAMEDATA[f])
@@ -87,14 +87,19 @@ function _xlsxworkbook(f)
     JSONWorkbook(copy_to_cache(joinpath_gamedata(f)), keys(meta), kwargs_per_sheet)
 end
 
-function _jsonworkbook(xlsxfile)   
-    if !haskey(CACHE[:xlsxlog], xlsxfile) 
-        print("\t...'xl(\"$(basename(xlsxfile))\")'의 xlsxlog 생성합니다")
-        xlsxlog(_xlsxworkbook(xlsxfile))
+function _jsonworkbook(xlsxfile) 
+    db = get!(CACHE, :DB_xlsxlog, DB_xlsxlog())
+    meta = getmetadata(xlsxfile) 
+    for sheet in keys(meta)
+        x = DB_SELECT_colname(db, "$(xlsxfile)_$(sheet)")
+        if isempty(x)
+            print("\t...'xl(\"$(basename(xlsxfile))\")'의 xlsxlog 생성합니다")
+            DBwrite_xlsxlog(_xlsxworkbook(xlsxfile))
+        end
     end
-    
+
     sheets = JSONWorksheet[]
-    for sheet_json in getmetadata(xlsxfile) # sheetindex가 xlsx과 다르다. getindex할 때 이름으로 참조할 것!
+    for sheet_json in meta # sheetindex가 xlsx과 다르다. getindex할 때 이름으로 참조할 것!
         jsonfile = sheet_json[2][1]
         if endswith(lowercase(jsonfile), ".json") 
             jws = _jsonworksheet(xlsxfile, sheet_json[1], joinpath_gamedata(jsonfile))

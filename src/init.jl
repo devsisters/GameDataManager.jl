@@ -26,7 +26,6 @@ function __init__()
             end
         end
         CACHE[:meta] = loadmeta()
-        CACHE[:xlsxlog] = init_xlsxlog()
         help()
     end
     nothing
@@ -76,29 +75,6 @@ function loadmeta(metafile = joinpath_gamedata("_Meta.json"))
     println("_Meta.json 로딩이 완료되었습니다", "."^max(6, displaysize(stdout)[2] - 34))
 
     return meta
-end
-
-function init_xlsxlog()
-    file = GAMEENV["xlsxlog"]
-    if isfile(file) 
-        log = JSON.parsefile(file; dicttype = Dict{String,Any})
-    else 
-        log = Dict{String,Any}()
-    end
-    # 방금 로딩한 _Meta.json 시간
-    log["_Meta.json"] = [mtime(joinpath_gamedata("_Meta.json"))]
-
-    return log
-end
-
-function init_inklog()
-    file = GAMEENV["inklog"]
-    if isfile(file) 
-        log = JSON.parsefile(file; dicttype = Dict{String,Float64})
-    else 
-        log = Dict{String,Float64}()
-    end
-    return log
 end
 
 # 안내

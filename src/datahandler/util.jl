@@ -26,10 +26,9 @@ end
 
 function reload_meta!()
     f = "_Meta.json"
-    if ismodified(f)
-        CACHE[:meta] = loadmeta()
-        CACHE[:xlsxlog][f] = [mtime(joinpath_gamedata(f))]
-    end
+    file = joinpath_gamedata("_Meta.json")
+    db = get!(CACHE, :DB_xlsxlog, DB_xlsxlog())
+    DBInterface.execute(db, "REPLACE INTO ExportLog VALUES (?, ?)", (f, mtime(file)))
 end
 
 function set_validation!()

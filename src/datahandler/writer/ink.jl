@@ -80,7 +80,7 @@ function convert_ink(files)
             print(" SAVE => ")
             printstyled(normpath(output), ".json\n"; color=:blue)
             copy_to_backup(inkfile)
-            inklog_replace(inkfile)
+            DBwrite_inklog(inkfile)
         catch e 
             print("\t")
             println(e)

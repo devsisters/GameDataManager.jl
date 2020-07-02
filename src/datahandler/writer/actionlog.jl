@@ -1,3 +1,60 @@
+function DB_inklog()
+    dbfile = joinpath(GAMEENV["cache"], "ExportLog_ink.sqlite")
+    db = SQLite.DB(dbfile)
+
+    tables = SQLite.tables(db)
+    if isempty(tables)
+        t1 = """
+        CREATE TABLE ExportLog (
+            filename TEXT PRIMARY KEY, 
+            mtime REAL DEFAULT 0);
+            """
+            DBInterface.execute(db, t1)
+        @show "$(basename(dbfile)) has created with Table 'ExportLog'"
+    end
+
+    return db
+end
+
+function DB_xlsxlog()
+    dbfile = joinpath(GAMEENV["cache"], "ExportLog_xlsx.sqlite")
+    db = SQLite.DB(dbfile)
+
+    tables = SQLite.tables(db)
+    if isempty(tables)
+        #TODO JSONPointer도 각 Excel시트마다 테이블 따로 만들어서 저장
+        t1 = """CREATE TABLE ExportLog (
+            filename TEXT PRIMARY KEY, 
+            mtime REAL DEFAULT 0);
+        """
+        t2 = """CREATE TABLE ColumnName (
+            file_sheet TEXT PRIMARY KEY, 
+            names TEXT NOT NULL);
+        """
+            DBInterface.execute(db, t1)
+            DBInterface.execute(db, t2)
+
+        @info("$(basename(dbfile)) has created with Tables ['ExportLog','ColumnName']")
+    end
+
+    return db
+end
+
+function DB_SELECT_mtime(db, fname)
+    r = DBInterface.execute(db, "SELECT mtime FROM ExportLog WHERE filename='$fname'") |> columntable
+    mtime = get(r, :mtime, [0.])
+
+    return mtime[1]
+end
+
+function DB_SELECT_colname(db, f_sheet)
+    r = DBInterface.execute(db, "SELECT names FROM ColumnName WHERE file_sheet='$f_sheet'") |> columntable
+    data = get(r, :names, [""])
+
+    return data[1]
+end
+
+
 #= ■■■◤  XLSX  ◢■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ =#
 """
     collect_modified_xlsx()
@@ -9,7 +66,7 @@ function collect_modified_xlsx()
     # files = collect_all_xlsx()
     files = collect_auto_xlsx()
     
-    return files[ismodified.(files)]
+    return filter(ismodified, files)
 end
 # 자동 검출하는 파일만
 function collect_auto_xlsx()
@@ -26,21 +83,27 @@ end
 
 function ismodified(f)::Bool
     if is_xlsxfile(f) | is_jsonfile(f)
-        t = mtime(joinpath_gamedata(f)) 
-        t_log = get(CACHE[:xlsxlog], f, [0.])[1]
+        file = joinpath_gamedata(f)
+        t = mtime(file) 
+        if is_xlsxfile(f)
+            fname = split(replace(file, "\\" => "/"), "XLSXTable/")[2]
+        else 
+            fname = basename(file)
+        end
+
+        t_log = DBread_xlsxlog_mtime(fname)
     elseif is_inkfile(f)
         t = mtime(f)
-        t_log = inklog_mtime(f)
+        t_log = DBread_inklog_mtime(f)
     else # xlsx shortcut 
-        f = CACHE[:meta][:xlsx_shortcut][f]
-        t = mtime(joinpath_gamedata(f)) 
-        t_log = get(CACHE[:xlsxlog], f, [0.])[1]
+        xlsxfile = CACHE[:meta][:xlsx_shortcut][f]
+        return ismodified(xlsxfile)
     end
     return t > t_log
 end
 
-xlsxlog(bt::Table) = xlsxlog(bt.data)
-function xlsxlog(jwb::JSONWorkbook)
+DBwrite_xlsxlog(bt::Table) = DBwrite_xlsxlog(bt.data)
+function DBwrite_xlsxlog(jwb::JSONWorkbook)
     file = replace(XLSXasJSON.xlsxpath(jwb), "\\" => "/")
     fname = split(file, "XLSXTable/")[2]
 
@@ -53,38 +116,24 @@ function xlsxlog(jwb::JSONWorkbook)
             T = eltype(p)
             vals[i] = (T == Any ? token : "$token::$T")
         end
-        pointer[s] = vals
+        pointer[s] = join(vals, '\t')
     end
 
-    CACHE[:xlsxlog][fname] = [mtime(file), pointer]
-    CACHE[:xlsxlog]["write_count"] = get(CACHE[:xlsxlog], "write_count", 0) + 1
-    write_xlsxlog!(5)
+    # moving...
+    db = get!(CACHE, :DB_xlsxlog, DB_xlsxlog())
+    DBInterface.execute(db, "REPLACE INTO ExportLog VALUES (?, ?)", (fname, mtime(file)))
+    for el in pointer
+        DBInterface.execute(db, "REPLACE INTO ColumnName VALUES (?, ?)", 
+                            ("$(fname)_$(el[1])", el[2]))
+    end
+
 end
     
-function write_xlsxlog!(threadhold::Int)
-    log = CACHE[:xlsxlog]
-    if get(log, "write_count", 0) >= threadhold
+function DBread_xlsxlog_mtime(file)
+    db = get!(CACHE, :DB_xlsxlog, DB_xlsxlog())
 
-        log["write_count"] = 0
-        open(GAMEENV["xlsxlog"], "w") do io
-            write(io, JSON.json(log))
-        end
-    end
+    DB_SELECT_mtime(db, file)
 end
-
-
-# _Meta.json에 없는 파일 제거함
-function cleanup_xlsxlog()
-    a = keys(CACHE[:meta][:auto])
-    deleted_file = setdiff(keys(CACHE[:xlsxlog]), a)
-    if length(deleted_file) > 0
-        for x in deleted_file
-            pop!(CACHE[:xlsxlog], x)
-        end
-    end
-    nothing
-end
-
 #= ■■■◤  Ink  ◢■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ =#
 #
 #
@@ -108,23 +157,8 @@ function collect_modified_ink(folder = "")
     filter(ismodified, collect_ink(rootdir))
 end
 
-function DB_inklog()
-    dbfile = joinpath(GAMEENV["cache"], "ExportLog_ink.sqlite")
-    db = SQLite.DB(dbfile)
 
-    tables = SQLite.tables(db)
-    if isempty(tables)
-        s = """
-        CREATE TABLE ExportLog (filename TEXT PRIMARY KEY, mtime REAL DEFAULT 0);
-            """
-            DBInterface.execute(db, s)
-        @show "$(basename(dbfile)) is created with '$(s)'"
-    end
-
-    return db
-end
-
-function inklog_replace(file)
+function DBwrite_inklog(file)
     db = get!(CACHE, :DB_inklog, DB_inklog())
 
     fname = basename(file)
@@ -135,12 +169,11 @@ function inklog_replace(file)
     nothing
 end
 
-function inklog_mtime(file)
+function DBread_inklog_mtime(file)
     fname = basename(file)
     db = get!(CACHE, :DB_inklog, DB_inklog())
 
-    r = DBInterface.execute(db, "SELECT mtime FROM ExportLog WHERE filename='$fname'") |> columntable
-    mtime = get(r, :mtime, [0.])
-
-    return mtime[1]
+    DB_SELECT_mtime(db, fname)
 end
+
+

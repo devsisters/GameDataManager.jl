@@ -100,9 +100,11 @@ JSON 포인터 정보를 미리 Cache에 담아둔다.
 엑셀파일의 컬럼에 있기 때문에 JSON만으로는 역추적 불가능
 """
 function getjsonpointer(filename, sheetname)
-    data = get(CACHE[:xlsxlog], filename, missing)
-    if ismissing(data)
+    db = get!(CACHE, :DB_xlsxlog, DB_xlsxlog())
+    data = DB_SELECT_colname(db, "$(filename)_$(sheetname)")
+    if isempty(data)
         throw(ArgumentError("$filename 의 JSONPointer cache가 존재하지 않습니다. xl(\"$filename\")한번 해주세요"))
     end
-    JSONPointer.Pointer.(data[2][sheetname])
+    
+    JSONPointer.Pointer.(split(data, '\t'))
 end
