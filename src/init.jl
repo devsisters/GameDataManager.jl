@@ -7,28 +7,27 @@ const CACHE = Dict{Symbol,Any}(
         :git => Dict())
 
 function __init__()
-    githubCI = haskey(ENV, "GITHUB_WORKSPACE")
-    if githubCI
-        ENV["MARS_CLIENT"] = joinpath(ENV["GITHUB_WORKSPACE"], "mars-client")
-        
-        extract_backupdata()
+    if haskey(ENV, "GITHUB_WORKSPACE")
+        __init_githubCI__()
     end
     s = setup_env!()
 
     if s
-        logfile = joinpath(GAMEENV["cache"], "updatelog.json")
-        if isfile(logfile)
-            # log = JSON.parsejson(logfile)
-        else 
-            if !githubCI
-                setup!()
-                write(logfile, JSON.json(Dict()))
-            end
-        end
         CACHE[:meta] = loadmeta()
         help()
     end
     nothing
+end
+
+"""
+    __init_githubCI__()
+
+GITHub CI를 돌리기 위한 데이터 세팅
+"""
+function __init_githubCI__()
+    ENV["MARS_CLIENT"] = joinpath(ENV["GITHUB_WORKSPACE"], "mars-client")
+        
+    extract_backupdata()
 end
 
 """

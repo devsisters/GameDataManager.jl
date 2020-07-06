@@ -19,7 +19,7 @@ function print_section(message, title = "NOTE"; color = :normal)
 
         printstyled(stderr, prefix; color = color)
         print(stderr, el)
-        el != last(msglines) && print(stderr,  '\n')
+        print(stderr,  '\n')
     end
     nothing
 end
