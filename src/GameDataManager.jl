@@ -15,21 +15,21 @@ import GameItemBase.buildingtype
 using GameBalanceManager
 
 # Table
-include("datahandler/tables.jl")
-include("datahandler/validator.jl")
-include("datahandler/inkvalidator.jl")
-include("datahandler/util.jl")
+include("tables.jl")
+include("validator/validator.jl")
+include("validator/inkvalidator.jl")
+include("util.jl")
 
 #= ■■■◤  DataHandler  ◢■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ =#
 include("init.jl")
 include("setup.jl")
-include("datahandler/loader.jl")
+include("loader.jl")
 
-include("datahandler/writer/writer.jl")
-include("datahandler/writer/autoxl.jl")
-include("datahandler/writer/actionlog.jl")
-include("datahandler/writer/report.jl")
-include("datahandler/writer/ink.jl")
+include("exporter/writer.jl")
+include("exporter/autoxl.jl")
+include("exporter/actionlog.jl")
+include("exporter/report.jl")
+include("exporter/ink.jl")
 
 
 #= ■■■◤  Report  ◢■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ =#
