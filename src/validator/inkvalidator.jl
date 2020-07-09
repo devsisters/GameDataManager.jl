@@ -33,7 +33,9 @@ end
 
     @assert isfile(f) "오류 검사용 DialogueCommand.json이 존재하지 않습니다. export_dialoguecommand() 검사 파일을 생성해 주세요"
 
-    commands = JSON.parsefile(f)
+    commands = open(f, "r") do io 
+        JSON.parse(io)
+    end
 
     d = Dict()
     for el in commands

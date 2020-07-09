@@ -5,6 +5,9 @@ using StatsBase
 using XLSX, JSON, XLSXasJSON
 import XLSXasJSON: Index
 using JSONPointer
+using JSONSchema
+import JSONSchema.validate
+
 using SQLite, Tables
 using OrderedCollections
 using Tar
@@ -17,6 +20,7 @@ using GameBalanceManager
 # Table
 include("tables.jl")
 include("validator/validator.jl")
+include("validator/schema.jl")
 include("validator/inkvalidator.jl")
 include("util.jl")
 

@@ -1,12 +1,4 @@
-# TODO Validator Submodue로 담기
-"""
-    validator(bt::XLSXTable)
 
-데이터 오류를 검사 엑셀 파일별로 정의한다
-"""
-function validate(bt::XLSXTable)::Nothing
-    nothing
-end
 """
     validate_haskey(class, a; assert=true)
 
@@ -209,38 +201,38 @@ function validate(bt::XLSXTable{:Block})
     nothing
 end
 
-validate(bt::XLSXTable{:Shop}) = validate_building(bt)
-validate(bt::XLSXTable{:Residence}) = validate_building(bt)
-validate(bt::XLSXTable{:Attraction}) = validate_building(bt)
-function validate_building(bt::XLSXTable)
-    buildingsheet = bt["Building"]
+# validate(bt::XLSXTable{:Shop}) = validate_building(bt)
+# validate(bt::XLSXTable{:Residence}) = validate_building(bt)
+# validate(bt::XLSXTable{:Attraction}) = validate_building(bt)
+# function validate_building(bt::XLSXTable)
+#     buildingsheet = bt["Building"]
         
-    validate_haskey("Ability", filter(!isnull, vcat(buildingsheet[:, j"/AbilityKey"]...)))
-    building_seeds = get.(buildingsheet[:, j"/BuildCost"], "NeedItemKey", missing)
-    validate_haskey("ItemTable", building_seeds)
-    # Level 시트
-    levelsheet = bt["Level"]
+#     validate_haskey("Ability", filter(!isnull, vcat(buildingsheet[:, j"/AbilityKey"]...)))
+#     building_seeds = get.(buildingsheet[:, j"/BuildCost"], "NeedItemKey", missing)
+#     validate_haskey("ItemTable", building_seeds)
+#     # Level 시트
+#     levelsheet = bt["Level"]
     
-    buildgkey_level = broadcast(row -> (row["BuildingKey"], row["Level"]), levelsheet)
-    validate_duplicate(buildgkey_level; assert = true, msg = "[Level]시트에 중복된 Level이 있습니다")
+#     buildgkey_level = broadcast(row -> (row["BuildingKey"], row["Level"]), levelsheet)
+#     validate_duplicate(buildgkey_level; assert = true, msg = "[Level]시트에 중복된 Level이 있습니다")
 
-    templates = filter(!isnull, levelsheet[:, j"/BuildingTemplate"]) .* ".json"
-    isfile_inrepo("patch_data", "BuildTemplate/Buildings", templates)
+#     templates = filter(!isnull, levelsheet[:, j"/BuildingTemplate"]) .* ".json"
+#     isfile_inrepo("patch_data", "BuildTemplate/Buildings", templates)
 
-    if haskey(levelsheet, j"/BuildingPrefab")
-        prefabs = filter(!isnull, levelsheet[:, j"/BuildingPrefab"]) .* ".prefab"
-        isfile_inrepo("mars_art_assets", "GameResources", prefabs)
-    end
-    if haskey(levelsheet, j"/Reward/BlockSetRewardKey")
-        rewards = levelsheet[:, j"/Reward/BlockSetRewardKey"]
-        validate_haskey("RewardTable", skipnull(rewards))
-    end
+#     if haskey(levelsheet, j"/BuildingPrefab")
+#         prefabs = filter(!isnull, levelsheet[:, j"/BuildingPrefab"]) .* ".prefab"
+#         isfile_inrepo("mars_art_assets", "GameResources", prefabs)
+#     end
+#     if haskey(levelsheet, j"/Reward/BlockSetRewardKey")
+#         rewards = levelsheet[:, j"/Reward/BlockSetRewardKey"]
+#         validate_haskey("RewardTable", skipnull(rewards))
+#     end
 
-    icons = buildingsheet[:, j"/Icon"] .* ".png"
-    isfile_inrepo("mars-client", "unity/Assets/1_CollectionResources", icons)
+#     icons = buildingsheet[:, j"/Icon"] .* ".png"
+#     isfile_inrepo("mars-client", "unity/Assets/1_CollectionResources", icons)
 
-    nothing
-end
+#     nothing
+# end
 
 function validate(bt::XLSXTable{:Ability})
     group = bt[:Group]
@@ -259,85 +251,58 @@ function validate(bt::XLSXTable{:Ability})
     nothing
 end
 
-function validate(bt::XLSXTable{:SiteBonus})
-    ref = bt[:Data]
-    a = begin 
-        x = ref[:, j"/Requirement"]
-        x = map(el -> get.(el, "Buildings", [""]), x)
-        x = vcat(vcat(x...)...)
-        unique(x)
-    end
-    validate_haskey("Building", a)
+# function validate(bt::XLSXTable{:SiteBonus})
+#     ref = bt[:Data]
+#     a = begin 
+#         x = ref[:, j"/Requirement"]
+#         x = map(el -> get.(el, "Buildings", [""]), x)
+#         x = vcat(vcat(x...)...)
+#         unique(x)
+#     end
+#     validate_haskey("Building", a)
 
-    nothing
-end
+#     nothing
+# end
 
-function validate(bt::XLSXTable{:Chore})
-    ref = bt[:Theme]
-    validate_haskey("Perk", unique(ref[:, j"/Perk"]))
+# function validate(bt::XLSXTable{:Chore})
+#     ref = bt[:Theme]
+#     validate_haskey("Perk", unique(ref[:, j"/Perk"]))
 
-    nothing
-end
+#     nothing
+# end
 
-function validate(bt::XLSXTable{:DroneDelivery})
-    ref = bt[:Group]
-    validate_haskey("RewardTable", ref[:, j"/RewardKey"])
+# function validate(bt::XLSXTable{:DroneDelivery})
+#     ref = bt[:Group]
+#     validate_haskey("RewardTable", ref[:, j"/RewardKey"])
 
-    itemkey = []
-    ref = bt[:Order][:, j"/Items"]
-    itemkeys = map(el -> get.(el, "Key", missing), ref)
-    validate_haskey("ItemTable", vcat(unique(itemkeys)...))
+#     itemkey = []
+#     ref = bt[:Order][:, j"/Items"]
+#     itemkeys = map(el -> get.(el, "Key", missing), ref)
+#     validate_haskey("ItemTable", vcat(unique(itemkeys)...))
 
-    nothing
-end
+#     nothing
+# end
 
-function validate(bt::XLSXTable{:PipoFashion})
-    # jwb[:Data] = merge(jwb[:Data], jwb[:args], "ProductKey")
-    root = joinpath(GAMEENV["mars-client"], "unity/Assets/4_ArtAssets/GameResources/Pipo")
+# function validate(bt::XLSXTable{:Player})
+#     ref = bt[:DevelopmentLevel]
 
-    nothing
-end
+#     p = joinpath(GAMEENV["CollectionResources"], "VillageGradeIcons")
 
-function validate(bt::XLSXTable{:ItemTable})
-    path = joinpath(GAMEENV["CollectionResources"], "ItemIcons")
-    
-    # NOTE:
-    # 구현은 key가 아이템 Kind전체에 대해 Unique할 필요는 없지만 관리 편의를 위해 동일 Key 사용을 금지한다
-    itemkeys = []
-    for sheet in ("Currency", "Normal", "BuildingSeed", "BlockPackage")
-        append!(itemkeys, bt[sheet][:, j"/Key"])
+#     icons = ref[:, j"/GradeIcon"] .* ".png"
+#     isfile_inrepo("mars-client", 
+#         "unity/Assets/1_CollectionResources/VillageGradeIcons", icons; 
+#         msg = "Icon이 존재하지 않습니다")
 
-        icons = bt[sheet][:, j"/Icon"] .* ".png"
-        isfile_inrepo("mars-client", 
-            "unity/Assets/1_CollectionResources/ItemIcons", icons; 
-            msg = "$(sheet)아이템 Icon이 존재하지 않습니다")
-    end
-    isfile_inrepo("patch_data", "BuildTemplate/BlockPackages", bt["BlockPackage"][:, j"/BuildingTemplete"] .* ".json")
-    validate_duplicate(itemkeys)
+#     chore_groupkeys = begin 
+#         data = filter(!isnull, get.(ref[:, j"/Chores"], "Group", missing))
+#         vcat(map(el -> get.(el, "Key", missing), data)...) |> unique
+#     end
+#     filter!(!isnull, chore_groupkeys)
 
-    nothing
-end
+#     validate_haskey("Chore", chore_groupkeys)
 
-function validate(bt::XLSXTable{:Player})
-    ref = bt[:DevelopmentLevel]
-
-    p = joinpath(GAMEENV["CollectionResources"], "VillageGradeIcons")
-
-    icons = ref[:, j"/GradeIcon"] .* ".png"
-    isfile_inrepo("mars-client", 
-        "unity/Assets/1_CollectionResources/VillageGradeIcons", icons; 
-        msg = "Icon이 존재하지 않습니다")
-
-    chore_groupkeys = begin 
-        data = filter(!isnull, get.(ref[:, j"/Chores"], "Group", missing))
-        vcat(map(el -> get.(el, "Key", missing), data)...) |> unique
-    end
-    filter!(!isnull, chore_groupkeys)
-
-    validate_haskey("Chore", chore_groupkeys)
-
-    nothing
-end
+#     nothing
+# end
 
 function validate(bt::XLSXTable{:RewardTable})
     # 시트를 합쳐둠
@@ -403,15 +368,15 @@ function validate_rewardscript_itemid(data)
 end
 
 
-function validate(bt::XLSXTable{:Flag})
-    ref = bt[:BuildingUnlock]
-    validate_haskey("Building", ref[:, j"/BuildingKey"])
+# function validate(bt::XLSXTable{:Flag})
+#     ref = bt[:BuildingUnlock]
+#     validate_haskey("Building", ref[:, j"/BuildingKey"])
 
-    for row in ref
-        validate_questcondition.(row["Condition"])
-    end
-    nothing
-end
+#     for row in ref
+#         validate_questcondition.(row["Condition"])
+#     end
+#     nothing
+# end
 
 function validate(bt::XLSXTable{:Quest})
     # Group시트 검사
