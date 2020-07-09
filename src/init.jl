@@ -63,7 +63,9 @@ function loadmeta(metafile = joinpath_gamedata("_Meta.json"))
         validate_duplicate(files)
         Dict(files)
     end
-    jsonfile = JSON.parsefile(metafile; dicttype = OrderedDict{String,Any})
+    jsonfile = open(metafile, "r") do io 
+        JSON.parse(io; dicttype = OrderedDict{String,Any})
+    end
 
     meta = Dict()
     # xl()로 자동 추출하는 파일

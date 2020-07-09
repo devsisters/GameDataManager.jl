@@ -111,7 +111,10 @@ function _jsonworkbook(xlsxfile)
 end
 
 function _jsonworksheet(xlsxfile, sheet, jsonfile)
-    data = JSON.parsefile(jsonfile; dicttype = OrderedDict, null = missing)
+    data = open(jsonfile, "r") do io 
+        JSON.parse(io; dicttype = OrderedDict, null = missing)
+    end
+
     pointers = getjsonpointer(xlsxfile, sheet)
     
     JSONWorksheet(xlsxfile, pointers, 
@@ -153,8 +156,10 @@ function JSONTable(file::String)
     @assert endswith(file, ".json") "$file 파일의 확장자가 `.json`이어야 합니다."
 
     f = joinpath_gamedata(file)
-    rawdata = JSON.parsefile(f; dicttype = OrderedDict)
- 
+    rawdata = open(f, "r") do io 
+        JSON.parse(io; dicttype = OrderedDict)
+    end
+
     if isa(rawdata, Array)
         data = convert(Vector{OrderedDict}, rawdata)
     else

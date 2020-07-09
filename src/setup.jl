@@ -56,9 +56,9 @@ function setup_env!()
         GAMEENV["cache"] = joinpath(GAMEENV["patch_data"], ".cache")
         GAMEENV["xlsxlog"] = joinpath(GAMEENV["cache"], "xlsxlog.json")
         GAMEENV["inklog"] = joinpath(GAMEENV["cache"], "inklog.json")
-
+        
         GAMEENV["CollectionResources"] = joinpath(GAMEENV["mars-client"], "unity/Assets/1_CollectionResources")
-
+        
         GAMEENV["NetworkFolder"] = Sys.iswindows() ? "G:/공유 드라이브/프로젝트 MARS/PatchDataOrigin" : "/Volumes/GoogleDrive/공유 드라이브/프로젝트 MARS/PatchDataOrigin"
         GAMEENV["NetworkCache"] = joinpath(GAMEENV["NetworkFolder"], ".cache")
         
@@ -75,6 +75,7 @@ function setup_env!()
             GAMEENV["ink"] = Dict("root" => joinpath(GAMEENV["NetworkFolder"], "InkDialogue"))
         end
         GAMEENV["json"] = Dict("root" => joinpath(GAMEENV["patch_data"], "Tables"))
+        GAMEENV["jsonschema"] = joinpath(GAMEENV["patch_data"], "TablesSchema")
         
         return true
     end

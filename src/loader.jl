@@ -71,6 +71,7 @@ function getmetadata(jwb::JSONWorkbook)
     metakey = CACHE[:meta][:xlsx_shortcut][f]
     getmetadata(metakey)
 end
+getmetadata(bt::XLSXTable) = getmetadata(bt.data)
 
 """
     get_filename_sheetname(jsonfile)
