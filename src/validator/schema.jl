@@ -54,17 +54,22 @@ function update_keydefinitions()
         JSON.parse(io)
     end
 
-    # TODO 이거 _Schema.xlsx 참조하도록 수정 필요
-    for type in ("Shop", "Residence", "Special", "Attraction")
-        pointer = JSONPointer.Pointer("/definitions/$(type)Key/enum")
+    def_from = Table("_Schema"; readfrom = :XLSX)["KeyDefinitions"]
+    for row in def_from
+        k1 = "/definitions$(row["Key"])"
 
-        jwb = Table(type; validation = false)
-        data[pointer] = jwb["Building"][:, j"/BuildingKey"]
+        for el in row["param"]
+            k = JSONPointer.Pointer("$(k1)/$(el[1])")
+            data[k] = el[2]
+        end
+        
+        # enum 입력
+        enum_data = begin 
+            p = JSONPointer.Pointer(row[j"/ref/pointer"])
+            map(el -> el[p], Table(row[j"/ref/JSONFile"]).data)
+        end
+        data[JSONPointer.Pointer("$(k1)/enum")] = enum_data
     end
-    
-    blockkey = Table("Block"; validation = false)["Block"][:, j"/Key"]
-    data[j"/definitions/BlockKey/enum"] = Table("Block")["Block"][:, j"/Key"]
-
     write(file, JSON.json(data))
 
     nothing
