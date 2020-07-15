@@ -112,32 +112,47 @@ function git_ls_files(repo)
     githubCI = haskey(ENV, "GITHUB_WORKSPACE")
     if githubCI # GithubCI에서는 미리 복사해둔 로그파일 사용
         filelog = joinpath(dirname(pathof(GameDataManager)), "../test/validation/git_ls-files_$repo.txt")
+        CACHE[:git][repo] = readlines(filelog)
     else
         filelog = joinpath(GAMEENV["cache"], "git_ls-files_$repo.txt")
 
-        origin = pwd()
-        cd(GAMEENV[repo]) # git 명령어를 위해 경로 이동
+        reload = is_git_ls_files_needupdate(repo)
+        if reload
+            origin = pwd()
+            cd(GAMEENV[repo]) # git 명령어를 위해 경로 이동
 
-        reload = true
-        if isfile(filelog)
-            hash = read(`git rev-parse HEAD`, String)
-            
-            open(filelog, "r") do io 
-                x = readuntil(io, '\n', keep = true)
-                if x == hash
-                    reload = false
-                end
-            end
+            run(pipeline(`git rev-parse HEAD` & `git ls-files`, stdout = filelog))
+            CACHE[:git][repo] = readlines(filelog)
+
+            cd(origin)
+        else 
+            get!(CACHE[:git], repo, readlines(filelog))
         end
 
-        if reload
-            run(pipeline(`git rev-parse HEAD` & `git ls-files`, stdout = filelog))
-            delete!(CACHE[:git], repo)
-        end 
-        cd(origin)
     end
 
-    return get!(CACHE[:git], repo, readlines(filelog))
+    return CACHE[:git][repo]
+end
+function is_git_ls_files_needupdate(repo)
+    origin = pwd()
+    cd(GAMEENV[repo]) # git 명령어를 위해 경로 이동
+
+    filelog = joinpath(GAMEENV["cache"], "git_ls-files_$repo.txt")
+
+    needupdate = true
+    if isfile(filelog)
+        hash = read(`git rev-parse HEAD`, String)
+        
+        open(filelog, "r") do io 
+            x = readuntil(io, '\n', keep = true)
+            if x == hash
+                needupdate = false
+            end
+        end
+    end
+    cd(origin)
+
+    return needupdate
 end
 
 """ 

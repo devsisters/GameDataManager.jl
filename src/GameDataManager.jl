@@ -19,7 +19,7 @@ using GameBalanceManager
 
 # Table
 include("tables.jl")
-include("validator/validator.jl")
+# include("validator/validator.jl")
 include("validator/schema.jl")
 include("validator/inkvalidator.jl")
 include("util.jl")

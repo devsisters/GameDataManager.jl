@@ -125,3 +125,37 @@ function lsfiles()
     print(" filelist => ")
     printstyled(normpath(output); color = :blue)
 end
+
+
+"""
+    validate_duplicate(lists; assert = false, keycheck = false)
+
+# Arguments
+===
+assert   : 
+keycheck : Key 타입일 경우 공백 검사
+"""
+function validate_duplicate(lists; assert=true, keycheck = false, 
+                            msg = "[:$(lists)]에서 중복된 값이 발견되었습니다")
+    if !allunique(lists)
+        duplicate = filter(el -> el[2] > 1, countmap(lists))
+        if assert
+            throw(AssertionError("$msg \n $(keys(duplicate))"))
+        else
+            @warn msg duplicate
+        end
+    end
+    # TODO keycheck? 이상하고... 규칙에 대한 공통 함수로 조정 필요
+    if keycheck
+        check = broadcast(x -> isa(x, String) ? occursin(r"(\s)|(\t)|(\n)", x) : false, lists)
+        if any(check)
+            msg = "Key에는 공백, 줄바꿈, 탭이 들어갈 수 없습니다 \n $(lists[check])"
+            if assert
+                throw(AssertionError(msg))
+            else
+                @warn msg
+            end
+        end
+    end
+    nothing
+end
