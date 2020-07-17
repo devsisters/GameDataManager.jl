@@ -83,6 +83,8 @@ end
 
 function ismodified(f)::Bool
     if is_xlsxfile(f) | is_jsonfile(f)
+        @label XLSXFILE
+
         file = joinpath_gamedata(f)
         t = mtime(file) 
         if is_xlsxfile(f)
@@ -95,9 +97,14 @@ function ismodified(f)::Bool
     elseif is_inkfile(f)
         t = mtime(f)
         t_log = DBread_otherlog_mtime(f)
-    else # xlsx shortcut 
-        xlsxfile = CACHE[:meta][:xlsx_shortcut][f]
-        return ismodified(xlsxfile)
+    else 
+        if haskey(CACHE[:meta][:xlsx_shortcut], f)
+            f = CACHE[:meta][:xlsx_shortcut][f]
+            @goto XLSXFILE
+        else 
+            t = mtime(f)
+            t_log = DBread_otherlog_mtime(f)
+        end
     end
     return t > t_log
 end

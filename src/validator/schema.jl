@@ -4,6 +4,9 @@
 데이터 오류를 검사 엑셀 파일별로 정의한다
 """
 function validate(bt::XLSXTable{NAME}) where NAME
+    if NAME == :Block
+        updateschema_blockmagnet()
+    end
     jwb = bt.data
     meta = getmetadata(jwb)
     
@@ -18,13 +21,18 @@ end
 function validate(jws::JSONWorksheet, jsonfile)
     schema = readschema(jsonfile)
 
-    err = Dict{Integer, Any}()
+    err = Dict()
     @inbounds for (i, row) in enumerate(jws)
         # 모든 `OrderedDict`를 `Dict`으로 변환이 필요
         data = reclusive_convert(row) 
         val = JSONSchema.validate(data, schema)
         if !isnothing(val)
-            err[i] = val
+            if in(j"/Key", jws.pointer)
+                marker = string("/Key: ", row[j"/Key"])
+            else 
+                marker = "#I_$i"
+            end
+            err[marker] = val
         end
     end
     return err
@@ -32,28 +40,30 @@ end
 
 function print_schemaerror(file, sheet, err::Dict)
     function getcause(p)
-        ("#R_$(p[1])", p[2].x)
+        (p[1], p[2].x)
     end
     title = " $(file) Validation failed\n"
     
     paths = map(el -> el.path, values(err))
     for p in unique(paths)
-        errors = filter(el -> el.path == p, collect(values(err)))
         
         # error가 난 데이터 내용
-        cause = [getcause(el) for el in err]
-        # error 원인
-        reason = unique(map(el -> el.reason, values(err)))
-
-        # TODO value종류별로 다르게 처리 필요
-        schemaval = errors[1].val
+        cause = []
+        for el in err 
+            if el[2].path == p 
+                push!(cause, getcause(el))
+            end
+        end
+        
+        # error 원인, 값
+        errors = filter(el -> el.path == p, collect(values(err)))
+        schemakey = unique(map(el -> el.reason, values(errors)))
+        schemaval = summary(errors[1].val)
 
         solution = get_schema_description(file, sheet, p)
 
-        msg = """    
-        ----schema_info----
-        schema key:   $reason
-        schema value: $(summary(schemaval))
+        msg = """schema_info: (key = $schemakey, summary = $schemaval)
+
         ----error info----
         sheet:        $sheet
         column:       $p
@@ -194,10 +204,10 @@ function updateschema_key(schema)
 end
 
 function updateschema_gitlsfiles(schema)
-    @info "GitLsFiles Schema를 생성합니다: $file"
-    
     file = joinpath(GAMEENV["jsonschema"], "Definitions/.GitLsFiles.json")
     jws = schema["GitLsFiles"]
+
+    @info "GitLsFiles Schema를 생성합니다: $file"
 
     defs = OrderedDict{String, Any}()
     for row in jws 
@@ -246,27 +256,33 @@ function updateschema_gitlsfiles(schema)
     nothing
 end
 
-# TODO 파일 수정날짜 비교해서 반복해서 뽑지 않기
-function schema_blockmagnet()
+function updateschema_blockmagnet()
     magnet_file = joinpath(GAMEENV["mars_art_assets"], "Internal/BlockTemplateTable.asset")
-    if isfile(magnet_file)
+    ismodified(magnet_file)
+    
+    if !isfile(magnet_file)
+        throw(AssertionError("$(magnet_file)이 존재하지 않아 오류검사를 할 수 없습니다"))
+    end 
+
+    if ismodified(magnet_file)
         magnet = filter(x -> startswith(x, "  - Key:"), readlines(magnet_file))
         magnetkey = unique(broadcast(x -> split(x, "Key: ")[2], magnet))
-    else
-        magnetkey = []
-    end
-    data = OrderedDict(
-        "\$schema" => "http://json-schema.org/draft-06/schema",
-            "\$id" => ".BlockTemplateKey.json",
-           "title" => "'Internal/BlockTemplateTable.asset' Key list",
-         "definitions" => OrderedDict(
-                "TemplateKey" => OrderedDict(
-                    "uniqueItems"=> true, 
-                       "type" => "string", 
-                       "enum" => magnetkey)))
+        
+        data = OrderedDict(
+            "\$schema" => "http://json-schema.org/draft-06/schema",
+                "\$id" => ".BlockTemplateKey.json",
+            "title" => "'Internal/BlockTemplateTable.asset' Key list",
+            "definitions" => OrderedDict(
+                    "TemplateKey" => OrderedDict(
+                        "uniqueItems"=> true, 
+                        "type" => "string", 
+                        "enum" => magnetkey)))
 
-    file = joinpath(GAMEENV["jsonschema"], "Definitions/.BlockTemplateKey.json")
-    write(file, JSON.json(data))
+        file = joinpath(GAMEENV["jsonschema"], "Definitions/.BlockTemplateKey.json")
+        write(file, JSON.json(data))
+
+        DBwrite_otherlog(magnet_file)
+    end
 
     nothing
 end
