@@ -2,8 +2,8 @@ const GAMEENV = Dict{String,Any}()
 const GAMEDATA = Dict{String,Table}()
 const CACHE = Dict{Symbol,Any}(
         :meta => missing,
-        :xlsxlog => missing,
-        :validation => true, 
+        :validation => true,
+        :tablesschema => Dict(), 
         :git => Dict())
 
 function __init__()
@@ -14,6 +14,7 @@ function __init__()
 
     if s
         CACHE[:meta] = loadmeta()
+        updateschema()
         help()
     end
     nothing

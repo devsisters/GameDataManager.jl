@@ -18,43 +18,94 @@ end
 function validate(jws::JSONWorksheet, jsonfile)
     schema = readschema(jsonfile)
 
-    err = []
-    @inbounds for row in jws
+    err = Dict{Integer, Any}()
+    @inbounds for (i, row) in enumerate(jws)
         # 모든 `OrderedDict`를 `Dict`으로 변환이 필요
         data = reclusive_convert(row) 
         val = JSONSchema.validate(data, schema)
         if !isnothing(val)
-            push!(err, val)
+            err[i] = val
         end
     end
     return err
 end
 
-function print_schemaerror(file, sheet, err::Vector)
-    title = " $(file)[$(sheet)] Validation failed\n"
+function print_schemaerror(file, sheet, err::Dict)
+    function getcause(p)
+        ("#R_$(p[1])", p[2].x)
+    end
+    title = " $(file) Validation failed\n"
     
-    paths = map(el -> el.path, err)
+    paths = map(el -> el.path, values(err))
     for p in unique(paths)
-        errors = filter(el -> el.path == p, err)
+        errors = filter(el -> el.path == p, collect(values(err)))
         
         # error가 난 데이터 내용
-        cause = map(el -> el.x, err)
+        cause = [getcause(el) for el in err]
         # error 원인
-        reason = unique(map(el -> el.reason, err))
+        reason = unique(map(el -> el.reason, values(err)))
 
         # TODO value종류별로 다르게 처리 필요
         schemaval = errors[1].val
 
+        solution = get_schema_description(file, sheet, p)
+
         msg = """    
-        │ path:         $p
-        │ instance:     $cause
-        │ schema key:   $reason
-        │ schema value: $(summary(schemaval))
+        ----schema_info----
+        schema key:   $reason
+        schema value: $(summary(schemaval))
+        ----error info----
+        sheet:        $sheet
+        column:       $p
+        instance:     $cause
+        ----SOLUTION----
+          ↳ $solution
         """
 
         print_section(msg, title; color = :yellow)
     end
 end
+
+function get_schema_description(file, sheet, path)
+    jsonfile = getmetadata(file)[sheet][1]
+    
+    schema = CACHE[:tablesschema][jsonfile]
+    desc = get_schema_description(schema, path)
+end
+function get_schema_description(schema::JSONSchema.Schema, path)
+    d = get_element(schema, path)
+    get(d, "description", missing)
+end
+function get_element(schema, path)
+    wind = schema.data["properties"]
+    paths = replace.(split(chop(path), "]"), "[" => "")
+    for (i, p) in enumerate(paths)
+        if ismissing(wind) 
+            break 
+        end
+        if i == 1 
+            wind = get(wind, p, missing)
+        elseif occursin(r"^\d+$", p)
+            wind = get(wind, "items", missing)
+            if isa(wind, AbstractArray)
+                idx = parse(Int, p) 
+                if idx > lastindex(wind)
+                    throw(BoundsError(schema, paths))
+                end
+                wind = wind[parse(Int, p)]
+            end
+        else 
+            if haskey(wind, "\$ref")
+                wind = get(wind["\$ref"]["properties"], p, missing)
+            else 
+                wind = get(wind["properties"], p, missing)
+            end
+        end
+    end
+    return wind
+end
+
+
 
 # Reward의 items를 string으로 변환하는 처리
 function validate(bt::XLSXTable{:RewardTable})
@@ -94,17 +145,21 @@ function readschema(f::AbstractString)::Schema
     else 
         sc = Schema("{}")
     end
+    CACHE[:tablesschema][f] = sc
     return sc 
 end
 
-function updateschema()
-    schema = Table("_Schema"; readfrom = :XLSX)
-    updateschema_key(schema)
-    updateschema_gitlsfiles(schema)
+function updateschema(force_update = false)
+    if ismodified("_Schema") || force_update
+        schema = Table("_Schema"; readfrom = :XLSX)
+        updateschema_key(schema)
+        updateschema_gitlsfiles(schema)
+    end
 end
 
 function updateschema_key(schema)
     file = joinpath(GAMEENV["jsonschema"], "Definitions/TableKeys.json")
+    @info "TableKeys Schema를 생성합니다: $file"
     
     data = OrderedDict(
         "\$schema" => "http://json-schema.org/draft-06/schema",
@@ -139,10 +194,10 @@ function updateschema_key(schema)
 end
 
 function updateschema_gitlsfiles(schema)
+    @info "GitLsFiles Schema를 생성합니다: $file"
+    
     file = joinpath(GAMEENV["jsonschema"], "Definitions/.GitLsFiles.json")
-
     jws = schema["GitLsFiles"]
-
 
     defs = OrderedDict{String, Any}()
     for row in jws 
@@ -191,7 +246,7 @@ function updateschema_gitlsfiles(schema)
     nothing
 end
 
-# TODO 파일 hash CACHE에 담아서 반복해서 뽑지 않기
+# TODO 파일 수정날짜 비교해서 반복해서 뽑지 않기
 function schema_blockmagnet()
     magnet_file = joinpath(GAMEENV["mars_art_assets"], "Internal/BlockTemplateTable.asset")
     if isfile(magnet_file)

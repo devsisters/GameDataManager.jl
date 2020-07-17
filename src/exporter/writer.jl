@@ -135,7 +135,6 @@ http://marspot.devscake.com:25078/develop/balancescriptlist
 TODO: 주소받으면 다운받아서 비교
 """
 function md5hash()
-
     url = "http://marspot.devscake.com:25078/develop/balancescriptlist"
     download(url, joinpath(GAMEENV["cache"], "temp.txt"))
 
