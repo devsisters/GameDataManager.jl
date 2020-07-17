@@ -78,7 +78,7 @@ function convert_ink(files)
         try 
             run(cmd)
             ink_backup = copy_to_backup(inkfile)
-            DBwrite_inklog(inkfile)
+            DBwrite_otherlog(inkfile)
             print(" EXPORT => ")
             printstyled(normpath(ink_backup), "\n"; color=:blue)
         catch e 

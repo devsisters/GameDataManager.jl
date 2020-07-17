@@ -1,5 +1,5 @@
-function DB_inklog()
-    dbfile = joinpath(GAMEENV["cache"], "ExportLog_ink.sqlite")
+function DB_otherlog()
+    dbfile = joinpath(GAMEENV["cache"], "ExportLog_other.sqlite")
     db = SQLite.DB(dbfile)
 
     tables = SQLite.tables(db)
@@ -94,7 +94,7 @@ function ismodified(f)::Bool
         t_log = DBread_xlsxlog_mtime(fname)
     elseif is_inkfile(f)
         t = mtime(f)
-        t_log = DBread_inklog_mtime(f)
+        t_log = DBread_otherlog_mtime(f)
     else # xlsx shortcut 
         xlsxfile = CACHE[:meta][:xlsx_shortcut][f]
         return ismodified(xlsxfile)
@@ -158,8 +158,8 @@ function collect_modified_ink(folder = "")
 end
 
 
-function DBwrite_inklog(file)
-    db = get!(CACHE, :DB_inklog, DB_inklog())
+function DBwrite_otherlog(file)
+    db = get!(CACHE, :DB_otherlog, DB_otherlog())
 
     fname = basename(file)
 
@@ -169,9 +169,9 @@ function DBwrite_inklog(file)
     nothing
 end
 
-function DBread_inklog_mtime(file)
+function DBread_otherlog_mtime(file)
     fname = basename(file)
-    db = get!(CACHE, :DB_inklog, DB_inklog())
+    db = get!(CACHE, :DB_otherlog, DB_otherlog())
 
     DB_SELECT_mtime(db, fname)
 end
