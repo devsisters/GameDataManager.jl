@@ -77,6 +77,7 @@ function print_schemaerror(file, sheet, err::Dict)
 end
 
 function get_schema_description(file, sheet, path)
+    file = CACHE[:meta][:xlsx_shortcut][split(file, ".")[1]]
     jsonfile = getmetadata(file)[sheet][1]
     
     schema = CACHE[:tablesschema][jsonfile]
