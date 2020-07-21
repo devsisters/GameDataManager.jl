@@ -3,20 +3,35 @@
 
 데이터 오류를 검사 엑셀 파일별로 정의한다
 """
-function validate(bt::XLSXTable{NAME}) where NAME
-    if NAME == :Block
-        updateschema_blockmagnet()
-    end
+# Reward의 items를 string으로 변환하는 처리
+function validate(bt::XLSXTable)
+    _validate(bt)
+end
+function validate(bt::XLSXTable{:Block})
+    updateschema_blockmagnet()
+    _validate(bt)
+end
+function validate(bt::XLSXTable{:RewardTable})
+    _validate(bt)
+    convert_rewardscript(bt)
+end
+function validate(bt::XLSXTable{:BlockRewardTable})
+    _validate(bt)
+    convert_rewardscript(bt)
+end
+function convert_rewardscript(bt::XLSXTable)
     jwb = bt.data
-    meta = getmetadata(jwb)
     
     @inbounds for s in sheetnames(jwb)
-        err = validate(jwb[s], meta[s][1])
-        if !isempty(err)
-            print_schemaerror(basename(jwb), s, err)
+        for row in jwb[s] 
+            for arr in row["RewardScript"]["Rewards"]
+                for (i, entry) in enumerate(arr)
+                    arr[i] = string.(entry)
+                end
+            end
         end
     end
-    nothing
+    bt
 end
 function validate(jws::JSONWorksheet, jsonfile)
     schema = readschema(jsonfile)
@@ -36,6 +51,19 @@ function validate(jws::JSONWorksheet, jsonfile)
         end
     end
     return err
+end
+
+function _validate(bt::XLSXTable)
+    jwb = bt.data
+    meta = getmetadata(jwb)
+    
+    @inbounds for s in sheetnames(jwb)
+        err = validate(jwb[s], meta[s][1])
+        if !isempty(err)
+            print_schemaerror(basename(jwb), s, err)
+        end
+    end
+    nothing
 end
 
 function print_schemaerror(file, sheet, err::Dict)
@@ -84,10 +112,10 @@ function get_schema_description(file, sheet, path)
     desc = get_schema_description(schema, path)
 end
 function get_schema_description(schema::JSONSchema.Schema, path)
-    d = get_element(schema, path)
+    d = get_schemaelement(schema, path)
     get(d, "description", missing)
 end
-function get_element(schema, path)
+function get_schemaelement(schema, path)
     wind = schema.data["properties"]
     paths = replace.(split(chop(path), "]"), "[" => "")
     for (i, p) in enumerate(paths)
@@ -116,35 +144,6 @@ function get_element(schema, path)
     return wind
 end
 
-
-
-# Reward의 items를 string으로 변환하는 처리
-function validate(bt::XLSXTable{:RewardTable})
-    validate_rewardscript(bt)
-end
-function validate(bt::XLSXTable{:BlockRewardTable})
-    validate_rewardscript(bt)
-end
-function validate_rewardscript(bt::XLSXTable)
-    jwb = bt.data
-    meta = getmetadata(jwb)
-    
-    @inbounds for s in sheetnames(jwb)
-        err = validate(jwb[s], meta[s][1])
-        if !isempty(err)
-            print_section(err, "'$(basename(jwb))' $(s)"; color=:red)
-        end
-        for row in jwb[s] 
-            for arr in row["RewardScript"]["Rewards"]
-                for (i, entry) in enumerate(arr)
-                    arr[i] = string.(entry)
-                end
-            end
-        end
-    end
-    nothing
-end
-
 function readschema(f::AbstractString)::Schema
     json = joinpath(GAMEENV["json"]["root"], f)
     schemafile = joinpath(GAMEENV["jsonschema"], f)
@@ -163,45 +162,76 @@ end
 function updateschema(force_update = false)
     if ismodified("_Schema") || force_update
         schema = Table("_Schema"; readfrom = :XLSX)
-        updateschema_key(schema)
+        updateschema_tablekey(schema)
         updateschema_gitlsfiles(schema)
     end
 end
 
-function updateschema_key(schema)
-    file = joinpath(GAMEENV["jsonschema"], "Definitions/TableKeys.json")
-    @info "TableKeys Schema를 생성합니다: $file"
+function updateschema_tablekey(schema::XLSXTable)
+    file = joinpath(GAMEENV["jsonschema"], "Definitions/.TableKeys.json")
     
-    data = OrderedDict(
-        "\$schema" => "http://json-schema.org/draft-06/schema",
-        "\$id" => "TableKeys.json",
-        "title" => "MARS GameData Keys",
-        "definitions" => OrderedDict{String, Any}())
-
-    jws = schema["TableKeys"]
-    for row in jws
-        k1 = "/definitions$(row["Key"])"
-
-        for el in row["param"]
-            k = JSONPointer.Pointer("$(k1)/$(el[1])")
-            data[k] = el[2]
+    # key_list = map(el -> JSONPointer.Pointer("$(el["Key"])"), jws)
+    rewrite = false
+    if !isfile(file)
+        rewrite = true
+        data = OrderedDict(
+            "\$schema" => "http://json-schema.org/draft-06/schema",
+            "\$id" => ".TableKeys.json",
+            "title" => "MARS GameData Keys",
+            "definitions" => OrderedDict{String, Any}())
+    end
+    
+    for row in schema["TableKeys"] 
+        newdata = updateschema_tablekey(row)
+        if !isnothing(newdata)
+            if !rewrite
+                data = JSON.parsefile(file; dicttype = OrderedDict)
+                rewrite = true
+                #TODO 사라진 Key 정리하기
+            end
+            p = JSONPointer.Pointer("/definitions$(row["Key"])")
+            data[p] = newdata
         end
+    end
+    if rewrite
+        @info "TableKeys Schema를 재생성합니다: $file"
+        write(file, JSON.json(data))
+    end
+
+    nothing
+end
+function updateschema_tablekey(row)
+    origin = row[j"/ref/JSONFile"]
+
+    logkey = "tablekeyschema_" * row["Key"]
+
+    mt = mtime(joinpath_gamedata(origin))
+    if DBread_otherlog(logkey) < mt        
+        data = Dict{String, Any}()
+        data["type"] = row["param"]["type"]
+        data["uniqueItems"] = row["param"]["uniqueItems"]
+
         desc = row[j"/ref/JSONFile"] * "#/" * row[j"/ref/pointer"]
-        data[JSONPointer.Pointer("$(k1)/description")] = desc
+        data["description"] = desc
         
         # enum 입력
         enum_data = begin 
             p = JSONPointer.Pointer(row[j"/ref/pointer"])
-            map(el -> el[p], Table(row[j"/ref/JSONFile"]).data)
+            x = map(el -> el[p], Table(row[j"/ref/JSONFile"]).data)
+            if row["param"]["uniqueItems"]
+                x = unique(x)
+            end
+            if row["param"]["type"] == "string"
+                x = string.(x)
+            end
+            x
         end
-        if row["param"]["uniqueItems"]
-            enum_data = unique(enum_data)
-        end
-        data[JSONPointer.Pointer("$(k1)/enum")] = enum_data
-    end
-    write(file, JSON.json(data))
+        data["enum"] = enum_data
 
-    nothing
+        DBwrite_otherlog(logkey, mt)
+        return data
+    end
+    return nothing
 end
 
 function updateschema_gitlsfiles(schema)
@@ -256,6 +286,7 @@ function updateschema_gitlsfiles(schema)
     write(file, JSON.json(data))
     nothing
 end
+
 
 function updateschema_blockmagnet()
     magnet_file = joinpath(GAMEENV["mars_art_assets"], "Internal/BlockTemplateTable.asset")

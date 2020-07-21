@@ -96,14 +96,14 @@ function ismodified(f)::Bool
         t_log = DBread_xlsxlog_mtime(fname)
     elseif is_inkfile(f)
         t = mtime(f)
-        t_log = DBread_otherlog_mtime(f)
+        t_log = DBread_otherlog(f)
     else 
         if haskey(CACHE[:meta][:xlsx_shortcut], f)
             f = CACHE[:meta][:xlsx_shortcut][f]
             @goto XLSXFILE
         else 
             t = mtime(f)
-            t_log = DBread_otherlog_mtime(f)
+            t_log = DBread_otherlog(f)
         end
     end
     return t > t_log
@@ -114,7 +114,7 @@ function DBwrite_xlsxlog(jwb::JSONWorkbook)
     file = replace(XLSXasJSON.xlsxpath(jwb), "\\" => "/")
     fname = split(file, "XLSXTable/")[2]
 
-    # TODO 이부분을 XLSXasJSON에 JSONTOken을 JSON.json으로 serialize하게 추가
+    # TODO 이부분을 XLSXasJSON에 JSONToken을 JSON.json으로 serialize하게 추가
     pointer = Dict()
     for s in sheetnames(jwb)
         vals = Array{String,1}(undef, length(jwb[s].pointer))
@@ -141,6 +141,7 @@ function DBread_xlsxlog_mtime(file)
 
     DB_SELECT_mtime(db, file)
 end
+
 #= ■■■◤  Ink  ◢■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ =#
 #
 #
@@ -164,23 +165,25 @@ function collect_modified_ink(folder = "")
     filter(ismodified, collect_ink(rootdir))
 end
 
-
 function DBwrite_otherlog(file)
     db = get!(CACHE, :DB_otherlog, DB_otherlog())
 
-    fname = basename(file)
-
+    if !isfile(file)
+        throw(AssertionError("$(file)이 존재하지 않습니다"))
+    end
     mt = mtime(file)    
-    DBInterface.execute(db, "REPLACE INTO ExportLog VALUES (?, ?)", (fname, mt))
+    DBwrite_otherlog(file, mt)
+end
+function DBwrite_otherlog(key, mt::Float64)
+    db = get!(CACHE, :DB_otherlog, DB_otherlog())
 
+    DBInterface.execute(db, "REPLACE INTO ExportLog VALUES (?, ?)", (key, mt))
     nothing
 end
 
-function DBread_otherlog_mtime(file)
-    fname = basename(file)
+function DBread_otherlog(key)
     db = get!(CACHE, :DB_otherlog, DB_otherlog())
-
-    DB_SELECT_mtime(db, fname)
+    DB_SELECT_mtime(db, key)
 end
 
 
