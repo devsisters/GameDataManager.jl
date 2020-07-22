@@ -1,7 +1,7 @@
 name = "GameDataManager"
 uuid = "88844230-ccf1-11e8-233b-3f48c6dac397"
 authors = ["김용희 <yongheekim@devsisters.com>"]
-version = "1.6.6"
+version = "1.6.7"
 
 [deps]
 GameBalanceManager = "bb77ccaf-9d50-4d58-b991-76f827c14ecc"

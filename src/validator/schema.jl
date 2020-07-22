@@ -9,6 +9,7 @@ function validate(bt::XLSXTable)
 end
 function validate(bt::XLSXTable{:Block})
     updateschema_blockmagnet()
+    updateschema_tablekey()
     _validate(bt)
 end
 function validate(bt::XLSXTable{:RewardTable})
@@ -159,21 +160,20 @@ function readschema(f::AbstractString)::Schema
     return sc 
 end
 
-function updateschema(force_update = false)
-    if ismodified("_Schema") || force_update
-        schema = Table("_Schema"; readfrom = :XLSX)
-        updateschema_tablekey(schema)
-        updateschema_gitlsfiles(schema)
-    end
+function updateschema()
+    schema = Table("_Schema"; readfrom = :XLSX)
+    updateschema_gitlsfiles(schema)
 end
 
-function updateschema_tablekey(schema::XLSXTable)
+function updateschema_tablekey(schema::XLSXTable = Table("_Schema"))
     file = joinpath(GAMEENV["jsonschema"], "Definitions/.TableKeys.json")
     
     # key_list = map(el -> JSONPointer.Pointer("$(el["Key"])"), jws)
     rewrite = false
+    newfile = false
     if !isfile(file)
         rewrite = true
+        newfile = true
         data = OrderedDict(
             "\$schema" => "http://json-schema.org/draft-06/schema",
             "\$id" => ".TableKeys.json",
@@ -182,7 +182,7 @@ function updateschema_tablekey(schema::XLSXTable)
     end
     
     for row in schema["TableKeys"] 
-        newdata = updateschema_tablekey(row)
+        newdata = updateschema_tablekey(row, newfile)
         if !isnothing(newdata)
             if !rewrite
                 data = JSON.parsefile(file; dicttype = OrderedDict)
@@ -200,13 +200,13 @@ function updateschema_tablekey(schema::XLSXTable)
 
     nothing
 end
-function updateschema_tablekey(row)
+function updateschema_tablekey(row, force = false)
     origin = row[j"/ref/JSONFile"]
 
     logkey = "tablekeyschema_" * row["Key"]
 
     mt = mtime(joinpath_gamedata(origin))
-    if DBread_otherlog(logkey) < mt        
+    if DBread_otherlog(logkey) < mt || force  
         data = Dict{String, Any}()
         data["type"] = row["param"]["type"]
         data["uniqueItems"] = row["param"]["uniqueItems"]
@@ -289,15 +289,17 @@ end
 
 
 function updateschema_blockmagnet()
-    magnet_file = joinpath(GAMEENV["mars_art_assets"], "Internal/BlockTemplateTable.asset")
-    ismodified(magnet_file)
+    input = joinpath(GAMEENV["mars_art_assets"], "Internal/BlockTemplateTable.asset")
+    output = joinpath(GAMEENV["jsonschema"], "Definitions/.BlockTemplateKey.json")
+
+    ismodified(input)
     
-    if !isfile(magnet_file)
-        throw(AssertionError("$(magnet_file)이 존재하지 않아 오류검사를 할 수 없습니다"))
+    if !isfile(input)
+        throw(AssertionError("$(input)이 존재하지 않아 오류검사를 할 수 없습니다"))
     end 
 
-    if ismodified(magnet_file)
-        magnet = filter(x -> startswith(x, "  - Key:"), readlines(magnet_file))
+    if !isfile(output) || ismodified(input) 
+        magnet = filter(x -> startswith(x, "  - Key:"), readlines(input))
         magnetkey = unique(broadcast(x -> split(x, "Key: ")[2], magnet))
         
         data = OrderedDict(
@@ -310,10 +312,9 @@ function updateschema_blockmagnet()
                         "type" => "string", 
                         "enum" => magnetkey)))
 
-        file = joinpath(GAMEENV["jsonschema"], "Definitions/.BlockTemplateKey.json")
-        write(file, JSON.json(data))
+        write(output, JSON.json(data))
 
-        DBwrite_otherlog(magnet_file)
+        DBwrite_otherlog(input)
     end
 
     nothing
