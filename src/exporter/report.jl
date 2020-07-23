@@ -155,11 +155,12 @@ function get_buildings(key::AbstractString, savetsv = true; include_artasset = t
     end
 end
 
-function count_buildtemplate(f)
-    root = joinpath(GAMEENV["json"]["root"], "../BuildTemplate/Buildings")
-    file = joinpath(root, "$(f).json")
+function count_buildtemplate(file;
+            root = joinpath(GAMEENV["json"]["root"], "../BuildTemplate/Buildings"))
+    file = joinpath(root, "$(file).json")
     try 
-        x = JSON.parsefile(file)
+        data = replace(read(file, String), "\Ufeff" => "")
+        x = JSON.parse(data)
         countmap(map(x -> x["BlockKey"], x["Blocks"]))
     catch 
         throw(ArgumentError("JSON 오류로 파일을 읽지 못 하였습니다\n$file"))
