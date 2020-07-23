@@ -171,8 +171,8 @@ end
 
 블록 Key별로 사용된 BuildTempalte과 수량을 확인합니다
 """
-function get_blocks(savetsv::Bool = true)
-    root = joinpath(GAMEENV["json"]["root"], "../BuildTemplate/Buildings")
+function get_blocks(savetsv::Bool = true; 
+                    root = joinpath(GAMEENV["json"]["root"], "../BuildTemplate/Buildings"))
     templates = Dict{String, Any}()
 
     errorfiles = String[]
@@ -182,7 +182,8 @@ function get_blocks(savetsv::Bool = true)
             file = joinpath(folder, f)
             k = chop(replace(file, root => ""); tail = 5)
             try 
-                templates[k] = JSON.parsefile(file)
+                data = replace(read(file, String), "\Ufeff" => "")
+                templates[k] = JSON.parse(data)
             catch e
                 push!(errorfiles, normpath(file))
             end
@@ -195,6 +196,7 @@ function get_blocks(savetsv::Bool = true)
 
     d2 = OrderedDict()
     for f in keys(templates)
+        @show f
         blocks = countmap(get.(templates[f]["Blocks"], "BlockKey", 0))
         for block_key in keys(blocks)
             if !haskey(d2, block_key)
