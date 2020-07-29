@@ -97,11 +97,12 @@ function print_schemaerror(file, sheet, err::Dict)
         sheet:        $sheet
         column:       $p
         instance:     $cause
-        ----SOLUTION----
-          ↳ $solution
         """
 
         print_section(msg, title; color = :yellow)
+        if !ismissing(solution)
+            printstyled("해결방법\n  ↳ ", solution, "\n"; color=:red)
+        end
     end
 end
 
