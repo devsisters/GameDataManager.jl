@@ -3,4 +3,3 @@ using GameDataManager
 
 include("GameDataManager/basic.jl")
 include("GameItemBase/basic.jl")
-include("GameItemBase/production.jl")
