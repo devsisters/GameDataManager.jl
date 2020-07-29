@@ -37,7 +37,7 @@ end
 function validate(jws::JSONWorksheet, jsonfile)
     schema = readschema(jsonfile)
 
-    err = Dict()
+    err = OrderedDict()
     @inbounds for (i, row) in enumerate(jws)
         # 모든 `OrderedDict`를 `Dict`으로 변환이 필요
         data = reclusive_convert(row) 
@@ -67,7 +67,7 @@ function _validate(bt::XLSXTable)
     nothing
 end
 
-function print_schemaerror(file, sheet, err::Dict)
+function print_schemaerror(file, sheet, err::AbstractDict)
     function getcause(p)
         (p[1], p[2].x)
     end
@@ -288,7 +288,6 @@ function updateschema_gitlsfiles(schema)
     nothing
 end
 
-
 function updateschema_blockmagnet()
     input = joinpath(GAMEENV["mars_art_assets"], "Internal/BlockTemplateTable.asset")
     output = joinpath(GAMEENV["jsonschema"], "Definitions/.BlockTemplateKey.json")
@@ -317,37 +316,8 @@ function updateschema_blockmagnet()
 
         DBwrite_otherlog(input)
     end
-
     nothing
 end
-
-# function schema_addressable()
-#     root = joinpath(GAMEENV["mars-client"], "unity/Assets/AddressableAssetsData/AssetGroups")
-
-#     data = OrderedDict(
-#         "\$schema" => "http://json-schema.org/draft-06/schema",
-#             "\$id" => ".Addressable.json",
-#            "title" => "'unity/Assets/AddressableAssetsData/AssetGroups' Address list",
-#         "definitions" => OrderedDict{String, Any}())
-
-#     for fname in filter(el -> endswith(el, ".asset"), readdir(root))
-#         f = joinpath(root, fname)
-#         raw = filter(x -> startswith(x, "    m_Address:"), readlines(f))
-#         keys = broadcast(x -> split(x, "    m_Address: ")[2], raw)
-
-#         group = split(fname, ".")[1]
-#         k1 = "/definitions/$(group)"
-
-#         data[JSONPointer.Pointer("$(k1)/type")] = "string"
-#         data[JSONPointer.Pointer("$(k1)/uniqueItems")] = true
-#         data[JSONPointer.Pointer("$(k1)/enum")] = keys
-#     end
-#     file = joinpath(GAMEENV["jsonschema"], "Definitions/.Addressable.json")
-#     write(file, JSON.json(data))
-
-#     nothing
-# end
-
 
 """
     reclusive_convert
