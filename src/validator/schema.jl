@@ -36,7 +36,7 @@ function convert_rewardscript(bt::XLSXTable)
 end
 function validate(jws::JSONWorksheet, jsonfile)
     schema = readschema(jsonfile)
-
+    
     err = OrderedDict()
     @inbounds for (i, row) in enumerate(jws)
         # 모든 `OrderedDict`를 `Dict`으로 변환이 필요
@@ -67,9 +67,7 @@ function _validate(bt::XLSXTable)
     nothing
 end
 
-function print_schemaerror(file, sheet, err::AbstractDict)
-    title = " $(file) Validation failed\n"
-    
+function print_schemaerror(file, sheet, err::AbstractDict)   
     paths = map(el -> el.path, values(err))
     for p in unique(paths)
         # error가 난 데이터 내용
@@ -80,23 +78,20 @@ function print_schemaerror(file, sheet, err::AbstractDict)
                 push!(cause, x)
             end
         end
-        
         # error 원인, 값
         errors = filter(el -> el.path == p, collect(values(err)))
         schemakey = unique(map(el -> el.reason, values(errors)))
         schemaval = summary(errors[1].val)
 
-        solution = get_schema_description(file, sheet, p)
-
-        msg = """schema_info: (key = $schemakey, summary = $schemaval)
-
-        ----error info----
+        title = "$(file) Validation failed from {key: $schemakey, summary: $schemaval}\n"
+        msg = """
         sheet:        $sheet
         column:       $p
         instance:     $cause
         """
-
         print_section(msg, title; color = :yellow)
+        
+        solution = get_schema_description(file, sheet, p)
         if !ismissing(solution)
             printstyled("해결방법\n  ↳ ", solution, "\n"; color=:red)
         end
