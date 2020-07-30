@@ -40,8 +40,7 @@ function validate(jws::JSONWorksheet, jsonfile)
     err = OrderedDict()
     @inbounds for (i, row) in enumerate(jws)
         # 모든 `OrderedDict`를 `Dict`으로 변환이 필요
-        data = reclusive_convert(row) 
-        val = JSONSchema.validate(data, schema)
+        val = JSONSchema.validate(row, schema)
         if !isnothing(val)
             if in(j"/Key", jws.pointer)
                 marker = string("/Key: ", row[j"/Key"])
@@ -195,7 +194,7 @@ function updateschema_tablekey(schema::XLSXTable = Table("_Schema"), force = fal
                 json = Table(row[j"/ref/JSONFile"])
                 x = map(el -> el[p], json.data)
                 if row["param"]["uniqueItems"]
-                    validate_duplicate(x; assert=false, msg = "다음의 Key가 중복되었습니다. 반드시 수정해 주세요")                        
+                    validate_duplicate(x; assert=false, msg = "다음의 BlockKey가 중복되었습니다. 반드시 수정해 주세요")                        
                     x = unique(x)
                 end
                 if row["param"]["type"] == "string"
@@ -344,29 +343,4 @@ function updateschema_blockmagnet()
         DBwrite_otherlog(input)
     end
     nothing
-end
-
-"""
-    reclusive_convert
-
-# https://github.com/fredo-dedup/JSONSchema.jl/issues/19 수정 전까지 필요
-
-"""
-reclusive_convert(x) = x
-function reclusive_convert(origin::AbstractDict)
-    d = Dict{String, Any}()
-    for el in origin 
-        k = el[1]
-        d[k] = reclusive_convert(el[2])
-    end
-    return d
-end
-
-function reclusive_convert(x::AbstractArray)
-    for (i, el) in enumerate(x)
-        if isa(el, AbstractDict)
-            x[i] = reclusive_convert(el)
-        end
-    end
-    return x
 end

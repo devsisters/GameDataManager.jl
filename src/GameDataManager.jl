@@ -7,6 +7,7 @@ import XLSXasJSON: Index
 using JSONPointer
 using JSONSchema
 import JSONSchema.validate
+using LoggingExtras
 
 using SQLite, Tables
 using OrderedCollections
