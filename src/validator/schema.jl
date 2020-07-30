@@ -40,7 +40,8 @@ function validate(jws::JSONWorksheet, jsonfile)
     err = OrderedDict()
     @inbounds for (i, row) in enumerate(jws)
         # 모든 `OrderedDict`를 `Dict`으로 변환이 필요
-        val = JSONSchema.validate(row, schema)
+        data = reclusive_convert(row) 
+        val = JSONSchema.validate(data, schema)
         if !isnothing(val)
             if in(j"/Key", jws.pointer)
                 marker = string("/Key: ", row[j"/Key"])
@@ -111,7 +112,11 @@ function get_schema_description(file, sheet, path)
 end
 function get_schema_description(schema::JSONSchema.Schema, path)
     d = get_schemaelement(schema, path)
-    get(d, "description", missing)
+    if isa(d, AbstractDict)
+        get(d, "description", missing)
+    else 
+        missing 
+    end
 end
 function get_schemaelement(schema, path)
     wind = schema.data["properties"]
@@ -194,7 +199,7 @@ function updateschema_tablekey(schema::XLSXTable = Table("_Schema"), force = fal
                 json = Table(row[j"/ref/JSONFile"])
                 x = map(el -> el[p], json.data)
                 if row["param"]["uniqueItems"]
-                    validate_duplicate(x; assert=false, msg = "다음의 BlockKey가 중복되었습니다. 반드시 수정해 주세요")                        
+                    validate_duplicate(x; assert=false, msg = "'$(basename(json))'에서 $(row["Key"])가 중복되었습니다. 반드시 수정해 주세요")                        
                     x = unique(x)
                 end
                 if row["param"]["type"] == "string"
@@ -214,7 +219,7 @@ function updateschema_tablekey(schema::XLSXTable = Table("_Schema"), force = fal
         for d in newdatas 
             origin["definitions"][d[1]] = d[2]
         end
-        @info "TableKeys Schema를 재생성합니다: $tablekeysfile"
+        print_section("TableKeys Schema를 재생성합니다: $tablekeysfile", "INFO"; color=:cyan)
 
         write(tablekeysfile, JSON.json(origin))
 
@@ -265,7 +270,7 @@ function updateschema_gitlsfiles(schema)
     file = joinpath(GAMEENV["jsonschema"], "Definitions/.GitLsFiles.json")
     jws = schema["GitLsFiles"]
 
-    @info "GitLsFiles Schema를 생성합니다: $file"
+    print_section("GitLsFiles Schema를 생성합니다: $file", "INFO"; color=:cyan)
 
     defs = OrderedDict{String, Any}()
     for row in jws 
@@ -343,4 +348,29 @@ function updateschema_blockmagnet()
         DBwrite_otherlog(input)
     end
     nothing
+end
+
+
+"""
+    reclusive_convert
+
+nested 오브젝트 검사가 불가능한 버그 있음
+"""
+reclusive_convert(x) = x
+function reclusive_convert(origin::AbstractDict)
+    d = Dict{String, Any}()
+    for el in origin 
+        k = el[1]
+        d[k] = reclusive_convert(el[2])
+    end
+    return d
+end
+
+function reclusive_convert(x::AbstractArray)
+    for (i, el) in enumerate(x)
+        if isa(el, AbstractDict)
+            x[i] = reclusive_convert(el)
+        end
+    end
+    return x
 end
