@@ -36,7 +36,7 @@ function set_validation!()
 end
 function set_validation!(b::Bool)
     CACHE[:validation] = b
-    @info "CACHE[:validation] = $(CACHE[:validation])"
+    @warn "CACHE[:validation] = $(CACHE[:validation])"
     CACHE[:validation]
 end
 

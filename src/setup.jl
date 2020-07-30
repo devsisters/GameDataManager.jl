@@ -29,7 +29,7 @@ function setup!(marsrepo = get(ENV, "MARS_CLIENT", ""))
         """)
     end
 
-    @info "\"$(startup)\"을 성공적으로 생성하였습니다\n\t터미널을 종료 후 다시 시작해 주세요."
+    print_section("\"$(startup)\"을 성공적으로 생성하였습니다\n\t터미널을 종료 후 다시 시작해 주세요.", "INFO"; color=:cyan)
 end
 
 """

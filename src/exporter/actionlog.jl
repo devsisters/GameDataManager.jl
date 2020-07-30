@@ -34,7 +34,7 @@ function DB_xlsxlog()
             DBInterface.execute(db, t1)
             DBInterface.execute(db, t2)
 
-        @info("$(basename(dbfile)) has created with Tables ['ExportLog','ColumnName']")
+        print_section("$(basename(dbfile)) has created with Tables ['ExportLog','ColumnName']", "INFO"; color=:cyan)
     end
 
     return db
