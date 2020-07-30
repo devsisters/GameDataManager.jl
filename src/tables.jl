@@ -36,12 +36,13 @@ struct XLSXTable{FileName} <: Table
 end
 function XLSXTable(jwb::JSONWorkbook, validation::Bool)
     f = splitext(basename(jwb))[1] |> string
-    
-    DBwrite_xlsxlog(jwb)
-    GAMEDATA[f] = XLSXTable{Symbol(f)}(hash(jwb), jwb)
+    data = XLSXTable{Symbol(f)}(hash(jwb), jwb)
+
     if validation 
-        validate(GAMEDATA[f])
+        validate(data)
     end
+    GAMEDATA[f] = data
+    DBwrite_xlsxlog(jwb)
 
     return GAMEDATA[f]
 end
@@ -122,11 +123,20 @@ function _jsonworksheet(xlsxfile, sheet, jsonfile)
 end 
 
 function copy_to_cache(origin)
-    destination = replace(origin, GAMEENV["xlsx"]["root"] => joinpath(GAMEENV["cache"], "XLSXTable"))
-    if !isdir(joinpath(GAMEENV["cache"], "XLSXTable"))
-        mkdir(joinpath(GAMEENV["cache"], "XLSXTable"))
+    if is_xlsxfile(origin)
+        destination = replace(origin, GAMEENV["xlsx"]["root"] => joinpath(GAMEENV["cache"], "XLSXTable"))
+    
+        if !isdir(joinpath(GAMEENV["cache"], "XLSXTable"))
+            mkdir(joinpath(GAMEENV["cache"], "XLSXTable"))
+        end
+    else
+        dir, file = splitdir(origin)
+        if normpath(dir) == normpath(GAMEENV["json"]["root"])
+            destination = joinpath(GAMEENV["cache"], "Tables", file)
+        else
+            destination = joinpath(GAMEENV["cache"], "TablesSchema", file)
+        end
     end
-
     dircheck_and_create(destination)
     cp(origin, destination; force = true)
 
@@ -156,9 +166,7 @@ function JSONTable(file::String)
     @assert endswith(file, ".json") "$file 파일의 확장자가 `.json`이어야 합니다."
 
     f = joinpath_gamedata(file)
-    rawdata = open(f, "r") do io 
-        JSON.parse(io; dicttype = OrderedDict)
-    end
+    rawdata = JSON.parsefile(f; dicttype = OrderedDict)
 
     if isa(rawdata, Array)
         data = convert(Vector{OrderedDict}, rawdata)

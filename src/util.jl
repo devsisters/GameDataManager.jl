@@ -142,7 +142,8 @@ function validate_duplicate(lists; assert=true, keycheck = false,
         if assert
             throw(AssertionError("$msg \n $(keys(duplicate))"))
         else
-            @warn msg duplicate
+
+            print_section("$msg\n  $(keys(duplicate))\n", "CRITICAL"; color = :red)
         end
     end
     # TODO keycheck? 이상하고... 규칙에 대한 공통 함수로 조정 필요

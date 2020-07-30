@@ -68,19 +68,16 @@ function _validate(bt::XLSXTable)
 end
 
 function print_schemaerror(file, sheet, err::AbstractDict)
-    function getcause(p)
-        (p[1], p[2].x)
-    end
     title = " $(file) Validation failed\n"
     
     paths = map(el -> el.path, values(err))
     for p in unique(paths)
-        
         # error가 난 데이터 내용
         cause = []
         for el in err 
             if el[2].path == p 
-                push!(cause, getcause(el))
+                x = (el[1], el[2].x)
+                push!(cause, x)
             end
         end
         
@@ -164,39 +161,67 @@ end
 function updateschema()
     schema = Table("_Schema"; readfrom = :XLSX)
     updateschema_gitlsfiles(schema)
+    updateschema_tablekey(schema)
 end
 
-function updateschema_tablekey(schema::XLSXTable = Table("_Schema"))
-    file = joinpath(GAMEENV["jsonschema"], "Definitions/.TableKeys.json")
+function updateschema_tablekey(schema::XLSXTable = Table("_Schema"), force = false)
+    tablekeysfile = joinpath(GAMEENV["jsonschema"], "Definitions/.TableKeys.json")
     
-    # key_list = map(el -> JSONPointer.Pointer("$(el["Key"])"), jws)
-    rewrite = false
-    newfile = false
-    if !isfile(file)
-        rewrite = true
-        newfile = true
+    if !isfile(tablekeysfile)
+        force = true
         data = OrderedDict(
             "\$schema" => "http://json-schema.org/draft-06/schema",
             "\$id" => ".TableKeys.json",
             "title" => "MARS GameData Keys",
             "definitions" => OrderedDict{String, Any}())
     end
+    newdatas = Dict{String, Any}()
+    DBwrite_otherlog_targets = []
     
     for row in schema["TableKeys"] 
-        newdata = updateschema_tablekey(row, newfile)
-        if !isnothing(newdata)
-            if !rewrite
-                data = JSON.parsefile(file; dicttype = OrderedDict)
-                rewrite = true
-                #TODO 사라진 Key 정리하기
+        keyfile = row[j"/ref/JSONFile"]
+        logkey = "tablekeyschema_" * row["Key"]
+        
+        mt = mtime(joinpath_gamedata(keyfile))        
+        if DBread_otherlog(logkey) < mt || force  
+            d = Dict{String, Any}()
+            d["type"] = row["param"]["type"]
+            d["uniqueItems"] = row["param"]["uniqueItems"]
+            d["description"] = row[j"/ref/JSONFile"] * "#/" * row[j"/ref/pointer"]
+
+            # enum 입력
+            d["enum"] = begin 
+                p = JSONPointer.Pointer(row[j"/ref/pointer"])
+                json = Table(row[j"/ref/JSONFile"])
+                x = map(el -> el[p], json.data)
+                if row["param"]["uniqueItems"]
+                    validate_duplicate(x; assert=false, msg = "다음의 Key가 중복되었습니다. 반드시 수정해 주세요")                        
+                    x = unique(x)
+                end
+                if row["param"]["type"] == "string"
+                    x = string.(x)
+                end
+                x
             end
-            p = JSONPointer.Pointer("/definitions$(row["Key"])")
-            data[p] = newdata
+
+            k = JSONPointer.Pointer("$(row["Key"])")
+            newdatas[k] = d
+            push!(DBwrite_otherlog_targets, (logkey, mt))
         end
     end
-    if rewrite
-        @info "TableKeys Schema를 재생성합니다: $file"
-        write(file, JSON.json(data))
+
+    if !isempty(newdatas)
+        origin = JSON.parsefile(copy_to_cache(tablekeysfile); dicttype = OrderedDict)
+        for d in newdatas 
+            origin["definitions"][d[1]] = d[2]
+        end
+        @info "TableKeys Schema를 재생성합니다: $tablekeysfile"
+
+        write(tablekeysfile, JSON.json(origin))
+
+        for el in DBwrite_otherlog_targets
+            DBwrite_otherlog(el[1], el[2])
+        end
     end
 
     nothing
@@ -207,13 +232,15 @@ function updateschema_tablekey(row, force = false)
     logkey = "tablekeyschema_" * row["Key"]
 
     mt = mtime(joinpath_gamedata(origin))
+    ct = DBread_otherlog(logkey) 
+
     if DBread_otherlog(logkey) < mt || force  
-        data = Dict{String, Any}()
-        data["type"] = row["param"]["type"]
-        data["uniqueItems"] = row["param"]["uniqueItems"]
+        d = Dict{String, Any}()
+        d["type"] = row["param"]["type"]
+        d["uniqueItems"] = row["param"]["uniqueItems"]
 
         desc = row[j"/ref/JSONFile"] * "#/" * row[j"/ref/pointer"]
-        data["description"] = desc
+        d["description"] = desc
         
         # enum 입력
         enum_data = begin 
@@ -227,10 +254,10 @@ function updateschema_tablekey(row, force = false)
             end
             x
         end
-        data["enum"] = enum_data
+        d["enum"] = enum_data
 
         DBwrite_otherlog(logkey, mt)
-        return data
+        return d
     end
     return nothing
 end
