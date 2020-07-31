@@ -276,7 +276,7 @@ function updateschema_gitlsfiles(schema = Table("_Schema"; validation = false))
     jws = schema["GitLsFiles"]
 
     # Git Repo들 중 1개라도 업데이트 필요할 경우 전체 다시 생성
-    repos = jws[:, j"/ref/Repo"]
+    repos = unique(jws[:, j"/ref/Repo"])
     needsupdate = is_git_ls_files_needupdate.(repos)
     if any(needsupdate)
         defs = OrderedDict{String, Any}()
