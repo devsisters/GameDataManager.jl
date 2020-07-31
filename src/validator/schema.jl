@@ -166,14 +166,11 @@ end
 function updateschema_tablekey(schema::XLSXTable = Table("_Schema"), force = false)
     tablekeysfile = joinpath(GAMEENV["jsonschema"], "Definitions/.TableKeys.json")
     
+    # 신규 생성시
     if !isfile(tablekeysfile)
         force = true
-        data = OrderedDict(
-            "\$schema" => "http://json-schema.org/draft-06/schema",
-            "\$id" => ".TableKeys.json",
-            "title" => "MARS GameData Keys",
-            "definitions" => OrderedDict{String, Any}())
     end
+
     newdatas = Dict{String, Any}()
     DBwrite_otherlog_targets = []
     
@@ -210,11 +207,19 @@ function updateschema_tablekey(schema::XLSXTable = Table("_Schema"), force = fal
     end
 
     if !isempty(newdatas)
-        origin = JSON.parsefile(copy_to_cache(tablekeysfile); dicttype = OrderedDict)
+        if isfile(tablekeysfile)
+            origin = JSON.parsefile(copy_to_cache(tablekeysfile); dicttype = OrderedDict)
+        else 
+            origin = OrderedDict(
+                "\$schema" => "http://json-schema.org/draft-06/schema",
+                "\$id" => ".TableKeys.json",
+                "title" => "MARS GameData Keys",
+                "definitions" => OrderedDict{String, Any}())
+        end
         for d in newdatas 
             origin["definitions"][d[1]] = d[2]
         end
-        print_section("TableKeys Schema를 재생성합니다: $tablekeysfile", "INFO"; color=:cyan)
+        print_section("TableKeys Schema를 재생성합니다: $tablekeysfile", "NOTE"; color=:cyan)
 
         write(tablekeysfile, JSON.json(origin))
 
@@ -261,13 +266,18 @@ function updateschema_tablekey(row, force = false)
     return nothing
 end
 
+"""
+    updateschema_gitlsfiles
+
+TODO: 커밋 해시가 변한 경우에만 재생성하도록 수정 필요
+"""
 function updateschema_gitlsfiles(schema)
     file = joinpath(GAMEENV["jsonschema"], "Definitions/.GitLsFiles.json")
     jws = schema["GitLsFiles"]
 
-    print_section("GitLsFiles Schema를 생성합니다: $file", "INFO"; color=:cyan)
-
     defs = OrderedDict{String, Any}()
+    print_section("GitLsFiles Schema를 생성합니다: $file", "NOTE"; color=:cyan)
+
     for row in jws 
         repo = row[j"/ref/Repo"]
         rootpath = row[j"/RootPath"]
@@ -281,28 +291,28 @@ function updateschema_gitlsfiles(schema)
 
         key = replace(rootpath, "/" => ".")
         defs[key] = OrderedDict("oneOf" => [])
-        
-        for el in target
-            folder = key * replace(el[1], "/" => ".")
-            if !haskey(defs, folder)
-                defs[folder] = OrderedDict(
-                    "type" => "string", 
-                    "uniqueItems" => true, 
-                    "enum" => String[])
+        if !isempty(target)
+            for el in target
+                folder = key * replace(el[1], "/" => ".")
+                if !haskey(defs, folder)
+                    defs[folder] = OrderedDict(
+                        "type" => "string", 
+                        "uniqueItems" => true, 
+                        "enum" => String[])
 
-                push!(defs[key]["oneOf"], OrderedDict("\$ref" => "#/definitions/$folder"))
+                    push!(defs[key]["oneOf"], OrderedDict("\$ref" => "#/definitions/$folder"))
+                end
+
+                if row[j"/RemoveExtension"]
+                    x = split(el[2], ".")[1]
+                else 
+                    x = el
+                end
+
+                push!(defs[folder]["enum"], x)
             end
 
-            if row[j"/RemoveExtension"]
-                x = split(el[2], ".")[1]
-            else 
-                x = el
-            end
-
-            push!(defs[folder]["enum"], x)
         end
-        
-
     end
     data = OrderedDict(
         "\$schema" => "http://json-schema.org/draft-06/schema",
