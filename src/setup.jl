@@ -14,8 +14,8 @@ function setup!(marsrepo = get(ENV, "MARS_CLIENT", ""))
     end
     open(startup, "w") do io 
             write(io, """
-        include(joinpath(dirname(Base.find_package("GameDataManager")), "_startup.jl"))
         let 
+            include(joinpath(dirname(Base.find_package("GameDataManager")), "_startup.jl"))
             using Pkg
             checkout_GameDataManager()
         end
