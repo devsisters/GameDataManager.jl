@@ -158,12 +158,12 @@ function readschema(f::AbstractString)::Schema
 end
 
 function updateschema()
-    schema = Table("_Schema"; readfrom = :XLSX)
+    schema = Table("_Schema"; validation = false)
     updateschema_gitlsfiles(schema)
     updateschema_tablekey(schema)
 end
 
-function updateschema_tablekey(schema::XLSXTable = Table("_Schema"), force = false)
+function updateschema_tablekey(schema::XLSXTable = Table("_Schema"; validation = false), force = false)
     tablekeysfile = joinpath(GAMEENV["jsonschema"], "Definitions/.TableKeys.json")
     
     # 신규 생성시
@@ -269,58 +269,63 @@ end
 """
     updateschema_gitlsfiles
 
-TODO: 커밋 해시가 변한 경우에만 재생성하도록 수정 필요
+TODO: repo 이름이 틀릴경우 오류메세지 대응 필요
 """
-function updateschema_gitlsfiles(schema)
+function updateschema_gitlsfiles(schema = Table("_Schema"; validation = false))
     file = joinpath(GAMEENV["jsonschema"], "Definitions/.GitLsFiles.json")
     jws = schema["GitLsFiles"]
 
-    defs = OrderedDict{String, Any}()
-    print_section("GitLsFiles Schema를 생성합니다: $file", "NOTE"; color=:cyan)
+    # Git Repo들 중 1개라도 업데이트 필요할 경우 전체 다시 생성
+    repos = jws[:, j"/ref/Repo"]
+    needsupdate = is_git_ls_files_needupdate.(repos)
+    if any(needsupdate)
+        defs = OrderedDict{String, Any}()
+        print_section("GitLsFiles Schema를 생성합니다: $file", "NOTE"; color=:cyan)
 
-    for row in jws 
-        repo = row[j"/ref/Repo"]
-        rootpath = row[j"/RootPath"]
+        for row in jws 
+            repo = row[j"/ref/Repo"]
+            rootpath = row[j"/RootPath"]
 
-        target = begin 
-            flist = git_ls_files(repo)
-            candidate = filter(el -> startswith(el, rootpath) && !endswith(el, ".meta"), flist)
-            candidate = broadcast(el -> splitdir(split(el, rootpath)[2]), candidate)
-            filter(!isempty, candidate)
-        end
-
-        key = replace(rootpath, "/" => ".")
-        defs[key] = OrderedDict("oneOf" => [])
-        if !isempty(target)
-            for el in target
-                folder = key * replace(el[1], "/" => ".")
-                if !haskey(defs, folder)
-                    defs[folder] = OrderedDict(
-                        "type" => "string", 
-                        "uniqueItems" => true, 
-                        "enum" => String[])
-
-                    push!(defs[key]["oneOf"], OrderedDict("\$ref" => "#/definitions/$folder"))
-                end
-
-                if row[j"/RemoveExtension"]
-                    x = split(el[2], ".")[1]
-                else 
-                    x = el
-                end
-
-                push!(defs[folder]["enum"], x)
+            target = begin 
+                flist = git_ls_files(repo)
+                candidate = filter(el -> startswith(el, rootpath) && !endswith(el, ".meta"), flist)
+                candidate = broadcast(el -> splitdir(split(el, rootpath)[2]), candidate)
+                filter(!isempty, candidate)
             end
 
+            key = replace(rootpath, "/" => ".")
+            defs[key] = OrderedDict("oneOf" => [])
+            if !isempty(target)
+                for el in target
+                    folder = key * replace(el[1], "/" => ".")
+                    if !haskey(defs, folder)
+                        defs[folder] = OrderedDict(
+                            "type" => "string", 
+                            "uniqueItems" => true, 
+                            "enum" => String[])
+
+                        push!(defs[key]["oneOf"], OrderedDict("\$ref" => "#/definitions/$folder"))
+                    end
+
+                    if row[j"/RemoveExtension"]
+                        x = split(el[2], ".")[1]
+                    else 
+                        x = el
+                    end
+
+                    push!(defs[folder]["enum"], x)
+                end
+
+            end
         end
+        data = OrderedDict(
+            "\$schema" => "http://json-schema.org/draft-06/schema",
+                "\$id" => ".GitLsFiles.json",
+            "title" => "Git Repository file list", 
+            "definitions" => defs)
+        
+        write(file, JSON.json(data))
     end
-    data = OrderedDict(
-        "\$schema" => "http://json-schema.org/draft-06/schema",
-            "\$id" => ".GitLsFiles.json",
-           "title" => "Git Repository file list", 
-           "definitions" => defs)
-    
-    write(file, JSON.json(data))
     nothing
 end
 
