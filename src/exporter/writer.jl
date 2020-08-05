@@ -164,6 +164,8 @@ end
 
 function backup()
     # 네트워크의 게임 데이터를 백업합니다
+    git_commit() = run(`git commit \*.tar \-m PatchDataOrigin_백업`)
+
     @assert startswith(GAMEENV["xlsx"]["root"], "G") "네트워크에 연결할 수 없어 데이터 백업이 불가능 합니다"
         
     println("../XLSXTable을 백업합니다")
@@ -181,8 +183,7 @@ function backup()
     print(" $foldername => ")
     printstyled(tarball, "\n"; color = :blue)
 
-    cd(GAMEENV["patch_data"])
-    run(`git commit \*.tar \-m PatchDataOrigin_백업`)
+    cd(git_commit, GAMEENV["patch_data"])
 end
 
 function dircheck_and_create(path)::Bool
