@@ -10,6 +10,7 @@ end
 function validate(bt::XLSXTable{:Block})
     updateschema_blockmagnet()
     updateschema_tablekey()
+    updateschema_gitlsfiles()
     _validate(bt)
 end
 function validate(bt::XLSXTable{:RewardTable})
