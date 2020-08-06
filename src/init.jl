@@ -14,6 +14,7 @@ function __init__()
 
     if s
         CACHE[:meta] = loadmeta()
+
         updateschema()
         help()
     end
@@ -39,7 +40,7 @@ end
 
 path 경로에 있는 _Meta.json을 읽는다
 """
-function loadmeta(metafile = joinpath_gamedata("_Meta.json"))
+function loadmeta()
     # 개별 시트에대한 kwargs 값이 있으면 가져오고, 없으면 global 세팅 사용
     function get_kwargs(json_row, sheet)
         x = json_row
@@ -67,7 +68,8 @@ function loadmeta(metafile = joinpath_gamedata("_Meta.json"))
         validate_duplicate(files)
         Dict(files)
     end
-    jsonfile = open(metafile, "r") do io 
+    file = joinpath_gamedata("_Meta.json")
+    jsonfile = open(file, "r") do io 
         JSON.parse(io; dicttype = OrderedDict{String,Any})
     end
 
@@ -77,7 +79,7 @@ function loadmeta(metafile = joinpath_gamedata("_Meta.json"))
     meta[:manual] = parse_metainfo(jsonfile["manual"])
     meta[:xlsx_shortcut] = merge(create_shortcut(meta[:auto]), create_shortcut(meta[:manual]))
 
-    println("_Meta.json 로딩이 완료되었습니다", "."^max(6, displaysize(stdout)[2] - 34))
+    DBwrite_otherlog(file)
 
     return meta
 end

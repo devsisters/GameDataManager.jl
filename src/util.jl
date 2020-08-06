@@ -25,10 +25,12 @@ function print_section(message, title = "NOTE"; color = :normal)
 end
 
 function reload_meta!()
-    f = "_Meta.json"
     file = joinpath_gamedata("_Meta.json")
-    db = get!(CACHE, :DB_xlsxlog, DB_xlsxlog())
-    DBInterface.execute(db, "REPLACE INTO ExportLog VALUES (?, ?)", (f, mtime(file)))
+    if ismodified(file)
+        print_section("$file 변경이 감지되어 다시 읽습니다", "NOTE"; color = :cyan)
+
+        CACHE[:meta] = loadmeta()
+    end
 end
 
 function set_validation!()
