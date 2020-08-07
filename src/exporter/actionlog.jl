@@ -82,17 +82,13 @@ function collect_all_xlsx()
 end
 
 function ismodified(f)::Bool
-    if is_xlsxfile(f) | is_jsonfile(f)
+    if is_xlsxfile(f)
         @label XLSXFILE
 
         file = joinpath_gamedata(f)
+        fname = split(replace(file, "\\" => "/"), "XLSXTable/")[2]
+        
         t = mtime(file) 
-        if is_xlsxfile(f)
-            fname = split(replace(file, "\\" => "/"), "XLSXTable/")[2]
-        else 
-            fname = basename(file)
-        end
-
         t_log = DBread_xlsxlog_mtime(fname)
     elseif is_inkfile(f)
         t = mtime(f)
