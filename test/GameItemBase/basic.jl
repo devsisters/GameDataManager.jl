@@ -58,4 +58,24 @@ set_validation!(false)
             end
         end
     end
+
+    @testset "Building 생성" begin
+        spec = Table("Special")["Building"][:, j"/BuildingKey"]
+        shop = Table("Shop")["Building"][:, j"/BuildingKey"]
+        resi = Table("Residence")["Building"][:, j"/BuildingKey"]
+        attr = Table("Attraction")["Building"][:, j"/BuildingKey"]
+
+
+        a = Building.(spec)
+        b = Building.(shop)
+        c = Building.(resi)
+        d = Building.(attr)
+
+        @test all(isa.(a, Building{:Special}))
+        @test all(isa.(b, Building{:Shop}))
+        @test all(isa.(c, Building{:Residence}))
+        @test all(isa.(d, Building{:Attraction}))
+    end
+
+    
 end
