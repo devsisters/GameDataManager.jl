@@ -4,7 +4,7 @@ using GameItemBase, GameBalanceManager
 using ..GameDataManager
 
 using XLSX
-import XLSXasJSON.@j_str
+using JSONPointer
 
 function report()
     maxlevel = Table("Player")["DevelopmentLevel"][:, j"/Level"] |> maximum

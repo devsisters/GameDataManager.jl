@@ -15,11 +15,22 @@ using Tar
 using Memoization
 using MD5
 
+using GameItemBase
 import GameItemBase.buildingtype
-using GameBalanceManager
+
+
 
 # Table
 include("tables.jl")
+
+# 엑셀을 편집
+include("localizer.jl")
+include("xlsxprocess/xlsxprocess.jl")
+
+include("xlsxprocess/balance.jl")
+include("xlsxprocess/rewardtablefile.jl")
+using .RewardTableFile
+
 # include("validator/validator.jl")
 include("validator/schema.jl")
 include("validator/inkvalidator.jl")

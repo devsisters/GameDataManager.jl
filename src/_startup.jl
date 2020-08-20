@@ -5,7 +5,7 @@ function checkout_GameDataManager()
         joinpath(root, "공유 드라이브/프로젝트 MARS/PatchDataOrigin/.tools")
     end
 
-    for pkgname in ("GameItemBase", "GameBalanceManager", "GameDataManager")
+    for pkgname in ("GameItemBase", "GameDataManager")
         dir = joinpath(network_folder_tools(), pkgname)
         projecttoml = joinpath(dir, "Project.toml")
 
