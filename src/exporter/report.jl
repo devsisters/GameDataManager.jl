@@ -252,3 +252,40 @@ function get_blocks(key::Integer)
     BuildTemplate JSON파일 IO 쓰기권한 오류가 이걸로 해결 된다고 함 =#
     cleanup_cache!()
 end
+
+"""
+    get_itemdecompose()
+
+production_recipe.json의 데이터를 분석하여 
+각 아이템별 생산 시간 + (소요 재료 or 소요 에너지)를 계산한다
+"""
+function get_itemdecompose()
+    # 하드 코딩으로 5000~6000 
+    itemkey = Table("ItemTable")["Normal"][:, j"/Key"]
+
+    
+    items = NormalItem.(filter!(k -> 5000 <= k <= 6000, itemkey))
+
+
+    file = joinpath(GAMEENV["cache"], "productiontable.tsv")
+    open(file, "w") do io
+        colnames = ["/ItemKey", "/Name", "/TotalProductionTimeSec", "/TotalPrice/Energy", "/TotalPrice/PriceItems"]
+        write(io, join(colnames, "\t"), '\n')
+
+        for (i, it) in enumerate(items) 
+            data1 = decompose1(it)
+            data2 = decompose2(it)
+
+            write(io, string(itemkeys(it)), '\t', itemname(it), '\t')
+            write(io, string(data1[1].value), '\t', string(Int(data1[2].val)), '\t')
+
+            for el in values(data2[2])
+                write(io, string(itemkeys(el)), '\t', string(itemvalues(el)), '\t')
+            end
+            write(io, '\n')
+        end
+    end
+    print_write_result(file, "아이템 레시피 생산 테이블")
+
+    nothing
+end

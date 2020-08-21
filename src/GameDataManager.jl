@@ -1,6 +1,6 @@
 module GameDataManager
 
-using Printf
+using Printf, Dates
 using StatsBase
 using XLSX, JSON, XLSXasJSON
 import XLSXasJSON: Index
@@ -48,9 +48,10 @@ include("exporter/report.jl")
 include("exporter/ink.jl")
 
 
-#= ■■■◤  Report  ◢■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ =#
-include("analytics/report.jl")
-
+#= ■■■◤  분석도구  ◢■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ =#
+include("analytics/production.jl")
+include("analytics/balancing.jl")
+using .Balancing
 
 
 export GAMEENV, GAMEDATA, help, setup!,
@@ -62,6 +63,6 @@ export GAMEENV, GAMEDATA, help, setup!,
        ink, ink_cleanup!,
        
        # 유틸리티
-       @j_str, findblock, get_buildings, get_blocks, lsfiles
+       @j_str, findblock, get_buildings, get_blocks, lsfiles, get_itemdecompose
 
 end

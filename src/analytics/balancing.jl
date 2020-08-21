@@ -1,10 +1,11 @@
-module Analystics
+module Balancing
 
-using GameItemBase, GameBalanceManager
+using GameItemBase
 using ..GameDataManager
 
 using XLSX
 using JSONPointer
+
 
 function report()
     maxlevel = Table("Player")["DevelopmentLevel"][:, j"/Level"] |> maximum
