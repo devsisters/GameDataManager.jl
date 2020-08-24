@@ -157,7 +157,7 @@ function release()
     end
 
     root = joinpath(GAMEENV["NetworkFolder"], ".tools")
-    for pkg in ("GameItemBase", "GameBalanceManager", "GameDataManager")
+    for pkg in ("GameItemBase", "GameDataManager")
         cd(joinpath(root, pkg))
         run(`git pull`)
     end

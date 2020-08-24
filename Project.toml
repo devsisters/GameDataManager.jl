@@ -1,9 +1,10 @@
 name = "GameDataManager"
 uuid = "88844230-ccf1-11e8-233b-3f48c6dac397"
 authors = ["김용희 <yongheekim@devsisters.com>"]
-version = "1.6.11"
+version = "1.7.0"
 
 [deps]
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 GameItemBase = "5bad4de0-7d96-491e-9f11-736efa64e4f5"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 JSONPointer = "cc3ff66e-924d-4e6b-b111-1d9960e4bba9"
@@ -23,10 +24,10 @@ XLSXasJSON = "8c9e00cc-ccf1-11e8-3de6-5b028f480d9e"
 
 [compat]
 JSONPointer = ">= 0.2"
+JSONSchema = ">= 0.3.2"
 XLSXasJSON = ">= 0.3"
 
 [extras]
-Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
