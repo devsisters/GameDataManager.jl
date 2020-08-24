@@ -63,6 +63,6 @@ export GAMEENV, GAMEDATA, help, setup!,
        ink, ink_cleanup!,
        
        # 유틸리티
-       @j_str, findblock, get_buildings, get_blocks, lsfiles, get_itemdecompose
+       @j_str, findblock, get_buildings, get_blocks, lsfiles, get_itemreduction
 
 end

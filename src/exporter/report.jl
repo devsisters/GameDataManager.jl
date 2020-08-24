@@ -254,18 +254,15 @@ function get_blocks(key::Integer)
 end
 
 """
-    get_itemdecompose()
+    get_itemreduction()
 
 production_recipe.json의 데이터를 분석하여 
 각 아이템별 생산 시간 + (소요 재료 or 소요 에너지)를 계산한다
 """
-function get_itemdecompose()
+function get_itemreduction()
     # 하드 코딩으로 5000~6000 
     itemkey = Table("ItemTable")["Normal"][:, j"/Key"]
-
-    
     items = NormalItem.(filter!(k -> 5000 <= k <= 6000, itemkey))
-
 
     file = joinpath(GAMEENV["cache"], "productiontable.tsv")
     open(file, "w") do io
@@ -273,13 +270,13 @@ function get_itemdecompose()
         write(io, join(colnames, "\t"), '\n')
 
         for (i, it) in enumerate(items) 
-            data1 = decompose1(it)
-            data2 = decompose2(it)
+            data1 = reduction1(it)
+            data2 = reduction2(it)
 
             write(io, string(itemkeys(it)), '\t', itemname(it), '\t')
-            write(io, string(data1[1].value), '\t', string(Int(data1[2].val)), '\t')
+            write(io, string(data2[1].value), '\t', string(Int(data2[2].val)), '\t')
 
-            for el in values(data2[2])
+            for el in values(data1[2])
                 write(io, string(itemkeys(el)), '\t', string(itemvalues(el)), '\t')
             end
             write(io, '\n')

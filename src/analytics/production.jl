@@ -8,7 +8,7 @@ function israwmaterial(x::NormalItem)::Bool
 end
 
 """
-    decompose1(x::NormalItem)
+    reduction2(x::NormalItem)
 
 ItemTable_Normal.json의 아이템을
 Production_Recipe.json 데이터를 기반으로 Energy와 생산시간(Second)으로 환원한다. 
@@ -16,31 +16,23 @@ Production_Recipe.json 데이터를 기반으로 Energy와 생산시간(Second)�
 ※ 재귀함수 성능 문제로 @memoize를 사용했기 때문에, 데이터를 수정할 경우 Julia를 다시 시작하거나
   cleanup_cache!()로 cache를 비워주어야 한다. 
 """
-@memoize function decompose1(x::NormalItem)
-    time = Second(0)
+function reduction2(x::NormalItem)
+    time, rawmaterial = reduction1(x)
     energy = 0*ENE
-    if israwmaterial(x)
+    for item in values(rawmaterial)
         # ItemTable에 기입된 수치를 사용
-        val = xlookup(itemkeys(x), Table("ItemTable")["Normal"], j"/Key", j"/EnergyReductionRate")
-        energy = val * ENE
-    else 
-        recipe = production_recipe(x)
-        time += recipe[1]
-        for item in values(recipe[2])
-            a, b = decompose1(item)
-            time += a 
-            energy += b
-        end
+        eg = xlookup(itemkeys(item), Table("ItemTable")["Normal"], j"/Key", j"/EnergyReductionRate")
+        energy += eg * itemvalues(item) * ENE
     end
     return time, energy
 end   
 
 """
-    demopose2(x::NormalItem)
+    reduction1(x::NormalItem)
 
-decompose1과 똑같은데 energy 대신 rawmaterial로 환산한다
+아이템을 rawmaterial과 생산시간으로 환원한다
 """
-@memoize function decompose2(x::NormalItem)
+@memoize function reduction1(x::NormalItem)
     time = Second(0)
     rawitem = AssetCollection()
     if israwmaterial(x)
@@ -49,7 +41,7 @@ decompose1과 똑같은데 energy 대신 rawmaterial로 환산한다
         recipe = production_recipe(x)
         time += recipe[1]
         for item in values(recipe[2])
-            a, b = decompose2(item)
+            a, b = reduction1(item)
             time += a 
             rawitem += b
         end
