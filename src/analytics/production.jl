@@ -21,7 +21,7 @@ function reduction2(x::NormalItem)
     energy = 0*ENE
     for item in values(rawmaterial)
         # ItemTable에 기입된 수치를 사용
-        eg = xlookup(itemkeys(item), Table("ItemTable")["Normal"], j"/Key", j"/EnergyReductionRate")
+        eg = xlookup(itemkeys(item), Table("ItemTable")["Normal"], j"/Key", j"/ReductionToEnergy")
         energy += eg * itemvalues(item) * ENE
     end
     return time, energy
