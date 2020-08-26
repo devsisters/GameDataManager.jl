@@ -61,7 +61,7 @@ function get_buildings(savetsv::Bool = true; include_artasset = true)
     data = Dict()
     for t in ("Shop", "Residence", "Special")
         bks = Table(t)["Building"][:, j"/BuildingKey"]
-        for k in bks 
+        @showprogress  "계산 중..." for k in bks 
             data[k] = get_buildings(k, false; include_artasset = include_artasset)
         end
     end
@@ -197,7 +197,6 @@ function get_blocks(savetsv::Bool = true;
 
     d2 = OrderedDict()
     for f in keys(templates)
-        @show f
         blocks = countmap(get.(templates[f]["Blocks"], "BlockKey", 0))
         for block_key in keys(blocks)
             if !haskey(d2, block_key)
@@ -240,7 +239,7 @@ function get_blocks(key::Integer)
     else
         file = joinpath(GAMEENV["cache"], "get_blocks_$key.tsv")
         open(file, "w") do io
-            for kv in data 
+            @showprogress  "계산 중..." for kv in data 
                 block_key = string(kv[1])
                 write(io, block_key, '\t' * join(keys(kv[2]), '\t'), '\n')
                 write(io, block_key, '\t' * join(values(kv[2]), '\t'), '\n')
@@ -269,7 +268,7 @@ function get_itemreduction()
         colnames = ["/ItemKey", "/Name", "/TotalProductionTimeSec", "/TotalPrice/Energy", "/TotalPrice/PriceItems"]
         write(io, join(colnames, "\t"), '\n')
 
-        for (i, it) in enumerate(items) 
+        @showprogress "계산 중..." for (i, it) in enumerate(items) 
             data1 = reduction1(it)
             data2 = reduction2(it)
 
