@@ -147,15 +147,7 @@ end
 나중에 version도 맞춰주는거 추가 할 것
 """
 function release()
-    # Test데이터 준비
     outpath = joinpath(dirname(pathof(GameDataManager)), "../test/validation")
-    git_ls_files()
-    for repo in ("mars-client", "patch_data", "mars_art_assets")
-        file = "git_ls-files_$repo.txt"
-        f = joinpath(GAMEENV["cache"], file)
-        cp(joinpath(GAMEENV["cache"], file), joinpath(outpath, file); force = true)
-    end
-
     root = joinpath(GAMEENV["NetworkFolder"], ".tools")
     for pkg in ("GameItemBase", "GameDataManager")
         cd(joinpath(root, pkg))
