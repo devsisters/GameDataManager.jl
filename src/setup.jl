@@ -139,19 +139,3 @@ function is_git_ls_files_needupdate(repo)
     return needupdate
 end
 
-
-""" 
-    release()
-
-그냥 GoogleDrive에 패키지 업데이트하는 기능...
-나중에 version도 맞춰주는거 추가 할 것
-"""
-function release()
-    outpath = joinpath(dirname(pathof(GameDataManager)), "../test/validation")
-    root = joinpath(GAMEENV["NetworkFolder"], ".tools")
-    for pkg in ("GameItemBase", "GameDataManager")
-        cd(joinpath(root, pkg))
-        run(`git pull`)
-    end
-    
-end
