@@ -158,13 +158,16 @@ end
 function count_buildtemplate(file;
             root = joinpath(GAMEENV["json"]["root"], "../BuildTemplate/Buildings"))
     file = joinpath(root, "$(file).json")
+    data = replace(read(file, String), "\Ufeff" => "")
+    result = Dict()
     try 
-        data = replace(read(file, String), "\Ufeff" => "")
         x = JSON.parse(data)
-        countmap(map(x -> x["BlockKey"], x["Blocks"]))
-    catch 
-        throw(ArgumentError("JSON 오류로 파일을 읽지 못 하였습니다\n$file"))
+        result = countmap(map(x -> x["BlockKey"], x["Blocks"]))
+    catch e
+        @warn "JSON 오류로 파일을 읽지 못 하였습니다\n$file"
+        result = Dict()
     end
+    return result
 end
 
 """
