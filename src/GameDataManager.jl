@@ -3,7 +3,6 @@ module GameDataManager
 using Printf, Dates
 using StatsBase
 using XLSX, JSON, XLSXasJSON
-import XLSXasJSON: Index
 using JSONPointer
 using JSONSchema
 import JSONSchema.validate
@@ -18,8 +17,6 @@ using MD5
 
 using GameItemBase
 import GameItemBase.buildingtype
-
-
 
 # Table
 include("tables.jl")
