@@ -158,9 +158,9 @@ end
 function count_buildtemplate(file;
             root = joinpath(GAMEENV["json"]["root"], "../BuildTemplate/Buildings"))
     file = joinpath(root, "$(file).json")
-    data = replace(read(file, String), "\Ufeff" => "")
     result = Dict()
     try 
+        data = replace(read(file, String), "\Ufeff" => "")
         x = JSON.parse(data)
         result = countmap(map(x -> x["BlockKey"], x["Blocks"]))
     catch e
@@ -215,8 +215,8 @@ function get_blocks(savetsv::Bool = true;
         open(file, "w") do io
             for kv in d2 
                 block_key = string(kv[1])
-                write(io, string(block_key), '\t', join(keys(kv[2]), '\t'), '\n')
-                write(io, string(block_key), '\t', join(values(kv[2]), '\t'), '\n')
+                write(io, block_key, '\t', join(keys(kv[2]), '\t'), '\n')
+                write(io, block_key, '\t', join(values(kv[2]), '\t'), '\n')
             end
         end
         print_write_result(file, "Block별 사용된 빈도는 다음과 같습니다")
