@@ -1,33 +1,34 @@
 ﻿Summary
-  Generated on: 08/31/2020 - 01:17:24
+  Generated on: 08/31/2020 - 08:36:53
   Parser: LCovParser
   Assemblies: 1
-  Classes: 20
-  Files: 20
+  Classes: 21
+  Files: 21
   Line coverage: 30.0%
-  Covered lines: 370
-  Uncovered lines: 863
-  Coverable lines: 1233
-  Total lines: 2712
+  Covered lines: 375
+  Uncovered lines: 871
+  Coverable lines: 1246
+  Total lines: 2717
 
-Default                                  30.0%
-  ./src/_startup.jl                       0.0%
-  ./src/analytics/balancing.jl            0.0%
-  ./src/analytics/production.jl           0.0%
-  ./src/exporter/actionlog.jl            61.3%
-  ./src/exporter/autoxl.jl                0.0%
-  ./src/exporter/ink.jl                   0.0%
-  ./src/exporter/report.jl               53.2%
-  ./src/exporter/writer.jl                0.0%
-  ./src/GameDataManager.jl              100.0%
-  ./src/init.jl                          82.0%
-  ./src/loader.jl                        37.7%
-  ./src/localizer.jl                      0.0%
-  ./src/setup.jl                         37.2%
-  ./src/tables.jl                        44.6%
-  ./src/util.jl                          25.5%
-  ./src/validator/inkvalidator.jl         0.0%
-  ./src/validator/schema.jl              43.8%
-  ./src/xlsxprocess/balance.jl            0.0%
-  ./src/xlsxprocess/rewardtablefile.jl    0.0%
-  ./src/xlsxprocess/xlsxprocess.jl        0.0%
+Default                                30.0%
+  src/_startup.jl                       0.0%
+  src/analytics/balancing.jl            0.0%
+  src/analytics/production.jl           0.0%
+  src/exporter/actionlog.jl            61.3%
+  src/exporter/autoxl.jl                0.0%
+  src/exporter/ink.jl                   0.0%
+  src/exporter/report.jl               54.6%
+  src/exporter/writer.jl                0.0%
+  src/GameDataManager.jl                    
+  src/init.jl                          82.0%
+  src/loader.jl                        37.7%
+  src/localizer.jl                      0.0%
+  src/setup.jl                         37.2%
+  src/tables.jl                        44.6%
+  src/util.jl                          25.5%
+  src/validator/inkvalidator.jl         0.0%
+  src/validator/schema.jl              44.5%
+  src/xlsxprocess/balance.jl            0.0%
+  src/xlsxprocess/dronedelivery.jl      0.0%
+  src/xlsxprocess/rewardtablefile.jl    0.0%
+  src/xlsxprocess/xlsxprocess.jl        0.0%
