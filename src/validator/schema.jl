@@ -82,10 +82,10 @@ function print_schemaerror(file, sheet, err::AbstractDict)
         end
         # error 원인, 값
         errors = filter(el -> el.path == p, collect(values(err)))
-        schemakey = unique(map(el -> el.reason, values(errors)))
-        schemaval = summary(errors[1].val)
+        reason = unique(map(el -> el.reason, values(errors)))
+        schemaval = unique(map(el -> el.val, values(errors)))
 
-        title = "$(file) Validation failed from {key: $schemakey, summary: $schemaval}\n"
+        title = "$(file) Validation failed from {key: $reason, summary: $(summary(schemaval[1]))}\n"
         msg = """
         sheet:        $sheet
         column:       $p
@@ -95,10 +95,15 @@ function print_schemaerror(file, sheet, err::AbstractDict)
         
         solution = get_schema_description(file, sheet, p)
         if !ismissing(solution)
-            printstyled("해결방법\n  ↳ ", solution, "\n"; color=:red)
+            msg = "해결방법\n  ↳ $(solution)"
         else 
-            printstyled("원인 = \"", errors[1].reason, "\": $(errors[1].val)","\n"; color=:red)
+            if length(reason) == 1 
+                msg = "\"$(reason[1])\": $(schemaval[1])"
+            else 
+                msg = "$(reason): $(schemaval)"
+            end 
         end
+        printstyled(msg,"\n"; color=:red)
     end
 end
 
