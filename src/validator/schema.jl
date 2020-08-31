@@ -40,11 +40,13 @@ function validate(jws::JSONWorksheet, jsonfile)
     
     err = OrderedDict()
     @inbounds for (i, row) in enumerate(jws)
-        # 모든 `OrderedDict`를 `Dict`으로 변환이 필요
         val = JSONSchema.validate(row, schema)
         if !isnothing(val)
             if in(j"/Key", jws.pointer)
                 marker = string("/Key: ", row[j"/Key"])
+                if haskey(err, marker)
+                    marker *= "#_" * string(hash(val))[1:4]
+                end
             else 
                 marker = "#I_$i"
             end
@@ -94,6 +96,8 @@ function print_schemaerror(file, sheet, err::AbstractDict)
         solution = get_schema_description(file, sheet, p)
         if !ismissing(solution)
             printstyled("해결방법\n  ↳ ", solution, "\n"; color=:red)
+        else 
+            printstyled("원인 = \"", errors[1].reason, "\": $(errors[1].val)","\n"; color=:red)
         end
     end
 end
