@@ -84,6 +84,7 @@ function print_schemaerror(file, sheet, err::AbstractDict)
         errors = filter(el -> el.path == p, collect(values(err)))
         reason = unique(map(el -> el.reason, values(errors)))
         schemaval = unique(map(el -> el.val, values(errors)))
+        x =
 
         title = "$(file) Validation failed from {key: $reason, summary: $(summary(schemaval[1]))}\n"
         msg = """
@@ -102,6 +103,9 @@ function print_schemaerror(file, sheet, err::AbstractDict)
             else 
                 msg = "$(reason): $(schemaval)"
             end 
+            if length(msg) > 42
+                msg = msg[1:40] * "......"
+            end
         end
         printstyled(msg,"\n"; color=:red)
     end
