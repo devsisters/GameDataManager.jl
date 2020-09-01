@@ -35,7 +35,7 @@ struct XLSXTable{FileName} <: Table
     data::JSONWorkbook
 end
 function XLSXTable(jwb::JSONWorkbook, validation::Bool)
-    f = splitext(basename(jwb))[1] |> string
+    f = basename(xlsxpath(jwb), ".xlsx") |> string
     data = XLSXTable{Symbol(f)}(hash(jwb), jwb)
 
     if validation 
@@ -65,7 +65,7 @@ function XLSXTable(file::AbstractString; validation = CACHE[:validation],
         table = XLSXTable(jwb, validation)
 
     elseif readfrom == :JSON
-        k = splitext(basename(f))[1]
+        k = basename(f, ".xlsx")
 
         if !haskey(GAMEDATA, k)
             jwb = _jsonworkbook(f)
@@ -181,19 +181,17 @@ end
 Base.getindex(bt::Table, i) = getindex(bt.data, i)
 
 Base.basename(bt::JSONTable) = basename(bt.filepath)
-Base.basename(xgd::XLSXTable) = basename(xgd.data)
-Base.basename(jwb::JSONWorkbook) = basename(xlsxpath(jwb))
+Base.basename(xgd::XLSXTable) = basename(xlsxpath(xgd))
 
 Base.dirname(bt::JSONTable) = dirname(bt.filepath)
-Base.dirname(xgd::XLSXTable) = dirname(xgd)
-Base.dirname(jwb::JSONWorkbook) = dirname(xlsxpath(jwb))
+Base.dirname(xgd::XLSXTable) = dirname(xlsxpath(xgd))
 _filename(xgd::XLSXTable{NAME}) where NAME = NAME
 
 index(x::XLSXTable) = x.data.sheetindex
-cache(x::XLSXTable) = x.cache
 XLSXasJSON.sheetnames(xgd::XLSXTable) = sheetnames(xgd.data)
+XLSXasJSON.xlsxpath(xgd::XLSXTable) = xlsxpath(xgd.data)
 
-    function Base.show(io::IO, bt::XLSXTable)
+function Base.show(io::IO, bt::XLSXTable)
     println(io, ".data ┕━")
     print(io, bt.data)
 end

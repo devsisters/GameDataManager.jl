@@ -18,7 +18,7 @@ end
 
 """
 function process!(jwb::JSONWorkbook; kwargs...)::JSONWorkbook
-    filename = splitext(basename(jwb))[1]
+    filename = splitext(basename(xlsxpath(jwb)))[1]
     T = WorkBook(filename)
 
     drop_null!(jwb)

@@ -63,7 +63,7 @@ function _validate(bt::XLSXTable)
     @inbounds for s in sheetnames(jwb)
         err = validate(jwb[s], meta[s][1])
         if !isempty(err)
-            print_schemaerror(basename(jwb), s, err)
+            print_schemaerror(basename(xlsxpath(jwb)), s, err)
         end
     end
     nothing
@@ -108,7 +108,7 @@ function print_schemaerror(file, sheet, err::AbstractDict)
 end
 
 function get_schema_description(file, sheet, path)
-    file = CACHE[:meta][:xlsx_shortcut][split(file, ".")[1]]
+    file = CACHE[:meta][:xlsx_shortcut][basename(file, ".xlsx")]
     jsonfile = getmetadata(file)[sheet][1]
     
     schema = CACHE[:tablesschema][jsonfile]
@@ -317,7 +317,7 @@ function updateschema_gitlsfiles(schema = Table("_Schema"; validation = false))
                     end
 
                     if row[j"/RemoveExtension"]
-                        x = split(el[2], ".")[1]
+                        x = splitext(el[2])[1]
                     else 
                         x = el
                     end

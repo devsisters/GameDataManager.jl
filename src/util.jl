@@ -2,6 +2,9 @@
 is_xlsxfile(f)::Bool = (endswith(f, ".xlsx") || endswith(f, ".xlsm"))
 is_jsonfile(f)::Bool = endswith(f, ".json")
 is_inkfile(f)::Bool = endswith(f, ".ink")
+function Base.basename(path, extension) 
+    string(split(basename(path), extension)[1])
+end
 
 function print_write_result(path, msg = "다음과 같습니다")
     print_section("$(msg)\n   SAVED => $(normpath(path))", "연산결과"; color = :green)
@@ -115,7 +118,7 @@ function lsfiles()
             dir = dirname(row)
             file = basename(row)
             if occursin(".", file)
-                file = split(file, ".")
+                file = splitext(file)
                 write(io, dir, '\t', file[1], '\t', file[2])
             else 
                 write(io, dir, '\t', file)

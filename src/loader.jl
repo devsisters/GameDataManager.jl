@@ -37,8 +37,6 @@ function joinpath_gamedata(fname)
     return p
 end
 
-
-
 function throw_fuzzylookupname(keyset, idx; kwargs...)
     throw_fuzzylookupname(collect(keyset), idx; kwargs...)
 end
@@ -66,7 +64,7 @@ function getmetadata(f::AbstractString)
     end
 end
 function getmetadata(jwb::JSONWorkbook) 
-    f = splitext(basename(jwb))[1] |> string
+    f = splitext(basename(xlsxpath(jwb)))[1] |> string
 
     metakey = CACHE[:meta][:xlsx_shortcut][f]
     getmetadata(metakey)
