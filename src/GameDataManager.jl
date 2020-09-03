@@ -40,7 +40,6 @@ include("setup.jl")
 include("loader.jl")
 
 include("exporter/writer.jl")
-include("exporter/autoxl.jl")
 include("exporter/actionlog.jl")
 include("exporter/report.jl")
 include("exporter/ink.jl")
@@ -48,9 +47,6 @@ include("exporter/ink.jl")
 
 #= ■■■◤  분석도구  ◢■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ =#
 include("analytics/production.jl")
-include("analytics/balancing.jl")
-using .Balancing
-
 
 export GAMEENV, GAMEDATA, help, setup!,
        # datahandler

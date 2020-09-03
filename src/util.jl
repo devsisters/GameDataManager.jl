@@ -53,11 +53,6 @@ function cleanup_cache!()
     nothing
 end
 
-function cleanup_exportlog!()
-    rm(GAMEENV["xlsxlog"])
-    printstyled("  └.exportlog.json을 삭제하였습니다 (◎﹏◎)"; color = :yellow)
-end
-
 function lookfor_xlsx(file)
     if is_xlsxfile(file) 
         f = file 
