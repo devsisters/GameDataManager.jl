@@ -228,3 +228,15 @@ function process!(jwb::JSONWorkbook, ::Type{WorkBook{:UserList}})
     drop_null!(jwb)
     return jwb
 end
+
+function process!(jwb::JSONWorkbook, ::Type{WorkBook{:ResourceProp}}) 
+    for row in jwb["Data"]
+        if isnull(row[j"/Phase/2/ArtAsset"])
+            deleteat!(row["Phase"], 2)
+        end
+        if isnull(row[j"/Phase/3/ArtAsset"])
+            deleteat!(row["Phase"], 3)
+        end
+    end
+    return jwb
+end
