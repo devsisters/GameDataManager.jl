@@ -1,7 +1,7 @@
 name: CoverageReport
 on:
   push:
-    branches: [ master ]
+    branches: [ nothing ]
 
 jobs:
   build:
