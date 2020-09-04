@@ -1,5 +1,6 @@
 using Test
 using GameDataManager
+using GameItemBase
 
 # 깃허브 액션 세팅  
 @testset "테스트 환경 확인" begin 
@@ -70,6 +71,20 @@ end
 
         @test isa(data, GameDataManager.XLSXTable)
     end
+end
+
+@testset "Recipe 구성" begin 
+    ref = Table("Production")["Recipe"]
+    
+    for k in 5001:5010
+        @test_throws Exception GameDataManager.Recipe(NormalItem(k))
+    end
+    
+    for (i, row) in enumerate(ref)
+        r = GameDataManager.Recipe(row)
+        @test itemkeys(r.rewarditem) == row[j"/RewardItems/NormalItem/1/1"]
+    end
+
 end
 
 
