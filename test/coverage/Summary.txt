@@ -1,5 +1,5 @@
 ﻿Summary
-  Generated on: 09/01/2020 - 08:07:17
+  Generated on: 09/04/2020 - 08:21:29
   Parser: LCovParser
   Assemblies: 1
   Classes: 20
@@ -8,7 +8,7 @@
   Covered lines: 426
   Uncovered lines: 815
   Coverable lines: 1241
-  Total lines: 2720
+  Total lines: 2731
 
 Default                                34.3%
   src/_startup.jl                       0.0%
