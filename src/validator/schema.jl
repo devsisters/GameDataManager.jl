@@ -298,18 +298,33 @@ function updateschema_gitlsfiles(schema = Table("_Schema"; validation = false))
         for row in jws 
             repo = row[j"/ref/Repo"]
             rootpath = row[j"/RootPath"]
+            key = replace(rootpath, "/" => ".")
+            remove_ext = row[j"/RemoveExtension"]
+            exclusion = row[j"/Regex/Exclude"]
+            inclusion = row[j"/Regex/Include"]
 
             target = begin 
                 flist = git_ls_files(repo)
                 candidate = filter(el -> startswith(el, rootpath) && !endswith(el, ".meta"), flist)
-                candidate = broadcast(el -> splitdir(split(el, rootpath)[2]), candidate)
+                
+
+                if !isnull(exclusion)
+                    r = Regex(exclusion)
+                    candidate = filter(el -> !occursin(r, el), candidate)
+                end
+                if !isnull(inclusion)
+                    r = Regex(inclusion)
+                    candidate = filter(el -> occursin(r, el), candidate)
+                end
+                candidate = broadcast(el -> split(el, rootpath)[2], candidate)
                 filter(!isempty, candidate)
             end
 
-            key = replace(rootpath, "/" => ".")
             defs[key] = OrderedDict("oneOf" => [])
+
             if !isempty(target)
-                for el in target
+                for entry in target
+                    el = splitdir(entry)
                     folder = key * replace(el[1], "/" => ".")
                     if !haskey(defs, folder)
                         defs[folder] = OrderedDict(
@@ -320,7 +335,7 @@ function updateschema_gitlsfiles(schema = Table("_Schema"; validation = false))
                         push!(defs[key]["oneOf"], OrderedDict("\$ref" => "#/definitions/$folder"))
                     end
 
-                    if row[j"/RemoveExtension"]
+                    if remove_ext
                         x = splitext(el[2])[1]
                     else 
                         x = el
