@@ -1,7 +1,7 @@
 name: CoverageReport
 on:
   push:
-    branches: [ nothing ]
+    branches: [ master ]
 
 jobs:
   build:
@@ -27,18 +27,20 @@ jobs:
         filefilters: '+*' # Optional list of files that should be included or excluded in the report. Exclusion filters take precedence over inclusion filters. Wildcards are allowed.
         verbosity: 'Info' # The verbosity level of the log messages. Values: Verbose, Info, Warning, Error, Off
         tag: '${{ github.run_number }}_${{ github.run_id }}' # Optional tag or build version.
-
+    - name: Get commit sha
+      id: vars
+      shell: bash
+      run: |
+        echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
     - name: CommitReport
       uses: EndBug/add-and-commit@v4 # You can change this to use a specific version
       with:
         # The arguments for the `git add` command (see the paragraph below for more info)
         # Default: '.'
         add: 'test/coverage/*'
-
-        force: true
-        signoff: true
-        message: 'Coverage Report'
-
+        message: 'Coverage Report ${{ steps.vars.outputs.sha_short }}'
+        ref: 'gh-pages'
       env:
         # This is necessary in order to push a commit to the repo
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Leave this line unchanged
