@@ -38,7 +38,7 @@ jobs:
       with:
         # The arguments for the `git add` command (see the paragraph below for more info)
         # Default: '.'
-        add: 'test/coverage/*'
+        add: 'docs/coverage/*'
         message: 'Coverage Report ${{ steps.vars.outputs.sha_short }}'
         ref: 'gh-pages'
       env:
