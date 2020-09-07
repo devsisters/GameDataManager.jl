@@ -1,6 +1,7 @@
 module GameDataManager
 
 using Printf, Dates
+using DelimitedFiles
 using StatsBase
 using XLSX, JSON, XLSXasJSON
 using JSONPointer
@@ -47,6 +48,7 @@ include("exporter/ink.jl")
 
 #= ■■■◤  분석도구  ◢■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ =#
 include("analytics/production.jl")
+using .Production
 
 export GAMEENV, GAMEDATA, help, setup!,
        # datahandler

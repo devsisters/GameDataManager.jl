@@ -1,3 +1,11 @@
+module Production
+
+using ..GameDataManager
+using GameItemBase
+using XLSXasJSON, JSONPointer
+using Dates
+using DelimitedFiles
+
 """
     Recipe
     Recipe(itemkey::Integer)
@@ -24,6 +32,7 @@ struct Recipe
                price, t, rewarditem, rewarduserexp)
     end
 end
+
 function Recipe(itemkey::Integer)
     data = Table("Production")["Recipe"]
     reward_itemkeys = data[:, j"/RewardItems/NormalItem/1/1"]
@@ -37,6 +46,12 @@ function Recipe(item::NormalItem)
         throw(ArgumentError("Recipe($(itemkeys(item))) does not exist"))
    end
     Recipe(itemkeys(item))
+end
+
+function Base.show(io::IO, x::Recipe)
+    m = string(x.groupkey, "(Level:", x.userlevel, ", Reward:")
+    println(io, m, x.rewarditem, ",")
+    print(io, " "^length(x.groupkey), " Price:", values(x.price), ")")
 end
 
 """
@@ -93,12 +108,25 @@ function reduction2(x::NormalItem)
 
     e = zero(ENE)
     for it in values(items) 
+        if !israwmaterial(it)
+            throw(ArgumentError("원재료만 에너지로 변환 가능 $it"))
+        end
         e1 = xlookup(itemkeys(it), Table("ItemTable")["Normal"], j"/Key", j"/ReductionToEnergy")
         e += e1 * itemvalues(it) * ENE
     end
     return t, e
 end
-
+function reduction2(x::Recipe)
+    t, items = reduction1(x)
+    
+    e = zero(ENE)
+    for x in values(items)
+        t2, e2 = reduction2(x)
+        t += t2
+        e += e2
+    end
+    return t, e
+end
 
 function production_recipe(x::NormalItem)
     if israwmaterial(x)
@@ -124,47 +152,112 @@ function production_recipe(itemkey)
 end
 
 """
-    productiontime_surplusrate(t::TimePeriod)
+    rewardpremium(t::TimePeriod)
+    rewardpremium(x::Recipe)
 
-생산 시간을 부가가치율로 변환
+생산 시간으로 인한 보상 프리미엄 (Energy에 대하여 곱한다)
 """
-function productiontime_surplusrate(t::TimePeriod)
-    productiontime_surplusrate(convert(Second, t))
-end
-function productiontime_surplusrate(t::Second)
+function rewardpremium(t::Second)
     ref = Table("GeneralSetting")["Data"][1]
     vars = ref[j"/ProductionTime/ExchangeRate/Variables"]
 
     return vars[1] * log(vars[2] * t.value)
 end
-
-function recipeorigin()
-    # 물가게의 첫번째 Recipe를 원점으로 본다 
+function rewardpremium(t::TimePeriod)
+    rewardpremium(convert(Second, t))
+end
+function rewardpremium(x::Recipe)::Float64
+    rewardpremium(x.productiontime)
 end
 
+"""
+    solve_productiontime(recipe, object::Float64)
 
-function Base.show(io::IO, x::Recipe)
-    m = string(x.groupkey, "(Level:", x.userlevel, ", Reward:")
-    println(io, m, x.rewarditem, ",")
-    print(io, " "^length(x.groupkey), " Price:", values(x.price), ")")
-end
+원점인 생수생산 대비 효율을 object 만큼 내기위한 총 시간 t를 구한다 
+이렇게 구한 t에서 원재료 생산시간을 빼야 해당 Recipe의 고유 생산시간을 책정할 수 있다. 
 
-function surplusrate(x::Recipe)::Float64
+"""
+function solve_productiontime(recipe::Recipe, object::Float64 = 1.0; origin::Recipe = Recipe(5101))
     ref = Table("GeneralSetting")["Data"][1]
     vars = ref[j"/ProductionTime/ExchangeRate/Variables"]
 
-    t = x.productiontime.value
-    return vars[1] * log(vars[2] * t)
-end
+    # 에너지와 생산시간
+    t0, e0 = reduction2(origin)
+    t1, e1 = reduction2(recipe)
 
-function 레시피밸런싱(recipe::Recipe, targetrate; origin = nothing)
+    e0 = itemvalues(e0)
+    e1 = itemvalues(e1)
 
-    if isnothing(origin)
-        origin = get!(CACHE, :RecipeOrigin, Recipe(5101))
+    left = (e0 / e1) * (log(vars[2] * t0.value) / t0.value) * object
+    righthand(t) = log(vars[2] * t) / t
+
+    # 최소 1분 최대 12시간
+    sol_range = 120:43200
+    error_margin = 0.1
+    difs = zeros(length(sol_range))
+    
+    sol = nothing
+    error = Inf
+    for (i, t) in enumerate(sol_range)
+        # 좌변 * object == 우변
+        right = righthand(t)
+        dif = left - right
+        difs[i] = dif
+        # 혹시 zero가 있으면 중단
+        if iszero(dif)
+            sol = t
+            error = 0.
+            break
+        end
+    end
+    if isnothing(sol)
+        # 에러가 가장 작은 걸 찾는다
+        abs_difs = abs.(difs)
+        error, i = findmin(abs_difs)
+        sol = sol_range[i]
     end
 
-    # 에너지와 생산시간
-    e0, t0 = reduction1(origin)
-    e1, t1 = reduction1(recipe)
- 
+    return (t = sol, error = error)
+end
+
+function allrecipe_solution!()
+    jws = Table("Production")["Recipe"]
+    # 레벨순서로 정렬
+    sort!(jws, j"/UserLevel")
+
+    for (i, row) in enumerate(jws)
+        recipe = Recipe(row)
+        object = row["#TargetProductivity"]
+        
+        sol = solve_productiontime(recipe, object)
+        # 선행 재료 제작 시간
+        material_t = begin 
+            costs = reduction1.(values(recipe.price))
+            sum(el -> el[1], costs)
+        end
+        
+        newt = clamp(sol.t - material_t.value, 120, 43200)
+
+        row["ProductionTime"] = newt
+        jws[i]["ProductionTimeSec"] = newt
+    end
+
+    sort!(jws, j"/RecipeGroupKey")
+    # 파일로 저장
+    file = joinpath(GAMEENV["cache"], "생산시간밸런싱.tsv")
+    open(file, "w") do io
+        colnames = ["/RecipeGroupKey", "/UserLevel", "/ProductionTimeSec"]
+        write(io, join(colnames, "\t"), '\n')
+
+        for (i, row) in enumerate(jws)
+            writedlm(io, [row["RecipeGroupKey"] row["UserLevel"] row["ProductionTimeSec"]])
+        end
+    end
+    GameDataManager.print_write_result(file, "생산시간 재밸런싱")
+
+    return nothing
+end
+
+
+
 end

@@ -5,6 +5,7 @@ version = "1.7.3"
 
 [deps]
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 GameItemBase = "5bad4de0-7d96-491e-9f11-736efa64e4f5"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 JSONPointer = "cc3ff66e-924d-4e6b-b111-1d9960e4bba9"
