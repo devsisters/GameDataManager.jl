@@ -39,7 +39,7 @@ end
     @test xlookup(2, Table("Block")["Block"], j"/Key", j"/Key"; lt = <) == 1
     @test xlookup(100, Table("Block")["Block"], j"/Key", j"/Key"; lt = >) > 1
     @test xlookup(900000009, Table("Block")["Block"], j"/Key", j"/ArtAsset"; lt = >) == "error_cube"
-    @test xlookup(900000009, Table("Block")["Block"], j"/Key", j"/ArtAsset"; lt = >=) == "Test_ZfightingBuilding_prefab"
+    @test xlookup(900000009, Table("Block")["Block"], j"/Key", j"/ArtAsset"; lt = >=) == "Test_ZfightingBuilding"
 
 end
 
@@ -102,21 +102,6 @@ import GameDataManager.Production
     Production.allrecipe_solution!()
 
 end
-
-
-
-ref = Table("Production")["Recipe"]
-sols = []
-for (i, row) in enumerate(ref)
-    r = GameDataManager.Recipe(row)
-    goal = row["#TargetProductivity"]
-
-    x = Production.solve_productiontime(r, goal)
-    push!(sols, x)
-end
-
-map(el -> el.t, sols)
-
 
 @testset "기타 기능" begin 
     # 캐시 청소
