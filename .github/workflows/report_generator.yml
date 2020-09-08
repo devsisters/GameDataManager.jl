@@ -8,6 +8,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Setting Variables
+      id: vars
+      shell: bash
+      run: |
+        echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+    - name: copy hisotry 
+      shell: bash
+      run: |
+        echo "copy start"
+        cp ${ path_report } ${ path_history }
 
     - name: Setup .NET Core # Required to execute ReportGenerator
       uses: actions/setup-dotnet@v1
@@ -17,30 +28,27 @@ jobs:
     - name: ReportGenerator
       uses: danielpalme/ReportGenerator-GitHub-Action@4.6.4
       with:
-        reports: './test/coverage/lcov.info'
-        targetdir: './docs/coverage' 
+        reports: '{ path_lcov }'
+        targetdir: '${ path_report }' 
         reporttypes: 'Badges;HtmlInline;TextSummary' # The output formats and scope (separated by semicolon) Values: Badges, Clover, Cobertura, CsvSummary, Html, HtmlChart, HtmlInline, HtmlInline_AzurePipelines, HtmlInline_AzurePipelines_Dark, HtmlSummary, JsonSummary, Latex, LatexSummary, lcov, MHtml, PngChart, SonarQube, TeamCitySummary, TextSummary, Xml, XmlSummary
-        historydir: '' # Optional directory for storing persistent coverage information. Can be used in future reports to show coverage evolution.
+        historydir: '${ path_history }' # Optional directory for storing persistent coverage information. Can be used in future reports to show coverage evolution.
         plugins: '' # Optional plugin files for custom reports or custom history storage (separated by semicolon).
         assemblyfilters: '+*' # Optional list of assemblies that should be included or excluded in the report. Exclusion filters take precedence over inclusion filters. Wildcards are allowed.
         classfilters: '+*' # Optional list of classes that should be included or excluded in the report. Exclusion filters take precedence over inclusion filters. Wildcards are allowed.
         filefilters: '+*' # Optional list of files that should be included or excluded in the report. Exclusion filters take precedence over inclusion filters. Wildcards are allowed.
         verbosity: 'Info' # The verbosity level of the log messages. Values: Verbose, Info, Warning, Error, Off
         tag: '${{ github.run_number }}_${{ github.run_id }}' # Optional tag or build version.
-    - name: Get commit sha
-      id: vars
-      shell: bash
-      run: |
-        echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+
     - name: CommitReport
       uses: EndBug/add-and-commit@v4 # You can change this to use a specific version
       with:
         # The arguments for the `git add` command (see the paragraph below for more info)
         # Default: '.'
-        add: 'docs/coverage/*'
+        add: '${ path_report }/*'
         message: 'Coverage Report ${{ steps.vars.outputs.sha_short }}'
-        ref: 'gh-pages'
+        ref: 'coverage-report'
       env:
-        # This is necessary in order to push a commit to the repo
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Leave this line unchanged
+        path_lcov: 'test/coverage/lcov.info'
+        path_report: 'test/coverage'
+        path_history: 'test/coverage/history'
