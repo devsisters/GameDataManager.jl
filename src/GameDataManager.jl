@@ -26,7 +26,6 @@ include("tables.jl")
 include("localizer.jl")
 include("xlsxprocess/xlsxprocess.jl")
 
-include("xlsxprocess/balance.jl")
 include("xlsxprocess/rewardtablefile.jl")
 using .RewardTableFile
 
@@ -59,6 +58,12 @@ export GAMEENV, GAMEDATA, help, setup!,
        ink, ink_cleanup!,
        
        # 유틸리티
-       @j_str, findblock, get_buildings, get_blocks, lsfiles, get_itemreduction
+       @j_str, findblock, get_buildings, get_blocks, lsfiles, 
+
+       # 밸런싱
+       gen_recipebalance
+
+# 개발용 임시
+export Recipe
 
 end
