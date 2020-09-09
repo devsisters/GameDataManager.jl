@@ -6,8 +6,9 @@ using XLSXasJSON, JSONPointer
 using Dates
 using DelimitedFiles
 using ProgressMeter
+using Memoization
 
-export Recipe, gen_recipebalance, transmute, calc_recipebalance
+export Recipe, gen_recipebalance, transmute
 
 """
     Recipe
@@ -144,15 +145,12 @@ function rewardpremium(t::Second)
 
     return vars[1] * log(vars[2] * t.value)
 end
-function rewardpremium(t::TimePeriod)
-    rewardpremium(convert(Second, t))
-end
-function rewardpremium(x::Recipe)
-    rewardpremium(x.productiontime)
-end
+rewardpremium(t::TimePeriod) = rewardpremium(convert(Second, t))
+rewardpremium(x::Recipe) = rewardpremium(x.productiontime)
+
 """
     transmute(e::Monetary{:ENE})
-
+ 
 에너지를 코인, 경험치로 변환
 """
 function transmute(x::Monetary{:ENE})
@@ -165,92 +163,56 @@ function transmute(x::Monetary{:ENE})
 end
 
 """
-    solve_productiontime(recipe, object::Float64)
+    solve_productiontime(recipe, productivity::Float64)
 
-원점인 생수생산(5101) 대비 효율을 object 만큼 내기위한 총 시간 t를 구한다 
-이렇게 구한 t에서 원재료 생산시간을 빼야 해당 Recipe의 고유 생산시간을 책정할 수 있다. 
-
+원점인 생수생산(5101) 대비 효율을 object 만큼 내기위한 총 ProductionTime 't'를 브루트 포스로 구한다 
+이렇게 구한 't'에서 원재료 생산시간을 모두 빼야 해당 Recipe의 자체 생산시간을 책정할 수 있다. 
 """
-function solve_productiontime(recipe::Recipe, object::Float64 = 1.0; 
-            baseline::Recipe = Recipe(5101))
-    ref = Table("GeneralSetting")["Data"][1]
-    vars = ref[j"/ProductionTime/ExchangeRate/Variables"]
-
+function solve_productiontime(recipe::Recipe, productivity = 1.0)
+    baseline = ProductionBaseRecipe()
+    vars = ProductionTimeFormulaVariables()
     # 에너지와 생산시간
     t0, e0 = reduction2(baseline)
     t1, e1 = reduction2(recipe)
-    
+
     premium0 = vars[1] * log(vars[2] * t0.value)    
-    left = (itemvalues(e0) * (1 + premium0) / t0.value) * object
+    left = (itemvalues(e0) * (1 + premium0) / t0.value) * productivity
     righthand(t::Integer) = itemvalues(e1) * (1 + vars[1] * log(vars[2] * t)) / t
 
-    # 최소 1분 최대 12시간
-    sol_range = 120:43200
-    error_margin = 0.1
-    difs = zeros(length(sol_range))
+    difs = zeros(length(ProductionTimeRange))
     
     sol = nothing
     error = Inf
-    @inbounds for (i, t) in enumerate(sol_range)
-        # 좌변 * object == 우변
+                                    #2분 ~ 12시간
+    @inbounds for (i, t) in enumerate(ProductionTimeRange)
         right = righthand(t)
         dif = abs(left - right) 
         difs[i] = dif
-        # 혹시 zero가 있으면 중단
-        if iszero(dif)
-            sol = t
-            error = 0.
-            break
-        end
     end
-    if isnothing(sol)
-        # 에러가 가장 작은 걸 찾는다 gt6
-        error, i = findmin(difs)
-        sol = sol_range[i]
+
+    error, id = findmin(difs)
+    sol = ProductionTimeRange[id]
+
+    error_percent = error / productivity 
+    if error_percent > 0.1
+        @warn "다음 Recipe의 error가 10% 이상입니다 $error_percent, $recipe"
     end
-    # error는 목표 대비 %
-    return (t = sol, error_percent = error/object)
+
+    return sol
 end
-
-function allrecipe_solution!()
-    jws = Table("Production")["Recipe"]
-    # 레벨순서로 정렬, 선행 레시피 밸런싱을 적용해야 다음 레시피 밸런싱 진행 가능 
-    sort!(jws, j"/UserLevel")
-
-    @showprogress "계산 중..." for (i, row) in enumerate(jws)
-        recipe = Recipe(row)
-        object = row["#TargetProductivity"]
-        
-        sol = solve_productiontime(recipe, object)
-        # 선행 재료 제작 시간
-        material_t = begin 
-            costs = reduction1.(values(recipe.price))
-            sum(el -> el[1], costs)
-        end
-
-        newt = clamp(sol.t - material_t.value, 120, 43200)
-
-        row["ProductionTime"] = newt
-        jws[i]["ProductionTimeSec"] = newt
-    end
-
-    sort!(jws, j"/RecipeGroupKey")
-    # 파일로 저장
-    file = joinpath(GAMEENV["cache"], "생산시간밸런싱.tsv")
-    open(file, "w") do io
-        colnames = ["/RecipeGroupKey", "/UserLevel", "/ProductionTimeSec"]
-        write(io, join(colnames, "\t"), '\n')
-
-        for (i, row) in enumerate(jws)
-            writedlm(io, [row["RecipeGroupKey"] row["UserLevel"] row["ProductionTimeSec"]])
-        end
-    end
-    GameDataManager.print_write_result(file, "생산시간 재밸런싱")
-
-    return nothing
+function solve_productiontime(row::AbstractDict)
+    recipe = Recipe(row)
+    productivity = row["#TargetProductivity"]
+    solve_productiontime(recipe, productivity)
 end
-
-
+function solve_productiontime(key)
+    ref = Table("Production")["Recipe"]
+    idx = findfirst(el -> el == key, ref[:, j"/RewardItems/NormalItem/1/1"])
+    if isnothing(idx)
+        throw(KeyError(key))
+    end 
+    solve_productiontime(ref[idx])
+end
 
 """
     calc_recipebalance()
@@ -258,7 +220,8 @@ end
 Recipe 밸런싱에 필수적인 지표 계산
 """
 calc_recipebalance(x) = calc_recipebalance(Recipe(x))
-function calc_recipebalance(rcp::Recipe; baseline = Recipe(5101))
+function calc_recipebalance(rcp::Recipe)
+    baseline = ProductionBaseRecipe()
     # 에너지와 생산시간
     t0, e0 = reduction2(baseline)
     t1, e1 = reduction2(rcp)
@@ -272,55 +235,74 @@ function calc_recipebalance(rcp::Recipe; baseline = Recipe(5101))
     rcp_reward = transmute(e1 + e1_premium)
     
     TotalCoin = rcp_reward[1]
+    TotalEnergy = e1 + e1_premium
     TotalCoinByBase = (TotalCoin / baseline_reward[1])
     CoinPerMin = itemvalues(rcp_reward[1]) / (t1.value / 60)
     CoinPerMinByBase = CoinPerMin / (itemvalues(baseline_reward[1]) / (t0.value / 60))
 
     return (TotalCoin = TotalCoin, TotalCoinByBase = TotalCoinByBase, 
-            CoinPerMin = CoinPerMin, CoinPerMinByBase = CoinPerMinByBase)
+            CoinPerMin = CoinPerMin, CoinPerMinByBase = CoinPerMinByBase, TotalEnergy = TotalEnergy)
 end
 
 """
     gen_recipebalance()
 
-production_recipe.json의 데이터를 분석하여 
-각 아이템별 생산 시간 + (소요 재료 or 소요 에너지)를 책정한다
+Production_Recipe.json의 사용 재료와 '/#TargetProductivity' 를 기준으로 각 Recipe의 생산시간을 책정하고
+Recipe들의 생산시간과, 밸런싱 분석 내용을 별도 파일로 저장한다
+5101(생수) 대비 각 Recipe의 보상 효율을 비교한다
 """
 function gen_recipebalance()
-    # 레시피만, 원재료는 따로 붙여준다
-    ref = Table("Production")["Recipe"]
-    # allrecipe_solution!() 별도로 실행 시켜줘야 한다
-    recipies = Recipe.(ref.data)
-    
-    time_and_material = Array{Any,1}(undef, length(ref))
-    time_and_energy = Array{Any,1}(undef, length(ref))
-    balance = Array{Any,1}(undef, length(ref))
+    datas = filter(el -> el[j"/RewardItems/NormalItem/1/1"] >= 5100, Table("Production")["Recipe"].data)
+    # 레벨순서로 진행, 선행 레시피 밸런싱을 적용해야 다음 레시피 밸런싱 진행 가능 
+    solve_order = sortperm(get.(datas, "UserLevel", 9999))
 
-    @showprogress "계산 중..." for i in eachindex(ref.data)
-        el = Recipe(ref[i])
+    @showprogress "solve_productiontime " for i in solve_order
+        recipe = Recipe(datas[i])
+        object = datas[i]["#TargetProductivity"]
+        
+        # 선행 재료 제작 시간을 제외
+        totaltime = solve_productiontime(recipe, object)
+        material_cost = reduction1.(values(recipe.price))
+        propertime = totaltime - sum(el -> el[1], material_cost).value
+        if !in(propertime, ProductionTimeRange)
+            @info "$(recipe)의 생산시간이 너무 짧습니다. $ProductionTimeRange 범위로 변경합니다"
+        end
+        datas[i]["ProductionTimeSec"] = clamp(propertime, first(ProductionTimeRange), last(ProductionTimeRange))
+    end
+    
+    time_and_material = Array{Any,1}(undef, length(datas))
+    time_and_energy = Array{Any,1}(undef, length(datas))
+    balance = Array{Any,1}(undef, length(datas))
+
+    @showprogress "검산데이터......" for i in eachindex(datas)
+        el = Recipe(datas[i])
         time_and_material[i] = reduction1(el)
         time_and_energy[i] = reduction2(el)
         balance[i] = calc_recipebalance(el)
     end
 
-    
     file = joinpath(GAMEENV["cache"], "recipebalance.tsv")
     open(file, "w") do io
-        colnames = ["/RewardItemKey", "/RewardItemName", "/TotalProductionTimeSec", 
-        "/TotalPrice/Currency/Energy", "/TotalPrice/NormalItems", "/RewardCoin", "/RewardCoinPerMinute"]
+        colnames = ["/RewardItemKey", "/RewardItemName", "/ProductionTimeSec", "/TotalProductionTimeSec", 
+        "/TotalPrice/Currency/Energy", "/TotalEnergy", "/TotalPrice/NormalItems", "/RewardCoin", "/RewardCoinPerMinute"]
         write(io, join(colnames, "\t"), '\n')
-        for i in eachindex(time_and_material)
-            reward_key = itemkeys(recipies[i].rewarditem) # RewardItemKey
-            reward_name = itemname(recipies[i].rewarditem) # RewardItemName
-            t = time_and_material[i][1].value # /TotalProductionTimeSec
-            base_energy = itemvalues(time_and_energy[i][2]) #"/TotalPrice/Currency/Energy"
+        for i in eachindex(datas)
+            reward = NormalItem(datas[i][j"/RewardItems/NormalItem/1/1"])
+            reward_key = itemkeys(reward) # RewardItemKey
+            reward_name = itemname(reward) # RewardItemName
+            time = datas[i]["ProductionTimeSec"]
+            totaltime = time_and_material[i][1].value # /TotalProductionTimeSec
+            base_energy = itemvalues(time_and_energy[i][2]) #/TotalPrice/Currency/Energy
+            totalenergy = itemvalues(balance[i].TotalEnergy)   #/TotalEnergy
             _items = collect(values(time_and_material[i][2])) 
             items = join(map(el -> (itemkeys(el), itemvalues(el)), _items), ";") # TotalPrice/NormalItems
+            totalcoin = itemvalues(balance[i].TotalCoin)           # RewardItems/Currency/Coin
+            coinpermin = balance[i].CoinPerMin                      # RewardPerMinute/Currency/Coin
+            # error_rate = balance[i].CoinPerMinByBase / jws[i]["#TargetProductivity"]
 
-            x1 = itemvalues(balance[i].TotalCoin)           # RewardItems/Currency/Coin
-            x2 = balance[i].CoinPerMin                      # RewardPerMinute/Currency/Coin
-
-            write(io, join([reward_key, reward_name, t, base_energy, items, x1,  x2], '\t'))
+            write(io, join([reward_key, reward_name, time, totaltime, 
+                base_energy, totalenergy, items, totalcoin,  coinpermin], 
+            '\t'))
             write(io, '\n')
         end
     end
@@ -328,5 +310,21 @@ function gen_recipebalance()
 
     nothing
 end
+
+
+
+
+#= ■■■◤  Transaction  ◢■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+    전역 변수들
+    ProductionTimeRange: 생산시간 범위 2분 ~ 12시간
+    ProductionTimeFormulaVariables
+    ProductionBaseRecipe: 밸런싱 기준 레시피
+=# 
+const ProductionTimeRange = 120:43200
+@memoize function ProductionTimeFormulaVariables()
+    ref = Table("GeneralSetting")["Data"][1]
+    ref["ProductionTime"]["ExchangeRate"]["Variables"]
+end
+@memoize ProductionBaseRecipe() = Recipe(5101)
 
 end

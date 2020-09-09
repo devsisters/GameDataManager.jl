@@ -123,6 +123,7 @@ function help(idx = 1)
                 get_buildings("sIcecream"): 건물Key별 사용되는 블록의 종류와 수량을 계산합니다.
                 get_blocks(101): 블록Key별 '../BuildTemplate/Buildings/' 에서 사용되는 빈도를 계산합니다
                 findblock()    : 'Block'데이터와 '../4_ArtAssets/GameResources/Blocks/' 폴더를 비교하여 누락된 항목을 찾습니다.
+                gen_recipe()    : 'Production_Recipe.json' 밸런싱 데이터를 생성합니다
             """
 
             msg = intro * rand([thankyou; oneline_asciiarts]) * "\n" * extra * basic

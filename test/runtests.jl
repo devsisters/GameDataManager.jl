@@ -81,13 +81,7 @@ import GameDataManager.Production
         @test_throws Exception Production.Recipe(NormalItem(k))
         @test Production.israwmaterial(NormalItem(k))
     end
-    
-    for (i, row) in enumerate(ref)
-        r = Production.Recipe(row)
-        @test itemkeys(r.rewarditem) == row[j"/RewardItems/NormalItem/1/1"]
-        @test r.price == AssetCollection(row[j"/PriceItems"])
-    end
-    
+
     for k in filter(el -> el >= 5100, ref[:, j"/RewardItems/NormalItem/1/1"])
         r1_item = Production.reduction1(NormalItem(k))
         r1_recipe = Production.reduction1(Production.Recipe(k))
@@ -97,11 +91,17 @@ import GameDataManager.Production
         r2_recipe = Production.reduction2(Production.Recipe(k))
         @test r2_item == r2_recipe 
     end
+    
+    for (i, row) in enumerate(ref)
+        r = Production.Recipe(row)
+        @test itemkeys(r.rewarditem) == row[j"/RewardItems/NormalItem/1/1"]
+        @test r.price == AssetCollection(row[j"/PriceItems"])
 
-    # TODO
-    Production.allrecipe_solution!()
-
+        @test in(Production.solve_productiontime(r), Production.ProductionTimeRange)
+    end
+    gen_recipebalance()
 end
+
 
 @testset "기타 기능" begin 
     # 캐시 청소
