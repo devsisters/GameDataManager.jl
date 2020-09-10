@@ -3,6 +3,11 @@ on:
   push:
     branches: [ master ]
 
+env:
+  path_lcov: 'test/coverage/lcov.info'
+  path_report: 'test/coverage'
+  path_history: 'test/coverage/history'
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -14,9 +19,6 @@ jobs:
       run: |
         echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
-        echo "::set-env name=path_lcov::test/coverage/lcov.info"
-        echo "::set-env name=path_report::test/coverage"
-        echo "::set-env name=path_history::test/coverage/history"
 
     - name: Setup .NET Core # Required to execute ReportGenerator
       uses: actions/setup-dotnet@v1
@@ -26,10 +28,10 @@ jobs:
     - name: ReportGenerator
       uses: danielpalme/ReportGenerator-GitHub-Action@4.6.4
       with:
-        reports: '{{ steps.vars.outputs.path_lcov }}'
-        targetdir: '${{ steps.vars.outputs.path_report }}' 
+        reports: '{{ env.path_lcov }}'
+        targetdir: '${{ env.path_report }}' 
         reporttypes: 'Badges;HtmlInline;TextSummary' # The output formats and scope (separated by semicolon) Values: Badges, Clover, Cobertura, CsvSummary, Html, HtmlChart, HtmlInline, HtmlInline_AzurePipelines, HtmlInline_AzurePipelines_Dark, HtmlSummary, JsonSummary, Latex, LatexSummary, lcov, MHtml, PngChart, SonarQube, TeamCitySummary, TextSummary, Xml, XmlSummary
-        historydir: '${{ steps.vars.outputs.path_history }}' # Optional directory for storing persistent coverage information. Can be used in future reports to show coverage evolution.
+        historydir: '${{ env.path_history }}' # Optional directory for storing persistent coverage information. Can be used in future reports to show coverage evolution.
         plugins: '' # Optional plugin files for custom reports or custom history storage (separated by semicolon).
         assemblyfilters: '+*' # Optional list of assemblies that should be included or excluded in the report. Exclusion filters take precedence over inclusion filters. Wildcards are allowed.
         classfilters: '+*' # Optional list of classes that should be included or excluded in the report. Exclusion filters take precedence over inclusion filters. Wildcards are allowed.
@@ -42,7 +44,7 @@ jobs:
       with:
         # The arguments for the `git add` command (see the paragraph below for more info)
         # Default: '.'
-        add: '${{ steps.vars.outputs.path_report }}/*'
+        add: '${{ env.path_report }}/*'
         message: 'Coverage Report ${{ steps.vars.outputs.sha_short }}'
         ref: 'coverage-report'
       env:
