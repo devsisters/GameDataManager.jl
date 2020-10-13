@@ -1,32 +1,32 @@
 ﻿Summary
-  Generated on: 10/06/2020 - 05:09:06
+  Generated on: 10/13/2020 - 02:03:28
   Parser: LCovParser
   Assemblies: 1
   Classes: 19
   Files: 19
-  Line coverage: 39.2%
-  Covered lines: 545
-  Uncovered lines: 844
-  Coverable lines: 1389
+  Line coverage: 34.9%
+  Covered lines: 482
+  Uncovered lines: 898
+  Coverable lines: 1380
   Total lines: 0
 
-Default                                39.2%
+Default                                34.9%
   src/_startup.jl                       0.0%
   src/balancing/balancing.jl            5.1%
   src/balancing/delivery.jl             0.0%
   src/balancing/production.jl          45.0%
   src/exporter/actionlog.jl            61.3%
   src/exporter/ink.jl                   0.0%
-  src/exporter/report.jl               60.6%
-  src/exporter/writer.jl                7.6%
+  src/exporter/report.jl               58.4%
+  src/exporter/writer.jl                4.3%
   src/GameDataManager.jl              100.0%
   src/init.jl                          82.0%
   src/loader.jl                        79.6%
-  src/localizer.jl                     66.6%
+  src/localizer.jl                      0.0%
   src/setup.jl                         46.5%
-  src/tables.jl                        58.1%
-  src/util.jl                          41.9%
+  src/tables.jl                        44.5%
+  src/util.jl                          45.3%
   src/validator/inkvalidator.jl         0.0%
-  src/validator/schema.jl              50.5%
+  src/validator/schema.jl              47.8%
   src/xlsxprocess/rewardtablefile.jl    0.0%
-  src/xlsxprocess/xlsxprocess.jl       22.3%
+  src/xlsxprocess/xlsxprocess.jl        0.0%
