@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<coverage version="1.0" date="2020-10-28_09-14-31" tag="45">
+  <assembly name="Default">
+    <class name="src/_startup.jl" coveredlines="0" coverablelines="27" totallines="0" coveredbranches="0" totalbranches="0" />
+    <class name="src/balancing/balancing.jl" coveredlines="4" coverablelines="78" totallines="0" coveredbranches="0" totalbranches="0" />
+    <class name="src/balancing/delivery.jl" coveredlines="0" coverablelines="55" totallines="0" coveredbranches="0" totalbranches="0" />
+    <class name="src/balancing/production.jl" coveredlines="46" coverablelines="156" totallines="0" coveredbranches="0" totalbranches="0" />
+    <class name="src/exporter/actionlog.jl" coveredlines="54" coverablelines="88" totallines="0" coveredbranches="0" totalbranches="0" />
+    <class name="src/exporter/ink.jl" coveredlines="0" coverablelines="53" totallines="0" coveredbranches="0" totalbranches="0" />
+    <class name="src/exporter/report.jl" coveredlines="62" coverablelines="106" totallines="0" coveredbranches="0" totalbranches="0" />
+    <class name="src/exporter/writer.jl" coveredlines="7" coverablelines="94" totallines="0" coveredbranches="0" totalbranches="0" />
+    <class name="src/GameDataManager.jl" coveredlines="1" coverablelines="1" totallines="0" coveredbranches="0" totalbranches="0" />
+    <class name="src/init.jl" coveredlines="41" coverablelines="53" totallines="0" coveredbranches="0" totalbranches="0" />
+    <class name="src/loader.jl" coveredlines="43" coverablelines="54" totallines="0" coveredbranches="0" totalbranches="0" />
+    <class name="src/setup.jl" coveredlines="29" coverablelines="58" totallines="0" coveredbranches="0" totalbranches="0" />
+    <class name="src/tables.jl" coveredlines="66" coverablelines="111" totallines="0" coveredbranches="0" totalbranches="0" />
+    <class name="src/util.jl" coveredlines="39" coverablelines="86" totallines="0" coveredbranches="0" totalbranches="0" />
+    <class name="src/validator/inkvalidator.jl" coveredlines="0" coverablelines="48" totallines="0" coveredbranches="0" totalbranches="0" />
+    <class name="src/validator/schema.jl" coveredlines="148" coverablelines="188" totallines="0" coveredbranches="0" totalbranches="0" />
+    <class name="src/xlsxprocess/rewardtablefile.jl" coveredlines="0" coverablelines="26" totallines="0" coveredbranches="0" totalbranches="0" />
+    <class name="src/xlsxprocess/xlsxprocess.jl" coveredlines="0" coverablelines="80" totallines="0" coveredbranches="0" totalbranches="0" />
+  </assembly>
+</coverage>
