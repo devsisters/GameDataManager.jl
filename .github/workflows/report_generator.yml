@@ -32,10 +32,10 @@ jobs:
           path: ${{ env.path_report }}
       - uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 3.1.302
+          dotnet-version: 5.0.100
 
       - name: ReportGenerator
-        uses: danielpalme/ReportGenerator-GitHub-Action@4.6.4
+        uses: danielpalme/ReportGenerator-GitHub-Action@4.8.1
         with:
           reports: "${{ env.path_lcov }}"
           targetdir: "${{ env.path_report }}"
@@ -55,3 +55,5 @@ jobs:
           ref: "coverage-report"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Leave this line unchanged
+
+
