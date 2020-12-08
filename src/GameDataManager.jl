@@ -41,7 +41,7 @@ include("exporter/ink.jl")
 
 
 #= ■■■◤  로컬라이저 함수  ◢■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ =#
-include("../deps/Localizer/src/localizer.jl")
+include("Localizer/localizer.jl")
 using .Localizer
 
 # sharedapi
