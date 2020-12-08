@@ -1,50 +1,25 @@
 # must be included from startup.jl
 function checkout_GameDataManager()
-    function network_folder_tools()
-        root = Sys.iswindows() ? "G:/" : "/Volumes/GoogleDrive/"
-        joinpath(root, "공유 드라이브/프로젝트 MARS/PatchDataOrigin/.tools")
-    end
+    manifest = Pkg.TOML.parsefile(joinpath(ENV["mars_client"], "patch-data/Manifest.toml"))
 
-    pkg_uuid = Dict(
-        "GameDataManager" => Base.UUID("88844230-ccf1-11e8-233b-3f48c6dac397")
-    )
+    for pkgname in keys(manifest) 
+        uuid = manifest[pkgname]["uuid"]
+        v2 = manifest[pkgname]["version"] |> VersionNumber
 
-    for pkgname in ["GameDataManager"]
-        dir = joinpath(network_folder_tools(), pkgname)
-        projecttoml = joinpath(dir, "Project.toml")
-
-        if !isfile(projecttoml)
-            @warn """$pkgname 경로를 찾을 수 없습니다.
-            아래의 페이지를 참고하여 네트워크 폴더 세팅을 해 주세요
-            https://www.notion.so/devsisters/ccb5824c48544ec28c077a1f39182f01
-            """
-        else
-            if VERSION >= v"1.5.0"
-                dep = Pkg.dependencies()
-                uuid = pkg_uuid[pkgname]
-                if haskey(dep, uuid)
-                    v1 = dep[uuid].version
-                else
-                    v1 = missing
-                end
+        if VERSION >= v"1.5.0"
+            dep = Pkg.dependencies()
+            if haskey(dep, uuid)
+                v1 = dep[uuid].version
             else
-                v1 = get(Pkg.installed(), pkgname, missing)
+                v1 = v"0.0.0"
             end
-            project = Pkg.TOML.parsefile(projecttoml)
+        else
+            v1 = get(Pkg.installed(), pkgname, v"0.0.0")
+        end
+        project = Pkg.TOML.parsefile(projecttoml)
 
-            v2 = VersionNumber(project["version"])
-
-            if v1 < v2 # Pkg 업데이트
-                @info "새로운 버전의 GameDataManager가 발견되었습니다.\n Updating... $v1 → $v2"
-                target = joinpath(tempdir(), "$pkgname")
-                cp(dir, target; force = true)
-                sleep(0.8)
-                try
-                    Pkg.add(PackageSpec(path = target))
-                catch e
-                    @show e
-                end
-            end
+        if v2 < v1 # Pkg 업데이트
+            Pkg.update(pkgname)
         end
     end
 
