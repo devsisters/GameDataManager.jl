@@ -27,8 +27,8 @@ function localize!(jwb::JSONWorkbook)
     for s in sheetnames(jwb)
         sheetmeta = meta[s]
         # "keycolumn이 있을때만 로컬라이즈
-        if !isnull(sheetmeta[3])
-            fname = sheetmeta[1]
+        if !isnull(sheetmeta[:keycolumn])
+            fname = sheetmeta[:io]
             localized_data = localize!(jwb[s], sheetmeta)
             if !isempty(localized_data)
                 json = joinpath(GAMEENV["patch_data"], "Localization/Tables/$(fname).json")

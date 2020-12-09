@@ -85,8 +85,8 @@ function _xlsxworkbook(f)
     meta = lookup_metadata(f)
 
     kwargs_per_sheet = Dict()
-    for el in meta
-        kwargs_per_sheet[el[1]] = el[2][2]
+    for (sheet, v) in meta
+        kwargs_per_sheet[sheet] = v[:kwargs]
     end
     JSONWorkbook(copy_to_cache(joinpath_gamedata(f)), keys(meta), kwargs_per_sheet)
 end

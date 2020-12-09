@@ -116,20 +116,20 @@ function write_json(jwb::JSONWorkbook)
     meta = lookup_metadata(jwb)
 
     for s in sheetnames(jwb)
-        json = joinpath(dir, meta[s][1])
+        io = joinpath(dir, meta[s][:io])
         newdata = JSON.json(jwb[s], 2)
         # 편집된 시트만 저장
         modified = true
-        if isfile(json)
-            modified = !issamedata(read(json, String), newdata)
+        if isfile(io)
+            modified = !issamedata(read(io, String), newdata)
         end
         if modified
-            write(json, newdata)
+            write(io, newdata)
             print(" SAVE => ")
-            printstyled(normpath(json), "\n"; color = :blue)
+            printstyled(normpath(io), "\n"; color = :blue)
         else
             print("  ⁿ/ₐ => ")
-            print(normpath(json), "\n")
+            print(normpath(io), "\n")
         end
     end
 end

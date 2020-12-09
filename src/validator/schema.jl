@@ -69,7 +69,7 @@ function _validate(bt::XLSXTable)
     meta = lookup_metadata(jwb)
     
     @inbounds for s in sheetnames(jwb)
-        err = validate(jwb[s], meta[s][1])
+        err = validate(jwb[s], meta[s][:io])
         if !isempty(err)
             print_schemaerror(basename(xlsxpath(jwb)), s, err)
         end
