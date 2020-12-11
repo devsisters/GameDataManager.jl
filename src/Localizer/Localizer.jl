@@ -31,7 +31,7 @@ function localize!(jwb::JSONWorkbook)
             fname = sheetmeta[:io]
             localized_data = localize!(jwb[s], sheetmeta)
             if !isempty(localized_data)
-                json = joinpath(GAMEENV["patch_data"], "Localization/Tables/$(fname).json")
+                json = joinpath(GAMEENV["patch_data"], "Localization/Tables/$(fname)")
         
                 write_localise(json, localized_data)
             end
