@@ -89,19 +89,28 @@ json gamedata의 Lokalise 플랫폼용 Key를 구성한다
 function gamedata_lokalkey(tokens)
     # $gamedata.(파일명)#/rowindex/(JSONPointer)"
     idx = @sprintf("%04i", tokens[2]) #0000 형태
-    string(tokens[1], idx, "/",
-        replace(join(tokens[3:end], "/"), "\$" => ""))
+    string(tokens[1], idx, ".",
+        replace(join(tokens[3:end], "."), "\$" => ""))
 end
 function gamedata_lokalkey(tokens, keyvalues)
     # $gamedata.(파일명)#/keycolum_values/(JSONPointer)"
-    idx = join(filter(el -> !isnull(el) && !isempty(el), keyvalues), "&")
-    string(tokens[1], idx, "/",
-        replace(join(tokens[3:end], "/"), "\$" => ""))
+    idx = ""
+    for el in keyvalues 
+        if !isnull(el) && !isempty(el)
+            if isa(el, AbstractArray)
+                idx *= "__" * join(el, ".") * "__"
+            else 
+                idx *= string(el)
+            end
+        end
+    end
+    string(tokens[1], idx, ".",
+        replace(join(tokens[3:end], "."), "\$" => ""))
 end
 function gamedata_lokalkey(tokens, keyval::AbstractString)
     # $gamedata.(파일명)#/keycolum_values/(JSONPointer)"
-    string(tokens[1], keyval, "/",
-        replace(join(tokens[3:end], "/"), "\$" => ""))
+    string(tokens[1], keyval, ".",
+        replace(join(tokens[3:end], "."), "\$" => ""))
 end
 
 function localize!(jws::JSONWorksheet, meta)
@@ -115,7 +124,7 @@ function localize!(jws::JSONWorksheet, meta)
 
     target_tokens = Tuple[]
     for (i, row) in enumerate(jws)
-        find_localizetarget!(row, ["\$gamedata.$(filename)#/", i], target_tokens)
+        find_localizetarget!(row, ["\$gamedata.$(filename).", i], target_tokens)
     end
 
     result = OrderedDict()
@@ -150,13 +159,13 @@ function dialogue_lokalkey(tokens, i)
     tokens = filter(el -> isa(el, AbstractString), tokens)    
     tokens = filter(el -> occursin(REG_WORD, el), tokens)
 
-    return join(tokens, "/") * "/" * @sprintf("%03i", i)
+    return join(tokens, ".") * "." * @sprintf("%03i", i)
 end
 function localize!(ink_origin::InkDialogue)
     prefix = begin 
         fname = splitpath(replace(ink_origin.source, GAMEENV["ink"]["origin"] => ""))
-        fname[end] = replace(fname[end], ".ink" => "#")
-        "\$dialogue." * join(fname[2:end],"/")
+        fname[end] = replace(fname[end], ".ink" => ".")
+        "\$dialogue." * join(fname[2:end], ".")
     end
     # localise
     ink_parsed = JSON.parse(ink_origin; dicttype = OrderedDict)
