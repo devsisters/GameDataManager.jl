@@ -1,6 +1,6 @@
 # must be included from startup.jl
 function checkout_GameDataManager()
-    f = joinpath(ENV["mars_client"], "patch-data/Manifest.toml")
+    f = joinpath(ENV["MARS_CLIENT"], "patch-data/Manifest.toml")
     if !isfile(f)
         @warn "$(f)를 찾을 수 없습니다. 환경변수 ENV[\"mars_client\"]를 확인해 주세요"
         return nothing
