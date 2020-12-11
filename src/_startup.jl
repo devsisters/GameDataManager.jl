@@ -21,7 +21,6 @@ function checkout_GameDataManager()
         else
             v1 = get(Pkg.installed(), pkgname, v"0.0.0")
         end
-        project = Pkg.TOML.parsefile(projecttoml)
 
         if v2 < v1 # Pkg 업데이트
             Pkg.update(pkgname)
