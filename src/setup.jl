@@ -1,8 +1,8 @@
 function setup!(marsrepo=get(ENV, "MARS_CLIENT", ""))
     if !isdir(marsrepo) 
-        throw(AssertionError(""" \"mars-client\"저장소 경로를 찾을 수 없습니다.
+        throw(AssertionError(""" \"MARS_CLIENT\"저장소 경로를 찾을 수 없습니다.
         https://www.notion.so/devsisters/d0467b863a8444df951225ab59fa9fa2 가이드를 참고하여
-        'setup.sh'를 실행하고 컴퓨터를 재시작 해 주세요.
+        터미널에서 'setup.sh'를 실행하고 컴퓨터를 재시작 해 주세요.
         """))
     end
 

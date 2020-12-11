@@ -1,11 +1,17 @@
 # must be included from startup.jl
 function checkout_GameDataManager()
+    if !haskey(ENV, "MARS_CLIENT")
+        @warn """ \"MARS_CLIENT\"저장소 경로를 찾을 수 없습니다.
+        https://www.notion.so/devsisters/d0467b863a8444df951225ab59fa9fa2 가이드를 참고하여
+        터미널에서 'setup.sh'를 실행하고 컴퓨터를 재시작 해 주세요.
+        """
+        return nothing
+    end
     f = joinpath(ENV["MARS_CLIENT"], "patch-data/Manifest.toml")
     if !isfile(f)
         @warn "$(f)를 찾을 수 없습니다. 환경변수 ENV[\"mars_client\"]를 확인해 주세요"
         return nothing
     end
-
     manifest = Pkg.TOML.parsefile(f)
     for pkgname in keys(manifest) 
         uuid = manifest[pkgname]["uuid"]
