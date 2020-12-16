@@ -2,10 +2,8 @@ import GameDataManager.Localizer
 using OrderedCollections
 
 @testset "Ink Localizer" begin 
-
-    key = Localizer.dialogue_lokalkey([2,"^", "이것", "->", 5, "_5", "^a", 50, "선택지"], 1)
-    @test key == "이것/^a/선택지/001"
-
+    key = Localizer.dialogue_lokalkey([2,"^", "이것", "->", 5, "a", 50, "선택지"], 1)
+    @test key == "이것.a.선택지.001"
 end
 
 @testset "XLSX Localizer" begin 
@@ -43,13 +41,19 @@ end
     @test targets[5][1] == ["\$gamedata.", 1, "Says", "\$PipoDetail", 2]
 
 
-    @test Localizer.gamedata_lokalkey(["\$gamedata.", 22, "\$Name"]) == "\$gamedata.0022/Name"
-    Localizer.gamedata_lokalkey(["\$gamedata.", 25, "\$Says", "Default"], "Cook") == "\$gamedata.Cook/Says/Default"
-    Localizer.gamedata_lokalkey(["\$gamedata.", 250, "\$Says", "Accept"], ["Cook", 1]) == "\$gamedata.Cook&1/Says/Accept"
-    Localizer.gamedata_lokalkey(["\$gamedata.", 11, "\$Says", 10], ["Cook"]) == "\$gamedata.Cook/Says/10"
+    @test Localizer.gamedata_lokalkey(["\$gamedata.", 22, "\$Name"]) == "\$gamedata.0022.Name"
+    Localizer.gamedata_lokalkey(["\$gamedata.", 25, "\$Says", "Default"], "Cook") == "\$gamedata.Cook.Says.Default"
+    Localizer.gamedata_lokalkey(["\$gamedata.", 250, "\$Says", "Accept"], ["Cook", 1]) == "\$gamedata.Cook1.Says.Accept"
+    Localizer.gamedata_lokalkey(["\$gamedata.", 250, "\$Says", "Accept"], ["Cook", [1,2]]) == "\$gamedata.Cook괄1_2호.Says.Accept"
 
 
-    idx = "1!2@3#4\$5%6^7&8*9(0)-_=+[{]};:'\",<.>/?\\|"
+    test1 = "1!2@3#4\$5%6^7&8*9(0)"
+    test2 = "_-+=[]{}|\\"
+    test3 = ";':\",./<>?`~"
 
-    @test Localizer.gamedata_lokalkey(["\$gamedata.", "some", "data", 10], idx) == "\$gamedata.1_2_3_4_5_6_7_8_9_0_______________._____.data.10"
+    @test Localizer.gamedata_lokalkey(["\$gamedata."], test1) == "\$gamedata.1느낌2앳3샵4달러5퍼센트6누승7앤드8곱9소괄0호."
+    @test Localizer.gamedata_lokalkey(["\$gamedata."], test2) == "\$gamedata._빼기더하기같음대괄호중괄호오알역사선."
+    # @test Localizer.gamedata_lokalkey(["\$gamedata."], test3) == "\$gamedata.쌍반점"
+
+
 end

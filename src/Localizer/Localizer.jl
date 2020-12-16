@@ -12,6 +12,34 @@ export localize!
 
 # 단어 검출
 const REG_WORD = r"[a-z|A-Z|ㄱ-ㅎ|ㅏ-ㅣ|가-힣]"
+const SPECIAL_CHAR_CONVERT = Dict('[' => "대괄", ']' => "호",
+                                    '{' => "중괄", '}' => "호",
+                                    '(' => "소괄", ')' => "호",
+                                    ';' => "쌍반점", 
+                                    ':' => "쌍점", 
+                                    '`' => "인용",
+                                    '"' => "따옴", 
+                                    ''' => "홑따옴",
+                                    ',' => "쉼표",
+                                    '<' => "왼부등호", 
+                                    '>' => "오부등호",
+                                    '/' => "사선",
+                                    '\\'  => "역사선",
+                                    '?' => "물음",
+                                    '!' => "느낌",
+                                    '@' => "앳",
+                                    '#' => "샵",
+                                    '$' => "달러",
+                                    '%' => "퍼센트",
+                                    '^' => "누승",
+                                    '&' => "앤드",
+                                    '*' => "곱",
+                                    '-' => "빼기",
+                                    '+' => "더하기",
+                                    '=' => "같음",
+                                    '|' => "오알",
+                                    '~' => "물결"
+                                    )
 
 
 """
@@ -98,7 +126,7 @@ function gamedata_lokalkey(tokens, keyvalues)
     for el in keyvalues 
         if !isnull(el) && !isempty(el)
             if isa(el, AbstractArray)
-                idx *= "__" * join(el, ".") * "__"
+                idx *= "괄" * join(el, "_") * "호"
             else 
                 idx *= string(el)
             end
@@ -106,10 +134,22 @@ function gamedata_lokalkey(tokens, keyvalues)
     end
     gamedata_lokalkey(tokens, idx)
 end
-function gamedata_lokalkey(tokens, idx::AbstractString)
+function gamedata_lokalkey(tokens, combinedkey::AbstractString)
     # $gamedata.(파일명)#/keycolum_values/(JSONPointer)"
     # lokalise에서 XML로 빌드하면 .과 _를 제외한 특수문자를 잘라먹기 때문에 어쩔 수 없이 전부 _로 전환 
-    idx = replace(idx, r"[!|@|#|\$|\%|\^|\&|\*|\(|\)|\-|\+|\=|\[|\]|{|}|:|;|\"|\'|<|,|>|\?|\/|\\]" => "_")
+    REG_NOTWORD = r"[^A-Za-z0-9ㄱ-ㅎㅏ-ㅣ가-힣]"
+    if occursin(REG_NOTWORD, combinedkey)
+        idx = ""
+        for w in combinedkey 
+            if haskey(SPECIAL_CHAR_CONVERT, w)
+                idx *= SPECIAL_CHAR_CONVERT[w]
+            else 
+                idx *= w
+            end
+        end
+    else 
+        idx = combinedkey
+    end
     string(tokens[1], idx, ".",
         replace(join(tokens[3:end], "."), "\$" => ""))
 end
