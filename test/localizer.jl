@@ -48,4 +48,8 @@ end
     Localizer.gamedata_lokalkey(["\$gamedata.", 250, "\$Says", "Accept"], ["Cook", 1]) == "\$gamedata.Cook&1/Says/Accept"
     Localizer.gamedata_lokalkey(["\$gamedata.", 11, "\$Says", 10], ["Cook"]) == "\$gamedata.Cook/Says/10"
 
+
+    idx = "1!2@3#4\$5%6^7&8*9(0)-_=+[{]};:'\",<.>/?\\|"
+
+    @test Localizer.gamedata_lokalkey(["\$gamedata.", "some", "data", 10], idx) == "\$gamedata.1_2_3_4_5_6_7_8_9_0_______________._____.data.10"
 end

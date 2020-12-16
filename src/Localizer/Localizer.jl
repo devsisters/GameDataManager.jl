@@ -104,12 +104,13 @@ function gamedata_lokalkey(tokens, keyvalues)
             end
         end
     end
-    string(tokens[1], idx, ".",
-        replace(join(tokens[3:end], "."), "\$" => ""))
+    gamedata_lokalkey(tokens, idx)
 end
-function gamedata_lokalkey(tokens, keyval::AbstractString)
+function gamedata_lokalkey(tokens, idx::AbstractString)
     # $gamedata.(파일명)#/keycolum_values/(JSONPointer)"
-    string(tokens[1], keyval, ".",
+    # lokalise에서 XML로 빌드하면 .과 _를 제외한 특수문자를 잘라먹기 때문에 어쩔 수 없이 전부 _로 전환 
+    idx = replace(idx, r"[!|@|#|\$|\%|\^|\&|\*|\(|\)|\-|\+|\=|\[|\]|{|}|:|;|\"|\'|<|,|>|\?|\/|\\]" => "_")
+    string(tokens[1], idx, ".",
         replace(join(tokens[3:end], "."), "\$" => ""))
 end
 
