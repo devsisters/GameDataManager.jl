@@ -31,12 +31,11 @@ JSONWorkbook과 기타 메타 데이터
 - `:JSON` - 무조건 JSON을 읽는다
 """
 struct XLSXTable{FileName} <: Table
-    chksum::UInt64
     data::JSONWorkbook
 end
 function XLSXTable(jwb::JSONWorkbook, validation::Bool)
     f = splitext(basename(xlsxpath(jwb)))[1] |> string
-    data = XLSXTable{Symbol(f)}(hash(jwb), jwb)
+    data = XLSXTable{Symbol(f)}(jwb)
 
     if validation
         validate(data)
@@ -50,7 +49,7 @@ end
 function XLSXTable(
     file::AbstractString;
     validation = CACHE[:validation],
-    readfrom::Symbol = :NEW,
+    readfrom::Symbol = :NEW
 )
 
     f = is_xlsxfile(file) ? file : CACHE[:meta][:xlsx_shortcut][file]
@@ -274,4 +273,14 @@ end
 
 @memoize function _xlookup_findindex(value, jws, lookup_col, find_mode, lt)
     find_mode(el -> lt(el[lookup_col], value), jws.data)
+end
+
+# 동일 파일인지 비교를 위한 처리
+Base.hash(data::XLSXTable) = hash(data.data)
+@inline function Base.hash(jwb::JSONWorkbook)
+    all = ""
+    @inbounds for jws in jwb 
+        all *= string(jws[:, :])
+    end
+    hash(all)
 end
