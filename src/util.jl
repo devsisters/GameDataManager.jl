@@ -205,7 +205,7 @@ function lsfiles()
 
     data = filter(el -> !(startswith(el, ".") || endswith(el, r".meta|.cs")), filelist)
 
-    output = joinpath(GAMEENV["cache"], "filelist.tsv")
+    output = joinpath(GAMEENV["localcache"], "filelist.tsv")
     open(output, "w") do io 
         write(io, "Path", '\t', "FileName", '\t', "Extension", '\n')
 

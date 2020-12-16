@@ -20,15 +20,15 @@ function export_dialoguecommand()
     end
     
     projectpath = joinpath(GAMEENV["mars-client"], "unity")
-    output = joinpath(GAMEENV["NetworkCache"], "DialogueCommand.json")
-    logpath = joinpath(GAMEENV["cache"], "log.txt")
+    output = joinpath(GAMEENV["networkcache"], "DialogueCommand.json")
+    logpath = joinpath(GAMEENV["localcache"], "log.txt")
     cmd = `$unitypath -quit -batchmode -projectPath $projectpath -executeMethod Mars.Editor.DialogueCommandExporter.Run -export-path $output -logfile $logpath`
 
     run(cmd; wait = false)
 end
 
 @memoize function parse_dialoguecommand()
-    f = joinpath(GAMEENV["NetworkCache"], "DialogueCommand.json")
+    f = joinpath(GAMEENV["networkcache"], "DialogueCommand.json")
 
     @assert isfile(f) "오류 검사용 DialogueCommand.json이 존재하지 않습니다. export_dialoguecommand() 검사 파일을 생성해 주세요"
 

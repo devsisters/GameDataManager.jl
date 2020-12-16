@@ -27,7 +27,7 @@ end
     @test GameDataManager.git_ls_files("mars_art_assets") isa Array{String, 1}
 
     GameDataManager.lsfiles()
-    @test isfile(joinpath(GAMEENV["cache"], "filelist.tsv"))
+    @test isfile(joinpath(GAMEENV["localcache"], "filelist.tsv"))
     
     @test joinpath_gamedata("NewbieScene.ink") == joinpath(GAMEENV["NetworkFolder"], "InkDialogue\\NewbieScene.ink")
     @test joinpath_gamedata("Concept.ink") == joinpath(GAMEENV["NetworkFolder"], "InkDialogue\\Villager\\Concept.ink")
@@ -90,7 +90,7 @@ end
 
 @testset "get_blocks - Block의 BuildTemplate별 사용량" begin 
     get_blocks()
-    @test isfile(joinpath(GAMEENV["cache"], "get_blocks.tsv"))
+    @test isfile(joinpath(GAMEENV["localcache"], "get_blocks.tsv"))
 
     x = get_blocks(false)
     ref = Table("Block"; readfrom = :JSON, validation = false)["Block"]
@@ -99,7 +99,7 @@ end
 
 @testset "get_buildings - BuildingTemplate에서 Block 사용량" begin 
     get_buildings()
-    @test isfile(joinpath(GAMEENV["cache"], "get_buildings_.tsv"))
+    @test isfile(joinpath(GAMEENV["localcache"], "get_buildings_.tsv"))
 
     data = get_buildings("sIce", false)
     # 파일명이 올바른지 검사

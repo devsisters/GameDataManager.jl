@@ -88,7 +88,7 @@ kwargs로 기입한 속성은 부활하지 않는다
 """
 function write_xlsxtable(file::AbstractString)
     jwb = Table(file; readfrom = :JSON).data
-    parent = joinpath(GAMEENV["cache"], "JSONTable")
+    parent = joinpath(GAMEENV["localcache"], "JSONTable")
     !isdir(parent) && mkdir(parent)
 
     path = begin
@@ -144,11 +144,11 @@ TODO: 주소받으면 다운받아서 비교
 """
 function md5hash()
     url = "http://marspot.devscake.com:25078/develop/balancescriptlist"
-    download(url, joinpath(GAMEENV["cache"], "temp.txt"))
+    download(url, joinpath(GAMEENV["localcache"], "temp.txt"))
 
     jsons = readdir(GAMEENV["json"]["root"]; extension = ".json")
 
-    result = joinpath(GAMEENV["cache"], "md5hash.tsv")
+    result = joinpath(GAMEENV["localcache"], "md5hash.tsv")
     open(result, "w") do io
         for (i, el) in enumerate(jsons)
             write(io, string(i), "\t", el, "\t")

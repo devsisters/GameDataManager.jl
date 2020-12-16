@@ -144,18 +144,18 @@ function copy_to_cache(origin)
     if is_xlsxfile(origin)
         destination = replace(
             origin,
-            GAMEENV["xlsx"]["root"] => joinpath(GAMEENV["cache"], "XLSXTable"),
+            GAMEENV["xlsx"]["root"] => joinpath(GAMEENV["localcache"], "XLSXTable"),
         )
 
-        if !isdir(joinpath(GAMEENV["cache"], "XLSXTable"))
-            mkdir(joinpath(GAMEENV["cache"], "XLSXTable"))
+        if !isdir(joinpath(GAMEENV["localcache"], "XLSXTable"))
+            mkdir(joinpath(GAMEENV["localcache"], "XLSXTable"))
         end
     else
         dir, file = splitdir(origin)
         if normpath(dir) == normpath(GAMEENV["json"]["root"])
-            destination = joinpath(GAMEENV["cache"], "Tables", file)
+            destination = joinpath(GAMEENV["localcache"], "Tables", file)
         else
-            destination = joinpath(GAMEENV["cache"], "TablesSchema", file)
+            destination = joinpath(GAMEENV["localcache"], "TablesSchema", file)
         end
     end
     dircheck_and_create(destination)

@@ -49,12 +49,12 @@ function setup_env!()
         GAMEENV["mars_art_assets"] = joinpath(GAMEENV["mars-client"], "unity/Assets/4_ArtAssets")
         
         # GameDataManager paths
-        GAMEENV["cache"] = joinpath(GAMEENV["patch_data"], ".cache")
-
         GAMEENV["CollectionResources"] = joinpath(GAMEENV["mars-client"], "unity/Assets/1_CollectionResources")
-        
         GAMEENV["NetworkFolder"] = Sys.iswindows() ? "G:/공유 드라이브/프로젝트 MARS/PatchDataOrigin" : "/Volumes/GoogleDrive/공유 드라이브/프로젝트 MARS/PatchDataOrigin"
-        GAMEENV["NetworkCache"] = joinpath(GAMEENV["NetworkFolder"], ".cache")
+        
+        GAMEENV["localcache"] = joinpath(GAMEENV["patch_data"], ".cache")
+        
+        GAMEENV["networkcache"] = joinpath(GAMEENV["NetworkFolder"], ".cache")
 
         GAMEENV["inklecate.exe"] = joinpath(@__DIR__, "../deps/ink/inklecate.exe")
 
@@ -81,7 +81,7 @@ function setup_env!()
 end
 
 function setup_sqldb!()
-    f1 = joinpath(GAMEENV["cache"], "ExportLog_other.sqlite")
+    f1 = joinpath(GAMEENV["localcache"], "ExportLog_other.sqlite")
     if !isfile(f1)
         db = SQLite.DB(f1)
 
@@ -95,7 +95,7 @@ function setup_sqldb!()
     end
     CACHE[:DB_otherlog] = SQLite.DB(f1)
 
-    f2 = joinpath(GAMEENV["cache"], "ExportLog_xlsx.sqlite")
+    f2 = joinpath(GAMEENV["localcache"], "ExportLog_xlsx.sqlite")
     if !isfile(f2)
         db2 = SQLite.DB(f2)
         # TODO JSONPointer도 각 Excel시트마다 테이블 따로 만들어서 저장
@@ -144,7 +144,7 @@ function git_ls_files()
     mars_art_assets = git_ls_files("mars_art_assets"))
 end
 function git_ls_files(repo)
-    filelog = joinpath(GAMEENV["cache"], "git_ls-files_$repo.txt")
+    filelog = joinpath(GAMEENV["localcache"], "git_ls-files_$repo.txt")
 
     write_git_ls_files() = run(pipeline(`git rev-parse HEAD` & `git ls-files`, stdout=filelog))
     
@@ -159,7 +159,7 @@ end
 function is_git_ls_files_needupdate(repo)
     git_rev_parse() = read(`git rev-parse HEAD`, String)
 
-    filelog = joinpath(GAMEENV["cache"], "git_ls-files_$repo.txt")
+    filelog = joinpath(GAMEENV["localcache"], "git_ls-files_$repo.txt")
 
     needupdate = true
     if isfile(filelog)

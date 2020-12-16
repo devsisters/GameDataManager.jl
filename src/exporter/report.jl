@@ -21,7 +21,7 @@ function findblock()
         print_section(msg; color=:green)
     else 
         msg = "다음의 데이터가 일치하지 않습니다"
-        file = joinpath(GAMEENV["cache"], "findblock.csv")
+        file = joinpath(GAMEENV["localcache"], "findblock.csv")
         open(file, "w") do io
             if !isempty(a)
                 msg_a = "$(length(a))개가 ArtAsset파일은 있지만 Block.xlsx에는 없습니다"
@@ -82,7 +82,7 @@ function get_buildings(filename_prefix::AbstractString = "", savetsv=true; inclu
     end
 
     if savetsv
-        file = joinpath(GAMEENV["cache"], "get_buildings_$filename_prefix.tsv")
+        file = joinpath(GAMEENV["localcache"], "get_buildings_$filename_prefix.tsv")
         open(file, "w") do io
                 write(io, "'$(filename_prefix)'의 블록 사용량\n")
             write(io, join(header, '\t'), '\n')
@@ -168,7 +168,7 @@ function get_blocks(savetsv::Bool=true;
     end 
 
     if savetsv
-        file = joinpath(GAMEENV["cache"], "get_blocks.tsv")
+        file = joinpath(GAMEENV["localcache"], "get_blocks.tsv")
 
         open(file, "w") do io
             for kv in d2 
@@ -198,7 +198,7 @@ function get_blocks(key::Integer)
     if isempty(data) 
         throw(AssertionError("'$key' Block이 사용된 건물은 없습니다"))
     else
-        file = joinpath(GAMEENV["cache"], "get_blocks_$key.tsv")
+        file = joinpath(GAMEENV["localcache"], "get_blocks_$key.tsv")
         open(file, "w") do io
             @showprogress  "계산 중..." for kv in data 
                 block_key = string(kv[1])
@@ -238,7 +238,7 @@ end
 function find_itemrecipe()
     itemlist = filter(el -> 5000 <= el < 6000, Table("ItemTable")["Normal"][:, j"/Key"])
 
-    file = joinpath(GAMEENV["cache"], "find_itemrecipe.tsv")
+    file = joinpath(GAMEENV["localcache"], "find_itemrecipe.tsv")
     open(file, "w") do io
         write(io, join(["ItemKey", "사용처1", "사용처2", "사용처3", "사용처4", "사용처5"], '\t'), '\n')
 
