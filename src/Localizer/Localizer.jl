@@ -107,6 +107,14 @@ end
 # Dict의 Key가 '$'으로 시작하면 있으면 로컬라이즈 대상이다
 islocalize_column(s) = false
 islocalize_column(s::AbstractString) = startswith(s, "\$")
+function islocalize_column(p::JSONPointer.Pointer)::Bool
+    @inbounds for k in p.token
+        if islocalize_column(k)
+            return true 
+        end
+    end
+    return false
+end
 
 """
     gamedata_lokalisekey(tokens)
