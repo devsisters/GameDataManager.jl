@@ -191,11 +191,10 @@ function backup()
 end
 
 function dircheck_and_create(path)::Bool
-    #NOTE 폴더 depth가 2 이상이면 안됨
     dir, file = splitdir(path)
 
     if !isdir(dir)
-        mkdir(dir)
+        mkpath(dir)
         return true
     end
     return false
