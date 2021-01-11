@@ -277,6 +277,9 @@ end
 
 # 동일 파일인지 비교를 위한 처리
 Base.hash(data::XLSXTable) = hash(data.data)
+@inline function Base.hash(jws::JSONWorksheet)
+    hash(string(jws[:, :]))
+end
 @inline function Base.hash(jwb::JSONWorkbook)
     all = ""
     @inbounds for jws in jwb 
