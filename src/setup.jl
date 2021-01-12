@@ -50,7 +50,7 @@ function setup_env!()
         
         # GameDataManager paths
         GAMEENV["CollectionResources"] = joinpath(GAMEENV["mars-client"], "unity/Assets/1_CollectionResources")
-        GAMEENV["NetworkFolder"] = Sys.iswindows() ? "G:/공유 드라이브/프로젝트 MARS/PatchDataOrigin" : "/Volumes/GoogleDrive/공유 드라이브/프로젝트 MARS/PatchDataOrigin"
+        GAMEENV["NetworkFolder"] = Sys.iswindows() ? "G:/공유 드라이브/프로젝트 MARS/PatchDataOrigin" : "/Volumes/GoogleDrive/Shared drives/프로젝트 MARS/PatchDataOrigin"
         
         GAMEENV["localcache"] = joinpath(GAMEENV["patch_data"], ".cache")
         
