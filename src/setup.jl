@@ -28,6 +28,17 @@ function setup!(marsrepo=get(ENV, "MARS_CLIENT", ""))
     print_section("\"$(startup)\"을 성공적으로 생성하였습니다\n\t터미널을 종료 후 다시 시작해 주세요.", "NOTE"; color=:cyan)
 end
 
+function lookup_networkfolder()
+    os_path = Sys.iswindows() ? "G:/" : "/Volumes/GoogleDrive/"
+    lang_path = if startswith(ENV["LANG"], "ko")
+                "공유 드라이브/프로젝트 MARS/PatchDataOrigin"
+            else
+                "Shared drives/프로젝트 MARS/PatchDataOrigin"
+            end
+
+    return joinpath(os_path, lang_path)
+end
+
 """
 setup_env()
 
@@ -50,8 +61,8 @@ function setup_env!()
         
         # GameDataManager paths
         GAMEENV["CollectionResources"] = joinpath(GAMEENV["mars-client"], "unity/Assets/1_CollectionResources")
-        GAMEENV["NetworkFolder"] = Sys.iswindows() ? "G:/공유 드라이브/프로젝트 MARS/PatchDataOrigin" : "/Volumes/GoogleDrive/공유 드라이브/프로젝트 MARS/PatchDataOrigin"
-        
+        GAMEENV["NetworkFolder"] = lookup_networkfolder()
+
         GAMEENV["localcache"] = joinpath(GAMEENV["patch_data"], ".cache")
         
         GAMEENV["networkcache"] = joinpath(GAMEENV["NetworkFolder"], ".cache")
