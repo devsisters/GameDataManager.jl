@@ -32,7 +32,7 @@ function lookup_networkfolder()
     os_path = Sys.iswindows() ? "G:/" : "/Volumes/GoogleDrive/"
 
     OS_LANG = get(ENV, "LANG", "ko_KR.UTF-8")
-    lang_path = if startswith(ENV["OS_LANG"], "ko")
+    lang_path = if startswith(OS_LANG, "ko")
                 "공유 드라이브/프로젝트 MARS/PatchDataOrigin"
             else
                 "Shared drives/프로젝트 MARS/PatchDataOrigin"
