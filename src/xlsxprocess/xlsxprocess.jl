@@ -135,14 +135,14 @@ end
 
 function process!(jwb::JSONWorkbook, ::Type{WorkBook{:SiteDecoProp}}) 
     for row in jwb["Resource"]
-        if isnull(row[j"/Phase/3/Blueprint"])
-            deleteat!(row["Phase"], 3)
+        for i in 5:-1:2
+            jp = JSONPointer.Pointer("/Phase/$i/Blueprint")
+            if isnull(row[jp])
+                deleteat!(row["Phase"], i)
+            end
         end
-        if isnull(row[j"/Phase/2/Blueprint"])
-            deleteat!(row["Phase"], 2)
-        end
-        if isnull(row[j"/Phase/1/RewardItems/Currency/FreeCrystal"])
-            delete!(row[j"/Phase/1/RewardItems/Currency"], "FreeCrystal")
+        if isnull(row[j"/Phase/1/RewardItems/Currency/Crystal"])
+            delete!(row[j"/Phase/1/RewardItems/Currency"], "Crystal")
         end
         if isnull(row[j"/Phase/1/RewardItems/Currency/BlockPiece"])
             delete!(row[j"/Phase/1/RewardItems/Currency"], "BlockPiece")
