@@ -134,7 +134,7 @@ end
 """
 function get_blocks(savetsv::Bool=true; 
                         root = joinpath(GAMEENV["patch_data"], "BuildTemplate"))
-    
+
     files = globwalkdir("*.json", root)
     filter!(el -> !occursin("Tutorials", el), files) # Tutorial 제거
     
@@ -192,6 +192,11 @@ end
 블록 block_key가 사용된 BuildTempalte과 수량을 확인합니다
 """
 function get_blocks(key::Integer)
+    # Itemkey 검사 
+    if !in(key, Table("Block")["Block"][:, j"/Key"])
+        printstyled("WARN: '$(key)'의 Block은 존재하지 않습니다\n"; color=:yellow)
+    end
+
     data = get_blocks(false)
     filter!(el -> el[1] == key, data)
 
