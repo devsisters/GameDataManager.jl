@@ -141,11 +141,10 @@ function process!(jwb::JSONWorkbook, ::Type{WorkBook{:SiteDecoProp}})
                 deleteat!(row["Phase"], i)
             end
         end
-        if isnull(row[j"/Phase/1/RewardItems/Currency/Crystal"])
-            delete!(row[j"/Phase/1/RewardItems/Currency"], "Crystal")
-        end
-        if isnull(row[j"/Phase/1/RewardItems/Currency/BlockPiece"])
-            delete!(row[j"/Phase/1/RewardItems/Currency"], "BlockPiece")
+        for (k, v) in row[j"/Phase/1/RewardItems/Currency"]
+            if isnull(v)
+                delete!(row[j"/Phase/1/RewardItems/Currency"], k)
+            end
         end
     end
 
