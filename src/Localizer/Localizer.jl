@@ -163,13 +163,15 @@ function gamedata_lokalkey(tokens, combinedkey::AbstractString)
 end
 
 function localize!(jws::JSONWorksheet, meta)
-    filename = splitext(meta[1])[1] 
+    filename = splitext(meta[:io])[1] 
     # _Meta에 정의된 keycolumn을 Pointer로 전환 
-    if isempty(meta[3])
-        keycolumns = missing
-    else 
-        keycolumns = JSONPointer.Pointer.(meta[3])
-    end
+    keycolumns = if isempty(meta[:keycolumn])
+                missing
+            elseif isa(meta[:keycolumn], AbstractString)
+                [JSONPointer.Pointer(meta[:keycolumn])]
+            else 
+                JSONPointer.Pointer.(meta[:keycolumn])
+            end
 
     target_tokens = Tuple[]
     for (i, row) in enumerate(jws)

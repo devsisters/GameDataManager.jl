@@ -53,12 +53,12 @@ function print_section(message, title="NOTE"; color=:normal)
 end
 
 # XLSXasJSON utility function
-function drop_empty!(jwb::JSONWorkbook, sheet, col)
-    drop_empty!(jwb[sheet], col)
-end
-function drop_empty!(jws::JSONWorksheet, col)
-    for row in jws.data
-        row[col] = filter(!isempty, row[col])
+function drop_empty!(jws::JSONWorksheet, col::AbstractArray)
+    pointers = JSONPointer.Pointer.(col)
+    @inbounds for row in jws.data
+        for p in pointers
+            row[p] = filter(!isempty, row[p])
+        end
     end
 end
 

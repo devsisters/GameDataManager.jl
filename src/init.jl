@@ -53,30 +53,11 @@ function load_metadata()
               delim        = get(x, "delim", r";|,"),
               squeeze      = get(x, "squeeze", false))
     end
-    function get_keycolumn(json_row, sheet)
-        if haskey(json_row, "keycolumn")
-            x = String[]
-            if haskey(json_row["keycolumn"], sheet)
-                data = json_row["keycolumn"][sheet]
-                if isa(data, AbstractArray)
-                    append!(x, data)
-                elseif isa(data, AbstractString)
-                    push!(x, data)
-                end
-                return x 
-            end
+    function get_extra(json_row, sheet, colname)
+        if !haskey(json_row, colname)
+            return missing
         end
-        return missing
-    end
-    function get_extraprocess(json_row, sheet)
-        # TODO: 이걸 시트 단위로 묶는게 맞나...?
-        # if haskey(json_row, "extraprocess")
-        #     for (k, v) in json_row["extraprocess"]
-        #         k = "함수명"
-        #         v::Array = "인자1(보통 시트명?), 2 ...
-        #     end
-        # end
-        missing
+        get(json_row[colname], sheet, missing)
     end
 
     function parse_metainfo(origin)
@@ -85,10 +66,10 @@ function load_metadata()
             xl = string(el["xlsx"])
             d[xl] = Dict{String, Any}()
             for (sheet, json) in el["asjson"]
-                d[xl][sheet] = (io = json, 
-                    kwargs = get_kwargs(el, sheet), 
-                    keycolumn = get_keycolumn(el, sheet),
-                    extraprocess = get_extraprocess(el, sheet)
+                d[xl][sheet] = Dict(:io => json, 
+                    :kwargs => get_kwargs(el, sheet), 
+                    :keycolumn => get_extra(el, sheet, "keycolumn"),
+                    :drop_empty! => get_extra(el, sheet, "drop_empty!")
                     )
             end
         end

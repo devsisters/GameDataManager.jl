@@ -18,6 +18,13 @@ function process!(jwb::JSONWorkbook; kwargs...)::JSONWorkbook
     T = WorkBook(filename)
 
     drop_null_object!(jwb)
+    meta = lookup_metadata(jwb)
+    for sheet in sheetnames(jwb)
+        drop_cols = get(meta[sheet], :drop_empty!, missing)
+        if !ismissing(drop_cols)
+            drop_empty!(jwb[sheet], drop_cols)
+        end
+    end
     if hasmethod(process!, Tuple{JSONWorkbook,Type{T}})
         printstyled(stderr, "  $(filename) processing... ◎﹏◎"; color=:yellow)
         jwb = process!(jwb, WorkBook(filename))
@@ -55,28 +62,6 @@ function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Block}})
     return jwb
 end
 
-"""
-    process!(jwb, WorkBook{:Quest})
-
-빈 컬럼 삭제
-"""
-function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Quest}}) 
-    drop_empty!(jwb, :Member, "CompleteCondition")
-    drop_empty!(jwb, :Group, "AndCondition")
-    drop_empty!(jwb, :Group, "OrCondition")
-
-    return jwb
-end
-"""
-    process!(jwb, WorkBook{:Store})
-
-빈 컬럼 삭제
-"""
-function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Store}}) 
-    drop_empty!(jwb, :BlockPackage, j"/OpenCondition/And")
-
-    return jwb
-end
             
 function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Trigger}}) 
     for row in jwb["Data"]
@@ -116,19 +101,6 @@ function process!(jwb::JSONWorkbook, ::Type{WorkBook{:BlockRewardTable}})
 
     sort!(jwb[mainsheet], j"/RewardKey")
     jwb[mainsheet].data = parse_rewardtable(jwb[mainsheet])
-
-    return jwb
-end
-# 간단한 처리 
-function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Flag}}) 
-    drop_empty!(jwb, :BuildingUnlock, "Condition")
-
-    return jwb
-end
-
-function process!(jwb::JSONWorkbook, ::Type{WorkBook{:Chore}}) 
-    drop_empty!(jwb, :Group, "Reward")
-    drop_empty!(jwb, :Group, "AssistReward")
 
     return jwb
 end

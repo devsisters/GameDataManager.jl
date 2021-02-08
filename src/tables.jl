@@ -103,7 +103,7 @@ function _jsonworkbook(xlsxfile)
 
     sheets = JSONWorksheet[]
     for sheet_json in meta # sheetindex가 xlsx과 다르다. getindex할 때 이름으로 참조할 것!
-        jsonfile = sheet_json[2][1]
+        jsonfile = sheet_json[2][:io]
         if endswith(lowercase(jsonfile), ".json")
             jws = _jsonworksheet(xlsxfile, sheet_json[1], joinpath_gamedata(jsonfile))
             push!(sheets, jws)
