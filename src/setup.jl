@@ -29,7 +29,7 @@ function setup!(marsrepo=get(ENV, "MARS_CLIENT", ""))
 end
 
 function lookup_networkfolder()
-    os_path = Sys.iswindows() ? "G:/" : "/Volumes/GoogleDrive/"
+    os_path = Sys.iswindows() ? "G:/" : "/Volumes/Google Drive/"
 
     OS_LANG = get(ENV, "LANG", "ko_KR.UTF-8")
     lang_path = if startswith(OS_LANG, "ko")
