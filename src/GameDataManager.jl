@@ -56,6 +56,6 @@ export GAMEENV, GAMEDATA, help, setup!,
        ink, ink_cleanup!,
        
        # 유틸리티
-       @j_str, findblock, get_buildings, get_blocks, lsfiles, runink, reimport_target
+       @j_str, findblock, get_buildings, get_blocks, lsfiles, runink, reimport_target, find_itemrecipe
 
 end
