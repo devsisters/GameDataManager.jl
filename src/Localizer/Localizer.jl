@@ -187,7 +187,7 @@ function localize!(jws::JSONWorksheet, meta)
             finalkey = gamedata_lokalkey(token, keyvalues)
         end
         if haskey(result, finalkey)
-            throw(AssertionError("`$finalkey`가 중복되었습니다. _Meta.json의 keycolumn이 중복되지 않는지 확인해 주세요\n$(meta[3]) "))
+            throw(AssertionError("`$finalkey`가 중복되었습니다. _Meta.json의 keycolumn이 중복되지 않는지 확인해 주세요\n$(meta[:keycolumn]) "))
         end
         result[finalkey] = Dict{String, Any}("translation" => text)
         
