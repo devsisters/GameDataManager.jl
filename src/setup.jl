@@ -29,7 +29,7 @@ function setup!(marsrepo=get(ENV, "MARS_CLIENT", ""))
 end
 
 function lookup_networkfolder()
-    os_path = Sys.iswindows() ? "G:/" : "/Volumes/Google Drive/"
+    os_path = Sys.iswindows() ? "G:/" : "/Volumes/GoogleDrive/"
 
     OS_LANG = get(ENV, "LANG", "ko_KR.UTF-8")
     lang_path = if startswith(OS_LANG, "ko")
@@ -37,6 +37,10 @@ function lookup_networkfolder()
             else
                 "Shared drives/프로젝트 MARS/PatchDataOrigin"
             end
+    path = joinpath(os_path, lang_path)
+    if !isdir(path)
+        throw(SystemError("Google Drive 경로를 찾을 수 없습니다", 2))
+    end
 
     return joinpath(os_path, lang_path)
 end
