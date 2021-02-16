@@ -89,7 +89,7 @@ function get_filename_sheetname(jsonfile)
     # NOTE Auto만 검색하고 있음...
     for el in CACHE[:meta][:auto] 
         for sheet_file in el[2]
-            fname = sheet_file[2][1]
+            fname = sheet_file[2][:io]
             if fname == jsonfile
                 r = (el[1], sheet_file[1])
                 break
