@@ -58,7 +58,7 @@ function validate(jws::JSONWorksheet, jsonfile)
             else 
                 marker = "#I_$i"
             end
-    err[marker] = val
+            err[marker] = val
         end
     end
     return err
@@ -134,6 +134,10 @@ function get_schema_description(schema::JSONSchema.Schema, path)
     end
 end
 function get_schemaelement(schema, path)
+    # patternProperties는 element를 찾지 않는다
+    if !haskey(schema.data, "properties")
+        return missing 
+    end
     wind = schema.data["properties"]
     paths = replace.(split(chop(path), "]"), "[" => "")
     for (i, p) in enumerate(paths)
