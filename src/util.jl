@@ -283,7 +283,7 @@ function cleanup_lokalkey(folder = missing)
     jsonroot = joinpath(GAMEENV["patch_data"], "Localization")
     if !ismissing(folder)
         jsonroot = joinpath(jsonroot, folder)
-        if !isdir(root)
+        if !isdir(jsonroot)
             throw(SystemError(jsonroot, 2))
         end
     end
@@ -300,18 +300,18 @@ function cleanup_lokalkey(folder = missing)
         file = joinpath(GAMEENV["localcache"], "lokalkey_compare.csv")
         open(file, "w") do io
             if !isempty(a)
-                msg_a = "$(length(a)) exist in 'Lokalise' but removed from 'GameClient'"
+                msg_a = "$(length(a)) exist in 'Lokalise' but deleted from 'GameClient'"
                 msg = msg * "\n" * msg_a
 
                 write(io, msg_a, '\n')
-                [write(io, string(el), '\n') for el in a]
+                [write(io, string(el), '\n') for el in sort(collect(a))]
             end 
             if !isempty(b)
                 msg_b = "$(length(b)) exist in 'GameClient' but cannot be found in 'Lokalise'"
                 msg = msg * "\n" * msg_b
 
                 write(io, '\n', msg_b, '\n')
-                [write(io, string(el), '\n') for el in b]
+                [write(io, string(el), '\n') for el in sort(collect(b))]
             end
         end
         print_section(msg * """\n
