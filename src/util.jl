@@ -274,4 +274,79 @@ function validate_duplicate(lists; assert=true, keycheck=false,
 end
     nothing
 end
+"""
+    cleanup_lokalkey
 
+Localization JSON 파일과 XML을 비교하여 XML에 존재하는데 JSON에 존재하지 않는 localkey 리스트를 뽑아줍니다. 
+"""
+function cleanup_lokalkey(folder = missing)
+    jsonroot = joinpath(GAMEENV["patch_data"], "Localization")
+    if !ismissing(folder)
+        jsonroot = joinpath(jsonroot, folder)
+        if !isdir(root)
+            throw(SystemError(jsonroot, 2))
+        end
+    end
+    xml = parse_lokalisexml()
+    json = parse_lokalisejson(jsonroot)
+
+    a = setdiff(keys(xml), keys(json))
+    b = setdiff(keys(json), keys(xml))
+    if isempty(a) && isempty(b)
+        msg = "'ko.xml'과 Localization/의 내용이 정확히 일치합니다👏"
+        print_section(msg; color=:green)
+    else 
+        msg = "다음의 데이터가 일치하지 않습니다"
+        file = joinpath(GAMEENV["localcache"], "lokalkey_compare.csv")
+        open(file, "w") do io
+            if !isempty(a)
+                msg_a = "$(length(a)) exist in 'Lokalise' but removed from 'GameClient'"
+                msg = msg * "\n" * msg_a
+
+                write(io, msg_a, '\n')
+                [write(io, string(el), '\n') for el in a]
+            end 
+            if !isempty(b)
+                msg_b = "$(length(b)) exist in 'GameClient' but cannot be found in 'Lokalise'"
+                msg = msg * "\n" * msg_b
+
+                write(io, '\n', msg_b, '\n')
+                [write(io, string(el), '\n') for el in b]
+            end
+        end
+        print_section(msg * """\n
+        .'$jsonroot'폴더와 'ko.xml'을 비교한 보고서입니다
+            SAVED => $file""";color=:cyan)
+        run(`powershell start \"$file\"`; wait=false)
+    end
+
+    return nothing
+end
+
+function parse_lokalisexml()
+    function _lokalise_keyvalue(el)
+        # xml 구조상 attribute가 항상 1개만 있다
+        nodecontent(attributes(el)[1]), nodecontent(el)
+    end
+    xml = joinpath(GAMEENV["mars-client"], "unity/Assets/Resources/DevPlay/Localization/ko.xml")
+    doc = readxml(xml)
+    lokalkeys = _lokalise_keyvalue.(elements(doc.root))
+
+    return Dict(lokalkeys)
+end
+
+"""
+    parse_lokalisejson(root)
+
+root부터 시작하여 모든 하위폴더의 JSON의 내용을 병합한다
+"""
+function parse_lokalisejson(root)
+    targets = String[]
+    for (root, dirs, files) in walkdir(root)
+        for f in filter(is_jsonfile, files)
+            json = joinpath(root, f)
+            push!(targets, joinpath(root, f))
+        end
+    end
+    return merge(pmap(JSON.parsefile, targets)...)
+end

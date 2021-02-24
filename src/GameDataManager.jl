@@ -2,8 +2,9 @@ module GameDataManager
 
 using Logging
 using Printf, Dates
+using Distributed
 using DelimitedFiles, IterTools
-using XLSX, JSON, XLSXasJSON
+using XLSX, JSON, XLSXasJSON, EzXML
 using JSONPointer
 using JSONSchema
 import JSONSchema.validate
@@ -52,7 +53,7 @@ export GAMEENV, GAMEDATA, help, setup!,
        Table, xlookup,
        sheetnames,
        xl, backup, md5hash, openxl, json_to_xl,
-       set_validation!, cleanup_cache!,
+       set_validation!, cleanup_cache!, cleanup_lokalkey,
        ink, ink_cleanup!,
        
        # 유틸리티
