@@ -82,9 +82,10 @@ function help_GameDataManager()
     cleanup_cache!() : 로딩되어있는 GameData 캐시를 모두 삭제합니다
     runink("NewbieScene.ink"): ink 대화를 콘솔창에서 재생합니다
 
+    cleanup_lokalkey(): Lokalise에 등록된 키와 'patch-data/Localization'에 존재하는 키를 비교합니다
     get_buildings("sIce"): `sIce`로 시작하는 모든 BuildingTemplate 파일의 블록 수량을 계산합니다
     get_blocks(101): 블록Key별 '../BuildTemplate/Buildings/' 에서 사용되는 빈도를 계산합니다
-    findblock()    : 'Block'데이터와 '../4_ArtAssets/GameResources/Blocks/' 폴더를 비교하여 누락된 항목을 찾습니다.
+    findblock()    : 'Block'데이터와 '../4_ArtAssets/GameResources/Blocks/' 폴더를 비교하여 누락된 항목을 찾습니다
     """
     msg = intro * rand([thankyou; oneline_asciiarts]) * "\n" * basic
 
