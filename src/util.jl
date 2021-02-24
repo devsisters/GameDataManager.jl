@@ -317,7 +317,9 @@ function cleanup_lokalkey(folder = missing)
         print_section(msg * """\n
         .'$jsonroot'폴더와 'ko.xml'을 비교한 보고서입니다
             SAVED => $file""";color=:cyan)
-        run(`powershell start \"$file\"`; wait=false)
+        if Sys.iswindows()
+            run(`powershell start \"$file\"`; wait=false)
+        end
     end
 
     return nothing
