@@ -279,14 +279,9 @@ end
 
 Localization JSON 파일과 XML을 비교하여 XML에 존재하는데 JSON에 존재하지 않는 localkey 리스트를 뽑아줍니다. 
 """
-function cleanup_lokalkey(folder = missing)
+function cleanup_lokalkey()
     jsonroot = joinpath(GAMEENV["patch_data"], "Localization")
-    if !ismissing(folder)
-        jsonroot = joinpath(jsonroot, folder)
-        if !isdir(jsonroot)
-            throw(SystemError(jsonroot, 2))
-        end
-    end
+
     xml = parse_lokalisexml()
     json = parse_lokalisejson(jsonroot)
 
