@@ -133,7 +133,7 @@ end
 블록 Key별로 사용된 BuildTempalte과 수량을 확인합니다
 """
 function get_blocks(savetsv::Bool=true; 
-                        root = joinpath(GAMEENV["patch_data"], "BuildTemplate"))
+                        root = joinpath(GAMEENV["patch_data"], "BuildingTemplate"))
 
     files = globwalkdir("*.json", root)
     filter!(el -> !occursin("Tutorials", el), files) # Tutorial 제거
