@@ -203,8 +203,17 @@ XLSXasJSON.sheetnames(xgd::XLSXTable) = sheetnames(xgd.data)
 XLSXasJSON.xlsxpath(xgd::XLSXTable) = xlsxpath(xgd.data)
 
 function Base.show(io::IO, bt::XLSXTable)
-    println(io, ".data ┕━")
+    print(io, "XLSXTable - ")
     print(io, bt.data)
+end
+
+function Base.show(io::IO, ws::JSONWorksheet)
+    # NOTE 긴 제목은 짤라주는 기능 필요
+    header = map(el -> "/"* join(el.token, "/"), ws.pointer)
+    title = string(sheetnames(ws), " - ", size(ws))
+    pretty_table(io, ws[:, :], header; title = title, 
+                 title_crayon = crayon"blue bold",
+                 alignment=:l, linebreaks = true)
 end
 
 function Base.show(io::IO, bt::JSONTable)

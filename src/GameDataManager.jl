@@ -2,6 +2,7 @@ module GameDataManager
 
 using Logging
 using Printf, Dates
+using PrettyTables
 using TOML
 using Distributed
 using DelimitedFiles, IterTools
