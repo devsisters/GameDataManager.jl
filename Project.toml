@@ -1,7 +1,7 @@
 name = "GameDataManager"
 uuid = "88844230-ccf1-11e8-233b-3f48c6dac397"
 authors = ["김용희 <yongheekim@devsisters.com>"]
-version = "1.13.3"
+version = "1.14.0"
 
 [deps]
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
@@ -21,6 +21,7 @@ Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
 SQLite = "0aa819cd-b072-5ff4-a722-6bc24af294d9"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
+TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
 Tables = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
 Tar = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
 XLSX = "fdbf4ff8-1666-58a4-91e7-1b58723a45e0"
