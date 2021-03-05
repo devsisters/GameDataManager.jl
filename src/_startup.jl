@@ -51,7 +51,8 @@ function help_GameDataManager()
         end
         nothing
     end
-    intro = "GameDataManager를 이용해주셔서 "
+    username = get(ENV, "USERDOMAIN", "고객")
+    intro = "$(username)님 GameDataManager를 이용해주셔서 "
 
     thankyou = ["감사합니다", "Thank You", "Danke schön", "Grazie", "Gracias", "Merci beaucoup",
         "ありがとうございます", "cпасибо", "谢谢你", "khop kun", "Dank je wel", "obrigado", "Tusen tack",
