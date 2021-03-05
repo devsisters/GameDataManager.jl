@@ -256,3 +256,37 @@ function find_itemrecipe()
     print_write_result(file, "각 아이템이 사용되는 레시피")
 
 end
+
+"""
+    get_userlevel_unlock()
+
+계정레벨별 해금되는 콘텐츠를 표로 그려준다
+"""
+function get_userlevel_unlock()
+    player = Table("Player")["Level"]
+
+    get_userlevel_unlock.(1:maximum(player[:, j"/Level"]))
+end
+
+function get_userlevel_unlock(lv)
+    bd = xlookup(lv, Table("Flag")["BuildingUnlock"], 
+        j"/Level", j"/BuildingKey"; find_mode = findall)
+    
+    rcp = xlookup(lv, Table("Production")["Recipe"], 
+        j"/UserLevel", j"/RewardItems/NormalItem/1/1"; find_mode = findall)
+
+    special = []
+    for row in Table("SiteDecoProp")["Special"]
+        cond = row["CleanCondition"]
+        if !isempty(cond)
+            if cond[1] == "UserLevel"
+                x = parse(Int, cond[3])
+                if x == lv
+                    push!(special, row["BuildOnClean"])
+                end 
+            end
+        end
+    end
+
+    return (Buildings = bd, Recipies = rcp, SpecialProp = special)
+end
