@@ -47,7 +47,7 @@ function runink(file)
     runink(InkDialogue(file))
 end
 function runink(data::InkDialogue)
-    inklecate = GAMEENV["inklecate.exe"]
+    inklecate = GAMEENV["inklecate_exe"]
     file = data.source
     cmd = `$inklecate -p "$file"`
     run(cmd)
@@ -120,7 +120,7 @@ function ink_cleanup!()
 end
 
 function write_ink(data::InkDialogue)
-    inklecate = GAMEENV["inklecate.exe"]
+    inklecate = GAMEENV["inklecate_exe"]
     inkfile = data.source
     output = data.output
 

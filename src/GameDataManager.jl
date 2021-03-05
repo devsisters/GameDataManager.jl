@@ -2,11 +2,11 @@ module GameDataManager
 
 using Logging
 using Printf, Dates
+using TOML
 using Distributed
 using DelimitedFiles, IterTools
 using XLSX, JSON, XLSXasJSON, EzXML
-using JSONPointer
-using JSONSchema
+using JSONPointer, JSONSchema
 import JSONSchema.validate
 using ProgressMeter
 using Glob

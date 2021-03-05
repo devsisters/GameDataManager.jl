@@ -29,8 +29,8 @@ end
     GameDataManager.lsfiles()
     @test isfile(joinpath(GAMEENV["localcache"], "filelist.tsv"))
     
-    @test joinpath_gamedata("NewbieScene.ink") == joinpath(GAMEENV["NetworkFolder"], "InkDialogue\\NewbieScene.ink")
-    @test joinpath_gamedata("Concept.ink") == joinpath(GAMEENV["NetworkFolder"], "InkDialogue\\Villager\\Concept.ink")
+    @test joinpath_gamedata("NewbieScene.ink") == joinpath(GAMEENV["googledrive"], "InkDialogue\\NewbieScene.ink")
+    @test joinpath_gamedata("Concept.ink") == joinpath(GAMEENV["googledrive"], "InkDialogue\\Villager\\Concept.ink")
     
     @test_throws ArgumentError joinpath_gamedata("Item.xlsx")
     @test_throws ArgumentError joinpath_gamedata("ItemTable.xml")
@@ -40,10 +40,10 @@ end
 
     jwb = Table("ItemTable")
     @test basename(jwb) == "ItemTable.xlsx"
-    @test dirname(jwb) == joinpath(GAMEENV["NetworkFolder"], "XLSXTable") 
+    @test dirname(jwb) == joinpath(GAMEENV["googledrive"], "XLSXTable") 
 
     @test sheetnames(jwb) == keys(GameDataManager.index(jwb))
-    @test GameDataManager.xlsxpath(jwb) == joinpath(GAMEENV["NetworkFolder"], "XLSXTable\\ItemTable.xlsx") 
+    @test GameDataManager.xlsxpath(jwb) == joinpath(GAMEENV["googledrive"], "XLSXTable\\ItemTable.xlsx") 
 end
 
 

@@ -11,7 +11,7 @@ function __init__()
         __init_githubCI__()
     end
     
-    if setup_env!()
+    if load_toml()
         setup_sqldb!()
         CACHE[:meta] = load_metadata()
         
@@ -32,6 +32,54 @@ function __init_githubCI__()
     ENV["MARS_CLIENT"] = joinpath(ENV["GITHUB_WORKSPACE"], "mars-client")
         
     extract_backupdata()
+end
+
+function load_toml()
+    f = joinpath(ENV["MARS_CLIENT"], "patch-data/Manifest.toml")
+    if !isfile(f)
+        @warn "$(f)를 찾을 수 없습니다. 환경변수 ENV[\"mars_client\"]를 확인해 주세요"
+        return nothing
+    end
+    manifest = TOML.parsefile(f)
+
+    # hardcording paths
+    GAMEENV["mars-client"] = ENV["MARS_CLIENT"]
+    GAMEENV["googledrive"] = lookup_googledrive()
+    GAMEENV["inklecate_exe"] = joinpath(@__DIR__, "../deps/ink/inklecate.exe")
+
+    for (k, v) in manifest["GAMEENV"]["priority"]
+        GAMEENV[k] = joinpath_manifest(v)
+    end
+
+    for (k, v) in manifest["GAMEENV"]["secondary"]
+        if isa(v, Vector)
+            GAMEENV[k] = joinpath_manifest(v)
+        else 
+            if !haskey(GAMEENV, k)
+                GAMEENV[k] = Dict{String, Any}()
+            end
+            for (k2, v2) in v 
+                GAMEENV[k][k2] = joinpath_manifest(v2)
+            end
+        end
+    end
+
+    return true
+end
+
+function joinpath_manifest(data::Vector)
+    if data[1] == "ENV"
+        root = ENV[data[2]]
+    elseif data[1] == "GAMEENV"
+        root = GAMEENV[data[2]]
+    else 
+        throw(ArgumentError("$(data[1])에 대해서는 `joinpath_manifest`가 정의되지 않았습니다"))
+    end
+    path = joinpath(root, data[3])
+    if !ispath(path)
+        @warn "\"$path\"는 존재하지 않는 경로입니다"
+    end
+    return path
 end
 
 """
@@ -102,6 +150,28 @@ function reload_meta!()
 
         CACHE[:meta] = load_metadata()
     end
+end
+
+"""
+    lookup_googledrive()
+
+구글드라이브 클라이언트의 경로를 찾는다
+"""
+function lookup_googledrive()
+    os_path = Sys.iswindows() ? "G:/" : "/Volumes/GoogleDrive/"
+
+    OS_LANG = get(ENV, "LANG", "ko_KR.UTF-8")
+    lang_path = if startswith(OS_LANG, "ko")
+                "공유 드라이브/프로젝트 MARS/PatchDataOrigin"
+            else
+                "Shared drives/프로젝트 MARS/PatchDataOrigin"
+            end
+    path = joinpath(os_path, lang_path)
+    if !isdir(path)
+        throw(SystemError("Google Drive 경로를 찾을 수 없습니다", 2))
+    end
+
+    return joinpath(os_path, lang_path)
 end
 
 function set_validation!()
