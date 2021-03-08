@@ -13,6 +13,7 @@ function checkout_GameDataManager()
         return nothing
     end
     manifest = Pkg.TOML.parsefile(f)
+    pkgname = "GameDataManager"
     for pkgname in keys(manifest) 
         uuid = manifest[pkgname]["uuid"]
         v2 = manifest[pkgname]["version"] |> VersionNumber
