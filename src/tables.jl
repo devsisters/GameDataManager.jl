@@ -206,12 +206,10 @@ function Base.show(io::IO, bt::XLSXTable)
     print(io, "XLSXTable - ")
     print(io, bt.data)
 end
-
-function Base.show(io::IO, ws::JSONWorksheet)
-    # NOTE 긴 제목은 짤라주는 기능 필요
+function PrettyTables.pretty_table(ws::JSONWorksheet)
     header = map(el -> "/"* join(el.token, "/"), ws.pointer)
     title = string(sheetnames(ws), " - ", size(ws))
-    pretty_table(io, ws[:, :], header; title = title, 
+    pretty_table(ws[:, :], header; title = title, 
                  title_crayon = crayon"blue bold",
                  alignment=:l, linebreaks = true)
 end
