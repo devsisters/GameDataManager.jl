@@ -14,24 +14,22 @@ function checkout_GameDataManager()
     end
     manifest = Pkg.TOML.parsefile(f)
     pkgname = "GameDataManager"
-    for pkgname in keys(manifest) 
-        uuid = manifest[pkgname]["uuid"]
-        v2 = manifest[pkgname]["version"] |> VersionNumber
+    uuid = manifest[pkgname]["uuid"]
+    v2 = manifest[pkgname]["version"] |> VersionNumber
 
-        if VERSION >= v"1.5.0"
-            dep = Pkg.dependencies()
-            if haskey(dep, uuid)
-                v1 = dep[uuid].version
-            else
-                v1 = v"0.0.0"
-            end
+    if VERSION >= v"1.5.0"
+        dep = Pkg.dependencies()
+        if haskey(dep, uuid)
+            v1 = dep[uuid].version
         else
-            v1 = get(Pkg.installed(), pkgname, v"0.0.0")
+            v1 = v"0.0.0"
         end
+    else
+        v1 = get(Pkg.installed(), pkgname, v"0.0.0")
+    end
 
-        if v2 < v1 # Pkg 업데이트
-            Pkg.update(pkgname)
-        end
+    if v2 < v1 # Pkg 업데이트
+        Pkg.update(pkgname)
     end
 
     nothing
