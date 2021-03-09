@@ -44,7 +44,8 @@ function ismodified(f)::Bool
         @label XLSXFILE
 
         file = joinpath_gamedata(f)
-        fname = split(replace(file, "\\" => "/"), "XLSXTable/")[2]
+        root_folder = splitdir(GAMEENV["xlsx"]["root"])[2]
+        fname = split(replace(file, "\\" => "/"), "$root_folder/")[2]
         
         t = mtime(file) 
         t_log = DBread_xlsxlog_mtime(fname)
@@ -66,7 +67,8 @@ end
 DBwrite_xlsxlog(bt::Table) = DBwrite_xlsxlog(bt.data)
 function DBwrite_xlsxlog(jwb::JSONWorkbook)
     file = replace(XLSXasJSON.xlsxpath(jwb), "\\" => "/")
-    fname = split(file, "XLSXTable/")[2]
+    root_folder = splitdir(GAMEENV["xlsx"]["root"])[2]
+    fname = split(file, "$root_folder/")[2]
 
     # TODO 이부분을 XLSXasJSON에 JSONToken을 JSON.json으로 serialize하게 추가
     pointer = Dict()

@@ -141,13 +141,15 @@ end
 
 function copy_to_cache(origin)
     if is_xlsxfile(origin)
+        
         destination = replace(
             origin,
-            GAMEENV["xlsx"]["root"] => joinpath(GAMEENV["localcache"], "XLSXTable"),
+            GAMEENV["patch_data"] => GAMEENV["localcache"],
         )
+        root_folder = splitdir(GAMEENV["xlsx"]["root"])[2]
 
-        if !isdir(joinpath(GAMEENV["localcache"], "XLSXTable"))
-            mkdir(joinpath(GAMEENV["localcache"], "XLSXTable"))
+        if !isdir(joinpath(GAMEENV["localcache"], root_folder))
+            mkdir(joinpath(GAMEENV["localcache"], root_folder))
         end
     else
         dir, file = splitdir(origin)
