@@ -12,24 +12,29 @@ function checkout_GameDataManager()
         @warn "$(f)를 찾을 수 없습니다. 환경변수 ENV[\"mars_client\"]를 확인해 주세요"
         return nothing
     end
-    manifest = Pkg.TOML.parsefile(f)
-    pkgname = "GameDataManager"
-    uuid = manifest[pkgname]["uuid"]
-    v2 = manifest[pkgname]["version"] |> VersionNumber
-
-    if VERSION >= v"1.5.0"
-        dep = Pkg.dependencies()
-        if haskey(dep, uuid)
-            v1 = dep[uuid].version
+    try 
+        manifest = Pkg.TOML.parsefile(f)
+        pkgname = "GameDataManager"
+        uuid = manifest[pkgname]["uuid"]
+        v2 = manifest[pkgname]["version"] |> VersionNumber
+        
+        if VERSION >= v"1.5.0"
+            dep = Pkg.dependencies()
+            if haskey(dep, uuid)
+                v1 = dep[uuid].version
+            else
+                v1 = v"0.0.0"
+            end
         else
-            v1 = v"0.0.0"
+            v1 = get(Pkg.installed(), pkgname, v"0.0.0")
         end
-    else
-        v1 = get(Pkg.installed(), pkgname, v"0.0.0")
-    end
 
-    if v2 < v1 # Pkg 업데이트
-        Pkg.update(pkgname)
+        if v2 < v1 # Pkg 업데이트
+            Pkg.update(pkgname)
+        end
+    catch e 
+        @warn """알수 없는 이유로 GameDataManager 자동 업데이트가 불가능합니다.
+        슬랙채널 mars_julia_help 에 문의해주세요 https://devsisters.slack.com/archives/CR5GAQSPP"""
     end
 
     nothing
@@ -44,9 +49,9 @@ function help_GameDataManager()
                                     i == 1 ? "┌ $title: " :
                                     el == last(msglines) ? "└ " : "│ "
     
-            printstyled(stderr, prefix; color=color)
-            print(stderr, el)
-            print(stderr,  '\n')
+            printstyled(prefix; color=color)
+            print(el)
+            print('\n')
         end
         nothing
     end
