@@ -141,16 +141,12 @@ end
 
 function copy_to_cache(origin)
     if is_xlsxfile(origin)
-        
+        root_folder = splitdir(GAMEENV["xlsx"]["root"])
+
         destination = replace(
             origin,
-            GAMEENV["patch_data"] => GAMEENV["localcache"],
+            root_folder[1] => GAMEENV["localcache"]
         )
-        root_folder = splitdir(GAMEENV["xlsx"]["root"])[2]
-
-        if !isdir(joinpath(GAMEENV["localcache"], root_folder))
-            mkdir(joinpath(GAMEENV["localcache"], root_folder))
-        end
     else
         dir, file = splitdir(origin)
         if normpath(dir) == normpath(GAMEENV["json"]["root"])
