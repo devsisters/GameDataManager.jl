@@ -107,7 +107,7 @@ end
 
 function process!(jwb::JSONWorkbook, ::Type{WorkBook{:SiteDecoProp}}) 
     for row in jwb["Resource"]
-        for i in 5:-1:2
+        for i in 2:-1:1
             jp = JSONPointer.Pointer("/Phase/$i/Blueprint")
             if isnull(row[jp])
                 deleteat!(row["Phase"], i)
