@@ -56,13 +56,6 @@ end
 
         @test isa(data, GameDataManager.XLSXTable)
     end
-
-    jsontable = Table("ItemTable_Normal.json")
-    jws = Table("ItemTable")["Normal"]
-    for (i, row) in enumerate(jsontable.data)
-        @test JSON.json(jws[i]) == JSON.json(row)
-    end
-
 end
 
 @testset "xlookup 기능" begin 
@@ -91,10 +84,6 @@ end
 @testset "get_blocks - Block의 BuildTemplate별 사용량" begin 
     get_blocks()
     @test isfile(joinpath(GAMEENV["localcache"], "get_blocks.tsv"))
-
-    x = get_blocks(false)
-    ref = Table("Block"; readfrom = :JSON, validation = false)["Block"]
-    # @test issubset(keys(x), ref[:, j"/Key"])
 end
 
 @testset "get_buildings - BuildingTemplate에서 Block 사용량" begin 
@@ -115,7 +104,7 @@ end
 
     files = ["ItemTable", "Shop", "Residence", "Pipo", "Player"]
     for f in files
-        data = Table(f;readfrom = :JSON, validation = true)
+        data = GameDataManager.XLSXTable(f; readfrom = :JSON, validation = true)
 
         @test isa(data, GameDataManager.XLSXTable)
     end
