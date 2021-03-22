@@ -1,23 +1,19 @@
 """
-    Table("ItemTable"; readfrom = :NEW, validate = true)
+    Table("ItemTable")
 
-GameData를 메모리로 읽어온다. XLSX파싱하여 JSON데이터로 재구성할 뿐 아니라, JSON으로부터 XLSX파일을 만들 수 있다.
-
-** Arguements **
-====
-* 'readfrom' : `:NEW`-편집된 경우 XLSX, 아니면 JSON에서 재 조합한다. `:XLSX`, `:JSON `
-* 'validate' : false로 하면 validation 하지않는다.
+GameData를 메모리로 읽어온다. 
+XLSX파싱하여 JSON데이터로 재구성할 뿐 아니라, JSON으로부터 XLSX파일을 만들 수 있다.
 
 """
 abstract type Table end
-function Table(file; kwargs...)
-    if endswith(file, ".json")
-        JSONTable(file; kwargs...)
-    else
-        XLSXTable(file; kwargs...)
+function Table(file)
+    f = is_xlsxfile(file) ? file : CACHE[:meta][:xlsx_shortcut][file]
+    key = splitext(f)[1] |> string
+    if !haskey(GAMEDATA, key) 
+        XLSXTable(f)
     end
+    GAMEDATA[key]
 end
-
 """
     XLSXTable
 
@@ -48,9 +44,8 @@ end
 
 function XLSXTable(
     file::AbstractString;
-    validation = CACHE[:validation],
-    readfrom::Symbol = :NEW
-)
+            validation=CACHE[:validation],
+            readfrom::Symbol=:NEW)
 
     f = is_xlsxfile(file) ? file : CACHE[:meta][:xlsx_shortcut][file]
 
@@ -62,19 +57,12 @@ function XLSXTable(
     if readfrom == :XLSX
         jwb = _xlsxworkbook(f)
         localize!(jwb)
-        process!(jwb; gameenv = GAMEENV)
+        process!(jwb; gameenv=GAMEENV)
 
         table = XLSXTable(jwb, validation)
-
     elseif readfrom == :JSON
-        k = splitext(f)[1]
-
-        if !haskey(GAMEDATA, k)
-            jwb = _jsonworkbook(f)
-            table = XLSXTable(jwb, validation)
-        else
-            table = GAMEDATA[k]
-        end
+        jwb = _jsonworkbook(f)
+        table = XLSXTable(jwb, false)
     end
 
     return table
@@ -115,7 +103,7 @@ end
 
 function _jsonworksheet(xlsxfile, sheet, jsonfile)
     data = open(jsonfile, "r") do io
-        JSON.parse(io; dicttype = OrderedDict, null = missing)
+        JSON.parse(io; dicttype=OrderedDict, null=missing)
     end
 
     pointers = fetch_jsonpointer(xlsxfile, sheet)
@@ -156,11 +144,10 @@ function copy_to_cache(origin)
         end
     end
     dircheck_and_create(destination)
-    cp(origin, destination; force = true)
+    cp(origin, destination; force=true)
 
     return destination
 end
-
 
 """
     JSONTable
@@ -186,6 +173,7 @@ function JSONTable(file::String)
 
     return GAMEDATA[file]
 end
+
 # fallback function
 Base.getindex(bt::Table, i) = getindex(bt.data, i)
 
@@ -205,13 +193,12 @@ function Base.show(io::IO, bt::XLSXTable)
     print(io, bt.data)
 end
 function PrettyTables.pretty_table(ws::JSONWorksheet)
-    header = map(el -> "/"* join(el.token, "/"), ws.pointer)
+    header = map(el -> "/" * join(el.token, "/"), ws.pointer)
     title = string(sheetnames(ws), " - ", size(ws))
-    pretty_table(ws[:, :], header; title = title, 
-                 title_crayon = crayon"blue bold",
-                 alignment=:l, linebreaks = true)
+    pretty_table(ws[:, :], header; title=title, 
+                 title_crayon=crayon"blue bold",
+                 alignment=:l, linebreaks=true)
 end
-
 function Base.show(io::IO, bt::JSONTable)
     print(io, "JSONTable: ")
     println(io, replace(bt.filepath, GAMEENV["xlsx"]["root"] => ".."))
@@ -225,6 +212,7 @@ function Base.show(io::IO, bt::JSONTable)
         print(io, JSON.json(data[end]))
     end
 end
+
 
 """
     xlookup(value, jws::JSONWorksheet, lookup_col::JSONPointer, return_col::JSONPointer; 
@@ -255,8 +243,8 @@ function xlookup(
     jws::JSONWorksheet,
     lookup_col::JSONPointer.Pointer,
     return_col;
-    find_mode::Function = findfirst,
-    lt::Function = isequal,
+    find_mode::Function=findfirst,
+    lt::Function=isequal,
 )
 
     @assert haskey(jws, lookup_col) "$(lookup_col)은 존재하지 않습니다"

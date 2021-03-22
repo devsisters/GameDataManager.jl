@@ -58,7 +58,7 @@ BuildingTemplate 폴더 하위에 있는 각 `.json` 파일에서 사용하는 �
 """
 function get_buildings(filename_prefix::AbstractString = "", savetsv=true; include_artasset=true)
 
-    ref = include_artasset ? Table("Block"; readfrom=:JSON)["Block"] : missing
+    ref = include_artasset ? Table("Block")["Block"] : missing
     
     datas = glob_countblock(filename_prefix)
     
@@ -225,7 +225,7 @@ end
 해당 아이템이 사용되는 recipe를 찾는다 
 """
 function find_itemrecipe(key)
-    ref = Table("Production"; readfrom=:JSON)["Recipe"]
+    ref = Table("Production")["Recipe"]
 
     x = []
     for row in ref 
@@ -277,16 +277,59 @@ function get_userlevel_unlock(lv)
 
     special = []
     for row in Table("SiteDecoProp")["Special"]
-        cond = row["CleanCondition"]
-        if !isempty(cond)
-            if cond[1] == "UserLevel"
-                x = parse(Int, cond[3])
-                if x == lv
-                    push!(special, row["BuildOnClean"])
-                end 
+        buildingkey = row["BuildOnClean"] 
+        if isa(buildingkey, String)
+            cond = row["CleanCondition"]
+            if !isempty(cond)
+                if cond[1] == "UserLevel"
+                    if parse(Int, cond[3]) == lv
+                        push!(special, buildingkey)
+                    end 
+                end
             end
         end
     end
 
     return (Buildings = bd, Recipies = rcp, SpecialProp = special)
 end
+
+function 레시피연주()
+    function _recipe_sort!(data)
+        item_sortorder = getindex.(data, 1)
+    
+        b = true 
+        while b    
+            b = false
+            for (i, row) in enumerate(data)
+                material_positions = indexin(row[2], item_sortorder)
+                # 재료보다 내가 앞이면 재료뒤로 밀어준다
+                me = row[1]
+                my_idx = findfirst(el -> el == me, item_sortorder)
+                for idx in material_positions
+                    if my_idx < idx 
+                        insert!(item_sortorder, idx+1, me)
+                        deleteat!(item_sortorder, my_idx)
+                        b = true
+                    end
+                end
+            end
+            sort!(data; by = x -> findfirst(el -> el == x[1], item_sortorder))
+        end
+        return data
+    end
+
+    ref = Table("Production")["Recipe"]
+    # 원재료는 하드코딩
+    data = [[5001, []], [5002, []], [5003, []], [5004, []], [5005, []], [5006, []], [5007, []], [5008, []], [5010, []], [5009, []]]
+    for row in ref 
+        # 재료 중 1개라도 
+        reward = row[j"/RewardItems/NormalItem/1/1"]
+        prices = row[j"/PriceItems/NormalItem"]
+        if reward >= 5100 #원재료 제외
+            push!(data, [reward, getindex.(prices, 1)])
+        end
+    end
+
+    _recipe_sort!(data)
+end
+

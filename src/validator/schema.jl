@@ -182,12 +182,12 @@ function readschema(f::AbstractString)::Schema
 end
 
 function updateschema()
-    schema = Table("_Schema"; validation=false)
+    schema = XLSXTable("_Schema"; validation=false)
     updateschema_gitlsfiles(schema)
     updateschema_tablekey(schema)
 end
 
-function updateschema_tablekey(schema::XLSXTable=Table("_Schema"; validation=false), force=false)
+function updateschema_tablekey(schema::XLSXTable=XLSXTable("_Schema"; validation=false), force=false)
     tablekeysfile = joinpath(GAMEENV["jsonschema"], "Definitions/.TableKeys.json")
     # 신규 생성시
     if !isfile(tablekeysfile)
@@ -211,7 +211,7 @@ function updateschema_tablekey(schema::XLSXTable=Table("_Schema"; validation=fal
             # enum 입력
             d["enum"] = begin 
                 p = JSONPointer.Pointer(row[j"/ref/pointer"])
-                json = Table(row[j"/ref/JSONFile"])
+                json = JSONTable(row[j"/ref/JSONFile"])
                 x = map(el -> el[p], json.data)
                 if row["param"]["uniqueItems"]
                     validate_duplicate(x; assert=false, msg="'$(basename(json))'에서 $(row["Key"])가 중복되었습니다. 반드시 수정해 주세요")                        
@@ -259,7 +259,7 @@ end
 
 TODO: repo 이름이 틀릴경우 오류메세지 대응 필요
 """
-function updateschema_gitlsfiles(schema=Table("_Schema"; validation=false))
+function updateschema_gitlsfiles(schema=XLSXTable("_Schema"; validation=false))
     file = joinpath(GAMEENV["jsonschema"], "Definitions/.GitLsFiles.json")
     jws = schema["GitLsFiles"]
 

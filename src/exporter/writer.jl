@@ -41,7 +41,7 @@ function json_to_xl()
 
     for f in collect_auto_xlsx()
         try
-            write_xlsxtable(f)
+            reconstruct_xlsxtable(f)
         catch e
             printstyled("$f json -> xlsx 변환 실패\n"; color = :red)
         end
@@ -54,7 +54,7 @@ function json_to_xl(f::AbstractString)
         color = :cyan,
     )
 
-    write_xlsxtable(f)
+    reconstruct_xlsxtable(f)
 
     print_section("xlsx 변환이 완료되었습니다 ☺", "DONE"; color = :cyan)
 end
@@ -74,7 +74,7 @@ function export_xlsxtable(file::AbstractString)
     f = lookfor_xlsx(file)
 
     println("『", f, "』")
-    bt = Table(f; readfrom = :XLSX)
+    bt = XLSXTable(f; readfrom = :XLSX)
     write_json(bt.data)
 
     nothing
@@ -86,8 +86,8 @@ end
 JSON파일에서부터 XLSX을 다시 구성한다.
 kwargs로 기입한 속성은 부활하지 않는다
 """
-function write_xlsxtable(file::AbstractString)
-    jwb = Table(file; readfrom = :JSON).data
+function reconstruct_xlsxtable(file::AbstractString)
+    jwb = XLSXTable(file; readfrom = :JSON).data
     parent = joinpath(GAMEENV["localcache"], "JSONTable")
     !isdir(parent) && mkdir(parent)
 
