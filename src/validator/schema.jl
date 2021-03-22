@@ -179,7 +179,7 @@ function readschema(f::AbstractString)::Schema
     end
     CACHE[:tablesschema][f] = sc
     return sc 
-    end
+end
 
 function updateschema()
     schema = Table("_Schema"; validation=false)
@@ -189,7 +189,6 @@ end
 
 function updateschema_tablekey(schema::XLSXTable=Table("_Schema"; validation=false), force=false)
     tablekeysfile = joinpath(GAMEENV["jsonschema"], "Definitions/.TableKeys.json")
-    
     # 신규 생성시
     if !isfile(tablekeysfile)
         force = true
@@ -216,8 +215,8 @@ function updateschema_tablekey(schema::XLSXTable=Table("_Schema"; validation=fal
                 x = map(el -> el[p], json.data)
                 if row["param"]["uniqueItems"]
                     validate_duplicate(x; assert=false, msg="'$(basename(json))'에서 $(row["Key"])가 중복되었습니다. 반드시 수정해 주세요")                        
-                    x = unique(x)
                 end
+                unique!(x) # enum이기 때문에 무조건 unique로 들어간다
                 if row["param"]["type"] == "string"
                     x = string.(x)
                 end
@@ -229,7 +228,7 @@ function updateschema_tablekey(schema::XLSXTable=Table("_Schema"; validation=fal
             push!(DBwrite_otherlog_targets, (logkey, mt))
         end
     end
-
+    
     if !isempty(newdatas)
         if isfile(tablekeysfile)
             origin = JSON.parsefile(copy_to_cache(tablekeysfile); dicttype=OrderedDict)
