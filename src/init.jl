@@ -1,5 +1,5 @@
 const GAMEENV = Dict{String,Any}()
-const GAMEDATA = Dict{String,Table}()
+const GAMEDATA = Dict{String,Any}()
 const CACHE = Dict{Symbol,Any}(
         :meta => missing,
         :validation => true,

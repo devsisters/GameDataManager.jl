@@ -64,7 +64,7 @@ function ismodified(f)::Bool
     return t > t_log
 end
 
-DBwrite_xlsxlog(bt::Table) = DBwrite_xlsxlog(bt.data)
+DBwrite_xlsxlog(bt::XLSXTable) = DBwrite_xlsxlog(bt.data)
 function DBwrite_xlsxlog(jwb::JSONWorkbook)
     file = replace(XLSXasJSON.xlsxpath(jwb), "\\" => "/")
     root_folder = splitdir(GAMEENV["xlsx"]["root"])[2]

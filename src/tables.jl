@@ -5,7 +5,6 @@ GameData를 메모리로 읽어온다.
 XLSX파싱하여 JSON데이터로 재구성할 뿐 아니라, JSON으로부터 XLSX파일을 만들 수 있다.
 
 """
-abstract type Table end
 function Table(file)
     f = is_xlsxfile(file) ? file : CACHE[:meta][:xlsx_shortcut][file]
     key = splitext(f)[1] |> string
@@ -26,7 +25,7 @@ JSONWorkbook과 기타 메타 데이터
 - `:XLSX` - 무조건 XLSX을 읽는다
 - `:JSON` - 무조건 JSON을 읽는다
 """
-struct XLSXTable{FileName} <: Table
+struct XLSXTable{FileName}
     data::JSONWorkbook
 end
 function XLSXTable(jwb::JSONWorkbook, validation::Bool)
@@ -150,37 +149,26 @@ function copy_to_cache(origin)
 end
 
 """
-    JSONTable
+    JSONWorksheet
 
 JSON을 쥐고 있음
 """
-struct JSONTable <: Table
-    data::Array{T,1} where {T<:AbstractDict}
-    filepath::AbstractString
-end
-function JSONTable(file::String)
+function XLSXasJSON.JSONWorksheet(file::String)
     @assert endswith(file, ".json") "$file 파일의 확장자가 `.json`이어야 합니다."
 
-    f = joinpath_gamedata(file)
-    rawdata = JSON.parsefile(f; dicttype = OrderedDict)
+    xlsxfile, sheetname = get_filename_sheetname(file)
+    jsonfile = joinpath_gamedata(file)
 
-    if isa(rawdata, Array)
-        data = convert(Vector{OrderedDict}, rawdata)
-    else
-        data = Dict[rawdata]
-    end
-    GAMEDATA[file] = JSONTable(data, file)
+    GAMEDATA[file] = _jsonworksheet(xlsxfile, sheetname, jsonfile)
 
     return GAMEDATA[file]
 end
 
 # fallback function
-Base.getindex(bt::Table, i) = getindex(bt.data, i)
+Base.getindex(bt::XLSXTable, i) = getindex(bt.data, i)
 
-Base.basename(bt::JSONTable) = basename(bt.filepath)
 Base.basename(xgd::XLSXTable) = basename(xlsxpath(xgd))
 
-Base.dirname(bt::JSONTable) = dirname(bt.filepath)
 Base.dirname(xgd::XLSXTable) = dirname(xlsxpath(xgd))
 _filename(xgd::XLSXTable{NAME}) where {NAME} = NAME
 
@@ -199,20 +187,6 @@ function PrettyTables.pretty_table(ws::JSONWorksheet)
                  title_crayon=crayon"blue bold",
                  alignment=:l, linebreaks=true)
 end
-function Base.show(io::IO, bt::JSONTable)
-    print(io, "JSONTable: ")
-    println(io, replace(bt.filepath, GAMEENV["xlsx"]["root"] => ".."))
-
-    data = bt.data
-    print(io, "row 1 => ")
-    print(io, data[1])
-    if length(data) > 1
-        print("...")
-        print(io, "row $(length(data)) => ")
-        print(io, JSON.json(data[end]))
-    end
-end
-
 
 """
     xlookup(value, jws::JSONWorksheet, lookup_col::JSONPointer, return_col::JSONPointer; 

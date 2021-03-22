@@ -211,7 +211,7 @@ function updateschema_tablekey(schema::XLSXTable=XLSXTable("_Schema"; validation
             # enum 입력
             d["enum"] = begin 
                 p = JSONPointer.Pointer(row[j"/ref/pointer"])
-                json = JSONTable(row[j"/ref/JSONFile"])
+                json = JSONWorksheet(row[j"/ref/JSONFile"])
                 x = map(el -> el[p], json.data)
                 if row["param"]["uniqueItems"]
                     validate_duplicate(x; assert=false, msg="'$(basename(json))'에서 $(row["Key"])가 중복되었습니다. 반드시 수정해 주세요")                        
