@@ -6,10 +6,10 @@ XLSX파싱하여 JSON데이터로 재구성할 뿐 아니라, JSON으로부터 X
 
 """
 function Table(file)
-    f = is_xlsxfile(file) ? file : CACHE[:meta][:xlsx_shortcut][file]
-    key = splitext(f)[1] |> string
+    f = lookfor_xlsx(file)
+    key = splitext(basename(f))[1] |> string
     if !haskey(GAMEDATA, key) 
-        XLSXTable(f)
+        XLSXTable(file)
     end
     GAMEDATA[key]
 end
@@ -46,7 +46,7 @@ function XLSXTable(
             validation=CACHE[:validation],
             readfrom::Symbol=:NEW)
 
-    f = is_xlsxfile(file) ? file : CACHE[:meta][:xlsx_shortcut][file]
+    f = lookfor_xlsx(file)
 
     @assert in(readfrom, (:NEW, :XLSX, :JSON)) "'readfrom'은 ':NEW', ':XLSX', ':JSON' 중 1개만 사용할 수 있습니다"
     if readfrom == :NEW

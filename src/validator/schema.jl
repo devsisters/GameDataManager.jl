@@ -214,7 +214,7 @@ function updateschema_tablekey(schema::XLSXTable=XLSXTable("_Schema"; validation
                 json = JSONWorksheet(row[j"/ref/JSONFile"])
                 x = map(el -> el[p], json.data)
                 if row["param"]["uniqueItems"]
-                    validate_duplicate(x; assert=false, msg="'$(basename(json))'에서 $(row["Key"])가 중복되었습니다. 반드시 수정해 주세요")                        
+                    validate_duplicate(x; assert=false, msg="'$(json.xlsxpath)'에서 $(row["Key"])가 중복되었습니다. 반드시 수정해 주세요")                        
                 end
                 unique!(x) # enum이기 때문에 무조건 unique로 들어간다
                 if row["param"]["type"] == "string"

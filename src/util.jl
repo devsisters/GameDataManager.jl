@@ -159,7 +159,7 @@ function lookfor_xlsx(file)
     else 
         hay = keys(CACHE[:meta][:xlsx_shortcut])
         needle = file
-        if !in(file, hay)
+        if !in(needle, hay)
             for (i, h) in enumerate(hay)
                 if lowercase(h) == lowercase(file)
                     # 소문자일 경우 처리 해줌
