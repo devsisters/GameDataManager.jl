@@ -10,9 +10,9 @@
 """
 function export_dialoguecommand()
     if Sys.iswindows()
-        unitypath = "C:/Program Files/Unity/Editor/2019.3.15f1/Editor/unity.exe" 
+        unitypath = "C:/Program Files/Unity/Editor/2019.4.22f1/Editor/unity.exe" 
     else 
-        unitypath = "/Applications/Unity/Hub/Editor/2019.3.15f1/Unity.app/unity"
+        unitypath = "/Applications/Unity/Hub/Editor/2019.4.22f1/Unity.app/unity"
     end
 
     if !isfile(unitypath)
