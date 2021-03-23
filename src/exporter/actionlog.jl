@@ -1,15 +1,19 @@
-function DB_SELECT_mtime(db, fname)
+function DB_SELECT_mtime(db, fname)::Float64
     r = DBInterface.execute(db, "SELECT mtime FROM ExportLog WHERE filename='$fname'") |> columntable
-    mtime = get(r, :mtime, [0.])
-
-    return mtime[1]
+    if haskey(r, :mtime)
+        return r[:mtime][1]
+    else 
+        return 0.
+    end
 end
 
-function DB_SELECT_colname(db, f_sheet)
+function DB_SELECT_colname(db, f_sheet)::AbstractString
     r = DBInterface.execute(db, "SELECT names FROM ColumnName WHERE file_sheet='$f_sheet'") |> columntable
-    data = get(r, :names, [""])
-
-    return data[1]
+    if haskey(r, :names)
+        return r[:names][1]
+    else 
+        return ""
+    end
 end
 
 
