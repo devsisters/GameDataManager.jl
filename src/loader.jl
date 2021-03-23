@@ -86,7 +86,6 @@ jsonfile으로 해당 파일을 추출하는 xlsx파일명과 시트명을 가�
 """
 function get_filename_sheetname(jsonfile)
     r = nothing
-    # NOTE Auto만 검색하고 있음...
     for el in CACHE[:meta][:auto] 
         for sheet_file in el[2]
             fname = sheet_file[2][:io]
@@ -94,7 +93,17 @@ function get_filename_sheetname(jsonfile)
                 r = (el[1], sheet_file[1])
                 break
             end
-
+        end
+    end
+    if isnothing(r)
+        for el in CACHE[:meta][:manual] 
+            for sheet_file in el[2]
+                fname = sheet_file[2][:io]
+                if fname == jsonfile
+                    r = (el[1], sheet_file[1])
+                    break
+                end
+            end
         end
     end
     return r

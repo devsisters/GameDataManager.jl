@@ -181,13 +181,13 @@ function readschema(f::AbstractString)::Schema
     return sc 
 end
 
-function updateschema()
-    schema = XLSXTable("_Schema"; validation=false)
-    updateschema_gitlsfiles(schema)
-    updateschema_tablekey(schema)
+function updateschema(force = false)
+    updateschema_gitlsfiles(force)
+    updateschema_tablekey(force)
 end
 
-function updateschema_tablekey(schema::XLSXTable=XLSXTable("_Schema"; validation=false), force=false)
+function updateschema_tablekey(force=false)
+    json_data = JSON.parsefile(joinpath_gamedata("_Schema_Tablekeys.json"))
     tablekeysfile = joinpath(GAMEENV["jsonschema"], "Definitions/.TableKeys.json")
     # 신규 생성시
     if !isfile(tablekeysfile)
@@ -197,7 +197,7 @@ function updateschema_tablekey(schema::XLSXTable=XLSXTable("_Schema"; validation
     newdatas = Dict{String,Any}()
     DBwrite_otherlog_targets = []
     
-    for row in schema["TableKeys"] 
+    for row in json_data
         keyfile = row[j"/ref/JSONFile"]
         logkey = "tablekeyschema_" * row["Key"]
             
@@ -259,19 +259,22 @@ end
 
 TODO: repo 이름이 틀릴경우 오류메세지 대응 필요
 """
-function updateschema_gitlsfiles(schema=XLSXTable("_Schema"; validation=false))
+function updateschema_gitlsfiles(forceupdate = false)
+    json_data = JSON.parsefile(joinpath_gamedata("_Schema_GitLsFiles.json"))
+
     file = joinpath(GAMEENV["jsonschema"], "Definitions/.GitLsFiles.json")
-    jws = schema["GitLsFiles"]
 
     # Git Repo들 중 1개라도 업데이트 필요할 경우 전체 다시 생성
-    repos = unique(jws[:, j"/ref/Repo"])
-    needsupdate = is_git_ls_files_needupdate.(repos)
-    if any(needsupdate)
+    if !forceupdate
+        repos = unique(map(el -> el[j"/ref/Repo"], json_data))
+        forceupdate = any(is_git_ls_files_needupdate.(repos))
+    end
+    if forceupdate
         print_section("GitLsFiles Schema를 재생성합니다: $file", "NOTE"; color=:cyan)
 
         defs = OrderedDict{String,Any}()
 
-        for row in jws 
+        for row in json_data 
             repo = row[j"/ref/Repo"]
             rootpath = row[j"/RootPath"]
             key = replace(rootpath, "/" => ".")
