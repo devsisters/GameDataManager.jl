@@ -120,7 +120,7 @@ function fetch_jsonpointer(filename, sheetname)
     db = CACHE[:DB_xlsxlog]
     data = DB_SELECT_colname(db, "$(filename)_$(sheetname)")
     if isempty(data)
-        throw(ArgumentError("$filename 의 JSONPointer cache가 존재하지 않습니다. xl(\"$filename\")한번 해주세요"))
+        @warn "$filename 의 JSONPointer cache가 존재하지 않습니다. xl(\"$filename\")한번 해주세요"
     end
     
     JSONPointer.Pointer.(split(data, '\t'))
