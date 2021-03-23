@@ -1,19 +1,23 @@
-function DB_SELECT_mtime(db, fname)::Float64
+function DB_SELECT_mtime(db, fname)
     r = DBInterface.execute(db, "SELECT mtime FROM ExportLog WHERE filename='$fname'") |> columntable
     if haskey(r, :mtime)
-        return r[:mtime][1]
-    else 
-        return 0.
-    end
+        # SQL 쿼리가 빈 array를 반환하는 경우에 대한 방어코드
+        if !isempty(r[:mtime])
+            return r[:mtime][1]
+        end
+    end 
+    return 0.
 end
 
-function DB_SELECT_colname(db, f_sheet)::AbstractString
+function DB_SELECT_colname(db, f_sheet)
     r = DBInterface.execute(db, "SELECT names FROM ColumnName WHERE file_sheet='$f_sheet'") |> columntable
     if haskey(r, :names)
-        return r[:names][1]
-    else 
-        return ""
-    end
+        # SQL 쿼리가 빈 array를 반환하는 경우에 대한 방어코드
+        if !isempty(r[:names])
+            return r[:names][1]
+        end
+    end 
+    return ""
 end
 
 
