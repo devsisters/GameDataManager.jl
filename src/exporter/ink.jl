@@ -139,7 +139,7 @@ function write_ink(data::InkDialogue)
     if Sys.iswindows()
         cmd = `$inklecate -o "$output" "$inkfile"`
     else
-        unityembeded = "/Applications/Unity/Hub/Editor/2019.3.7f1/Unity.app/Contents/MonoBleedingEdge/bin/mono"
+        unityembeded = joinpath(lookup_unityeditor(), "Unity.app/Contents/MonoBleedingEdge/bin/mono")
         cmd = `$unityembeded $inklecate -o “$output.json” “$inkfile”`
     end
 

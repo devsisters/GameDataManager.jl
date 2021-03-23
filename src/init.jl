@@ -173,6 +173,33 @@ function lookup_googledrive()
 
     return joinpath(os_path, lang_path)
 end
+"""
+    lookup_unityeditor()
+
+유니티 에디터의 설치 경로를 찾는다
+"""
+function lookup_unityeditor()
+    # NOTE: library는 파일이 있을 것이라 보장하지 않음 단, version은 사용자가 실제 사용하는 버전이 다를 수 있음
+    # editor_instance = joinpath(GAMEENV["mars-client"], "unity/Library/EditorInstance.json")
+    versiontxt = joinpath(GAMEENV["mars-client"], "unity/ProjectSettings/ProjectVersion.txt")
+    if !isfile(versiontxt)
+        throw(SystemError("유니티 'ProjectVersion.txt'을 찾을 수 없습니다", 2))
+    end
+
+    #=  m_EditorVersion: 2019.4.22f1
+        m_EditorVersionWithRevision: 2019.4.22f1 (9fdda2fe27ad) =#
+    version = split(readlines(versiontxt)[1], ": ")[2]
+    if Sys.iswindows()
+        path = "C:/Program Files/Unity/Editor/$version"
+    else 
+        path = "/Users/devsisters/Public/Unity/$version"
+    end
+    if !isdir(path)
+        throw(SystemError("$(path)에서 유니티를 찾을 수 없습니다. UnityVersion이 올바른지 확인해 주세요", 2))
+    end
+    return path
+end
+
 
 function set_validation!()
     set_validation!(!CACHE[:validation])

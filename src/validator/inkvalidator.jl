@@ -9,10 +9,11 @@
     https://www.notion.so/devsisters/a990e45cf0dd43c9a6ca70d2f12460e1
 """
 function export_dialoguecommand()
+    root = lookup_unityeditor()
     if Sys.iswindows()
-        unitypath = "C:/Program Files/Unity/Editor/2019.4.22f1/Editor/unity.exe" 
+        unitypath = joinpath(root, "Editor/unity.exe") 
     else 
-        unitypath = "/Applications/Unity/Hub/Editor/2019.4.22f1/Unity.app/unity"
+        unitypath = joinpath(root, "Unity.app/unity") 
     end
 
     if !isfile(unitypath)
