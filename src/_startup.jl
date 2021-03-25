@@ -12,6 +12,7 @@ function checkout_GameDataManager()
         @warn "$(f)를 찾을 수 없습니다. 환경변수 ENV[\"mars_client\"]를 확인해 주세요"
         return nothing
     end
+    update = false
     try 
         manifest = Pkg.TOML.parsefile(f)
         pkgname = "GameDataManager"
@@ -28,16 +29,16 @@ function checkout_GameDataManager()
         else
             v1 = get(Pkg.installed(), pkgname, v"0.0.0")
         end
-
-        if v2 < v1 # Pkg 업데이트
-            Pkg.update(pkgname)
-        end
+        update = v2 < v1
     catch e 
         @warn """알수 없는 이유로 GameDataManager 자동 업데이트가 불가능합니다.
         슬랙채널 mars_julia_help 에 문의해주세요 https://devsisters.slack.com/archives/CR5GAQSPP"""
     end
 
-    nothing
+    if update
+        Pkg.update(pkgname)
+    end
+    return nothing 
 end
 
 function help_GameDataManager()
