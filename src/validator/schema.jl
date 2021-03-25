@@ -189,8 +189,14 @@ end
 function updateschema_tablekey(force=false)
     function pull_tablekey!(row)
         fname = row[j"/ref/JSONFile"]
+        try 
+            joinpath_gamedata(fname)
+        catch e
+            @warn "$(fname)이 존재하지 않아 tablekeyschema를 생성하지 않고 넘어갑니다"
+            return nothing
+        end
+        
         logkey = "tablekeyschema_" * row["Key"]
-
         mt = mtime(joinpath_gamedata(fname))        
         if DBread_otherlog(logkey) < mt || force  
             d = Dict{String,Any}()
