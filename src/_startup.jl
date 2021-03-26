@@ -12,22 +12,19 @@ function checkout_GameDataManager()
         @warn "$(f)를 찾을 수 없습니다. 환경변수 ENV[\"mars_client\"]를 확인해 주세요"
         return nothing
     end
-    pkgname = "GameDataManager"
     try 
         manifest = Pkg.TOML.parsefile(f)
-        uuid = manifest[pkgname]["uuid"]
+        pkgname = "GameDataManager"
         v2 = manifest[pkgname]["version"] |> VersionNumber
         
         if VERSION >= v"1.5.0"
             dep = Pkg.dependencies()
-            if haskey(dep, uuid)
-                v1 = dep[uuid].version
-            else
-                v1 = v"0.0.0"
-            end
+            uuid = manifest[pkgname]["uuid"] |> Base.UUID
+            v1 = dep[uuid].version
         else
             v1 = get(Pkg.installed(), pkgname, v"0.0.0")
         end
+
         if v2 > v1
             Pkg.update(pkgname)
         end
