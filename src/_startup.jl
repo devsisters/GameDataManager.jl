@@ -29,7 +29,7 @@ function checkout_GameDataManager()
         else
             v1 = get(Pkg.installed(), pkgname, v"0.0.0")
         end
-        update = v2 < v1
+        update = v2 > v1
     catch e 
         @warn """알수 없는 이유로 GameDataManager 자동 업데이트가 불가능합니다.
         슬랙채널 mars_julia_help 에 문의해주세요 https://devsisters.slack.com/archives/CR5GAQSPP"""
