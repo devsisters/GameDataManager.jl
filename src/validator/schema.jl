@@ -207,10 +207,10 @@ function updateschema_tablekey(force=false)
             # enum 입력
             d["enum"] = begin 
                 p = JSONPointer.Pointer(row[j"/ref/pointer"])
-                json = JSONWorksheet(fname)
-                x = map(el -> el[p], json.data)
+                json = JSON.parsefile(joinpath_gamedata(fname))
+                x = map(el -> el[p], json)
                 if row["param"]["uniqueItems"]
-                    validate_duplicate(x; assert=false, msg="'$(json.xlsxpath)'에서 $(row["Key"])가 중복되었습니다. 반드시 수정해 주세요")                        
+                    validate_duplicate(x; assert=false, msg="'$(fname)'에서 $(row["Key"])가 중복되었습니다. 반드시 수정해 주세요")                        
                 end
                 unique!(x) # enum이기 때문에 무조건 unique로 들어간다
                 if row["param"]["type"] == "string"
