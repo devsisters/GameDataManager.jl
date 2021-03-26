@@ -57,7 +57,7 @@ function help_GameDataManager()
         nothing
     end
     username = get(ENV, "USERDOMAIN", "고객")
-    intro = "$(username)님 GameDataManager를 이용해주셔서 "
+    intro = "$(username)님 GDM을 이용해주셔서 "
 
     thankyou = ["감사합니다", "Thank You", "Danke schön", "Grazie", "Gracias", "Merci beaucoup",
         "ありがとうございます", "cпасибо", "谢谢你", "khop kun", "Dank je wel", "obrigado", "Tusen tack",
@@ -96,5 +96,4 @@ function help_GameDataManager()
     msg = intro * rand([thankyou; oneline_asciiarts]) * "\n" * basic
 
     print_section(msg, "도움말"; color=:green)
-
 end
