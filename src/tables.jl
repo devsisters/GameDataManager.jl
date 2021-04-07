@@ -233,7 +233,18 @@ function xlookup(
     elseif isempty(idx)
         r = Any[]
     else
-        r = jws[idx, return_col]
+        if isa(return_col, Array)
+            col_indicies = map(return_col) do this
+                i = findfirst(el -> el.token == this.token, keys(jws))
+                if isa(i, Nothing)
+                    throw(KeyError(this))
+                end
+                i
+            end
+            r = jws[idx, col_indicies]
+        else 
+            r = jws[idx, return_col]
+        end
     end
     return r
 end
