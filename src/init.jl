@@ -35,9 +35,16 @@ function __init_githubCI__()
 end
 
 function load_toml()
-    f = joinpath(ENV["MARS_CLIENT"], "patch-data/Manifest.toml")
+    f = joinpath(pwd(), "Manifest.toml")
+    if isfile(f)
+        working_in_branch = true
+    else 
+        working_in_branch = false
+        f = joinpath(ENV["MARS_CLIENT"], "patch-data/Manifest.toml")
+    end
+
     if !isfile(f)
-        @warn "$(f)를 찾을 수 없습니다. 환경변수 ENV[\"mars_client\"]를 확인해 주세요"
+        @warn "$(f)를 찾을 수 없습니다. 환경변수 ENV[\"MARS_CLIENT\"]를 확인해 주세요"
         return nothing
     end
     manifest = TOML.parsefile(f)
@@ -49,6 +56,11 @@ function load_toml()
 
     for (k, v) in manifest["GAMEENV"]["priority"]
         GAMEENV[k] = joinpath_manifest(v)
+    end
+
+    if working_in_branch
+        @warn "Working Directory가 patch-data 브랜치인 것으로 확인되어\n$(f)로 GameDataManager를 세팅합니다"
+        GAMEENV["patch_data"] = pwd()
     end
 
     for (k, v) in manifest["GAMEENV"]["secondary"]
@@ -63,6 +75,7 @@ function load_toml()
             end
         end
     end
+
 
     return true
 end
