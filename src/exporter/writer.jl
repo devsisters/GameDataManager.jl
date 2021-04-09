@@ -1,6 +1,7 @@
 # 단축키
 function xl(exportall::Bool = false)
     reload_meta!()
+    updateschema_tablekey()
 
     files = exportall ? collect_auto_xlsx() : collect_modified_xlsx()
     if isempty(files)

@@ -10,7 +10,6 @@ function validate(bt::XLSXTable)
 end
 function validate(bt::XLSXTable{:Block})
     updateschema_blockmagnet()
-    updateschema_tablekey()
     updateschema_gitlsfiles()
     _validate(bt)
 end
@@ -181,11 +180,6 @@ function readschema(f::AbstractString)::Schema
     return sc 
 end
 
-function updateschema(force = false)
-    updateschema_gitlsfiles(force)
-    updateschema_tablekey(force)
-end
-
 function updateschema_tablekey(force=false)
     function pull_tablekey!(row)
         fname = row[j"/ref/JSONFile"]
@@ -236,7 +230,7 @@ function updateschema_tablekey(force=false)
 
     newdatas = Dict{String,Any}()
     DBwrite_otherlog_targets = []
-
+    
     schema_info = JSON.parsefile(joinpath_gamedata("_Schema_Tablekeys.json"))
     pull_tablekey!.(schema_info)
     

@@ -14,8 +14,7 @@ function __init__()
     if load_toml()
         setup_sqldb!()
         CACHE[:meta] = load_metadata()
-        
-        updateschema()
+        updateschema_gitlsfiles()
     end
     # NOTE 임시! validate에서만 줄이도록 수정필요
     global_logger(SimpleLogger(stdout, Logging.Warn))
