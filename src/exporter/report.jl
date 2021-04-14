@@ -60,7 +60,7 @@ function get_buildings(filename_prefix::AbstractString = "", savetsv=true; inclu
 
     ref = include_artasset ? Table("Block")["Block"] : missing
     
-    datas = glob_countblock(filename_prefix)
+    datas = glob_buildingtemplate(filename_prefix)
     
     if include_artasset 
         header = ["Template" "BlockKey" "Quantity" "ArtAsset"]
@@ -101,21 +101,55 @@ function get_buildings(filename_prefix::AbstractString = "", savetsv=true; inclu
         return data
     end
 end
+
+function get_blockcost_buildings()
+    data = glob_buildingtemplate()
     
-function countblock_buildtemplate(file::AbstractString)
-    result = nothing
-    try 
-        data = replace(read(file, String), "\Ufeff" => "")
-        x = JSON.parse(data)
-        result = countmap(map(x -> x["BlockKey"], x["Blocks"]))
-    catch e
-        @warn "JSON 오류로 파일을 읽지 못 하였습니다\n$file"
+    price_table = map(Table("Block")["Block"].data) do row 
+        (row["Key"], (row["Verts"], row["BlockPiecePrice"]))
+    end |> Dict
+
+
+    building_price = OrderedDict()
+    for (fname, blockinfo) in data 
+        blockcoin = 0
+        vert = 0  
+        for (blockkey, amt) in blockinfo
+            if haskey(price_table, blockkey)
+                vert += price_table[blockkey][1] * amt 
+                blockcoin += price_table[blockkey][2] * amt 
+            else 
+                @warn "'$fname': Block($(blockkey),$(amt))가 존재하지 않아 BlockCost 계산에서 제외됩니다"
+            end
+        end
+        building_price[fname] = (vert, blockcoin)
     end
-    return result
+    output = joinpath(GAMEENV["localcache"], "get_blockcost_buildings.csv")
+    open(output, "w") do io 
+        write(io, "TemplateFileName,TotalVerts,TotalBlockCoin\n")
+        for (k, v) in building_price
+            write(io, string(k, ",", v[1], ",", v[2], "\n"))
+        end
+    end
+    openfile(output)
+    
+    return building_price
 end
-function glob_countblock(prefix;
+    
+function glob_buildingtemplate(prefix = "";
                             root = joinpath(GAMEENV["patch_data"], "BuildingTemplate/Buildings"))
     #NOTE: glob pattern을 쓸 수 있지만 prefix만 사용하도록 안내
+    function _countblock(file::AbstractString)
+        result = nothing
+        try 
+            data = replace(read(file, String), "\Ufeff" => "") # BOM 제거
+            x = JSON.parse(data)
+            result = countmap(map(x -> x["BlockKey"], x["Blocks"]))
+        catch e
+            @warn "JSON 오류로 파일을 읽지 못 하였습니다\n$file"
+        end
+        return result
+    end
     files = globwalkdir("$(prefix)*.json", root)
 
     dict_key = basename.(files)
@@ -123,7 +157,7 @@ function glob_countblock(prefix;
         @warn "일부 BuildingTemplate 파일명이 중복되어 중복된 파일의 블록 정보가 덮어씌워지게 됩니다"
     end
 
-    OrderedDict(zip(dict_key, countblock_buildtemplate.(files)))
+    OrderedDict(zip(dict_key, _countblock.(files)))
 end
 
 """

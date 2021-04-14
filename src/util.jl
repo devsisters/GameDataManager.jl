@@ -176,13 +176,17 @@ function lookfor_xlsx(file)
     return f
 end
 
-function openxl(file::AbstractString)
+function openxl(file::AbstractString) 
     f = lookfor_xlsx(file) |> joinpath_gamedata
+    openfile(f)
+end
+
+function openfile(file::AbstractString)
     if Sys.iswindows()
-        if isfile(f)
-            run(`powershell start \"$f\"`; wait=false)
+        if isfile(file)
+            run(`powershell start \"$file\"`; wait=false)
         else 
-            @warn "$(f)에 접근할 수 없습니다"
+            @warn "$(file)에 접근할 수 없습니다"
         end
     else
         @warn "맥이나 리눅스에서는 지원하지 않는 함수입니다."
@@ -312,9 +316,7 @@ function cleanup_lokalkey()
         print_section(msg * """\n
         .'$jsonroot'폴더와 'ko.xml'을 비교한 보고서입니다
             SAVED => $file""";color=:cyan)
-        if Sys.iswindows()
-            run(`powershell start \"$file\"`; wait=false)
-        end
+        openfile(file)
     end
 
     return nothing
