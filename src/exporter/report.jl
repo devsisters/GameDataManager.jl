@@ -114,10 +114,9 @@ function countblock_buildtemplate(file::AbstractString)
     return result
 end
 function glob_countblock(prefix;
-                            root = joinpath(GAMEENV["patch_data"], "BuildingTemplate"))
+                            root = joinpath(GAMEENV["patch_data"], "BuildingTemplate/Buildings"))
     #NOTE: glob pattern을 쓸 수 있지만 prefix만 사용하도록 안내
     files = globwalkdir("$(prefix)*.json", root)
-    filter!(el -> !occursin("Tutorials", el), files) # Tutorial 제거
 
     dict_key = basename.(files)
     if !allunique(dict_key)
