@@ -69,41 +69,6 @@ function localize!(jwb::JSONWorkbook)
     return jwb
 end
 
-
-find_localizetarget!(x, token, holder) = nothing
-function find_localizetarget!(arr::AbstractArray, token, holder)
-    for (i, row) in enumerate(arr) 
-        find_localizetarget!(row, vcat(token, i), holder)
-    end
-    return holder
-end
-function find_localizetarget!(dict::AbstractDict, token, holder)
-    data = Array{Any, 1}(undef, length(dict))
-    for (i, kv) in enumerate(dict) 
-       find_localizetarget!(kv[2], vcat(token, kv[1]), holder)
-    end
-    return holder
-end
-
-function find_localizetarget!(sentence::Union{AbstractString, Number}, token, holder)
-    if startswith(token[1], "\$gamedata")
-        if any(islocalize_column.(token[3:end]))
-            push!(holder, (token, string(sentence)))
-        end
-    elseif startswith(token[1], "\$dialogue")
-        if isa(sentence, AbstractString)
-            if startswith(sentence, "^") && !startswith(sentence, "^@")
-                if occursin(REG_WORD, sentence)
-                    push!(holder, (token, sentence[2:end]))
-                end
-            end
-        end
-    else 
-        throw(ArgumentError("정의되지 않은 localize 대상입니다 / $token"))
-    end
-    return holder
-end
-
 # Dict의 Key가 '$'으로 시작하면 있으면 로컬라이즈 대상이다
 islocalize_column(s) = false
 islocalize_column(s::AbstractString) = startswith(s, "\$")
@@ -175,7 +140,7 @@ function localize!(jws::JSONWorksheet, meta)
 
     target_tokens = Tuple[]
     for (i, row) in enumerate(jws)
-        find_localizetarget!(row, ["\$gamedata.$(filename).", i], target_tokens)
+        localize_table!(row, ["\$gamedata.$(filename).", i], target_tokens)
     end
 
     result = OrderedDict()
@@ -200,6 +165,27 @@ function localize!(jws::JSONWorksheet, meta)
     return result
 end
 
+localize_table!(x, token, holder) = nothing
+function localize_table!(arr::AbstractArray, token, holder)
+    for (i, row) in enumerate(arr) 
+        localize_table!(row, vcat(token, i), holder)
+    end
+    return holder
+end
+function localize_table!(dict::AbstractDict, token, holder)
+    data = Array{Any, 1}(undef, length(dict))
+    for (i, kv) in enumerate(dict) 
+       localize_table!(kv[2], vcat(token, kv[1]), holder)
+    end
+    return holder
+end
+function localize_table!(sentence::Union{AbstractString, Number}, token, holder)
+    if any(islocalize_column.(token[3:end]))
+        push!(holder, (token, string(sentence)))
+    end
+    return holder
+end
+
 """
     dialogue_lokalkey(tokens)
     dialogue_lokalkey(tokens, keyvalues)
@@ -215,15 +201,14 @@ end
 function localize!(ink_origin::InkDialogue)
     prefix = begin 
         fname = splitpath(replace(ink_origin.source, GAMEENV["ink"]["origin"] => ""))
-        fname[end] = replace(fname[end], ".ink" => ".")
+        fname[end] = replace(fname[end], ".ink" => "")
         "\$dialogue." * join(fname[2:end], ".")
     end
     # localise
     ink_parsed = JSON.parse(ink_origin; dicttype = OrderedDict)
 
     target_tokens = Tuple[]
-    find_localizetarget!(ink_parsed["root"], [prefix], target_tokens)
-
+    localize_ink!(ink_parsed["root"], [prefix], target_tokens)
 
     result = OrderedDict()
     for (i, (token, text)) in enumerate(target_tokens)
@@ -243,6 +228,45 @@ function localize!(ink_origin::InkDialogue)
     
     # ink_origin.data = ink_parsed
     return ink_origin
+end
+
+localize_ink!(x, token, holder) = nothing
+function localize_ink!(arr::AbstractArray, token, holder)
+    # Ink는 줄바꿈 기호로 실행단위가 나뉘어져 있으며, 각 단위의 첫번째 항목에서 해당 속성을 알려준다
+    line_breaks = findall(el -> el == "\n", arr)
+    if !isempty(line_breaks)
+        st = 1
+        for ed in line_breaks
+            if isa(arr[st], AbstractString)
+                if arr[st] != "ev" # ink 함수에 입력하는 변수 제외
+                    for line in arr[st:ed-1]
+                        localize_ink!(line, token, holder)
+                    end
+                end
+            end
+            st = ed+1
+        end
+    else
+        for row in arr 
+            localize_ink!(row, token, holder)
+        end
+    end
+
+    return holder
+end
+function localize_ink!(dict::AbstractDict, token, holder)
+    data = Array{Any, 1}(undef, length(dict))
+    for (i, kv) in enumerate(dict) 
+        localize_ink!(kv[2], vcat(token, kv[1]), holder)
+    end
+    return holder
+end
+function localize_ink!(sentence::AbstractString, token, holder)
+    if startswith(sentence, "^")
+        push!(holder, (token, sentence[2:end]))
+        return holder
+    end
+    return holder
 end
 
 function write_localise(filepath, data)

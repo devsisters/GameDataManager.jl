@@ -169,15 +169,23 @@ function readschema(f::AbstractString)::Schema
     json = joinpath(GAMEENV["json"]["root"], f)
     schemafile = joinpath(GAMEENV["jsonschema"], f)
     if isfile(schemafile)
-        s = open(schemafile, "r") do io 
-            JSON.parse(io)
+        if haskey(CACHE[:tablesschema], f) && ismodified(schemafile)
+        else
+            s = open(schemafile, "r") do io 
+                JSON.parse(io)
+            end
+            CACHE[:tablesschema][f] = Schema(s; parent_dir=GAMEENV["jsonschema"])
         end
-        sc = Schema(s; parent_dir=GAMEENV["jsonschema"])
     else 
-        sc = Schema("{}")
+        CACHE[:tablesschema][f] = Schema("{}")
     end
-    CACHE[:tablesschema][f] = sc
-    return sc 
+    return CACHE[:tablesschema][f] 
+end
+
+function foo() 
+    jws = JSONWorksheet("_Schema_Tablekeys.json")
+    
+
 end
 
 function updateschema_tablekey(force=false)
