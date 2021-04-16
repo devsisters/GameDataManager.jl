@@ -22,6 +22,7 @@ function xl(exportall::Bool = false)
     end
 end
 function xl(file::AbstractString)
+    # updateschema_tablekey()
 
     print_section(
         "xlsx -> json 추출을 시작합니다 ⚒\n" * "-"^(displaysize(stdout)[2] - 4);

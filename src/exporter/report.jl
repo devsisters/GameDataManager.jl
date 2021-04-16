@@ -102,13 +102,12 @@ function get_buildings(filename_prefix::AbstractString = "", savetsv=true; inclu
     end
 end
 
-function get_blockcost_buildings()
-    data = glob_buildingtemplate()
+function get_blockcost_buildings(;args...)
+    data = glob_buildingtemplate(;args...)
     
     price_table = map(Table("Block")["Block"].data) do row 
         (row["Key"], (row["Verts"], row["BlockPiecePrice"]))
     end |> Dict
-
 
     building_price = OrderedDict()
     for (fname, blockinfo) in data 
