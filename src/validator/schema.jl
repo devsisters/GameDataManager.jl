@@ -182,89 +182,46 @@ function readschema(f::AbstractString)::Schema
     return CACHE[:tablesschema][f] 
 end
 
-function foo() 
-    jws = JSONWorksheet("_Schema_Tablekeys.json")
-    
-
-end
-
-function updateschema_tablekey(force=false)
-    function pull_tablekey!(row)
-        fname = row[j"/ref/JSONFile"]
-        try 
-            joinpath_gamedata(fname)
-        catch e
-            @warn "$(fname)이 존재하지 않아 tablekeyschema를 생성하지 않고 넘어갑니다"
-            return nothing
-        end
+function updateschema_tablekey(force = false) 
+    meta = JSONWorksheet("_Schema_Tablekeys.json")
+    for origin_json in unique(meta[:, j"/ref/JSONFile"]) 
+        fname = ".TableKey_$origin_json"
+        schema_json = joinpath(GAMEENV["jsonschema"], "Definitions", fname)
         
-        logkey = "tablekeyschema_" * row["Key"]
-        mt = mtime(joinpath_gamedata(fname))        
-        if DBread_otherlog(logkey) < mt || force  
-            d = Dict{String,Any}()
-            d["type"] = row["param"]["type"]
-            d["uniqueItems"] = row["param"]["uniqueItems"]
-            d["description"] = fname * "#/" * row[j"/ref/pointer"]
+        mt = mtime(joinpath_gamedata(origin_json))        
+        if DBread_otherlog(fname) < mt || !isfile(schema_json) || force  
+            output = OrderedDict(
+                "\$schema" => "http://json-schema.org/draft-06/schema",
+                "\$id" => fname,
+                "title" => "MARS GameData Keys",
+                "definitions" => Dict())
 
-            # enum 입력
-            d["enum"] = begin 
+            origin_data = JSON.parsefile(joinpath_gamedata(origin_json))
+
+            for row in filter(el -> el[j"/ref/JSONFile"] == origin_json, meta.data)
                 p = JSONPointer.Pointer(row[j"/ref/pointer"])
-                json = JSON.parsefile(joinpath_gamedata(fname))
-                x = map(el -> el[p], json)
+                enum = map(el -> el[p], origin_data)
                 if row["param"]["uniqueItems"]
-                    validate_duplicate(x; assert=false, msg="'$(fname)'에서 $(row["Key"])가 중복되었습니다. 반드시 수정해 주세요")                        
+                    validate_duplicate(enum; assert=false, msg="'$(origin_json)'에서 $(row["Key"])가 중복되었습니다. 반드시 수정해 주세요")                        
                 end
-                unique!(x) # enum이기 때문에 무조건 unique로 들어간다
+                unique!(enum) # enum이기 때문에 무조건 unique로 들어간다
                 if row["param"]["type"] == "string"
-                    x = string.(x)
+                    enum = string.(enum)
                 end
-                x
+                
+                output["definitions"][row["Key"][2:end]] = begin 
+                    OrderedDict("type" => row["param"]["type"],
+                    "uniqueItems" => row["param"]["uniqueItems"],
+                    "description" => origin_json * "#" * row[j"/ref/pointer"], 
+                    "enum" => enum)
+                end
             end
-
-            newdatas[JSONPointer.Pointer("$(row["Key"])")] = d
-            push!(DBwrite_otherlog_targets, (logkey, mt))
+            write(schema_json, JSON.json(output))
+            DBwrite_otherlog(fname, mt)
         end
     end
-    tablekeys_json = joinpath(GAMEENV["jsonschema"], "Definitions/.TableKeys.json")
-    # 파일 없을 땐 신규 생성
-    if !isfile(tablekeys_json)
-        write(tablekeys_json, JSON.json(OrderedDict(
-            "\$schema" => "http://json-schema.org/draft-06/schema",
-            "\$id" => ".TableKeys.json",
-            "title" => "MARS GameData Keys",
-            "definitions" => OrderedDict{String,Any}())))
-        force = true
-    end
-
-    newdatas = Dict{String,Any}()
-    DBwrite_otherlog_targets = []
-    
-    schema_info = JSON.parsefile(joinpath_gamedata("_Schema_Tablekeys.json"))
-    pull_tablekey!.(schema_info)
-    
-    if !isempty(newdatas)
-        output = JSON.parsefile(copy_to_cache(tablekeys_json); dicttype=OrderedDict)
-        # 더이상 사용하지 않는 TableKey 제거해준다
-        used_keys = map(el -> el["Key"][2:end], schema_info)
-        for k in setdiff(keys(output["definitions"]), used_keys)
-            delete!(output["definitions"], k)
-        end
-        for d in newdatas 
-            output["definitions"][d[1]] = d[2]
-        end
-        print_section("TableKeys Schema를 재생성합니다: $tablekeys_json", "NOTE"; color=:cyan)
-
-        write(tablekeys_json, JSON.json(output))
-
-        for el in DBwrite_otherlog_targets
-            DBwrite_otherlog(el[1], el[2])
-        end
-    end
-
     nothing
 end
-
-
 
 """
     updateschema_gitlsfiles

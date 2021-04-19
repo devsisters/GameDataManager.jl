@@ -22,13 +22,13 @@ function xl(exportall::Bool = false)
     end
 end
 function xl(file::AbstractString)
-    # updateschema_tablekey()
+    reload_meta!()
+    updateschema_tablekey()
 
     print_section(
         "xlsx -> json 추출을 시작합니다 ⚒\n" * "-"^(displaysize(stdout)[2] - 4);
         color = :cyan,
     )
-    reload_meta!()
     export_xlsxtable(file)
     print_section("json 추출이 완료되었습니다 ☺", "DONE"; color = :cyan)
 
