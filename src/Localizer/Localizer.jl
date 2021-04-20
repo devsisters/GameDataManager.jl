@@ -11,7 +11,7 @@ import ..GameDataManager.InkDialogue
 export localize!
 
 # 단어 검출
-const REG_WORD = r"[a-z|A-Z|ㄱ-ㅎ|ㅏ-ㅣ|가-힣]"
+const REG_WORD = r"[a-z|A-Z|ㄱ-ㅣ|가-힣]"
 const SPECIAL_CHAR_CONVERT = Dict('[' => "__", ']' => "__",
                                     '{' => "__", '}' => "__",
                                     '(' => "__", ')' => "__",
@@ -194,9 +194,11 @@ Ink dialogue의 Lokalise 플랫폼용 Key를 구성한다
 """
 function dialogue_lokalkey(tokens, i)
     tokens = filter(el -> isa(el, AbstractString), tokens)    
-    tokens = filter(el -> occursin(REG_WORD, el), tokens)
+    # tokens = filter(el -> occursin(REG_WORD, el), tokens)
+    k = join(tokens, ".") * "." * @sprintf("%03i", i)
+    k = replace(k, r"\s" => "")
 
-    return join(tokens, ".") * "." * @sprintf("%03i", i)
+    return k
 end
 function localize!(ink_origin::InkDialogue)
     prefix = begin 
