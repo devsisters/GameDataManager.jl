@@ -1,4 +1,3 @@
-
 mutable struct InkDialogue
     source::AbstractString
     output::AbstractString
@@ -26,6 +25,7 @@ function JSON.parse(ink::InkDialogue; kwargs...)
     s = read(ink.output, String) 
     JSON.parse(chop(s, head=1, tail=0); kwargs...)
 end
+
 
 function Base.show(io::IO, ink::InkDialogue)
     print(io, "InkDialogue(")
@@ -124,14 +124,14 @@ function write_ink(data::InkDialogue)
     inkfile = data.source
     output = data.output
 
-    ink_errors = validate_ink(inkfile)
-    if !isempty(ink_errors)
-        printstyled("  Error: \"$inkfile\"\n"; color = :red)
-        for e in ink_errors
-            printstyled("\t", e; color = :red)
-            println()
-        end
-    end
+    # ink_errors = validate_ink(inkfile)
+    # if !isempty(ink_errors)
+    #     printstyled("  Error: \"$inkfile\"\n"; color = :red)
+    #     for e in ink_errors
+    #         printstyled("\t", e; color = :red)
+    #         println()
+    #     end
+    # end
 
     backupfile = replace(inkfile, GAMEENV["ink"]["origin"] =>
                                   joinpath(GAMEENV["patch_data"], "_Backup/InkDialogue"))
@@ -171,3 +171,4 @@ function copy_to_backup(origin, dest)
 
     return dest
 end
+

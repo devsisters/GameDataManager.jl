@@ -232,26 +232,9 @@ end
 
 localize_ink!(x, token, holder) = nothing
 function localize_ink!(arr::AbstractArray, token, holder)
-    # Ink는 줄바꿈 기호로 실행단위가 나뉘어져 있으며, 각 단위의 첫번째 항목에서 해당 속성을 알려준다
-    line_breaks = findall(el -> el == "\n", arr)
-    if !isempty(line_breaks)
-        st = 1
-        for ed in line_breaks
-            if isa(arr[st], AbstractString)
-                if arr[st] != "ev" # ink 함수에 입력하는 변수 제외
-                    for line in arr[st:ed-1]
-                        localize_ink!(line, token, holder)
-                    end
-                end
-            end
-            st = ed+1
-        end
-    else
-        for row in arr 
-            localize_ink!(row, token, holder)
-        end
+    for (i, row) in enumerate(arr) 
+        localize_ink!(row, vcat(token, i), holder)
     end
-
     return holder
 end
 function localize_ink!(dict::AbstractDict, token, holder)
@@ -262,10 +245,14 @@ function localize_ink!(dict::AbstractDict, token, holder)
     return holder
 end
 function localize_ink!(sentence::AbstractString, token, holder)
-    if startswith(sentence, "^")
+    # 한글인 스트링은 Localize
+    if startswith(sentence, r"^\^[ㄱ-ㅣ가-힣]")
         push!(holder, (token, sentence[2:end]))
-        return holder
+    # 한글이 아닌경우 문장의 시작에 $으로 찍어서 Localize 대상임을 표시
+    elseif startswith(sentence, r"^\^[$]")
+        push!(holder, (token, sentence[3:end]))
     end
+
     return holder
 end
 
