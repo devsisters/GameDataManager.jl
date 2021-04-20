@@ -11,7 +11,6 @@ import ..GameDataManager.InkDialogue
 export localize!
 
 # 단어 검출
-const REG_WORD = r"[a-z|A-Z|ㄱ-ㅣ|가-힣]"
 const SPECIAL_CHAR_CONVERT = Dict('[' => "__", ']' => "__",
                                     '{' => "__", '}' => "__",
                                     '(' => "__", ')' => "__",
@@ -194,23 +193,22 @@ Ink dialogue의 Lokalise 플랫폼용 Key를 구성한다
 """
 function dialogue_lokalkey(tokens, i)
     tokens = filter(el -> isa(el, AbstractString), tokens)    
-    # tokens = filter(el -> occursin(REG_WORD, el), tokens)
     k = join(tokens, ".") * "." * @sprintf("%03i", i)
     k = replace(k, r"\s" => "")
 
     return k
 end
-function localize!(ink_origin::InkDialogue)
+function localize!(inkdata::InkDialogue)
     prefix = begin 
-        fname = splitpath(replace(ink_origin.source, GAMEENV["ink"]["origin"] => ""))
+        fname = splitpath(replace(inkdata.source, GAMEENV["ink"]["origin"] => ""))
         fname[end] = replace(fname[end], ".ink" => "")
         "\$dialogue." * join(fname[2:end], ".")
     end
     # localise
-    ink_parsed = JSON.parse(ink_origin; dicttype = OrderedDict)
+    data = inkdata.data
 
     target_tokens = Tuple[]
-    localize_ink!(ink_parsed["root"], [prefix], target_tokens)
+    localize_ink!(data["root"], [prefix], target_tokens)
 
     result = OrderedDict()
     for (i, (token, text)) in enumerate(target_tokens)
@@ -223,13 +221,13 @@ function localize!(ink_origin::InkDialogue)
     end
 
     # writing file
-    file = replace(ink_origin.source, GAMEENV["ink"]["origin"] => 
+    file = replace(inkdata.source, GAMEENV["ink"]["origin"] => 
                     joinpath(GAMEENV["patch_data"], "Localization/Dialogue"))
     file = splitext(file)[1] * ".json" 
     write_localise(file, result)
     
     # ink_origin.data = ink_parsed
-    return ink_origin
+    return inkdata
 end
 
 localize_ink!(x, token, holder) = nothing
@@ -251,8 +249,17 @@ function localize_ink!(sentence::AbstractString, token, holder)
     if startswith(sentence, r"^\^[ㄱ-ㅣ가-힣]")
         push!(holder, (token, sentence[2:end]))
     # 한글이 아닌경우 문장의 시작에 $으로 찍어서 Localize 대상임을 표시
-    elseif startswith(sentence, r"^\^[$]")
+    elseif startswith(sentence, "^\$")
         push!(holder, (token, sentence[3:end]))
+    elseif startswith(sentence, "^@ERROR")
+        @show sentence[2:end] join(token, "/")
+        p = "/" * join(token, "/")
+
+        title = "Validation failed at $(sentence[2:end])\n"
+        msg = """
+        pointer:    $p
+        """
+        GameDataManager.print_section(msg, title; color=:yellow)
     end
 
     return holder

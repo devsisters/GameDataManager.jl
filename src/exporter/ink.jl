@@ -119,19 +119,10 @@ function ink_cleanup!()
     end
 end
 
-function write_ink(data::InkDialogue)
+function write_ink(inkdata::InkDialogue)
     inklecate = GAMEENV["inklecate_exe"]
-    inkfile = data.source
-    output = data.output
-
-    # ink_errors = validate_ink(inkfile)
-    # if !isempty(ink_errors)
-    #     printstyled("  Error: \"$inkfile\"\n"; color = :red)
-    #     for e in ink_errors
-    #         printstyled("\t", e; color = :red)
-    #         println()
-    #     end
-    # end
+    inkfile = inkdata.source
+    output = inkdata.output
 
     backupfile = replace(inkfile, GAMEENV["ink"]["origin"] =>
                                   joinpath(GAMEENV["patch_data"], "_Backup/InkDialogue"))
@@ -142,18 +133,14 @@ function write_ink(data::InkDialogue)
         unityembeded = joinpath(lookup_unityeditor(), "Unity.app/Contents/MonoBleedingEdge/bin/mono")
         cmd = `$unityembeded $inklecate -o “$output.json” “$inkfile”`
     end
-
-    inkbackup = true
-    if isfile(backupfile)
-        inkbackup = !issamedata(read(inkfile), read(backupfile))
-    end
-    if inkbackup
+    if ismodified(inkfile)
         copy_to_backup(inkfile, backupfile)
     end
-    
+
     try
         run(cmd)
-        localize!(data)
+        inkdata.data = JSON.parse(inkdata; dicttype = OrderedDict)
+        localize!(inkdata)
         DBwrite_otherlog(inkfile)
         print(" EXPORT => ")
         printstyled(normpath(backupfile), "\n"; color = :blue)

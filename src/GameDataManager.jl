@@ -27,8 +27,6 @@ include("xlsxprocess/xlsxprocess.jl")
 include("xlsxprocess/rewardtablefile.jl")
 
 # include("validator/validator.jl")
-include("validator/schema.jl")
-include("validator/inkvalidator.jl")
 include("util.jl")
 
 #= ■■■◤  DataHandler  ◢■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ =#
@@ -40,6 +38,9 @@ include("exporter/writer.jl")
 include("exporter/actionlog.jl")
 include("exporter/report.jl")
 include("exporter/ink.jl")
+
+include("validator/schema.jl")
+include("validator/inkvalidator.jl")
 
 
 #= ■■■◤  로컬라이저 함수  ◢■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ =#
