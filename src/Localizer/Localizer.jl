@@ -251,15 +251,6 @@ function localize_ink!(sentence::AbstractString, token, holder)
     # 한글이 아닌경우 문장의 시작에 $으로 찍어서 Localize 대상임을 표시
     elseif startswith(sentence, "^\$")
         push!(holder, (token, sentence[3:end]))
-    elseif startswith(sentence, "^@ERROR")
-        @show sentence[2:end] join(token, "/")
-        p = "/" * join(token, "/")
-
-        title = "Validation failed at $(sentence[2:end])\n"
-        msg = """
-        pointer:    $p
-        """
-        GameDataManager.print_section(msg, title; color=:yellow)
     end
 
     return holder
