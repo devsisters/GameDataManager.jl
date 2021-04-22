@@ -124,17 +124,11 @@ function write_ink(inkdata::InkDialogue)
     inkfile = inkdata.source
     output = inkdata.output
 
-    backupfile = replace(inkfile, GAMEENV["ink"]["origin"] =>
-                                  joinpath(GAMEENV["patch_data"], "_Backup/InkDialogue"))
-
     if Sys.iswindows()
         cmd = `$inklecate -o "$output" "$inkfile"`
     else
         unityembeded = joinpath(lookup_unityeditor(), "Unity.app/Contents/MonoBleedingEdge/bin/mono")
         cmd = `$unityembeded $inklecate -o “$output.json” “$inkfile”`
-    end
-    if ismodified(inkfile)
-        copy_to_backup(inkfile, backupfile)
     end
 
     try
@@ -143,7 +137,7 @@ function write_ink(inkdata::InkDialogue)
         localize!(inkdata)
         DBwrite_otherlog(inkfile)
         print(" EXPORT => ")
-        printstyled(normpath(backupfile), "\n"; color = :blue)
+        printstyled(normpath(inkfile), "\n"; color = :blue)
     catch e
         print("\t")
         println(e)
@@ -151,11 +145,3 @@ function write_ink(inkdata::InkDialogue)
 
     nothing
 end
-
-function copy_to_backup(origin, dest)
-    dircheck_and_create(dest)
-    cp(origin, dest; force = true)
-
-    return dest
-end
-
