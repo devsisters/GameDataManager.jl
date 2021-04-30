@@ -224,6 +224,7 @@ end
 
 function cleanup_cache!()
     empty!(GAMEDATA)
+    empty!(CACHE[:tablesschema])
     Memoization.empty_all_caches!()
 
     printstyled("  └로딩 되어있던 GAMEDATA를 모두 청소하였습니다 (◎﹏◎)\n"; color=:yellow)

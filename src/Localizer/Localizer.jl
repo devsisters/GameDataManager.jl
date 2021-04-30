@@ -11,7 +11,6 @@ import ..GameDataManager.InkDialogue
 export localize!
 
 # 단어 검출
-const REG_WORD = r"[a-z|A-Z|ㄱ-ㅎ|ㅏ-ㅣ|가-힣]"
 const SPECIAL_CHAR_CONVERT = Dict('[' => "__", ']' => "__",
                                     '{' => "__", '}' => "__",
                                     '(' => "__", ')' => "__",
@@ -194,21 +193,22 @@ Ink dialogue의 Lokalise 플랫폼용 Key를 구성한다
 """
 function dialogue_lokalkey(tokens, i)
     tokens = filter(el -> isa(el, AbstractString), tokens)    
-    tokens = filter(el -> occursin(REG_WORD, el), tokens)
+    k = join(tokens, ".") * "." * @sprintf("%03i", i)
+    k = replace(k, r"\s" => "")
 
-    return join(tokens, ".") * "." * @sprintf("%03i", i)
+    return k
 end
-function localize!(ink_origin::InkDialogue)
+function localize!(inkdata::InkDialogue)
     prefix = begin 
-        fname = splitpath(replace(ink_origin.source, GAMEENV["ink"]["origin"] => ""))
+        fname = splitpath(replace(inkdata.source, GAMEENV["ink"]["origin"] => ""))
         fname[end] = replace(fname[end], ".ink" => "")
         "\$dialogue." * join(fname[2:end], ".")
     end
     # localise
-    ink_parsed = JSON.parse(ink_origin; dicttype = OrderedDict)
+    data = inkdata.data
 
     target_tokens = Tuple[]
-    localize_ink!(ink_parsed["root"], [prefix], target_tokens)
+    localize_ink!(data["root"], [prefix], target_tokens)
 
     result = OrderedDict()
     for (i, (token, text)) in enumerate(target_tokens)
@@ -221,37 +221,20 @@ function localize!(ink_origin::InkDialogue)
     end
 
     # writing file
-    file = replace(ink_origin.source, GAMEENV["ink"]["origin"] => 
+    file = replace(inkdata.source, GAMEENV["ink"]["origin"] => 
                     joinpath(GAMEENV["patch_data"], "Localization/Dialogue"))
     file = splitext(file)[1] * ".json" 
     write_localise(file, result)
     
     # ink_origin.data = ink_parsed
-    return ink_origin
+    return inkdata
 end
 
 localize_ink!(x, token, holder) = nothing
 function localize_ink!(arr::AbstractArray, token, holder)
-    # Ink는 줄바꿈 기호로 실행단위가 나뉘어져 있으며, 각 단위의 첫번째 항목에서 해당 속성을 알려준다
-    line_breaks = findall(el -> el == "\n", arr)
-    if !isempty(line_breaks)
-        st = 1
-        for ed in line_breaks
-            if isa(arr[st], AbstractString)
-                if arr[st] != "ev" # ink 함수에 입력하는 변수 제외
-                    for line in arr[st:ed-1]
-                        localize_ink!(line, token, holder)
-                    end
-                end
-            end
-            st = ed+1
-        end
-    else
-        for row in arr 
-            localize_ink!(row, token, holder)
-        end
+    for (i, row) in enumerate(arr) 
+        localize_ink!(row, vcat(token, i), holder)
     end
-
     return holder
 end
 function localize_ink!(dict::AbstractDict, token, holder)
@@ -262,10 +245,14 @@ function localize_ink!(dict::AbstractDict, token, holder)
     return holder
 end
 function localize_ink!(sentence::AbstractString, token, holder)
-    if startswith(sentence, "^")
+    # 한글인 스트링은 Localize
+    if startswith(sentence, r"^\^[ㄱ-ㅣ가-힣]")
         push!(holder, (token, sentence[2:end]))
-        return holder
+    # 한글이 아닌경우 문장의 시작에 $으로 찍어서 Localize 대상임을 표시
+    elseif startswith(sentence, "^\$")
+        push!(holder, (token, sentence[3:end]))
     end
+
     return holder
 end
 

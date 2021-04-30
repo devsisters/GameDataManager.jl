@@ -1,4 +1,3 @@
-
 mutable struct InkDialogue
     source::AbstractString
     output::AbstractString
@@ -26,6 +25,7 @@ function JSON.parse(ink::InkDialogue; kwargs...)
     s = read(ink.output, String) 
     JSON.parse(chop(s, head=1, tail=0); kwargs...)
 end
+
 
 function Base.show(io::IO, ink::InkDialogue)
     print(io, "InkDialogue(")
@@ -119,22 +119,10 @@ function ink_cleanup!()
     end
 end
 
-function write_ink(data::InkDialogue)
+function write_ink(inkdata::InkDialogue)
     inklecate = GAMEENV["inklecate_exe"]
-    inkfile = data.source
-    output = data.output
-
-    ink_errors = validate_ink(inkfile)
-    if !isempty(ink_errors)
-        printstyled("  Error: \"$inkfile\"\n"; color = :red)
-        for e in ink_errors
-            printstyled("\t", e; color = :red)
-            println()
-        end
-    end
-
-    backupfile = replace(inkfile, GAMEENV["ink"]["origin"] =>
-                                  joinpath(GAMEENV["patch_data"], "_Backup/InkDialogue"))
+    inkfile = inkdata.source
+    output = inkdata.output
 
     if Sys.iswindows()
         cmd = `$inklecate -o "$output" "$inkfile"`
@@ -143,31 +131,17 @@ function write_ink(data::InkDialogue)
         cmd = `$unityembeded $inklecate -o “$output.json” “$inkfile”`
     end
 
-    inkbackup = true
-    if isfile(backupfile)
-        inkbackup = !issamedata(read(inkfile), read(backupfile))
-    end
-    if inkbackup
-        copy_to_backup(inkfile, backupfile)
-    end
-    
     try
         run(cmd)
-        localize!(data)
+        inkdata.data = JSON.parse(inkdata; dicttype = OrderedDict)
+        localize!(inkdata)
         DBwrite_otherlog(inkfile)
         print(" EXPORT => ")
-        printstyled(normpath(backupfile), "\n"; color = :blue)
+        printstyled(normpath(inkfile), "\n"; color = :blue)
     catch e
         print("\t")
         println(e)
     end
 
     nothing
-end
-
-function copy_to_backup(origin, dest)
-    dircheck_and_create(dest)
-    cp(origin, dest; force = true)
-
-    return dest
 end
