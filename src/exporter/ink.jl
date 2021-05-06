@@ -58,6 +58,7 @@ end
     ink(folder, everything = false)
 
 '../InkDialogue/(folder)'의 '.ink' 파일을 json으로 변환합니다
+단, '_Functions'와 같이 '_'로 시작하는 폴더나 파일은 무시합니다
 
 ## Arguments
 exportall : 'true'면 모든 ink파일을 변환합니다

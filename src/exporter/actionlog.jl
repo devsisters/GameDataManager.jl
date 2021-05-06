@@ -116,7 +116,19 @@ function collect_ink(folder = nothing)
     end
     @assert isdir(rootdir) "존재하지 않은 폴더입니다 폴더명을 확인해 주세요  \'$folder\'"
 
-    globwalkdir("[!_]*.ink", rootdir)
+    targets = []
+    for child in readdir(rootdir)
+        if startswith(child, "_")
+            continue 
+        end
+        fullpath = joinpath(rootdir, child)
+        if isdir(fullpath) 
+            append!(targets, globwalkdir("[!_]*.ink", fullpath))
+        elseif endswith(child, ".ink")
+            push!(targets, fullpath)
+        end
+    end 
+    targets
 end
 
 function collect_modified_ink(folder=nothing)
