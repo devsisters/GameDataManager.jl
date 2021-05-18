@@ -225,7 +225,7 @@ end
 """
 function get_blocks(key::Integer)
     # Itemkey 검사 
-    if !in(key, Table("Block")["Block"][:, j"/Key"])
+    if !in(key, Table("Block"; validation=false)["Block"][:, j"/Key"])
         printstyled("WARN: '$(key)'의 Block이 ItemTable_Block.json에 존재하지 않습니다\n"; color=:yellow)
     end
 
