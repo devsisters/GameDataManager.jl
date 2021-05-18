@@ -34,12 +34,12 @@ function __init_githubCI__()
 end
 
 function load_toml()
-    f = joinpath(pwd(), "Manifest.toml")
+    f = joinpath(pwd(), ".GameDataManager.toml")
     if isfile(f)
         working_in_branch = true
     else 
         working_in_branch = false
-        f = joinpath(ENV["MARS_CLIENT"], "patch-data/Manifest.toml")
+        f = joinpath(ENV["MARS_CLIENT"], "patch-data/.GameDataManager.toml")
     end
 
     if !isfile(f)
