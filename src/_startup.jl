@@ -7,7 +7,7 @@ function checkout_GameDataManager()
         """
         return nothing
     end
-    f = joinpath(ENV["MARS_CLIENT"], "patch-data/Manifest.toml")
+    f = joinpath(ENV["MARS_CLIENT"], "patch-data/.GameDataManager.toml")
     if !isfile(f)
         @warn "$(f)를 찾을 수 없습니다. 환경변수 ENV[\"mars_client\"]를 확인해 주세요"
         return nothing
