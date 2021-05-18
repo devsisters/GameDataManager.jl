@@ -51,7 +51,6 @@ function load_toml()
     # hardcording paths
     GAMEENV["mars-client"] = ENV["MARS_CLIENT"]
     GAMEENV["googledrive"] = lookup_googledrive()
-    GAMEENV["inklecate_exe"] = joinpath(@__DIR__, "../deps/ink/inklecate.exe")
 
     for (k, v) in manifest["GAMEENV"]["priority"]
         GAMEENV[k] = joinpath_manifest(v)
