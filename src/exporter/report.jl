@@ -387,13 +387,14 @@ function get_magnetsize()
             write(io, k, ",")
         elseif startswith(row, "    _sizeInVec:")
             # 크기는 항상 한자리 숫자로 본다 
-            tmp = split(row, ",")
-            write(io, tmp[1][end], ",")
-            write(io, tmp[2][end], ",")
-            write(io, tmp[3][end-1], "\n")
+            sizes = collect(eachmatch(r"\d+", row))
+            write(io, sizes[1].match , ",")
+            write(io, sizes[2].match , ",")
+            write(io, sizes[3].match , "\n")
         end
     end
     write(output, String(take!(io)))
+    print_write_result(output, "BlockMagent에서 Template별 크기")
     nothing
 end
 
