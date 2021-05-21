@@ -119,8 +119,10 @@ JSON -> XLSX 재구성을 위해 JSON 포인터 정보를 미리 SQLDB 에 담�
 function fetch_jsonpointer(filename, sheetname)
     db = CACHE[:DB_xlsxlog]
     data = DB_SELECT_colname(db, "$(filename)_$(sheetname)")
+    
     if isempty(data)
-        @warn "$filename 의 JSONPointer cache가 존재하지 않습니다. xl(\"$filename\")한번 해주세요"
+        command = splitext(filename)[1]
+        @warn "$filename 의 JSONPointer cache가 존재하지 않습니다. xl(\"$command\")한번 해주세요"
     end
     
     JSONPointer.Pointer.(split(data, '\t'))
