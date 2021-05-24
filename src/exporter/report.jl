@@ -108,20 +108,22 @@ function get_blockcost_buildings(;args...)
     price_table = map(Table("Block")["Block"].data) do row 
         (row["Key"], (row["Verts"], row["BlockPiecePrice"]))
     end |> Dict
-
+    
     building_price = OrderedDict()
     for (fname, blockinfo) in data 
-        blockcoin = 0
-        vert = 0  
-        for (blockkey, amt) in blockinfo
-            if haskey(price_table, blockkey)
-                vert += price_table[blockkey][1] * amt 
-                blockcoin += price_table[blockkey][2] * amt 
-            else 
-                @warn "'$fname': Block($(blockkey),$(amt))가 존재하지 않아 BlockCost 계산에서 제외됩니다"
+        if !isnothing(blockinfo)
+            blockcoin = 0
+            vert = 0  
+            for (blockkey, amt) in blockinfo
+                if haskey(price_table, blockkey)
+                    vert += price_table[blockkey][1] * amt 
+                    blockcoin += price_table[blockkey][2] * amt 
+                else 
+                    @warn "'$fname': Block($(blockkey),$(amt))가 존재하지 않아 BlockCost 계산에서 제외됩니다"
+                end
             end
+            building_price[fname] = (vert, blockcoin)
         end
-        building_price[fname] = (vert, blockcoin)
     end
     output = joinpath(GAMEENV["localcache"], "get_blockcost_buildings.csv")
     open(output, "w") do io 
@@ -288,83 +290,6 @@ function find_itemrecipe()
     print_write_result(file, "각 아이템이 사용되는 레시피")
 
 end
-
-"""
-    get_userlevel_unlock()
-
-계정레벨별 해금되는 콘텐츠를 표로 그려준다
-"""
-function get_userlevel_unlock()
-    player = Table("Player")["Level"]
-
-    get_userlevel_unlock.(1:maximum(player[:, j"/Level"]))
-end
-
-function get_userlevel_unlock(lv)
-    bd = xlookup(lv, Table("Flag")["BuildingUnlock"], 
-        j"/Level", j"/BuildingKey"; find_mode = findall)
-    
-    rcp = xlookup(lv, Table("Production")["Recipe"], 
-        j"/UserLevel", j"/RewardItems/NormalItem/1/1"; find_mode = findall)
-
-    special = []
-    for row in Table("SiteDecoProp")["Special"]
-        buildingkey = row["BuildOnClean"] 
-        if isa(buildingkey, String)
-            cond = row["CleanCondition"]
-            if !isempty(cond)
-                if cond[1] == "UserLevel"
-                    if parse(Int, cond[3]) == lv
-                        push!(special, buildingkey)
-                    end 
-                end
-            end
-        end
-    end
-
-    return (Buildings = bd, Recipies = rcp, SpecialProp = special)
-end
-
-function 레시피연주()
-    function _recipe_sort!(data)
-        item_sortorder = getindex.(data, 1)
-    
-        b = true 
-        while b    
-            b = false
-            for (i, row) in enumerate(data)
-                material_positions = indexin(row[2], item_sortorder)
-                # 재료보다 내가 앞이면 재료뒤로 밀어준다
-                me = row[1]
-                my_idx = findfirst(el -> el == me, item_sortorder)
-                for idx in material_positions
-                    if my_idx < idx 
-                        insert!(item_sortorder, idx+1, me)
-                        deleteat!(item_sortorder, my_idx)
-                        b = true
-                    end
-                end
-            end
-            sort!(data; by = x -> findfirst(el -> el == x[1], item_sortorder))
-        end
-        return data
-    end
-
-    ref = Table("Production")["Recipe"]
-    # 원재료는 하드코딩
-    data = [[5001, []], [5002, []], [5003, []], [5004, []], [5005, []], [5006, []], [5007, []], [5008, []], [5010, []], [5009, []]]
-    for row in ref 
-        # 재료 중 1개라도 
-        reward = row[j"/RewardItems/NormalItem/1/1"]
-        prices = row[j"/PriceItems/NormalItem"]
-        if reward >= 5100 #원재료 제외
-            push!(data, [reward, getindex.(prices, 1)])
-        end
-    end
-
-    _recipe_sort!(data)
-end
-
 
 """
     get_magnetsize()
