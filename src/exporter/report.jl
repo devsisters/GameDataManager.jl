@@ -101,41 +101,6 @@ function get_buildings(filename_prefix::AbstractString = "", savetsv=true; inclu
         return data
     end
 end
-
-function get_blockcost_buildings(;args...)
-    data = glob_buildingtemplate(;args...)
-    
-    price_table = map(Table("Block")["Block"].data) do row 
-        (row["Key"], (row["Verts"], row["BlockPiecePrice"]))
-    end |> Dict
-    
-    building_price = OrderedDict()
-    for (fname, blockinfo) in data 
-        if !isnothing(blockinfo)
-            blockcoin = 0
-            vert = 0  
-            for (blockkey, amt) in blockinfo
-                if haskey(price_table, blockkey)
-                    vert += price_table[blockkey][1] * amt 
-                    blockcoin += price_table[blockkey][2] * amt 
-                else 
-                    @warn "'$fname': Block($(blockkey),$(amt))가 존재하지 않아 BlockCost 계산에서 제외됩니다"
-                end
-            end
-            building_price[fname] = (vert, blockcoin)
-        end
-    end
-    output = joinpath(GAMEENV["localcache"], "get_blockcost_buildings.csv")
-    open(output, "w") do io 
-        write(io, "TemplateFileName,TotalVerts,TotalBlockCoin\n")
-        for (k, v) in building_price
-            write(io, string(k, ",", v[1], ",", v[2], "\n"))
-        end
-    end
-    openfile(output)
-    
-    return building_price
-end
     
 function glob_buildingtemplate(prefix = "";
                             root = joinpath(GAMEENV["patch_data"], "BuildingTemplate/Buildings"))
