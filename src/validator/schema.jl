@@ -166,20 +166,26 @@ function get_schemaelement(schema, path)
 end
 
 function readschema(f::AbstractString)::Schema
-    json = joinpath(GAMEENV["json"]["root"], f)
     schemafile = joinpath(GAMEENV["jsonschema"], f)
-    if isfile(schemafile)
-        if haskey(CACHE[:tablesschema], f) && ismodified(schemafile)
-        else
-            s = open(schemafile, "r") do io 
-                JSON.parse(io)
-            end
-            CACHE[:tablesschema][f] = Schema(s; parent_dir=GAMEENV["jsonschema"])
-        end
-    else 
-        CACHE[:tablesschema][f] = Schema("{}")
+    if !isfile(schemafile)
+        return Schema("{}") 
     end
-    return CACHE[:tablesschema][f] 
+
+    reload_schema = true 
+    mt = mtime(schemafile)
+    if haskey(CACHE[:tablesschema], f)
+        if mt == CACHE[:tablesschema][f][1] 
+            reload_schema = false
+        end 
+    end 
+    if reload_schema
+        @info "$(schemafile)을 읽습니다"
+        s = open(schemafile, "r") do io 
+            JSON.parse(io)
+        end
+        CACHE[:tablesschema][f] = [mt, Schema(s; parent_dir=GAMEENV["jsonschema"])]
+    end
+    return CACHE[:tablesschema][f][2]
 end
 
 function updateschema_tablekey(force = false) 
