@@ -121,7 +121,7 @@ function get_schema_description(file, sheet, path)
     file = CACHE[:meta][:xlsx_shortcut][splitext(basename(file))[1]]
     jsonfile = lookup_metadata(file)[sheet][:io]
     
-    schema = CACHE[:tablesschema][jsonfile]
+    schema = CACHE[:tablesschema][jsonfile][2]
     desc = get_schema_description(schema, path)
 end
 function get_schema_description(schema::JSONSchema.Schema, path)
