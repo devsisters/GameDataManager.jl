@@ -5,11 +5,11 @@ GameData를 메모리로 읽어온다.
 XLSX파싱하여 JSON데이터로 재구성할 뿐 아니라, JSON으로부터 XLSX파일을 만들 수 있다.
 
 """
-function Table(file)
+function Table(file; kwargs...)
     f = lookfor_xlsx(file)
     key = splitext(basename(f))[1] |> string
-    if !haskey(GAMEDATA, key) 
-        XLSXTable(file)
+    if !haskey(GAMEDATA, file) 
+        XLSXTable(file; kwargs...)
     end
     GAMEDATA[key]
 end
@@ -119,8 +119,10 @@ JSON -> XLSX 재구성을 위해 JSON 포인터 정보를 미리 SQLDB 에 담�
 function fetch_jsonpointer(filename, sheetname)
     db = CACHE[:DB_xlsxlog]
     data = DB_SELECT_colname(db, "$(filename)_$(sheetname)")
+    
     if isempty(data)
-        @warn "$filename 의 JSONPointer cache가 존재하지 않습니다. xl(\"$filename\")한번 해주세요"
+        command = splitext(filename)[1]
+        @warn "$filename 의 JSONPointer cache가 존재하지 않습니다. xl(\"$command\")한번 해주세요"
     end
     
     JSONPointer.Pointer.(split(data, '\t'))

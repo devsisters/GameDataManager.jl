@@ -121,7 +121,7 @@ function get_schema_description(file, sheet, path)
     file = CACHE[:meta][:xlsx_shortcut][splitext(basename(file))[1]]
     jsonfile = lookup_metadata(file)[sheet][:io]
     
-    schema = CACHE[:tablesschema][jsonfile]
+    schema = CACHE[:tablesschema][jsonfile][2]
     desc = get_schema_description(schema, path)
 end
 function get_schema_description(schema::JSONSchema.Schema, path)
@@ -166,20 +166,26 @@ function get_schemaelement(schema, path)
 end
 
 function readschema(f::AbstractString)::Schema
-    json = joinpath(GAMEENV["json"]["root"], f)
     schemafile = joinpath(GAMEENV["jsonschema"], f)
-    if isfile(schemafile)
-        if haskey(CACHE[:tablesschema], f) && ismodified(schemafile)
-        else
-            s = open(schemafile, "r") do io 
-                JSON.parse(io)
-            end
-            CACHE[:tablesschema][f] = Schema(s; parent_dir=GAMEENV["jsonschema"])
-        end
-    else 
-        CACHE[:tablesschema][f] = Schema("{}")
+    if !isfile(schemafile)
+        return Schema("{}") 
     end
-    return CACHE[:tablesschema][f] 
+
+    reload_schema = true 
+    mt = mtime(schemafile)
+    if haskey(CACHE[:tablesschema], f)
+        if mt == CACHE[:tablesschema][f][1] 
+            reload_schema = false
+        end 
+    end 
+    if reload_schema
+        @info "$(schemafile)을 읽습니다"
+        s = open(schemafile, "r") do io 
+            JSON.parse(io)
+        end
+        CACHE[:tablesschema][f] = [mt, Schema(s; parent_dir=GAMEENV["jsonschema"])]
+    end
+    return CACHE[:tablesschema][f][2]
 end
 
 function updateschema_tablekey(force = false) 
@@ -202,7 +208,8 @@ function updateschema_tablekey(force = false)
                 p = JSONPointer.Pointer(row[j"/ref/pointer"])
                 enum = map(el -> el[p], origin_data)
                 if row["param"]["uniqueItems"]
-                    validate_duplicate(enum; assert=false, msg="'$(origin_json)'에서 $(row["Key"])가 중복되었습니다. 반드시 수정해 주세요")                        
+                    validate_duplicate(enum; assert=false, 
+                    msg="'$(origin_json)#$(row["Key"])'가 중복되었습니다\n해당 데이터 작업자에게 알려주세요")      
                 end
                 unique!(enum) # enum이기 때문에 무조건 unique로 들어간다
                 if row["param"]["type"] == "string"

@@ -101,39 +101,6 @@ function get_buildings(filename_prefix::AbstractString = "", savetsv=true; inclu
         return data
     end
 end
-
-function get_blockcost_buildings(;args...)
-    data = glob_buildingtemplate(;args...)
-    
-    price_table = map(Table("Block")["Block"].data) do row 
-        (row["Key"], (row["Verts"], row["BlockPiecePrice"]))
-    end |> Dict
-
-    building_price = OrderedDict()
-    for (fname, blockinfo) in data 
-        blockcoin = 0
-        vert = 0  
-        for (blockkey, amt) in blockinfo
-            if haskey(price_table, blockkey)
-                vert += price_table[blockkey][1] * amt 
-                blockcoin += price_table[blockkey][2] * amt 
-            else 
-                @warn "'$fname': Block($(blockkey),$(amt))가 존재하지 않아 BlockCost 계산에서 제외됩니다"
-            end
-        end
-        building_price[fname] = (vert, blockcoin)
-    end
-    output = joinpath(GAMEENV["localcache"], "get_blockcost_buildings.csv")
-    open(output, "w") do io 
-        write(io, "TemplateFileName,TotalVerts,TotalBlockCoin\n")
-        for (k, v) in building_price
-            write(io, string(k, ",", v[1], ",", v[2], "\n"))
-        end
-    end
-    openfile(output)
-    
-    return building_price
-end
     
 function glob_buildingtemplate(prefix = "";
                             root = joinpath(GAMEENV["patch_data"], "BuildingTemplate/Buildings"))
@@ -225,7 +192,7 @@ end
 """
 function get_blocks(key::Integer)
     # Itemkey 검사 
-    if !in(key, Table("Block")["Block"][:, j"/Key"])
+    if !in(key, Table("Block"; validation=false)["Block"][:, j"/Key"])
         printstyled("WARN: '$(key)'의 Block이 ItemTable_Block.json에 존재하지 않습니다\n"; color=:yellow)
     end
 
@@ -290,79 +257,35 @@ function find_itemrecipe()
 end
 
 """
-    get_userlevel_unlock()
+    get_magnetsize()
 
-계정레벨별 해금되는 콘텐츠를 표로 그려준다
+Block TemplateKey별 크기 정보를 뽑는다 (충돌 크기 아님)
 """
-function get_userlevel_unlock()
-    player = Table("Player")["Level"]
-
-    get_userlevel_unlock.(1:maximum(player[:, j"/Level"]))
-end
-
-function get_userlevel_unlock(lv)
-    bd = xlookup(lv, Table("Flag")["BuildingUnlock"], 
-        j"/Level", j"/BuildingKey"; find_mode = findall)
+function get_magnetsize()
+    input = joinpath(GAMEENV["mars_art_assets"], "Internal/BlockTemplateTable.asset")
+    output = joinpath(GAMEENV["localcache"], "blockmagnetsize.csv")
     
-    rcp = xlookup(lv, Table("Production")["Recipe"], 
-        j"/UserLevel", j"/RewardItems/NormalItem/1/1"; find_mode = findall)
+    if !isfile(input)
+        throw(AssertionError("$(input)이 존재하지 않아 Magent크기 정보를 뽑을 수 없습니다"))
+    end 
 
-    special = []
-    for row in Table("SiteDecoProp")["Special"]
-        buildingkey = row["BuildOnClean"] 
-        if isa(buildingkey, String)
-            cond = row["CleanCondition"]
-            if !isempty(cond)
-                if cond[1] == "UserLevel"
-                    if parse(Int, cond[3]) == lv
-                        push!(special, buildingkey)
-                    end 
-                end
-            end
+    io = IOBuffer()
+    write(io, "MagnetKey,X,Y,Z\n")
+    for row in readlines(input)
+        if startswith(row, "  - Key:")
+            k = row[10:end]
+            write(io, k, ",")
+        elseif startswith(row, "    _sizeInVec:")
+            # 크기는 항상 한자리 숫자로 본다 
+            sizes = collect(eachmatch(r"\d+", row))
+            write(io, sizes[1].match , ",")
+            write(io, sizes[2].match , ",")
+            write(io, sizes[3].match , "\n")
         end
     end
-
-    return (Buildings = bd, Recipies = rcp, SpecialProp = special)
-end
-
-function 레시피연주()
-    function _recipe_sort!(data)
-        item_sortorder = getindex.(data, 1)
-    
-        b = true 
-        while b    
-            b = false
-            for (i, row) in enumerate(data)
-                material_positions = indexin(row[2], item_sortorder)
-                # 재료보다 내가 앞이면 재료뒤로 밀어준다
-                me = row[1]
-                my_idx = findfirst(el -> el == me, item_sortorder)
-                for idx in material_positions
-                    if my_idx < idx 
-                        insert!(item_sortorder, idx+1, me)
-                        deleteat!(item_sortorder, my_idx)
-                        b = true
-                    end
-                end
-            end
-            sort!(data; by = x -> findfirst(el -> el == x[1], item_sortorder))
-        end
-        return data
-    end
-
-    ref = Table("Production")["Recipe"]
-    # 원재료는 하드코딩
-    data = [[5001, []], [5002, []], [5003, []], [5004, []], [5005, []], [5006, []], [5007, []], [5008, []], [5010, []], [5009, []]]
-    for row in ref 
-        # 재료 중 1개라도 
-        reward = row[j"/RewardItems/NormalItem/1/1"]
-        prices = row[j"/PriceItems/NormalItem"]
-        if reward >= 5100 #원재료 제외
-            push!(data, [reward, getindex.(prices, 1)])
-        end
-    end
-
-    _recipe_sort!(data)
+    write(output, String(take!(io)))
+    print_write_result(output, "BlockMagent에서 Template별 크기")
+    nothing
 end
 
 
@@ -396,5 +319,3 @@ function get_magnetsize()
     write(output, String(take!(io)))
     nothing
 end
-
-
