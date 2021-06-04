@@ -208,7 +208,8 @@ function updateschema_tablekey(force = false)
                 p = JSONPointer.Pointer(row[j"/ref/pointer"])
                 enum = map(el -> el[p], origin_data)
                 if row["param"]["uniqueItems"]
-                    validate_duplicate(enum; assert=false, msg="'$(origin_json)'에서 $(row["Key"])가 중복되었습니다. 반드시 수정해 주세요")                        
+                    validate_duplicate(enum; assert=false, 
+                    msg="'$(origin_json)#$(row["Key"])'가 중복되었습니다\n해당 데이터 작업자에게 알려주세요")      
                 end
                 unique!(enum) # enum이기 때문에 무조건 unique로 들어간다
                 if row["param"]["type"] == "string"
