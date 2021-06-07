@@ -15,6 +15,7 @@ function __init__()
         setup_sqldb!()
         CACHE[:meta] = load_metadata()
         updateschema_gitlsfiles()
+        updateschema_tablekey()
     end
     # NOTE 임시! validate에서만 줄이도록 수정필요
     global_logger(SimpleLogger(stdout, Logging.Warn))
