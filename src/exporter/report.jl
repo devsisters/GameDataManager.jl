@@ -217,45 +217,6 @@ function get_blocks(key::Integer)
     cleanup_cache!()
 end
 
-
-"""
-    find_itemrecipe()
-
-해당 아이템이 사용되는 recipe를 찾는다 
-"""
-function find_itemrecipe(key)
-    ref = Table("Production")["Recipe"]
-
-    x = []
-    for row in ref 
-        data = row[j"/PriceItems/NormalItem"]
-
-        for el in data 
-            if el[1] == key 
-                push!(x, row[j"/RewardItems/NormalItem/1/1"])
-            end
-        end
-    end
-    return x 
-end
-
-function find_itemrecipe()
-    itemlist = filter(el -> 5000 <= el < 6000, Table("ItemTable")["Normal"][:, j"/Key"])
-
-    file = joinpath(GAMEENV["localcache"], "find_itemrecipe.tsv")
-    open(file, "w") do io
-        write(io, join(["ItemKey", "사용처1", "사용처2", "사용처3", "사용처4", "사용처5"], '\t'), '\n')
-
-        @showprogress  "계산 중..." for k in itemlist 
-            target = find_itemrecipe(k)
-            write(io, string(k), '\t')
-            write(io, join(target, '\t'), '\n')
-        end
-    end
-    print_write_result(file, "각 아이템이 사용되는 레시피")
-
-end
-
 """
     get_magnetsize()
 
