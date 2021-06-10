@@ -229,10 +229,10 @@ function get_blockunlock_condition()
     end
 
     d = Dict()
-    for k in buildings
+    for k in ["hNewbieBase"; buildings]
         x = get_buildings(k, false; include_artasset = false)
         if isempty(x)
-            @warn "$(k)의 BuildingTemplate에는 사용된 Block이 없습니다" 
+            # @warn "$(k)의 BuildingTemplate에는 사용된 Block이 없습니다" 
         end
         for (buildingkey, itemkey, amt) in x 
             if !haskey(d, itemkey)
