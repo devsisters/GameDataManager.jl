@@ -57,8 +57,7 @@ BuildingTemplate 폴더 하위에 있는 각 `.json` 파일에서 사용하는 �
 `savetsv`: `false`일 경우 data를 return 합니다
 """
 function get_buildings(filename_prefix::AbstractString = "", savetsv=true; include_artasset=true)
-
-    ref = include_artasset ? Table("Block")["Block"] : missing
+    ref = include_artasset ? Table("Block"; validation=false)["Block"] : missing
     
     datas = glob_buildingtemplate(filename_prefix)
     
@@ -201,22 +200,61 @@ function get_blocks(key::Integer)
 
     if isempty(data) 
         throw(AssertionError("'$key' Block이 사용된 건물은 없습니다"))
-    else
-        file = joinpath(GAMEENV["localcache"], "get_blocks_$key.tsv")
-        open(file, "w") do io
-            @showprogress  "계산 중..." for kv in data 
-                block_key = string(kv[1])
-                write(io, block_key, '\t' * join(keys(kv[2]), '\t'), '\n')
-                write(io, block_key, '\t' * join(values(kv[2]), '\t'), '\n')
-            end    
-        end
-        print_write_result(file, "'$key' Block이 사용된 건물은 다음과 같습니다")
     end
+    file = joinpath(GAMEENV["localcache"], "get_blocks_$key.tsv")
+    open(file, "w") do io
+        @showprogress  "계산 중..." for kv in data 
+            block_key = string(kv[1])
+            write(io, block_key, '\t' * join(keys(kv[2]), '\t'), '\n')
+            write(io, block_key, '\t' * join(values(kv[2]), '\t'), '\n')
+        end    
+    end
+    print_write_result(file, "'$key' Block이 사용된 건물은 다음과 같습니다")
+
     #= https://devsisters.slack.com/archives/CTS8TK7GQ/p1583999904192000
     BuildTemplate JSON파일 IO 쓰기권한 오류가 이걸로 해결 된다고 함 =#
     cleanup_cache!()
 end
 
+"""
+    get_blockunlock_condition()
+
+'Table("Block")["Block"]' 이 사용된 BuildingTemplate리스트를 가져옵니다
+"""
+function get_blockunlock_condition()
+    buildings = begin 
+        tmp = sort(Table("Flag"; validation=false)["BuildingUnlock"].data, by = el -> el["Level"])
+        tmp = get.(x, "BuildingKey", "")
+        filter(k -> startswith.(k, r"s|r"), tmp)
+    end
+
+    d = Dict()
+    for k in buildings
+        x = get_buildings(k, false; include_artasset = false)
+        if isempty(x)
+            @warn "$(k)의 BuildingTemplate에는 사용된 Block이 없습니다" 
+        end
+        for (buildingkey, itemkey, amt) in x 
+            if !haskey(d, itemkey)
+                d[itemkey] = [splitext(buildingkey)[1]]
+            else 
+                push!(d[itemkey], splitext(buildingkey)[1])
+            end  
+        end
+    end
+
+    file = joinpath(GAMEENV["localcache"], "get_blockunlock_condition.tsv")
+    open(file, "w") do io
+        for (k,v) in d
+            write(io, string(k), '\t' * join(unique(v), '\t'), '\n')
+        end
+    end
+    print_write_result(file, "Block별 사용된 건물데이터가 출력되었습니다")
+
+    # return d
+    return nothing
+end
+    
 """
     get_magnetsize()
 

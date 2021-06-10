@@ -88,6 +88,7 @@ function help_GameDataManager()
     get_buildings("sIce"): `sIce`로 시작하는 모든 BuildingTemplate 파일의 블록 수량을 계산합니다
     get_blocks(101): 블록Key별 '../BuildTemplate/Buildings/' 에서 사용되는 빈도를 계산합니다
     findblock()    : 'Block'데이터와 '../4_ArtAssets/GameResources/Blocks/' 폴더를 비교하여 누락된 항목을 찾습니다
+    get_blockunlock_condition() : 'Block'이 사용된 BuildingKey목록을 생성합니다 
     """
     msg = intro * rand([thankyou; oneline_asciiarts]) * "\n" * basic
 
