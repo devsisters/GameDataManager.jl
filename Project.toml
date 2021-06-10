@@ -1,7 +1,7 @@
 name = "GameDataManager"
 uuid = "88844230-ccf1-11e8-233b-3f48c6dac397"
 authors = ["김용희 <yongheekim@devsisters.com>"]
-version = "1.15.6"
+version = "1.15.7"
 
 [deps]
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
