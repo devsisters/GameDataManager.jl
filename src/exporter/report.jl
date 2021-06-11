@@ -218,13 +218,15 @@ end
 
 """
     get_blockunlock_condition()
+    get_blockunlock_condition(blockkey)
 
 'Table("Block")["Block"]' 이 사용된 BuildingTemplate리스트를 가져옵니다
+blockkey를 입력할 경우 해당blockkey가 아닌 나머지 데이터는 삭제합니다
 """
-function get_blockunlock_condition()
+function get_blockunlock_condition(savetsv::Bool=true)
     buildings = begin 
         tmp = sort(Table("Flag"; validation=false)["BuildingUnlock"].data, by = el -> el["Level"])
-        tmp = get.(x, "BuildingKey", "")
+        tmp = get.(tmp, "BuildingKey", "")
         filter(k -> startswith.(k, r"s|r"), tmp)
     end
 
@@ -242,17 +244,26 @@ function get_blockunlock_condition()
             end  
         end
     end
-
-    file = joinpath(GAMEENV["localcache"], "get_blockunlock_condition.tsv")
-    open(file, "w") do io
-        for (k,v) in d
-            write(io, string(k), '\t' * join(unique(v), '\t'), '\n')
+    if savetsv
+        file = joinpath(GAMEENV["localcache"], "get_blockunlock_condition.tsv")
+        open(file, "w") do io
+            for (k,v) in d
+                write(io, string(k), '\t' * join(unique(v), '\t'), '\n')
+            end
         end
-    end
-    print_write_result(file, "Block별 사용된 건물데이터가 출력되었습니다")
+        print_write_result(file, "Block별 사용된 건물데이터가 출력되었습니다")
 
-    # return d
-    return nothing
+        return nothing
+    else 
+        return d
+    end
+end
+function get_blockunlock_condition(blockkey::Integer)
+    data = get_blockunlock_condition(false)
+    if !haskey(data, blockkey)
+        throw(ArgumentError("$(blockkey) Block이 사용된 Shop이나 Residence가 존재하지 않습니다"))
+    end 
+    return data[blockkey]
 end
     
 """
