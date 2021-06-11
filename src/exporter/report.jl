@@ -273,23 +273,23 @@ Block TemplateKey별 크기 정보를 뽑는다 (충돌 크기 아님)
 """
 function get_magnetsize()
     input = joinpath(GAMEENV["mars_art_assets"], "Internal/BlockTemplateTable.asset")
-    output = joinpath(GAMEENV["localcache"], "blockmagnetsize.csv")
+    output = joinpath(GAMEENV["localcache"], "blockmagnetsize.tsv")
     
     if !isfile(input)
         throw(AssertionError("$(input)이 존재하지 않아 Magent크기 정보를 뽑을 수 없습니다"))
     end 
 
     io = IOBuffer()
-    write(io, "MagnetKey,X,Y,Z\n")
+    write(io, "MagnetKey\tX\tY\tZ\n")
     for row in readlines(input)
         if startswith(row, "  - Key:")
             k = row[10:end]
-            write(io, k, ",")
+            write(io, k, "\t")
         elseif startswith(row, "    _sizeInVec:")
             # 크기는 항상 한자리 숫자로 본다 
             sizes = collect(eachmatch(r"\d+", row))
-            write(io, sizes[1].match , ",")
-            write(io, sizes[2].match , ",")
+            write(io, sizes[1].match , "\t")
+            write(io, sizes[2].match , "\t")
             write(io, sizes[3].match , "\n")
         end
     end
