@@ -28,7 +28,7 @@ function export_dialoguecommand()
     run(cmd; wait = false)
 end
 
-@memoize function parse_dialoguecommand()
+function parse_dialoguecommand()
     f = joinpath(GAMEENV["networkcache"], "DialogueCommand.json")
 
     @assert isfile(f) "오류 검사용 DialogueCommand.json이 존재하지 않습니다. export_dialoguecommand() 검사 파일을 생성해 주세요"
@@ -56,49 +56,3 @@ end
 end
 
 
-
-"""
-    validate_ink(file)
-
-#TODO
-- valida 하지 않은 함수만 모아서 line 번호와 함께 반환할 것
-"""
-function validate_ink(file::AbstractString)
-    io = read(file, String)
-    condition = parse_dialoguecommand()
-
-    # @ ......;  함수들
-    commands = eachmatch(r"\@(.*?)(?=[\t|\r|\n|;])", io)
-    # TODO 범용 인자 목록 관리 필요
-    universal_params = ["-wait"]
-
-
-    report = String[]
-    for el in commands
-        errmsg = ""
-
-        s = el.captures[1]
-        vars = filter(x -> !isempty(x) && !in(x, universal_params), split(s, r"\s"))
-
-        if !haskey(condition, vars[1])
-            errmsg = "UndefVarError: @$(vars[1]) not defined"
-        else 
-            ref = condition[vars[1]]
-            # 필수 파라미터가 부족
-            if length(vars) -1 < ref["RequiredParamCount"]
-                errmsg = "MethodError: 함수 파라미터가 부족합니다 @$s"
-            end
-            # 파라미터가 너무 많음 
-            if length(vars) -1 > length(ref["Description"]) 
-                errmsg = "MethodError: 함수 파라미터가 너무 많습니다 @$s"
-            end 
-        end
-        if !isempty(errmsg)
-            push!(report, errmsg)
-        end
-    end
-    return report
-end
-# function validate_dialoguecommand(command)
-
-# end
