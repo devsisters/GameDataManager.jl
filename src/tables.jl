@@ -205,7 +205,7 @@ https://support.office.com/en-us/article/xlookup-function-b7fd680e-6d10-43e6-84f
 - xlookup("SES_4", Table("Ability")["Level"], j"/AbilityKey", :; find_mode = findall)
 - xlookup("ShopEnergyStash", Table("Ability")["Level"], j"/Group", j"/Value1"; lt = >=, find_mode = findall)
 """
-function xlookup(value, jws::JSONWorksheet, lookup_col, return_col; kwargs...)
+@inline function xlookup(value, jws::JSONWorksheet, lookup_col, return_col; kwargs...)
     xlookup(
         value,
         jws,
@@ -214,7 +214,7 @@ function xlookup(value, jws::JSONWorksheet, lookup_col, return_col; kwargs...)
         kwargs...,
     )
 end
-function xlookup(
+@inline function xlookup(
     value,
     jws::JSONWorksheet,
     lookup_col::JSONPointer.Pointer,
@@ -251,7 +251,7 @@ function xlookup(
     return r
 end
 
-@memoize function _xlookup_findindex(value, jws, lookup_col, find_mode, lt)
+@inline function _xlookup_findindex(value, jws, lookup_col, find_mode, lt)
     find_mode(el -> lt(el[lookup_col], value), jws.data)
 end
 
