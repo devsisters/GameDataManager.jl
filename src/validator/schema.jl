@@ -262,7 +262,6 @@ function updateschema_gitlsfiles(forceupdate = false)
             target = begin 
                 flist = git_ls_files(repo)
                 candidate = filter(el -> startswith(el, rootpath) && !endswith(el, ".meta"), flist)
-                
                 if !isnull(exclusion)
                     r = Regex(exclusion)
                     candidate = filter(el -> !occursin(r, el), candidate)
@@ -271,7 +270,7 @@ function updateschema_gitlsfiles(forceupdate = false)
                     r = Regex(inclusion)
                     candidate = filter(el -> occursin(r, el), candidate)
                 end
-                candidate = broadcast(el -> split(el, rootpath)[2], candidate)
+                candidate = broadcast(el -> split(el, rootpath; limit=2)[2], candidate)
                 filter(!isempty, candidate)
             end
 
@@ -279,16 +278,21 @@ function updateschema_gitlsfiles(forceupdate = false)
 
             if !isempty(target)
                 for entry in target
+                    groupkey = key * "."
                     folder, f = splitdir(entry)
 
                     # 파일명 앞에 폴더를 붙여준다
                     if append_folder
                         paths = splitpath(folder)
-                        paths[1] == "/" && (paths = paths[2:end])
-                        f = paths[end] * "/" * f
-                        groupkey = key * "." * join(paths[1:end - 1], ".")
+                        if length(paths) > 1
+                            paths[1] == "/" && (paths = paths[2:end])
+                            f = paths[end] * "/" * f
+                            groupkey *= join(paths[1:end - 1], ".")
+                        end
                     else 
-                        groupkey = key * "." * replace(folder, "/" => ".")
+                        if !isempty(folder)
+                            groupkey *= replace(folder, "/" => ".")
+                        end
                     end
                     if remove_ext
                         f = splitext(f)[1]
@@ -302,7 +306,6 @@ function updateschema_gitlsfiles(forceupdate = false)
 
                         push!(defs[key]["oneOf"], OrderedDict("\$ref" => "#/definitions/$groupkey"))
                     end
-
                     push!(defs[groupkey]["enum"], f)
                 end
 
