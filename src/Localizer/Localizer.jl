@@ -198,7 +198,42 @@ function dialogue_lokalkey(tokens, i)
 
     return k
 end
-function localize!(inkdata::InkDialogue)
+
+function localize!(datas::Array{InkDialogue, 1})
+    function localize_filename(ink)
+        paths = replace(ink.source, GAMEENV["patch_data"] => "")  |> splitpath
+        # paths1 은 //
+        if length(paths) > 2 
+            fname = join(paths[2:end-1], "_") * ".json" 
+        else 
+            fname = paths[2] * ".json"
+        end
+        joinpath(GAMEENV["patch_data"], "Localization/Dialogue/$fname")
+    end
+
+    output = Dict{String, Any}()
+    for ink in datas
+        fname = localize_filename(ink)
+        if !haskey(output, fname)
+            if isfile(fname)
+                output[fname] = open(fname, "r") do io
+                    JSON.parse(io; dicttype=OrderedDict)
+                end
+            else 
+                output[fname] = OrderedDict{String, Any}()
+            end
+        end
+        merge!(output[fname], localize_ink!(ink))
+    end
+
+    for (fname, v) in output
+        write_localise(fname, v)
+    end
+
+    return datas
+end
+
+function localize_ink!(inkdata::InkDialogue)
     prefix = begin 
         fname = splitpath(replace(inkdata.source, GAMEENV["ink"]["origin"] => ""))
         fname[end] = replace(fname[end], ".ink" => "")
@@ -210,26 +245,17 @@ function localize!(inkdata::InkDialogue)
     target_tokens = Tuple[]
     localize_ink!(data["root"], [prefix], target_tokens)
 
-    result = OrderedDict()
+    localize_data = OrderedDict()
     for (i, (token, text)) in enumerate(target_tokens)
         finalkey = dialogue_lokalkey(token, i)
-        result[finalkey] = Dict{String, Any}("translation" => text)
+        localize_data[finalkey] = Dict{String, Any}("translation" => text)
         
         # TODO: 원본 JSON의 내용도 LokaliseKEy로 덮어씌워야 함
         # p = JSONPointer.Pointer("/root/"* join(token[2:end], "/"))
         # ink_parsed[p] = "^$finalkey"
     end
-
-    # writing file
-    file = replace(inkdata.source, GAMEENV["ink"]["origin"] => 
-                    joinpath(GAMEENV["patch_data"], "Localization/Dialogue"))
-    file = splitext(file)[1] * ".json" 
-    write_localise(file, result)
-    
-    # ink_origin.data = ink_parsed
-    return inkdata
+    return localize_data
 end
-
 localize_ink!(x, token, holder) = nothing
 function localize_ink!(arr::AbstractArray, token, holder)
     for (i, row) in enumerate(arr) 
@@ -256,16 +282,20 @@ function localize_ink!(sentence::AbstractString, token, holder)
     return holder
 end
 
-function write_localise(filepath, data)
-    newdata = JSON.json(OrderedDict(data), 2)
-
+function write_localise(filepath::AbstractString, data)
+    if isa(data, AbstractDict)
+        newdata = JSON.json(data, 2)
+    else 
+        newdata = JSON.json(OrderedDict(data), 2)
+    end
+    
     modified = true
     if isfile(filepath)
         modified = !GameDataManager.issamedata(read(filepath, String), newdata)
     else 
         GameDataManager.dircheck_and_create(filepath)
     end
-    
+
     if modified
         write(filepath, newdata)
         print("Localize => ")

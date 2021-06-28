@@ -26,6 +26,9 @@ function JSON.parse(ink::InkDialogue; kwargs...)
     JSON.parse(chop(s, head=1, tail=0); kwargs...)
 end
 
+function parse!(ink::InkDialogue)
+    ink.data = JSON.parse(ink; dicttype = OrderedDict)
+end
 
 function Base.show(io::IO, ink::InkDialogue)
     print(io, "InkDialogue(")
@@ -69,11 +72,13 @@ function ink(files::Array)
             "ink -> json 변환을 시작합니다 ⚒\n" * "-"^(displaysize(stdout)[2] - 4);
             color = :cyan,
         )
-        for f in files
-            data = InkDialogue(f) 
-            write_ink(data)
-            localize!(data)         
+        inks = InkDialogue.(files)
+        for el in inks
+            write_ink(el)
+            DBwrite_otherlog(el.source)
         end
+        localize!(inks)
+
         print_section("ink 추출이 완료되었습니다 ☺", "DONE"; color = :cyan)
     else
         print_section("변환할 ink 파일이 없습니다"; color = :yellow)
@@ -87,6 +92,31 @@ end
 function ink(exportall::Bool = false)
     files = exportall ? collect_ink() : collect_modified_ink()
     ink(files)
+end
+
+function write_ink(inkdata::InkDialogue)
+    inklecate = GAMEENV["inklecate_exe"]
+    inkfile = inkdata.source
+    output = inkdata.output
+
+    if Sys.iswindows()
+        cmd = `$inklecate -o "$output" "$inkfile"`
+    else
+        unityembeded = joinpath(lookup_unityeditor(), "Unity.app/Contents/MonoBleedingEdge/bin/mono")
+        cmd = `$unityembeded $inklecate -o “$output.json” “$inkfile”`
+    end
+
+    try
+        run(cmd)
+        parse!(inkdata)
+        print(" EXPORT => ")
+        printstyled(normpath(inkfile), "\n"; color = :blue)
+    catch e
+        print("\t")
+        println(e)
+    end
+
+    nothing
 end
 
 function ink_cleanup!()
@@ -118,31 +148,4 @@ function ink_cleanup!()
             rm(f2; force = true)
         end
     end
-end
-
-function write_ink(inkdata::InkDialogue)
-    inklecate = GAMEENV["inklecate_exe"]
-    inkfile = inkdata.source
-    output = inkdata.output
-
-    if Sys.iswindows()
-        cmd = `$inklecate -o "$output" "$inkfile"`
-    else
-        unityembeded = joinpath(lookup_unityeditor(), "Unity.app/Contents/MonoBleedingEdge/bin/mono")
-        cmd = `$unityembeded $inklecate -o “$output.json” “$inkfile”`
-    end
-
-    try
-        run(cmd)
-        inkdata.data = JSON.parse(inkdata; dicttype = OrderedDict)
-        localize!(inkdata)
-        DBwrite_otherlog(inkfile)
-        print(" EXPORT => ")
-        printstyled(normpath(inkfile), "\n"; color = :blue)
-    catch e
-        print("\t")
-        println(e)
-    end
-
-    nothing
 end
