@@ -197,7 +197,7 @@ function updateschema_tablekey(force = false)
         mt = mtime(joinpath_gamedata(origin_json))        
         if DBread_otherlog(fname) < mt || !isfile(schema_json) || force  
             output = OrderedDict(
-                "\$schema" => "http://json-schema.org/draft-06/schema",
+                "\$schema" => "http://json-schema.org/draft-07/schema",
                 "\$id" => fname,
                 "title" => "MARS GameData Keys",
                 "definitions" => Dict())
@@ -312,7 +312,7 @@ function updateschema_gitlsfiles(forceupdate = false)
             end
         end
         data = OrderedDict(
-            "\$schema" => "http://json-schema.org/draft-06/schema",
+            "\$schema" => "http://json-schema.org/draft-07/schema",
                 "\$id" => ".GitLsFiles.json",
                "title" => "Git Repository file list", 
             "definitions" => defs)
@@ -335,7 +335,7 @@ function updateschema_blockmagnet()
         magnetkey = unique(broadcast(x -> split(x, "Key: ")[2], magnet))
         
         data = OrderedDict(
-            "\$schema" => "http://json-schema.org/draft-06/schema",
+            "\$schema" => "http://json-schema.org/draft-07/schema",
                 "\$id" => ".BlockTemplateKey.json",
             "title" => "'Internal/BlockTemplateTable.asset' Key list",
             "definitions" => OrderedDict(
